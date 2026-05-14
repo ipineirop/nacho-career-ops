@@ -17,6 +17,8 @@ jds/*
 
 # User config and customization (never auto-updated)
 config/profile.yml
+config/secrets.yml
+config/.linkedin-session.json
 portals.yml
 modes/_profile.md
 .update-dismissed
@@ -25,6 +27,11 @@ modes/_profile.md
 # Generated
 .resolved-prompt-*
 node_modules/
+
+# Web UI
+web/.next/
+web/.env.local
+web/node_modules/
 
 # OS
 .DS_Store
@@ -35,3 +42,4 @@ node_modules/
 .claude/settings.local.json
 .claude/memory/
 career-dashboard
+cv.md
