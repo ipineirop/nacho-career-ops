@@ -543,6 +543,99 @@ body {
 }
 .pick-sub { font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2); }
 .pick-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+/* ── TOOLS HUB ──────────────────────────────────────── */
+.tool-card {
+  cursor: pointer; gap: 0; padding: 16px;
+  transition: background .15s;
+}
+.tool-card:active { background: var(--canvas); }
+.tool-card.tool-locked { cursor: default; }
+.tool-glyph {
+  width: 44px; height: 44px; border-radius: 13px;
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Fraunces", serif; font-style: italic;
+  font-size: 22px; flex-shrink: 0; margin-right: 14px;
+}
+.tool-name {
+  font-family: "Albert Sans"; font-weight: 600;
+  font-size: 15px; color: var(--ink);
+}
+.tool-desc {
+  font-family: "Albert Sans"; font-size: 12px;
+  color: var(--ink-2); line-height: 1.4;
+}
+
+/* ── TAILOR SCREEN ──────────────────────────────────── */
+.tailor-bullets { display: flex; flex-direction: column; gap: 12px; }
+.tailor-bullet {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-family: "Albert Sans"; font-size: 13px; line-height: 1.55; color: var(--ink);
+}
+.bullet-marker {
+  font-family: "Geist Mono"; font-size: 10px; color: var(--ink-3);
+  padding-top: 2px; flex-shrink: 0; width: 20px;
+}
+.tailor-pitch {
+  font-family: "Albert Sans"; font-size: 13px; line-height: 1.6;
+  color: var(--ink); background: var(--surface);
+  padding: 10px 12px; border-radius: 8px;
+}
+.tailor-tps { display: flex; flex-direction: column; gap: 12px; }
+.tailor-tp {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding-bottom: 12px; border-bottom: 1px solid var(--line);
+}
+.tailor-tp:last-child { border-bottom: 0; padding-bottom: 0; }
+.tp-num {
+  font-family: "Geist Mono"; font-size: 11px; font-weight: 600;
+  color: var(--accent); flex-shrink: 0; padding-top: 2px;
+}
+.tp-head { font-family: "Albert Sans"; font-weight: 600; font-size: 13px; color: var(--ink); }
+.tp-body { font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+
+/* ── PREP SCREEN ────────────────────────────────────── */
+.prep-context-grid { display: flex; flex-direction: column; gap: 8px; }
+.context-row {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-family: "Albert Sans"; font-size: 12.5px;
+}
+.context-label {
+  width: 90px; flex-shrink: 0; color: var(--ink-3);
+  font-size: 11px; font-family: "Geist Mono";
+  text-transform: uppercase; letter-spacing: 0.5px; padding-top: 1px;
+}
+.context-val { color: var(--ink); line-height: 1.4; flex: 1; }
+.prep-qs { display: flex; flex-direction: column; gap: 0; }
+.prep-q {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.prep-q:last-child { border-bottom: 0; }
+.q-num {
+  font-family: "Geist Mono"; font-size: 10px; font-weight: 600;
+  color: var(--accent); flex-shrink: 0; padding-top: 2px; width: 22px;
+}
+.q-text {
+  font-family: "Albert Sans"; font-size: 13px; color: var(--ink);
+  line-height: 1.45; font-weight: 500;
+}
+.q-angle {
+  font-family: "Albert Sans"; font-size: 11.5px; color: var(--ink-2);
+  line-height: 1.45; background: var(--canvas);
+  border-radius: 8px; padding: 7px 10px; margin-top: 4px;
+}
+.angle-label {
+  font-family: "Geist Mono"; font-size: 9px; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--signal); margin-right: 4px;
+}
+.prep-opening {
+  font-family: "Fraunces", serif; font-size: 14px; font-style: italic;
+  line-height: 1.5; color: var(--ink);
+  background: var(--surface); padding: 10px 12px; border-radius: 8px;
+  border-left: 3px solid var(--accent);
+}
 </style>
 </head>
 <body class="theme-light">
@@ -610,7 +703,7 @@ body {
       <p class="body-copy" style="font-size:13px;margin:0;">Multi-country RevOps at Series B fintech. Your Clara application and Clip scope map directly to this motion.</p>
 
       <div class="pick-actions">
-        <button class="btn primary" onclick="navigate('evaluate')">Tailor &amp; apply</button>
+        <button class="btn primary" onclick="navigate('tailor')">Tailor &amp; apply</button>
         <button class="btn row-act" onclick="navigate('evaluate')">Evaluate</button>
       </div>
     </div>
@@ -705,16 +798,21 @@ body {
       <div class="kicker" style="color:var(--accent);">Today's focus · 15 min</div>
       <div class="row" style="font-size:13px;">
         <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">1</span>
-        <span style="flex:1;">Evaluate &amp; apply to <b style="font-weight:600;">Jeeves</b></span>
+        <span style="flex:1;">Evaluate <b style="font-weight:600;">Jeeves</b></span>
         <button class="btn primary sm row-act" style="padding:5px 12px;" onclick="navigate('evaluate')">Open</button>
       </div>
       <div class="row" style="font-size:13px;">
         <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">2</span>
+        <span style="flex:1;">Tailor CV for <b style="font-weight:600;">Jeeves</b></span>
+        <button class="btn primary sm row-act" style="padding:5px 12px;" onclick="navigate('tailor')">Open</button>
+      </div>
+      <div class="row" style="font-size:13px;">
+        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">3</span>
         <span style="flex:1;">Follow up <b style="font-weight:600;">Plata Card</b></span>
         <button class="btn sm row-act" style="padding:5px 12px;" onclick="navigate('tracker')">Open</button>
       </div>
       <div class="row" style="font-size:13px;">
-        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">3</span>
+        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">4</span>
         <span style="flex:1;">Review <b style="font-weight:600;">Outreach GM</b> JD</span>
         <button class="btn sm row-act" style="padding:5px 12px;" onclick="navigate('discover')">Open</button>
       </div>
@@ -785,7 +883,11 @@ body {
       </div>
       <div class="footer-row">
         <span class="status-label"><span class="status-dot"></span>Evaluating · top pick</span>
-        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">$110–140K</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);">$110–140K</span>
+        <div style="display:flex;gap:5px;margin-left:auto;">
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('tailor')">Tailor</button>
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('prep')">Prep</button>
+        </div>
       </div>
     </div>
 
@@ -796,7 +898,10 @@ body {
       </div>
       <div class="footer-row">
         <span class="status-label"><span class="status-dot applied"></span>Applied · CDMX hybrid</span>
-        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">4.2/5</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);">4.2/5</span>
+        <div style="display:flex;gap:5px;margin-left:auto;">
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('prep')">Prep</button>
+        </div>
       </div>
     </div>
 
@@ -807,7 +912,10 @@ body {
       </div>
       <div class="footer-row">
         <span class="status-label"><span class="status-dot applied"></span>Applied · Apr 07 · <span style="color:var(--signal);font-weight:600;">follow up</span></span>
-        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">3.9/5</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);">3.9/5</span>
+        <div style="display:flex;gap:5px;margin-left:auto;">
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('prep')">Prep</button>
+        </div>
       </div>
     </div>
 
@@ -818,7 +926,11 @@ body {
       </div>
       <div class="footer-row">
         <span class="status-label"><span class="status-dot"></span>Evaluating · CDMX</span>
-        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">$90–120K</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);">$90–120K</span>
+        <div style="display:flex;gap:5px;margin-left:auto;">
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('tailor')">Tailor</button>
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('prep')">Prep</button>
+        </div>
       </div>
     </div>
 
@@ -829,7 +941,11 @@ body {
       </div>
       <div class="footer-row">
         <span class="status-label"><span class="status-dot"></span>Evaluating · remote</span>
-        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">3.8/5</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);">3.8/5</span>
+        <div style="display:flex;gap:5px;margin-left:auto;">
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('tailor')">Tailor</button>
+          <button class="btn sm ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('prep')">Prep</button>
+        </div>
       </div>
     </div>
 
@@ -865,7 +981,7 @@ body {
 <div class="screen hidden" id="screen-evaluate">
   <div class="screen-header">
     <div class="header-row">
-      <button class="back-btn" onclick="navigate('discover')">←</button>
+      <button class="back-btn" onclick="goBack()">←</button>
       <span class="screen-title">Evaluate</span>
       <div class="header-actions">
         <button class="iconbtn">⋯</button>
@@ -1050,6 +1166,343 @@ body {
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: TOOLS HUB                                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-tools">
+  <div class="screen-header">
+    <div class="header-row">
+      <div class="brand-mark">L<span class="dot">.</span></div>
+      <span class="screen-title">Tools</span>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">★ Action center</div>
+    <h1 class="editorial" style="font-size:28px;">What do you <em>need</em>?</h1>
+
+    <div class="card tool-card" onclick="navigate('evaluate')">
+      <div class="row">
+        <div class="tool-glyph">e</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span class="tool-name">Evaluate</span>
+          <span class="tool-desc">Paste a DM or JD. Get a score, comp check, and a reply draft in 60 seconds.</span>
+        </div>
+        <span style="color:var(--ink-3);font-size:18px;">›</span>
+      </div>
+    </div>
+
+    <div class="card tool-card" onclick="navigate('tailor')">
+      <div class="row">
+        <div class="tool-glyph">t</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span class="tool-name">Tailor</span>
+          <span class="tool-desc">Adapt your CV bullets and pitch for a specific role. Pick from pipeline or paste a JD.</span>
+        </div>
+        <span style="color:var(--ink-3);font-size:18px;">›</span>
+      </div>
+    </div>
+
+    <div class="card tool-card" onclick="navigate('prep')">
+      <div class="row">
+        <div class="tool-glyph">p</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span class="tool-name">Prep</span>
+          <span class="tool-desc">Get company context, 5 likely questions with angle hints, and how to position yourself.</span>
+        </div>
+        <span style="color:var(--ink-3);font-size:18px;">›</span>
+      </div>
+    </div>
+
+    <div class="card tool-card tool-locked">
+      <div class="row">
+        <div class="tool-glyph" style="opacity:.4;">n</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span class="tool-name" style="opacity:.4;">Network</span>
+          <span class="tool-desc" style="opacity:.4;">Map warm intros, track conversations, find bridge contacts in LatAm fintech.</span>
+        </div>
+        <span class="pill signal-soft" style="font-size:10px;white-space:nowrap;">Phase 3</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: TAILOR                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-tailor">
+  <div class="screen-header">
+    <div class="header-row">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <span class="screen-title">Tailor</span>
+      <div class="header-actions">
+        <button class="iconbtn">⋯</button>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">★ CV adaptation</div>
+    <h1 class="editorial" style="font-size:28px;">Tailor your <em>pitch</em>.</h1>
+
+    <div class="pill-scroll" id="tailor-role-strip">
+      <span class="pill solid" id="tr-jeeves" onclick="selectTailorRole(this,'jeeves')">Jeeves · RevOps</span>
+      <span class="pill"       id="tr-yummy"  onclick="selectTailorRole(this,'yummy')">Yummy · CM</span>
+      <span class="pill"       id="tr-dlocal" onclick="selectTailorRole(this,'dlocal')">dLocal · Ops</span>
+      <span class="pill"       id="tr-custom" onclick="selectTailorRole(this,'custom')">+ Paste JD</span>
+    </div>
+
+    <div class="ev-input" id="tailor-jd-wrap" style="display:none;">
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span class="kicker">Paste JD or URL</span>
+        <span class="mono" id="tailor-charcount" style="font-size:9.5px;color:var(--ink-3);">0 chars</span>
+      </div>
+      <textarea id="tailor-input" class="ev-textarea"
+        placeholder="Paste the job description or a URL. I'll extract the role requirements and adapt your CV."></textarea>
+    </div>
+
+    <div class="card canvas tight" id="tailor-role-preview">
+      <div class="row">
+        <div class="avatar-co" id="tailor-preview-avatar">JV</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span style="font-family:'Albert Sans';font-weight:600;font-size:14px;color:var(--ink);" id="tailor-preview-title">Head of Global Revenue Operations</span>
+          <span style="font-family:'Albert Sans';font-size:12px;color:var(--ink-2);" id="tailor-preview-sub">Jeeves · Remote LATAM · Score 86</span>
+        </div>
+        <div class="score sm" id="tailor-preview-score">86</div>
+      </div>
+    </div>
+
+    <button class="btn primary" id="tailor-go" onclick="runTailor()">Tailor for this role →</button>
+
+    <div class="ev-empty" id="tailor-empty" style="display:none;">
+      <div class="glyph">t</div>
+      <p><b>Pick a role above</b><br/>or paste a JD to generate tailored bullets, a pitch, and 3 talking points.</p>
+    </div>
+
+    <div class="ev-processing" id="tailor-processing">
+      <span class="kicker">Adapting…</span>
+      <div class="proc-row" id="tproc-1"><div class="check">✓</div><span>Extracted 6 role requirements from JD</span></div>
+      <div class="proc-row" id="tproc-2"><div class="check">✓</div><span>Matched your experience to role priorities</span></div>
+      <div class="proc-row" id="tproc-3"><div class="check">✓</div><span>Rewrote 3 bullets in impact-first format</span></div>
+      <div class="proc-row" id="tproc-4"><div class="check">✓</div><span>Drafted pitch paragraph for this context</span></div>
+      <div class="proc-row" id="tproc-5"><div class="spin"></div><span>Identifying 3 key talking points…</span></div>
+    </div>
+
+    <div class="ev-verdict" id="tailor-verdict">
+
+      <div class="card tight">
+        <div class="row" style="justify-content:space-between;align-items:baseline;">
+          <span class="kicker">✦ Tailored CV bullets</span>
+          <button class="btn sm ghost" onclick="copyTailorBullets(event)" style="font-size:11px;width:auto;">Copy all</button>
+        </div>
+        <div class="tailor-bullets" id="tailor-bullets-list">
+          <div class="tailor-bullet">
+            <span class="bullet-marker">01</span>
+            <span>Designed and deployed end-to-end revenue operations infrastructure across MX and AR markets at Clip, consolidating 7 data sources into a single GTM dashboard and reducing reporting lag from 5 days to same-day.</span>
+          </div>
+          <div class="tailor-bullet">
+            <span class="bullet-marker">02</span>
+            <span>Led cross-border RevOps alignment for $3.4B MXN P&amp;L across two geographies, partnering with Finance, Sales, and Product to establish unified pipeline governance and forecasting cadences.</span>
+          </div>
+          <div class="tailor-bullet">
+            <span class="bullet-marker">03</span>
+            <span>Built and scaled a 40+ person operations team in a high-growth fintech environment, managing performance cycles, hiring pipeline, and org design for a B2B payments motion expanding into SMB.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card accent tight">
+        <span class="kicker" style="color:var(--accent);">✦ Pitch paragraph</span>
+        <div class="tailor-pitch" id="tailor-pitch-text">
+          I've spent the last three years building the revenue operations function at Clip across Mexico and Argentina — owning the full motion from pipeline governance to market-level P&amp;L. At Jeeves, I'd bring the same cross-border GTM instinct to a payments infrastructure business that's already operating at Series B scale. I'm particularly drawn to the multi-market scope; it maps directly to the systems and team structures I've built.
+        </div>
+        <button class="btn primary sm" style="width:100%;padding:8px 14px;" onclick="copyTailorPitch(event)">Copy pitch →</button>
+      </div>
+
+      <div class="card tight">
+        <span class="kicker">✦ 3 talking points</span>
+        <div class="tailor-tps" id="tailor-tps-list">
+          <div class="tailor-tp">
+            <span class="tp-num">1</span>
+            <div class="col" style="gap:2px;">
+              <span class="tp-head">Cross-border ops at B2B fintech scale</span>
+              <span class="tp-body">Lead with the Clip multi-country scope — it mirrors Jeeves' expansion motion exactly.</span>
+            </div>
+          </div>
+          <div class="tailor-tp">
+            <span class="tp-num">2</span>
+            <div class="col" style="gap:2px;">
+              <span class="tp-head">Revenue system ownership (not just ops support)</span>
+              <span class="tp-body">You didn't just support Sales — you designed the revenue architecture. That's the distinction for Head-level.</span>
+            </div>
+          </div>
+          <div class="tailor-tp">
+            <span class="tp-num">3</span>
+            <div class="col" style="gap:2px;">
+              <span class="tp-head">Team scaling in hypergrowth</span>
+              <span class="tp-body">40+ team, two geographies, high-growth pace — relevant because Jeeves is in headcount-building mode post-Series B.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn primary" style="flex:1;" onclick="navigate('prep')">Prep interview →</button>
+        <button class="btn ghost" style="flex:0 0 auto;width:auto;padding:11px 16px;" onclick="resetTailor()">↺</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: PREP                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-prep">
+  <div class="screen-header">
+    <div class="header-row">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <span class="screen-title">Prep</span>
+      <div class="header-actions">
+        <button class="iconbtn">⋯</button>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">★ Interview preparation</div>
+    <h1 class="editorial" style="font-size:28px;">Walk in <em>ready</em>.</h1>
+
+    <div class="pill-scroll" id="prep-role-strip">
+      <span class="pill solid" id="pr-jeeves" onclick="selectPrepRole(this,'jeeves')">Jeeves · RevOps</span>
+      <span class="pill"       id="pr-clara"  onclick="selectPrepRole(this,'clara')">Clara · RevOps</span>
+      <span class="pill"       id="pr-yummy"  onclick="selectPrepRole(this,'yummy')">Yummy · CM</span>
+      <span class="pill"       id="pr-custom" onclick="selectPrepRole(this,'custom')">+ Company name</span>
+    </div>
+
+    <div class="ev-input" id="prep-co-wrap" style="display:none;">
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span class="kicker">Company name</span>
+      </div>
+      <input id="prep-co-input" type="text"
+        placeholder="e.g. Konfío, Kueski, Mercado Pago…"
+        style="border:1px dashed var(--line);border-radius:10px;background:var(--canvas);
+               padding:12px 14px;font-family:'Albert Sans';font-size:14px;color:var(--ink);
+               width:100%;outline:none;" />
+    </div>
+
+    <div class="card canvas tight" id="prep-role-preview">
+      <div class="row">
+        <div class="avatar-co" id="prep-preview-avatar">JV</div>
+        <div class="col" style="flex:1;gap:2px;">
+          <span style="font-family:'Albert Sans';font-weight:600;font-size:14px;color:var(--ink);" id="prep-preview-title">Head of Global Revenue Operations</span>
+          <span style="font-family:'Albert Sans';font-size:12px;color:var(--ink-2);" id="prep-preview-sub">Jeeves · Series B · B2B fintech</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn primary" id="prep-go" onclick="runPrep()">Prep for this interview →</button>
+
+    <div class="ev-empty" id="prep-empty" style="display:none;">
+      <div class="glyph">p</div>
+      <p><b>Pick a role above</b><br/>I'll pull company context, 5 likely questions, and how to position yourself in the first call.</p>
+    </div>
+
+    <div class="ev-processing" id="prep-processing">
+      <span class="kicker">Researching…</span>
+      <div class="proc-row" id="pproc-1"><div class="check">✓</div><span>Pulled company context · Series B · $47M raised</span></div>
+      <div class="proc-row" id="pproc-2"><div class="check">✓</div><span>Identified leadership team and LatAm footprint</span></div>
+      <div class="proc-row" id="pproc-3"><div class="check">✓</div><span>Modeled 5 likely interview questions for this role</span></div>
+      <div class="proc-row" id="pproc-4"><div class="check">✓</div><span>Mapped your experience to their stage and priorities</span></div>
+      <div class="proc-row" id="pproc-5"><div class="spin"></div><span>Writing your positioning statement…</span></div>
+    </div>
+
+    <div class="ev-verdict" id="prep-verdict">
+
+      <div class="card tight">
+        <div class="row" style="justify-content:space-between;align-items:baseline;">
+          <span class="kicker">✦ Company context</span>
+          <span class="pill accent" id="prep-stage-pill">Series B</span>
+        </div>
+        <div class="prep-context-grid">
+          <div class="context-row"><span class="context-label">Stage</span><span class="context-val">Series B · $47M raised (2023)</span></div>
+          <div class="context-row"><span class="context-label">Investors</span><span class="context-val">Kaszek, Monashees, QED</span></div>
+          <div class="context-row"><span class="context-label">Leaders</span><span class="context-val">Dileep Thazhmon (CEO), Tess Dieckmann (CPO)</span></div>
+          <div class="context-row"><span class="context-label">LatAm</span><span class="context-val">MX, BR, CO, AR · 300+ employees</span></div>
+          <div class="context-row"><span class="context-label">Motion</span><span class="context-val">B2B corporate spend management · cross-border payments</span></div>
+        </div>
+      </div>
+
+      <div class="card tight">
+        <span class="kicker">✦ 5 likely questions</span>
+        <div class="prep-qs">
+
+          <div class="prep-q">
+            <div class="q-num">Q1</div>
+            <div class="col" style="flex:1;gap:4px;">
+              <span class="q-text">Tell me about a time you built a revenue operations function from scratch or redesigned it at scale.</span>
+              <div class="q-angle"><span class="angle-label">Your angle</span> Lead with Clip: multi-country GTM, 7 data sources → single dashboard, same-day reporting. Quantify the before/after.</div>
+            </div>
+          </div>
+
+          <div class="prep-q">
+            <div class="q-num">Q2</div>
+            <div class="col" style="flex:1;gap:4px;">
+              <span class="q-text">How do you approach pipeline governance when Sales and Finance have different definitions of a "qualified" opportunity?</span>
+              <div class="q-angle"><span class="angle-label">Your angle</span> Structural alignment story — share how you established a single source of truth and the governance cadence you ran.</div>
+            </div>
+          </div>
+
+          <div class="prep-q">
+            <div class="q-num">Q3</div>
+            <div class="col" style="flex:1;gap:4px;">
+              <span class="q-text">Jeeves operates in 8+ markets. How do you adapt a RevOps playbook across markets at different maturity levels?</span>
+              <div class="q-angle"><span class="angle-label">Your angle</span> MX vs AR contrast at Clip is exactly this. Speak to how you varied the motion without fragmenting the reporting model.</div>
+            </div>
+          </div>
+
+          <div class="prep-q">
+            <div class="q-num">Q4</div>
+            <div class="col" style="flex:1;gap:4px;">
+              <span class="q-text">How do you think about team design for RevOps — generalists vs. specialists, and at what scale do you split?</span>
+              <div class="q-angle"><span class="angle-label">Your angle</span> You scaled 40+ and made this split. Have a concrete answer with the threshold (team size / ARR) where you changed structure.</div>
+            </div>
+          </div>
+
+          <div class="prep-q">
+            <div class="q-num">Q5</div>
+            <div class="col" style="flex:1;gap:4px;">
+              <span class="q-text">What's broken in most B2B fintech revenue operations, and what would you fix here in the first 90 days?</span>
+              <div class="q-angle"><span class="angle-label">Your angle</span> Opinion question — be direct. Name a specific pathology (e.g. siloed data, late-stage pipeline inflation) and your 90-day audit approach.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card accent tight">
+        <span class="kicker" style="color:var(--accent);">✦ How to present yourself</span>
+        <div class="editor-note" style="margin-top:0;">
+          <p>Open as the operator who has <em>already built</em> what Jeeves needs — not a candidate exploring a pivot. Reference the multi-country scope immediately. Don't lead with title; lead with the outcome you delivered.</p>
+        </div>
+        <div class="prep-opening" id="prep-opening-text">
+          "I've spent three years building the revenue operations function at Clip across two countries — owning the full motion from system design to team scaling. I'm talking to Jeeves because the multi-market scope and B2B payments context match almost exactly what I've been doing, and I'd rather join a Series B with momentum than wait for a C-stage search."
+        </div>
+        <button class="btn primary sm" style="width:100%;padding:8px 14px;" onclick="copyPrepOpening(event)">Copy opening →</button>
+      </div>
+
+      <button class="btn ghost sm" onclick="resetPrep()" style="font-size:12px;">↺ Prep another</button>
+
+    </div>
+
+  </div>
+</div>
+
 </div><!-- .screens-wrap -->
 
 
@@ -1065,8 +1518,8 @@ body {
     <div class="tab-icon"></div>
     <span>Home</span>
   </button>
-  <button class="tab cta-tab" id="tab-evaluate" onclick="navigate('evaluate')">
-    <span class="cta-label">Evaluate</span>
+  <button class="tab cta-tab" id="tab-tools" onclick="navigate('tools')">
+    <span class="cta-label">Tools</span>
   </button>
   <button class="tab" id="tab-tracker" onclick="navigate('tracker')">
     <div class="tab-icon"></div>
@@ -1081,15 +1534,27 @@ body {
 
 <script>
 // ── NAVIGATION ────────────────────────────────────────
-const SCREENS = ['discover','home','tracker','evaluate','settings'];
+const SCREENS = ['discover','home','tracker','evaluate','settings','tools','tailor','prep'];
+const TAB_SCREENS = ['discover','home','tools','tracker','settings'];
+let prevScreen = 'discover';
 
 function navigate(name) {
+  const cur = SCREENS.find(s => {
+    const el = document.getElementById('screen-' + s);
+    return el && !el.classList.contains('hidden');
+  });
+  if (cur && cur !== name) prevScreen = cur;
   SCREENS.forEach(s => {
-    document.getElementById('screen-' + s).classList.toggle('hidden', s !== name);
+    const el = document.getElementById('screen-' + s);
+    if (el) el.classList.toggle('hidden', s !== name);
+  });
+  TAB_SCREENS.forEach(s => {
     const t = document.getElementById('tab-' + s);
     if (t) t.classList.toggle('active', s === name);
   });
 }
+
+function goBack() { navigate(prevScreen); }
 
 // ── DISCOVER SEG ──────────────────────────────────────
 function setSeg(el) {
@@ -1185,6 +1650,188 @@ function copyReply() {
       const btn = event.target;
       btn.textContent = 'Copied ✓';
       setTimeout(() => btn.textContent = 'Copy reply →', 2000);
+    });
+  }
+}
+
+// ── TAILOR FLOW ───────────────────────────────────────
+const TAILOR_ROLES = {
+  jeeves: { initials:'JV', title:'Head of Global Revenue Operations', sub:'Jeeves · Remote LATAM · Score 86', score:'86' },
+  yummy:  { initials:'YM', title:'Country Manager — Mexico',          sub:'Yummy · CDMX · Score 76',         score:'76' },
+  dlocal: { initials:'DL', title:'Operations Manager, LATAM',         sub:'dLocal · Remote · Score 76',       score:'76' },
+};
+
+let tailorRole = 'jeeves';
+const tailorJdWrap    = document.getElementById('tailor-jd-wrap');
+const tailorInput     = document.getElementById('tailor-input');
+const tailorCount     = document.getElementById('tailor-charcount');
+const tailorGo        = document.getElementById('tailor-go');
+const tailorPreview   = document.getElementById('tailor-role-preview');
+const tailorEmpty     = document.getElementById('tailor-empty');
+const tailorProcessing= document.getElementById('tailor-processing');
+const tailorVerdict   = document.getElementById('tailor-verdict');
+const tailorProcRows  = [1,2,3,4,5].map(n => document.getElementById('tproc-' + n));
+
+if (tailorInput) {
+  tailorInput.addEventListener('input', () => {
+    const len = tailorInput.value.length;
+    tailorCount.textContent = len + ' chars';
+    tailorInput.classList.toggle('filled', len > 20);
+    tailorGo.disabled = len < 20;
+  });
+}
+
+function selectTailorRole(el, key) {
+  document.querySelectorAll('#tailor-role-strip .pill').forEach(p => p.className = 'pill');
+  el.classList.add('solid');
+  tailorRole = key;
+  if (key === 'custom') {
+    tailorJdWrap.style.display = '';
+    tailorPreview.style.display = 'none';
+    tailorGo.disabled = !tailorInput || tailorInput.value.length < 20;
+  } else {
+    tailorJdWrap.style.display = 'none';
+    tailorPreview.style.display = '';
+    const r = TAILOR_ROLES[key];
+    document.getElementById('tailor-preview-avatar').textContent = r.initials;
+    document.getElementById('tailor-preview-title').textContent  = r.title;
+    document.getElementById('tailor-preview-sub').textContent    = r.sub;
+    document.getElementById('tailor-preview-score').textContent  = r.score;
+    tailorGo.disabled = false;
+  }
+}
+
+function runTailor() {
+  tailorEmpty.style.display = 'none';
+  tailorVerdict.classList.remove('show');
+  tailorProcessing.classList.add('show');
+  tailorProcRows.forEach(r => r && r.classList.remove('show'));
+  [200, 800, 1500, 2200, 2900].forEach((t, i) => {
+    setTimeout(() => tailorProcRows[i] && tailorProcRows[i].classList.add('show'), t);
+  });
+  setTimeout(() => {
+    tailorProcessing.classList.remove('show');
+    tailorVerdict.classList.add('show');
+    tailorVerdict.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 3900);
+}
+
+function resetTailor() {
+  tailorVerdict.classList.remove('show');
+  tailorProcessing.classList.remove('show');
+  if (tailorInput) { tailorInput.value = ''; tailorInput.classList.remove('filled'); }
+  if (tailorCount) tailorCount.textContent = '0 chars';
+  tailorJdWrap.style.display = 'none';
+  tailorPreview.style.display = '';
+  tailorGo.disabled = false;
+  tailorRole = 'jeeves';
+  document.querySelectorAll('#tailor-role-strip .pill').forEach((p, i) => {
+    p.className = i === 0 ? 'pill solid' : 'pill';
+  });
+  const r = TAILOR_ROLES['jeeves'];
+  document.getElementById('tailor-preview-avatar').textContent = r.initials;
+  document.getElementById('tailor-preview-title').textContent  = r.title;
+  document.getElementById('tailor-preview-sub').textContent    = r.sub;
+  document.getElementById('tailor-preview-score').textContent  = r.score;
+}
+
+function copyTailorBullets(evt) {
+  const bullets = Array.from(document.querySelectorAll('#tailor-bullets-list .tailor-bullet span:last-child'))
+    .map(el => '• ' + el.textContent.trim()).join('\n\n');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(bullets).then(() => {
+      const btn = evt.target; btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy all', 2000);
+    });
+  }
+}
+
+function copyTailorPitch(evt) {
+  const text = document.getElementById('tailor-pitch-text').textContent.trim();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = evt.target; btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy pitch →', 2000);
+    });
+  }
+}
+
+// ── PREP FLOW ─────────────────────────────────────────
+const PREP_ROLES = {
+  jeeves: { initials:'JV', title:'Head of Global Revenue Operations', sub:'Jeeves · Series B · B2B fintech' },
+  clara:  { initials:'CL', title:'Head of Revenue Operations',        sub:'Clara · Series C · corporate cards' },
+  yummy:  { initials:'YM', title:'Country Manager — Mexico',          sub:'Yummy · Series A · on-demand delivery' },
+};
+
+let prepRole = 'jeeves';
+const prepCoWrap     = document.getElementById('prep-co-wrap');
+const prepCoInput    = document.getElementById('prep-co-input');
+const prepGo         = document.getElementById('prep-go');
+const prepPreview    = document.getElementById('prep-role-preview');
+const prepEmpty      = document.getElementById('prep-empty');
+const prepProcessing = document.getElementById('prep-processing');
+const prepVerdict    = document.getElementById('prep-verdict');
+const prepProcRows   = [1,2,3,4,5].map(n => document.getElementById('pproc-' + n));
+
+function selectPrepRole(el, key) {
+  document.querySelectorAll('#prep-role-strip .pill').forEach(p => p.className = 'pill');
+  el.classList.add('solid');
+  prepRole = key;
+  if (key === 'custom') {
+    prepCoWrap.style.display = '';
+    prepPreview.style.display = 'none';
+    prepGo.disabled = true;
+    if (prepCoInput) {
+      prepCoInput.oninput = () => { prepGo.disabled = prepCoInput.value.trim().length < 2; };
+    }
+  } else {
+    prepCoWrap.style.display = 'none';
+    prepPreview.style.display = '';
+    const r = PREP_ROLES[key];
+    document.getElementById('prep-preview-avatar').textContent = r.initials;
+    document.getElementById('prep-preview-title').textContent  = r.title;
+    document.getElementById('prep-preview-sub').textContent    = r.sub;
+    prepGo.disabled = false;
+  }
+}
+
+function runPrep() {
+  prepEmpty.style.display = 'none';
+  prepVerdict.classList.remove('show');
+  prepProcessing.classList.add('show');
+  prepProcRows.forEach(r => r && r.classList.remove('show'));
+  [200, 900, 1700, 2400, 3100].forEach((t, i) => {
+    setTimeout(() => prepProcRows[i] && prepProcRows[i].classList.add('show'), t);
+  });
+  setTimeout(() => {
+    prepProcessing.classList.remove('show');
+    prepVerdict.classList.add('show');
+    prepVerdict.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 4200);
+}
+
+function resetPrep() {
+  prepVerdict.classList.remove('show');
+  prepProcessing.classList.remove('show');
+  prepCoWrap.style.display = 'none';
+  prepPreview.style.display = '';
+  prepGo.disabled = false;
+  prepRole = 'jeeves';
+  document.querySelectorAll('#prep-role-strip .pill').forEach((p, i) => {
+    p.className = i === 0 ? 'pill solid' : 'pill';
+  });
+  const r = PREP_ROLES['jeeves'];
+  document.getElementById('prep-preview-avatar').textContent = r.initials;
+  document.getElementById('prep-preview-title').textContent  = r.title;
+  document.getElementById('prep-preview-sub').textContent    = r.sub;
+}
+
+function copyPrepOpening(evt) {
+  const text = document.getElementById('prep-opening-text').textContent.trim();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = evt.target; btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy opening →', 2000);
     });
   }
 }
