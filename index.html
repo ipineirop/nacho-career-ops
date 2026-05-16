@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" id="theme-color-meta" content="#f6f8f8" />
+<title>LeadMe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────── */
+:root, .theme-light {
+  --bg:         #f6f8f8;
+  --surface:    #ffffff;
+  --canvas:     #f0f4f4;
+  --ink:        #0a1f24;
+  --ink-2:      #455258;
+  --ink-3:      #889399;
+  --line:       #e2e7e8;
+  --track:      #edf1f1;
+  --accent:     #0d7c89;
+  --accent-soft:#d6eef0;
+  --accent-on:  #ffffff;
+  --signal:     #c97b0e;
+  --signal-soft:#fbecd6;
+  --signal-on:  #ffffff;
+}
+.theme-dark {
+  --bg:         #0a0e14;
+  --surface:    #1a2230;
+  --canvas:     #0f1620;
+  --ink:        #f4f6fa;
+  --ink-2:      #c4cad6;
+  --ink-3:      #8893a3;
+  --line:       #2a3543;
+  --track:      #2a3543;
+  --accent:     #5cb1ff;
+  --accent-soft:#1a2d44;
+  --accent-on:  #06101c;
+  --signal:     #ecae4d;
+  --signal-soft:#382b16;
+  --signal-on:  #0a0e14;
+}
+
+/* ── RESET + BASE ───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: "Albert Sans", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.screens-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.screen.hidden { display: none; }
+
+.screen-header {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 20px;
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+.screen-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px;
+  padding-bottom: max(100px, calc(80px + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── TABBAR ─────────────────────────────────────────── */
+.tabbar {
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 8px 8px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: 4px;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  color: var(--ink-3);
+  font-family: "Albert Sans"; font-size: 10px; font-weight: 500;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 10px;
+}
+.tab .tab-icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: transparent; border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+}
+.tab.active { color: var(--ink); }
+.tab.active .tab-icon { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.tab.cta-tab {
+  background: var(--accent);
+  color: var(--accent-on);
+  border-radius: 14px;
+  padding: 6px 4px;
+  margin: -4px 0;
+  flex: 1.2;
+}
+.tab.cta-tab .cta-label {
+  font-family: "Albert Sans"; font-weight: 600; font-size: 11px;
+  display: flex; align-items: center; gap: 4px;
+}
+.tab.cta-tab .cta-label::before { content: '✦'; font-size: 10px; }
+
+/* ── HEADER ROW ─────────────────────────────────────── */
+.header-row { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: var(--ink); color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Fraunces", serif; font-style: italic; font-size: 18px;
+  flex-shrink: 0; line-height: 1;
+}
+.brand-mark .dot { color: var(--accent); }
+.screen-title {
+  font-family: "Fraunces", serif; font-weight: 500;
+  font-size: 18px; color: var(--ink);
+}
+.header-actions { margin-left: auto; display: flex; gap: 6px; }
+.iconbtn {
+  width: 32px; height: 32px; border-radius: 999px;
+  background: var(--canvas);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); font-size: 14px;
+  cursor: pointer; border: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.back-btn {
+  width: 32px; height: 32px; border-radius: 999px;
+  background: var(--canvas);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); font-size: 16px; font-weight: 500;
+  cursor: pointer; border: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── PRIMITIVES ─────────────────────────────────────── */
+.kicker {
+  font-family: "Geist Mono", monospace;
+  font-size: 9.5px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.editorial {
+  font-family: "Fraunces", serif; font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.4px; color: var(--ink);
+}
+.editorial em { font-style: italic; }
+.body-copy {
+  font-family: "Albert Sans"; font-size: 13.5px;
+  line-height: 1.5; color: var(--ink-2);
+}
+.row { display: flex; align-items: center; gap: 10px; }
+.col { display: flex; flex-direction: column; gap: 4px; }
+.mono { font-family: "Geist Mono", monospace; letter-spacing: 0.4px; }
+
+/* ── CARDS ──────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.card.tight { padding: 12px 14px; gap: 8px; }
+.card.canvas { background: var(--canvas); }
+.card.accent { background: var(--accent-soft); border-color: transparent; }
+.card.signal { background: var(--signal-soft); border-color: var(--signal); }
+
+/* ── PILLS ──────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-2);
+}
+.pill.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.pill.signal-chip { background: var(--signal); color: var(--signal-on); border-color: transparent; }
+.pill.signal-soft { color: var(--signal); border-color: var(--signal); background: transparent; }
+.pill.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* ── BUTTONS ────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px 18px; border-radius: 999px;
+  font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  cursor: pointer; width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .15s;
+}
+.btn.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn.sm { padding: 7px 12px; font-size: 12px; width: auto; }
+.btn.row-act { width: auto; padding: 9px 14px; font-size: 13px; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ── SCORE + AVATAR ─────────────────────────────────── */
+.score {
+  min-width: 48px; height: 48px; padding: 0 8px; border-radius: 12px;
+  background: var(--accent); color: var(--accent-on);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: "Albert Sans"; font-weight: 700; font-size: 18px;
+  flex-shrink: 0;
+}
+.score.sm { min-width: 36px; height: 36px; font-size: 14px; border-radius: 9px; }
+.score.flag { background: var(--signal); color: var(--signal-on); }
+.score.muted { background: var(--canvas); color: var(--ink-2); }
+.avatar-co {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Albert Sans"; font-weight: 700; font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ── SALARY + METER ─────────────────────────────────── */
+.salary {
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; background: var(--canvas);
+  display: flex; flex-direction: column; gap: 7px;
+}
+.meter {
+  position: relative; height: 8px; border-radius: 4px;
+  background: var(--track);
+}
+.meter .band {
+  position: absolute; top: 0; height: 100%; border-radius: 4px;
+  background: var(--accent); opacity: .35;
+}
+.meter .pin {
+  position: absolute; top: -2px; width: 2px; height: 12px;
+  background: var(--signal);
+}
+.meter .pin::after {
+  content: ''; position: absolute; top: -3px; left: -3px;
+  width: 8px; height: 8px; background: var(--signal); border-radius: 50%;
+}
+
+/* ── FIT BARS ───────────────────────────────────────── */
+.fits { display: flex; flex-direction: column; gap: 6px; }
+.fit-bar { display: flex; align-items: center; gap: 8px; }
+.fit-bar .label-bar {
+  width: 56px; font-family: "Geist Mono"; font-size: 9.5px;
+  color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+}
+.fit-bar .track {
+  flex: 1; height: 5px; border-radius: 3px; background: var(--track);
+  position: relative; overflow: hidden;
+}
+.fit-bar .fill {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: var(--accent); border-radius: 3px;
+}
+.fit-bar .fill.soft { opacity: .55; }
+.fit-bar .fill.sig { background: var(--signal); }
+.fit-bar .grade {
+  font-family: "Geist Mono"; font-size: 10px;
+  color: var(--ink); width: 20px; text-align: right;
+}
+
+/* ── EDITOR NOTE ────────────────────────────────────── */
+.editor-note {
+  background: var(--accent-soft); border-radius: 12px;
+  padding: 14px 16px; position: relative; margin-top: 4px;
+}
+.theme-dark .editor-note { background: #16283a; }
+.editor-note::before {
+  content: "Editor's note";
+  position: absolute; top: -8px; left: 14px;
+  font-family: "Geist Mono"; font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--accent);
+  background: var(--bg); padding: 2px 8px; border-radius: 999px;
+}
+.editor-note p {
+  font-family: "Fraunces", serif; font-size: 14px; line-height: 1.45;
+  color: var(--ink); margin: 0;
+}
+.editor-note p em { font-style: italic; }
+
+/* ── SEG TOGGLE ─────────────────────────────────────── */
+.seg-toggle {
+  display: inline-flex; background: var(--canvas);
+  border-radius: 999px; padding: 3px; gap: 2px;
+  border: 1px solid var(--line);
+}
+.seg-toggle .seg {
+  padding: 5px 11px; border-radius: 999px;
+  font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+  color: var(--ink-3); cursor: pointer;
+}
+.seg-toggle .seg.on { background: var(--ink); color: var(--bg); }
+
+/* ── STATUS DOT ─────────────────────────────────────── */
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ink-3); display: inline-block; flex-shrink: 0;
+}
+.status-dot.applied  { background: var(--signal); }
+.status-dot.interview{ background: var(--accent); }
+.status-dot.offer    { background: var(--ink); }
+
+/* ── HOME: STATS GRID ───────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-card.sig { background: var(--signal-soft); border-color: var(--signal); }
+.stat-card .stat-label {
+  font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.stat-card .stat-num {
+  font-family: "Fraunces", serif; font-weight: 400;
+  font-size: 26px; line-height: 1; color: var(--ink); letter-spacing: -0.4px;
+}
+.stat-card .stat-num em { font-style: italic; font-size: 22px; }
+.stat-card .stat-sub { font-family: "Albert Sans"; font-size: 11px; color: var(--ink-2); }
+.stat-card.sig .stat-num   { color: var(--signal); }
+.stat-card.sig .stat-label { color: var(--signal); }
+
+/* ── TERRITORY MAP ──────────────────────────────────── */
+.territory-mini {
+  position: relative; height: 200px;
+  background: var(--canvas); border: 1px solid var(--line);
+  border-radius: 12px; overflow: hidden;
+}
+.territory-mini svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.territory-mini .node {
+  position: absolute; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; line-height: 1.1;
+  background: var(--surface); border: 1px solid var(--line);
+  font-family: "Albert Sans"; font-weight: 600; font-size: 9.5px;
+  color: var(--ink); text-align: center;
+}
+.territory-mini .node.strong {
+  background: var(--accent); color: var(--accent-on); border-color: var(--accent);
+}
+.territory-mini .node.you {
+  background: var(--ink); color: var(--bg); border: 2px solid var(--ink);
+  width: 48px; height: 48px; font-size: 11px;
+}
+.territory-mini .node-score {
+  font-family: "Geist Mono"; font-size: 9px; opacity: .85; margin-top: 1px;
+}
+
+/* ── TRACKER CARDS ──────────────────────────────────── */
+.tracker-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.tracker-card .top-row { display: flex; align-items: center; gap: 10px; }
+.tracker-card .role-text {
+  font-family: "Albert Sans"; font-size: 14px; color: var(--ink);
+  line-height: 1.2; flex: 1; min-width: 0;
+}
+.tracker-card .role-text b { font-weight: 600; }
+.tracker-card .role-text span { color: var(--ink-2); display: block; font-size: 12px; margin-top: 1px; }
+.tracker-card .footer-row {
+  display: flex; align-items: center; gap: 8px;
+  padding-top: 6px; border-top: 1px dashed var(--line); font-size: 11px;
+}
+.tracker-card .status-label {
+  display: flex; align-items: center; gap: 6px;
+  font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2);
+}
+
+/* ── PILL SCROLL (Tracker filter) ───────────────────── */
+.pill-scroll {
+  display: flex; gap: 6px;
+  overflow-x: auto;
+  margin: 0 -20px;
+  padding: 0 20px;
+  scrollbar-width: none;
+}
+.pill-scroll::-webkit-scrollbar { display: none; }
+.pill-scroll .pill { white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+
+/* ── EVALUATE ───────────────────────────────────────── */
+.ev-input {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ev-textarea {
+  border: 1px dashed var(--line); border-radius: 10px;
+  background: var(--canvas); padding: 12px 14px;
+  font-family: "Albert Sans"; font-size: 13px; line-height: 1.5;
+  color: var(--ink-2); resize: none;
+  width: 100%; min-height: 110px; outline: none;
+  transition: border-color .2s, background .2s;
+}
+.ev-textarea.filled {
+  background: var(--surface); border-style: solid;
+  color: var(--ink); border-color: var(--line);
+}
+.ev-extract-pills { display: flex; gap: 6px; flex-wrap: wrap; min-height: 22px; }
+.ev-extract-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 999px;
+  font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+  background: var(--accent-soft); color: var(--accent);
+  opacity: 0; transform: translateY(2px);
+  transition: all .25s ease;
+}
+.ev-extract-pill.show { opacity: 1; transform: translateY(0); }
+.ev-extract-pill.sig { background: var(--signal-soft); color: var(--signal); }
+.ev-extract-pill::before { content: '✓ '; }
+
+.ev-empty {
+  background: var(--canvas); border: 1px dashed var(--line);
+  border-radius: 14px; padding: 28px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; text-align: center;
+}
+.ev-empty .glyph {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: var(--surface); border: 1px dashed var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Fraunces", serif; font-style: italic;
+  font-size: 22px; color: var(--ink-3);
+}
+.ev-empty p {
+  font-family: "Albert Sans"; font-size: 13px; line-height: 1.55;
+  color: var(--ink-3); margin: 0;
+}
+.ev-empty p b { color: var(--ink); font-weight: 600; }
+
+.ev-processing {
+  display: none; flex-direction: column; gap: 10px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px;
+}
+.ev-processing.show { display: flex; }
+.proc-row {
+  display: flex; gap: 8px; align-items: center;
+  opacity: 0; transform: translateX(-4px);
+  transition: all .3s ease;
+  font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-2);
+}
+.proc-row.show { opacity: 1; transform: translateX(0); }
+.proc-row .check {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-on);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.proc-row .spin {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--accent);
+  animation: spin .8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ev-verdict { display: none; flex-direction: column; gap: 12px; }
+.ev-verdict.show { display: flex; animation: fadein .35s ease; }
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SETTINGS ───────────────────────────────────────── */
+.settings-row {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.settings-row .s-label {
+  flex: 1; font-family: "Albert Sans"; font-size: 14px; color: var(--ink);
+}
+.settings-row .s-sub {
+  font-family: "Albert Sans"; font-size: 12px; color: var(--ink-3);
+}
+.toggle {
+  width: 44px; height: 26px; border-radius: 999px;
+  background: var(--track); border: 1px solid var(--line);
+  position: relative; cursor: pointer; flex-shrink: 0;
+  transition: background .2s;
+}
+.toggle.on { background: var(--accent); border-color: var(--accent); }
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: transform .2s;
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── PICK CARDS (Discover) ──────────────────────────── */
+.pick-card { padding: 16px; gap: 12px; }
+.pick-head { display: flex; align-items: flex-start; gap: 12px; }
+.pick-meta { flex: 1; min-width: 0; }
+.pick-title {
+  font-family: "Fraunces", serif; font-weight: 400;
+  font-size: 18px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+}
+.pick-title em { font-style: italic; }
+.pick-role {
+  font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+  color: var(--ink); margin-bottom: 2px;
+}
+.pick-sub { font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2); }
+.pick-actions { display: flex; gap: 8px; margin-top: 4px; }
+</style>
+</head>
+<body class="theme-light">
+
+<div class="screens-wrap">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: DISCOVER                                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen" id="screen-discover">
+  <div class="screen-header">
+    <div class="header-row">
+      <div class="brand-mark">L<span class="dot">.</span></div>
+      <span class="screen-title">Discover</span>
+      <div class="header-actions">
+        <button class="iconbtn">⌕</button>
+        <button class="iconbtn">⋯</button>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">Issue №19 · Fri May 16 · CDMX</div>
+    <h1 class="editorial" style="font-size:32px;margin-top:-2px;">Today's <em>brief</em>.</h1>
+
+    <div class="seg-toggle" style="align-self:flex-start;" id="discover-seg">
+      <div class="seg" onclick="setSeg(this)">Need</div>
+      <div class="seg on" onclick="setSeg(this)">Leverage</div>
+      <div class="seg" onclick="setSeg(this)">Open</div>
+    </div>
+
+    <div class="editor-note">
+      <p><b style="font-weight:500;">Jeeves</b> just opened a Global RevOps seat — remote LATAM, matches your multi-country GTM scope <em>line for line</em>. I filtered 14 others.</p>
+    </div>
+
+    <!-- Pick 1 -->
+    <div class="card pick-card">
+      <div class="pick-head">
+        <div class="avatar-co">JV</div>
+        <div class="pick-meta">
+          <div class="kicker">№ 1 · Strong fit · 2d</div>
+          <div class="pick-title">Jeeves opened <em>your seat</em>.</div>
+        </div>
+        <div class="score">86</div>
+      </div>
+      <div class="pick-role">Head of Global Revenue Operations</div>
+      <div class="pick-sub">Remote · LATAM focus · B2B fintech / payments</div>
+
+      <div class="salary">
+        <div class="row" style="font-size:12px;">
+          <span style="font-weight:600;">USD $110–140k</span>
+          <span class="mono" style="color:var(--ink-3);font-size:9.5px;">EST</span>
+          <span class="pill accent" style="margin-left:auto;">in band</span>
+        </div>
+        <div class="meter">
+          <div class="band" style="left:35%;width:32%;"></div>
+          <div class="pin" style="left:50%;"></div>
+        </div>
+        <div class="row" style="font-size:10px;">
+          <span class="mono" style="color:var(--ink-3);">FLOOR $80K</span>
+          <span class="mono" style="margin-left:auto;color:var(--ink-3);">●●● HIGH</span>
+        </div>
+      </div>
+
+      <p class="body-copy" style="font-size:13px;margin:0;">Multi-country RevOps at Series B fintech. Your Clara application and Clip scope map directly to this motion.</p>
+
+      <div class="pick-actions">
+        <button class="btn primary" onclick="navigate('evaluate')">Tailor &amp; apply</button>
+        <button class="btn row-act" onclick="navigate('evaluate')">Evaluate</button>
+      </div>
+    </div>
+
+    <!-- Pick 2 -->
+    <div class="card pick-card">
+      <div class="pick-head">
+        <div class="avatar-co">YM</div>
+        <div class="pick-meta">
+          <div class="kicker">№ 2 · Regional play · 4d</div>
+          <div class="pick-role" style="font-size:15px;">Country Manager — Mexico</div>
+          <div class="pick-sub">Yummy · CDMX · On-demand delivery</div>
+        </div>
+        <div class="score">76</div>
+      </div>
+      <div class="salary">
+        <div class="row" style="font-size:12px;">
+          <span style="font-weight:600;">USD $90–120k</span>
+          <span class="pill accent" style="margin-left:auto;">above floor</span>
+        </div>
+        <div class="meter"><div class="band" style="left:30%;width:30%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Pick 3 -->
+    <div class="card pick-card">
+      <div class="pick-head">
+        <div class="avatar-co">BC</div>
+        <div class="pick-meta">
+          <div class="kicker">№ 3 · Remote · 1d</div>
+          <div class="pick-role" style="font-size:15px;">Director of Operations</div>
+          <div class="pick-sub">Blue Coding · Remote · Tech staffing</div>
+        </div>
+        <div class="score">72</div>
+      </div>
+      <div class="row" style="font-size:12px;flex-wrap:wrap;">
+        <span style="font-weight:600;">USD $90–120k</span>
+        <span class="pill signal-soft" style="margin-left:auto;">verify scope</span>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:center;padding:8px 0;">
+      <span class="kicker">2 more · 14 filtered ↓</span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: HOME                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-home">
+  <div class="screen-header">
+    <div class="header-row">
+      <div class="brand-mark">L<span class="dot">.</span></div>
+      <span class="screen-title">Home</span>
+      <div class="header-actions">
+        <div class="iconbtn" style="background:var(--ink);color:var(--bg);font-weight:700;font-family:'Fraunces';font-style:italic;font-size:13px;">NP</div>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">Friday May 16 · Issue №19</div>
+    <h1 class="editorial" style="font-size:28px;">Good morning, <em>Nacho</em>.</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Today's brief</span>
+        <span class="stat-num">3 <em>picks</em></span>
+        <span class="stat-sub" style="color:var(--accent);">1 strong fit</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">In pipeline</span>
+        <span class="stat-num">7</span>
+        <span class="stat-sub">2 applied</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Top score</span>
+        <span class="stat-num">86</span>
+        <span class="stat-sub">Jeeves · RevOps</span>
+      </div>
+      <div class="stat-card sig">
+        <span class="stat-label">★ Applied</span>
+        <span class="stat-num" style="font-size:20px;">Clara</span>
+        <span class="stat-sub" style="color:var(--signal);">4.2/5 · active</span>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="kicker" style="color:var(--accent);">Today's focus · 15 min</div>
+      <div class="row" style="font-size:13px;">
+        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">1</span>
+        <span style="flex:1;">Evaluate &amp; apply to <b style="font-weight:600;">Jeeves</b></span>
+        <button class="btn primary sm row-act" style="padding:5px 12px;" onclick="navigate('evaluate')">Open</button>
+      </div>
+      <div class="row" style="font-size:13px;">
+        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">2</span>
+        <span style="flex:1;">Follow up <b style="font-weight:600;">Plata Card</b></span>
+        <button class="btn sm row-act" style="padding:5px 12px;" onclick="navigate('tracker')">Open</button>
+      </div>
+      <div class="row" style="font-size:13px;">
+        <span class="score sm" style="width:22px;height:22px;min-width:22px;font-size:11px;border-radius:999px;">3</span>
+        <span style="flex:1;">Review <b style="font-weight:600;">Outreach GM</b> JD</span>
+        <button class="btn sm row-act" style="padding:5px 12px;" onclick="navigate('discover')">Open</button>
+      </div>
+    </div>
+
+    <div class="kicker">Your territory · MX fintech ops</div>
+    <div class="territory-mini">
+      <svg>
+        <circle cx="50%" cy="50%" r="55" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <circle cx="50%" cy="50%" r="88" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>
+      </svg>
+      <div class="node you" style="left:calc(50% - 24px);top:calc(50% - 24px);">you</div>
+      <div class="node strong" style="left:19%;top:14%;width:44px;height:44px;">Clara<div class="node-score">84</div></div>
+      <div class="node strong" style="left:62%;top:11%;width:44px;height:44px;">Jeeves<div class="node-score">86</div></div>
+      <div class="node" style="left:75%;top:52%;width:38px;height:38px;">Yummy<div class="node-score">76</div></div>
+      <div class="node" style="left:15%;top:66%;width:36px;height:36px;">Plata<div class="node-score">78</div></div>
+      <div class="node" style="left:65%;top:76%;width:30px;height:30px;">dLocal<div class="node-score">76</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span class="kicker">★ Your market</span>
+        <span class="pill accent">Director · MX</span>
+      </div>
+      <div class="salary">
+        <div class="row" style="font-size:12.5px;">
+          <span style="font-weight:600;">MXN $1.9–2.4M</span>
+          <span class="mono" style="color:var(--ink-3);font-size:9.5px;">MEDIAN</span>
+        </div>
+        <div class="meter"><div class="band" style="left:30%;width:35%;"></div></div>
+      </div>
+      <div class="body-copy" style="font-size:12px;">Bands up <b>+6% YoY</b>. USD remote roles trending higher.</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: TRACKER                                      -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-tracker">
+  <div class="screen-header">
+    <div class="header-row">
+      <button class="back-btn" onclick="navigate('home')">←</button>
+      <span class="screen-title">Tracker</span>
+      <div class="header-actions">
+        <button class="iconbtn">⌕</button>
+        <button class="iconbtn">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <h1 class="editorial" style="font-size:26px;">Pipeline · <em>7 active</em>.</h1>
+
+    <div class="pill-scroll">
+      <span class="pill solid"   id="f-all"        onclick="filterTracker('all')">All · 7</span>
+      <span class="pill"         id="f-evaluating" onclick="filterTracker('evaluating')">Evaluating · 3</span>
+      <span class="pill"         id="f-applied"    onclick="filterTracker('applied')">Applied · 2</span>
+      <span class="pill"         id="f-evaluated"  onclick="filterTracker('evaluated')">Reviewed · 2</span>
+    </div>
+
+    <div class="tracker-card" data-status="evaluating">
+      <div class="top-row">
+        <div class="score sm">86</div>
+        <div class="role-text"><b>Jeeves</b><span>Head of Global Revenue Operations</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot"></span>Evaluating · top pick</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">$110–140K</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="applied">
+      <div class="top-row">
+        <div class="score sm">84</div>
+        <div class="role-text"><b>Clara</b><span>Head of Revenue Operations</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot applied"></span>Applied · CDMX hybrid</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">4.2/5</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="applied">
+      <div class="top-row">
+        <div class="score sm flag">78</div>
+        <div class="role-text"><b>Plata Card</b><span>Head of Antifraud &amp; Disputes Ops</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot applied"></span>Applied · Apr 07 · <span style="color:var(--signal);font-weight:600;">follow up</span></span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">3.9/5</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="evaluating">
+      <div class="top-row">
+        <div class="score sm">76</div>
+        <div class="role-text"><b>Yummy</b><span>Country Manager — Mexico</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot"></span>Evaluating · CDMX</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">$90–120K</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="evaluating">
+      <div class="top-row">
+        <div class="score sm">76</div>
+        <div class="role-text"><b>dLocal</b><span>Operations Manager, LATAM</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot"></span>Evaluating · remote</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">3.8/5</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="evaluated">
+      <div class="top-row">
+        <div class="score sm muted">76</div>
+        <div class="role-text"><b>Firstbase.io</b><span>Head of Operations and CX</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot"></span>Reviewed · YC W21</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">3.8/5</span>
+      </div>
+    </div>
+
+    <div class="tracker-card" data-status="evaluated">
+      <div class="top-row">
+        <div class="score sm muted">64</div>
+        <div class="role-text"><b>Outreach</b><span>General Manager, Mexico City</span></div>
+      </div>
+      <div class="footer-row">
+        <span class="status-label"><span class="status-dot"></span>Reviewed · 3.2/5</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink-3);margin-left:auto;">$80–100K</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: EVALUATE                                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-evaluate">
+  <div class="screen-header">
+    <div class="header-row">
+      <button class="back-btn" onclick="navigate('discover')">←</button>
+      <span class="screen-title">Evaluate</span>
+      <div class="header-actions">
+        <button class="iconbtn">⋯</button>
+      </div>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">★ The aha moment</div>
+    <h1 class="editorial" style="font-size:28px;">Got a lead? <em>Paste it.</em></h1>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <span class="pill solid">Recruiter DM</span>
+      <span class="pill">Job URL</span>
+      <span class="pill">JD text</span>
+    </div>
+
+    <div class="ev-input">
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span class="kicker">Paste anything</span>
+        <span class="mono" id="ev-charcount" style="font-size:9.5px;color:var(--ink-3);">0 chars</span>
+      </div>
+      <textarea id="ev-input" class="ev-textarea" placeholder="Paste a recruiter DM, a job URL, or a JD. I'll parse, score, check comp, and draft a reply."></textarea>
+      <div class="ev-extract-pills">
+        <span class="ev-extract-pill"     id="ext-co">Jeeves</span>
+        <span class="ev-extract-pill"     id="ext-role">Head of RevOps</span>
+        <span class="ev-extract-pill"     id="ext-loc">Remote LATAM</span>
+        <span class="ev-extract-pill sig" id="ext-comp">USD $110K</span>
+      </div>
+      <button class="btn ghost sm" onclick="pasteSample()" style="font-size:12px;">↘ Paste sample DM</button>
+      <button class="btn primary" id="ev-go" onclick="runEvaluate()" disabled>Evaluate →</button>
+    </div>
+
+    <div class="ev-empty" id="ev-empty">
+      <div class="glyph">e</div>
+      <p><b>In about a minute</b><br/>you'll know if it's worth your time and what to say back.</p>
+    </div>
+
+    <div class="ev-processing" id="ev-processing">
+      <span class="kicker">Reading…</span>
+      <div class="proc-row" id="proc-1"><div class="check">✓</div><span>Parsed · <b>Jeeves · Head of Global RevOps · USD $110K</b></span></div>
+      <div class="proc-row" id="proc-2"><div class="check">✓</div><span>Pulled context · Series B · B2B fintech / cross-border</span></div>
+      <div class="proc-row" id="proc-3"><div class="check">✓</div><span>Cross-referenced 5 LATAM RevOps comparables</span></div>
+      <div class="proc-row" id="proc-4"><div class="check">✓</div><span>Scored fit · 10 dimensions</span></div>
+      <div class="proc-row" id="proc-5"><div class="spin"></div><span>Drafting reply in your voice…</span></div>
+    </div>
+
+    <div class="ev-verdict" id="ev-verdict">
+      <div class="card">
+        <div class="row">
+          <div class="score">86</div>
+          <div class="col" style="flex:1;gap:2px;">
+            <span class="kicker">Verdict</span>
+            <span class="editorial" style="font-size:18px;">Strong match — <em>move fast</em>.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card tight">
+        <div class="row" style="justify-content:space-between;">
+          <span class="kicker">★ Salary check</span>
+          <span class="pill accent">in your band</span>
+        </div>
+        <div class="salary">
+          <div class="row" style="font-size:12.5px;">
+            <span style="font-weight:600;">USD $110K base</span>
+            <span class="mono" style="margin-left:auto;color:var(--ink-3);font-size:9.5px;">MARKET $100–140K</span>
+          </div>
+          <div class="meter">
+            <div class="band" style="left:35%;width:35%;"></div>
+            <div class="pin" style="left:48%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card tight">
+        <span class="kicker">Fit · A–F</span>
+        <div class="fits">
+          <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:90%;"></span></span><span class="grade">A</span></div>
+          <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+          <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width:75%;"></span></span><span class="grade">B+</span></div>
+          <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill" style="width:72%;"></span></span><span class="grade">B</span></div>
+        </div>
+      </div>
+
+      <div class="card accent tight">
+        <span class="kicker" style="color:var(--accent);">✦ Draft reply</span>
+        <div style="font-family:'Albert Sans';font-size:12.5px;line-height:1.55;color:var(--ink);background:var(--surface);padding:10px 12px;border-radius:8px;">
+          Hi Sofia — thanks for reaching out. Jeeves is on my radar and this scope looks like a strong fit. Happy to chat — could you send the full JD and confirm the <b style="color:var(--accent);">equity structure</b> before we set a call?
+        </div>
+        <button class="btn primary sm" style="width:100%;padding:8px 14px;" onclick="copyReply()">Copy reply →</button>
+      </div>
+
+      <button class="btn ghost sm" onclick="resetEvaluate()" style="font-size:12px;">↺ Try another</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN: MORE / SETTINGS                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-settings">
+  <div class="screen-header">
+    <div class="header-row">
+      <div class="brand-mark">L<span class="dot">.</span></div>
+      <span class="screen-title">More</span>
+    </div>
+  </div>
+  <div class="screen-body">
+
+    <div class="kicker">Profile</div>
+    <div class="card tight">
+      <div class="row" style="gap:14px;">
+        <div class="avatar-co" style="width:48px;height:48px;font-size:16px;border-radius:14px;">NP</div>
+        <div class="col" style="gap:2px;">
+          <span style="font-family:'Albert Sans';font-weight:600;font-size:15px;color:var(--ink);">Ignacio Piñeiro</span>
+          <span style="font-family:'Albert Sans';font-size:12px;color:var(--ink-3);">Director of Operations · CDMX</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:4px;">
+        <span class="pill accent" style="font-size:10.5px;">P&amp;L $3.4B MXN</span>
+        <span class="pill accent" style="font-size:10.5px;">Team 40+</span>
+        <span class="pill accent" style="font-size:10.5px;">Fintech · Marketplace</span>
+        <span class="pill signal-soft" style="font-size:10.5px;">MX + AR multi-country</span>
+        <span class="pill" style="font-size:10.5px;">ES · EN</span>
+      </div>
+    </div>
+
+    <div class="kicker">Preferences</div>
+
+    <div class="settings-row">
+      <div class="col" style="gap:2px;">
+        <span class="s-label">Dark mode</span>
+        <span class="s-sub">Switch to dark theme</span>
+      </div>
+      <div class="toggle" id="dark-toggle" onclick="toggleDark()"></div>
+    </div>
+
+    <div class="settings-row">
+      <div class="col" style="gap:2px;">
+        <span class="s-label">Salary floor</span>
+        <span class="s-sub">Min. comp target</span>
+      </div>
+      <span class="mono" style="font-size:12px;color:var(--ink-2);">$80K USD</span>
+    </div>
+
+    <div class="settings-row">
+      <div class="col" style="gap:2px;">
+        <span class="s-label">Locations</span>
+        <span class="s-sub">Open to</span>
+      </div>
+      <span class="mono" style="font-size:11px;color:var(--ink-2);">CDMX · Remote</span>
+    </div>
+
+    <div class="kicker">Pipeline snapshot</div>
+    <div class="card tight canvas">
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span style="font-family:'Albert Sans';font-size:13px;color:var(--ink);">Roles evaluated</span>
+        <span class="mono" style="font-size:12px;color:var(--ink);">18</span>
+      </div>
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span style="font-family:'Albert Sans';font-size:13px;color:var(--ink);">Applied</span>
+        <span class="mono" style="font-size:12px;color:var(--ink);">2</span>
+      </div>
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span style="font-family:'Albert Sans';font-size:13px;color:var(--ink);">Avg score (applied)</span>
+        <span class="mono" style="font-size:12px;color:var(--ink);">4.05 / 5</span>
+      </div>
+      <div class="row" style="justify-content:space-between;align-items:baseline;">
+        <span style="font-family:'Albert Sans';font-size:13px;color:var(--ink);">Active since</span>
+        <span class="mono" style="font-size:12px;color:var(--ink);">Apr 2026</span>
+      </div>
+    </div>
+
+    <div class="card tight canvas" style="text-align:center;gap:4px;">
+      <span class="kicker" style="text-align:center;">LeadMe · v0.1</span>
+      <span style="font-family:'Albert Sans';font-size:12px;color:var(--ink-3);">ipineirop/nacho-career-ops</span>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- .screens-wrap -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- BOTTOM TAB BAR                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="tabbar">
+  <button class="tab active" id="tab-discover" onclick="navigate('discover')">
+    <div class="tab-icon"></div>
+    <span>Discover</span>
+  </button>
+  <button class="tab" id="tab-home" onclick="navigate('home')">
+    <div class="tab-icon"></div>
+    <span>Home</span>
+  </button>
+  <button class="tab cta-tab" id="tab-evaluate" onclick="navigate('evaluate')">
+    <span class="cta-label">Evaluate</span>
+  </button>
+  <button class="tab" id="tab-tracker" onclick="navigate('tracker')">
+    <div class="tab-icon"></div>
+    <span>Tracker</span>
+  </button>
+  <button class="tab" id="tab-settings" onclick="navigate('settings')">
+    <div class="tab-icon"></div>
+    <span>More</span>
+  </button>
+</div>
+
+
+<script>
+// ── NAVIGATION ────────────────────────────────────────
+const SCREENS = ['discover','home','tracker','evaluate','settings'];
+
+function navigate(name) {
+  SCREENS.forEach(s => {
+    document.getElementById('screen-' + s).classList.toggle('hidden', s !== name);
+    const t = document.getElementById('tab-' + s);
+    if (t) t.classList.toggle('active', s === name);
+  });
+}
+
+// ── DISCOVER SEG ──────────────────────────────────────
+function setSeg(el) {
+  el.closest('.seg-toggle').querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── TRACKER FILTER ────────────────────────────────────
+const FILTERS = ['all','evaluating','applied','evaluated'];
+
+function filterTracker(filter) {
+  FILTERS.forEach(f => {
+    const el = document.getElementById('f-' + f);
+    if (!el) return;
+    el.className = 'pill' + (f === filter ? ' solid' : '');
+  });
+  document.querySelectorAll('.tracker-card').forEach(card => {
+    card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+  });
+}
+
+// ── EVALUATE FLOW ─────────────────────────────────────
+const evInput      = document.getElementById('ev-input');
+const evCount      = document.getElementById('ev-charcount');
+const evGo         = document.getElementById('ev-go');
+const evEmpty      = document.getElementById('ev-empty');
+const evProcessing = document.getElementById('ev-processing');
+const evVerdict    = document.getElementById('ev-verdict');
+const pills        = ['ext-co','ext-role','ext-loc','ext-comp'].map(id => document.getElementById(id));
+const procRows     = [1,2,3,4,5].map(n => document.getElementById('proc-' + n));
+
+const SAMPLE_DM = "Hi Nacho! I'm Sofia from Jeeves' talent team. We just opened a Head of Global Revenue Operations seat — fully remote, strong LATAM focus. You'd own the full revenue ops motion across all markets. We closed our Series B last year and are growing fast. Base around USD $110K + meaningful equity + benefits. Do you have 15 min this week to connect?";
+
+evInput.addEventListener('input', () => {
+  const len = evInput.value.length;
+  evCount.textContent = len + ' chars';
+  const active = len > 20;
+  evGo.disabled = !active;
+  evInput.classList.toggle('filled', active);
+  if (!active) pills.forEach(p => p && p.classList.remove('show'));
+});
+
+function pasteSample() {
+  evInput.classList.add('filled');
+  evInput.value = '';
+  let i = 0;
+  const step = () => {
+    evInput.value = SAMPLE_DM.slice(0, i);
+    evCount.textContent = i + ' chars';
+    i += 5;
+    if (i < SAMPLE_DM.length) {
+      setTimeout(step, 8);
+    } else {
+      evInput.value = SAMPLE_DM;
+      evCount.textContent = SAMPLE_DM.length + ' chars';
+      pills.forEach((p, idx) => p && setTimeout(() => p.classList.add('show'), 200 + idx * 160));
+      evGo.disabled = false;
+    }
+  };
+  step();
+}
+
+function runEvaluate() {
+  evEmpty.style.display = 'none';
+  evVerdict.classList.remove('show');
+  evProcessing.classList.add('show');
+  procRows.forEach(r => r && r.classList.remove('show'));
+  [200, 700, 1300, 1900, 2500].forEach((t, i) => {
+    setTimeout(() => procRows[i] && procRows[i].classList.add('show'), t);
+  });
+  setTimeout(() => {
+    evProcessing.classList.remove('show');
+    evVerdict.classList.add('show');
+    evVerdict.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 3400);
+}
+
+function resetEvaluate() {
+  evVerdict.classList.remove('show');
+  evProcessing.classList.remove('show');
+  evEmpty.style.display = 'flex';
+  evInput.value = '';
+  evInput.classList.remove('filled');
+  evCount.textContent = '0 chars';
+  evGo.disabled = true;
+  pills.forEach(p => p && p.classList.remove('show'));
+}
+
+function copyReply() {
+  const text = "Hi Sofia — thanks for reaching out. Jeeves is on my radar and this scope looks like a strong fit. Happy to chat — could you send the full JD and confirm the equity structure before we set a call?";
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy reply →', 2000);
+    });
+  }
+}
+
+// ── DARK MODE ─────────────────────────────────────────
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('theme-dark', isDark);
+  document.body.classList.toggle('theme-light', !isDark);
+  document.getElementById('dark-toggle').classList.toggle('on', isDark);
+  const meta = document.getElementById('theme-color-meta');
+  if (meta) meta.content = isDark ? '#0a0e14' : '#f6f8f8';
+  try { localStorage.setItem('leadme-mode', isDark ? 'dark' : 'light'); } catch(e) {}
+}
+
+try {
+  if (localStorage.getItem('leadme-mode') === 'dark') toggleDark();
+} catch(e) {}
+</script>
+</body>
+</html>
