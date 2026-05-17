@@ -1,7 +1,7 @@
-import { getDb, jobs } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getDb, evaluations, roles, pipelineStatus } from '@/lib/db';
+import { eq } from 'drizzle-orm';
+import { getAuthUserId } from '@/lib/auth-bridge';
+import { redirect } from 'next/navigation';
 import { AvatarCo } from '@/components/ui/avatar-co';
 import { ScoreChip } from '@/components/ui/score-chip';
 import { PipelineFirstRun } from '@/components/pipeline/PipelineFirstRun';
@@ -9,14 +9,43 @@ import { PipelineFirstRun } from '@/components/pipeline/PipelineFirstRun';
 export const dynamic = 'force-dynamic';
 
 export default async function DiscoverPage() {
-  const session = await getServerSession(authOptions);
-  const userEmail = session?.user?.email ?? '';
+  const authUser = await getAuthUserId();
+  if (!authUser) redirect('/auth/signin');
 
-  const dbJobs = await getDb()
-    .select()
-    .from(jobs)
-    .where(and(eq(jobs.status, 'pending'), eq(jobs.userEmail, userEmail)))
-    .orderBy(jobs.id);
+  const db = getDb();
+
+  // Get all evaluations for this user
+  const userEvals = await db
+    .select({ roleId: evaluations.roleId })
+    .from(evaluations)
+    .where(eq(evaluations.userId, authUser.id));
+
+  // Get roles without evaluations (pending)
+  const allRoles = await db.select().from(roles);
+  const evalRoleIds = new Set(userEvals.map((e) => e.roleId));
+  const pendingRoles = allRoles.filter((r) => !evalRoleIds.has(r.id));
+
+  // Enrich pending roles with pipeline status
+  const dbJobs = await Promise.all(
+    pendingRoles.map(async (role) => {
+      const pipeline = await db
+        .select()
+        .from(pipelineStatus)
+        .where(eq(pipelineStatus.roleId, role.id))
+        .limit(1);
+
+      return {
+        id: role.id,
+        company: role.companyName,
+        role: role.roleTitle,
+        portal: role.portal,
+        location: role.location,
+        url: role.sourceRef,
+        firstSeen: role.scrapedAt?.toISOString().split('T')[0],
+        status: pipeline[0]?.status ?? 'evaluating',
+      };
+    })
+  );
 
   const today = new Date();
   const issueNum = Math.floor((today.getTime() - new Date('2024-01-01').getTime()) / (1000 * 60 * 60 * 24));

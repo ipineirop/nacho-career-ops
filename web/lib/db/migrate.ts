@@ -1,11 +1,14 @@
 /**
  * One-time migration: imports applications.md and pipeline.md from GitHub into Postgres.
  * Run with: npx tsx lib/db/migrate.ts
+ *
+ * NOTE: This script has been superseded by the Supabase schema migration.
+ * The old applications/jobs tables no longer exist. Keeping for historical reference.
  */
 import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { applications, jobs } from './schema';
+// import { neon } from '@neondatabase/serverless';
+// import { drizzle } from 'drizzle-orm/neon-http';
+// import { applications, jobs } from './schema';
 import { Octokit } from '@octokit/rest';
 
 const OWNER = process.env.GITHUB_OWNER!;
@@ -68,33 +71,34 @@ function parsePipelineMd(raw: string) {
   return rows;
 }
 
-async function main() {
-  const sql = neon(process.env.DATABASE_URL!);
-  const db = drizzle(sql, { schema: { applications, jobs } });
-
-  console.log('Fetching data from GitHub...');
-  const [appsMd, pipelineMd] = await Promise.all([
-    fetchFile('data/applications.md'),
-    fetchFile('data/pipeline.md'),
-  ]);
-
-  const appRows = parseApplicationsMd(appsMd);
-  const jobRows = parsePipelineMd(pipelineMd);
-
-  console.log(`Migrating ${appRows.length} applications...`);
-  if (appRows.length > 0) {
-    await db.insert(applications).values(appRows).onConflictDoNothing();
-  }
-
-  console.log(`Migrating ${jobRows.length} pipeline jobs...`);
-  const today = new Date().toISOString().split('T')[0];
-  if (jobRows.length > 0) {
-    await db.insert(jobs).values(
-      jobRows.map((j) => ({ ...j, firstSeen: today }))
-    ).onConflictDoNothing();
-  }
-
-  console.log('✓ Migration complete.');
-}
-
-main().catch(console.error);
+// Superseded by Supabase schema migration. Kept for historical reference.
+// async function main() {
+//   const sql = neon(process.env.DATABASE_URL!);
+//   const db = drizzle(sql, { schema: { applications, jobs } });
+//
+//   console.log('Fetching data from GitHub...');
+//   const [appsMd, pipelineMd] = await Promise.all([
+//     fetchFile('data/applications.md'),
+//     fetchFile('data/pipeline.md'),
+//   ]);
+//
+//   const appRows = parseApplicationsMd(appsMd);
+//   const jobRows = parsePipelineMd(pipelineMd);
+//
+//   console.log(`Migrating ${appRows.length} applications...`);
+//   if (appRows.length > 0) {
+//     await db.insert(applications).values(appRows).onConflictDoNothing();
+//   }
+//
+//   console.log(`Migrating ${jobRows.length} pipeline jobs...`);
+//   const today = new Date().toISOString().split('T')[0];
+//   if (jobRows.length > 0) {
+//     await db.insert(jobs).values(
+//       jobRows.map((j) => ({ ...j, firstSeen: today }))
+//     ).onConflictDoNothing();
+//   }
+//
+//   console.log('✓ Migration complete.');
+// }
+//
+// main().catch(console.error);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { requireAuth } from '@/lib/require-auth';
 import { getFile } from '@/lib/github';
-import { getDb, documents, applications } from '@/lib/db';
+import { getDb, documents, evaluations, roles } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
@@ -104,23 +104,26 @@ ${jd}`;
   const fenceMatch = html.match(/```(?:html)?\s*([\s\S]+?)\s*```/);
   if (fenceMatch) html = fenceMatch[1].trim();
 
-  // Save to documents table if linked to an application
+  // Save to documents table if linked to an evaluation
   if (applicationId && html) {
     try {
       const db = getDb();
-      const [app] = await db.select({ company: applications.company, role: applications.role })
-        .from(applications).where(eq(applications.id, applicationId));
+      const [eval_] = await db.select({ userId: evaluations.userId, roleId: evaluations.roleId })
+        .from(evaluations).where(eq(evaluations.id, applicationId));
 
-      await db.insert(documents).values({
-        applicationId,
-        type: 'cv',
-        title: `CV — ${app?.company ?? 'Unknown'} (${app?.role ?? ''})`,
-        content: html,
-      });
+      if (eval_) {
+        const [roleData] = await db.select({ companyName: roles.companyName, roleTitle: roles.roleTitle })
+          .from(roles).where(eq(roles.id, eval_.roleId));
 
-      await db.update(applications)
-        .set({ hasPdf: true, updatedAt: new Date() })
-        .where(eq(applications.id, applicationId));
+        await db.insert(documents).values({
+          userId: eval_.userId,
+          evaluationId: applicationId,
+          roleId: eval_.roleId,
+          type: 'cv',
+          title: `CV — ${roleData?.companyName ?? 'Unknown'} (${roleData?.roleTitle ?? ''})`,
+          content: html,
+        });
+      }
     } catch (err) {
       console.error('Failed to save CV document:', err);
     }

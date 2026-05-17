@@ -1,13 +1,11 @@
-import { getDb, applications, jobs } from '@/lib/db';
+import { getDb, evaluations, roles, pipelineStatus } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getAuthUserId } from '@/lib/auth-bridge';
 import { ScoreChip } from '@/components/ui/score-chip';
 import { SalaryBand } from '@/components/ui/salary-band';
 import { StatusDot } from '@/components/ui/status-dot';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,24 +23,50 @@ function statusToType(status: string): 'draft' | 'applied' | 'interview' | 'offe
 }
 
 export default async function DashboardPage() {
-  // Redirect to onboarding if not completed
-  try {
-    const dbUrl = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-      .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-    const sql = neon(dbUrl);
-    const session2 = await getServerSession(authOptions);
-    const email = session2?.user?.email ?? '';
-    const rows = await sql`SELECT value FROM settings WHERE key = ${email + ':leadme_onboarding_complete'} LIMIT 1`;
-    if (!rows[0]) redirect('/onboarding');
-  } catch { redirect('/onboarding'); }
+  // Get authenticated user
+  const authUser = await getAuthUserId();
+  if (!authUser) redirect('/auth/signin');
 
-  const session = await getServerSession(authOptions);
-  const userEmail = session?.user?.email ?? '';
+  // Query evaluations and roles for this user
+  const db = getDb();
+  const userEvals = await db
+    .select()
+    .from(evaluations)
+    .where(eq(evaluations.userId, authUser.id));
 
-  const [allApps, pendingJobs] = await Promise.all([
-    getDb().select().from(applications).where(eq(applications.userEmail, userEmail)).orderBy(applications.id),
-    getDb().select().from(jobs).where(and(eq(jobs.status, 'pending'), eq(jobs.userEmail, userEmail))),
-  ]);
+  // Get pending roles (those without evaluations)
+  const allRoleIds = await db.select({ id: roles.id }).from(roles);
+  const evalRoleIds = new Set(userEvals.map((e) => e.roleId));
+  const pendingRoles = allRoleIds.filter((r) => !evalRoleIds.has(r.id));
+
+  // Enrich evaluations with role data and pipeline status
+  const allApps = await Promise.all(
+    userEvals.map(async (eval_) => {
+      const role = await db
+        .select()
+        .from(roles)
+        .where(eq(roles.id, eval_.roleId))
+        .limit(1);
+
+      const pipeline = await db
+        .select()
+        .from(pipelineStatus)
+        .where(and(eq(pipelineStatus.userId, authUser.id), eq(pipelineStatus.roleId, eval_.roleId)))
+        .limit(1);
+
+      return {
+        id: eval_.id,
+        company: role[0]?.companyName ?? 'Unknown',
+        role: role[0]?.roleTitle ?? 'Unknown',
+        scoreNum: eval_.overallScore ? Number(eval_.overallScore) / 20 : null, // Convert 0-100 back to 0-5 for display
+        score: eval_.displayId,
+        status: pipeline[0]?.status ?? 'evaluating',
+        date: eval_.evaluatedAt?.toISOString().split('T')[0] ?? new Date().toISOString().split('T')[0],
+        reportId: eval_.displayId,
+        reportContent: eval_.fullReportMarkdown,
+      };
+    })
+  );
 
   const avgScore = allApps.length > 0
     ? allApps.reduce((s, a) => s + (a.scoreNum ?? 0), 0) / allApps.length
@@ -63,6 +87,9 @@ export default async function DashboardPage() {
     .filter((a) => (a.scoreNum ?? 0) >= 4)
     .sort((a, b) => (b.scoreNum ?? 0) - (a.scoreNum ?? 0))
     .slice(0, 6);
+
+  // Pending jobs are roles without evaluations
+  const pendingJobs = pendingRoles.slice(0, 10);
 
   const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
   const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }).toUpperCase();

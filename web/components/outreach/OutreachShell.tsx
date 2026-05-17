@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 
-interface App { id: number; company: string; role: string; status: string | null; }
+interface App { id: string; company: string; role: string; status: string | null; }
 
 const MSG_TYPES = [
   { id: 'linkedin', label: 'LinkedIn message', limit: '300 chars' },

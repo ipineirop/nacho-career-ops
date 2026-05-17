@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ScoreChip } from '@/components/ui/score-chip';
 
 interface AppCard {
-  id: number;
+  id: string;
   company: string;
   role: string;
   status: string;
@@ -32,11 +32,11 @@ function colFor(status: string): string {
 
 export function KanbanBoard({ applications }: { applications: AppCard[] }) {
   const [cards, setCards] = useState(applications);
-  const [dragId, setDragId] = useState<number | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
   const [overCol, setOverCol] = useState<string | null>(null);
   const dragCard = useRef<AppCard | null>(null);
 
-  async function moveCard(cardId: number, targetColId: string) {
+  async function moveCard(cardId: string, targetColId: string) {
     const col = COLUMNS.find((c) => c.id === targetColId);
     if (!col) return;
     const newStatus = col.targetStatus;

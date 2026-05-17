@@ -1,5 +1,5 @@
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 export type DbType = ReturnType<typeof drizzle<typeof schema>>;
@@ -8,9 +8,10 @@ let _db: DbType | null = null;
 
 export function getDb(): DbType {
   if (_db) return _db;
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL is not set');
-  _db = drizzle(neon(url), { schema });
+  const url = process.env.SUPABASE_POSTGRES_URL || process.env.DATABASE_URL;
+  if (!url) throw new Error('SUPABASE_POSTGRES_URL or DATABASE_URL is not set');
+  const client = postgres(url, { max: 1 });
+  _db = drizzle(client, { schema });
   return _db;
 }
 

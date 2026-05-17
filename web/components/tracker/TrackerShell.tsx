@@ -29,7 +29,7 @@ function stageIndex(status: string): number {
 }
 
 interface AppRow {
-  id: number; date: string; company: string; role: string;
+  id: string; date: string; company: string; role: string;
   score: string; scoreNum: number; status: string;
   hasPdf: boolean; reportId: string | null; notes: string;
 }

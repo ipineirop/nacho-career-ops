@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface Application {
-  id: number;
+  id: string;
   company: string;
   role: string;
   score: string | null;
@@ -115,7 +115,7 @@ export function CVGenerator({ applications }: { applications: Application[] }) {
                 className="w-full appearance-none rounded-lg border border-border bg-background px-3 py-2.5 pr-8 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 value={selectedApp?.id ?? ''}
                 onChange={(e) => {
-                  const app = applications.find((a) => a.id === Number(e.target.value));
+                  const app = applications.find((a) => a.id === e.target.value);
                   setSelectedApp(app ?? null);
                 }}
               >

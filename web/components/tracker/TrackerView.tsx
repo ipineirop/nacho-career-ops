@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { KanbanBoard } from './KanbanBoard';
 
 interface AppRow {
-  id: number;
+  id: string;
   date: string;
   company: string;
   role: string;
