@@ -1,38 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFile, updateFile } from '@/lib/github';
-import { parseApplications, updateApplicationStatus } from '@/lib/parsers';
-import { requireAuth } from '@/lib/require-auth';
-
-const APPLICATIONS_PATH = 'data/applications.md';
+import { getDb, applications } from '@/lib/db';
+import { eq, and } from 'drizzle-orm';
+import { getAuthUser, requireAuth } from '@/lib/require-auth';
 
 export async function GET() {
-  const denied = await requireAuth();
-  if (denied) return denied;
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { content } = await getFile(APPLICATIONS_PATH);
-  const applications = parseApplications(content);
-  return NextResponse.json(applications);
+  const rows = await getDb()
+    .select()
+    .from(applications)
+    .where(eq(applications.userEmail, user.email))
+    .orderBy(applications.id);
+  return NextResponse.json(rows);
 }
 
 export async function PATCH(req: NextRequest) {
-  const denied = await requireAuth();
-  if (denied) return denied;
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { id, status } = await req.json();
-  if (!id || !status) {
-    return NextResponse.json({ error: 'id and status are required' }, { status: 400 });
+  const body = await req.json();
+  const { id, status, notes } = body;
+
+  if (!id || (status === undefined && notes === undefined)) {
+    return NextResponse.json({ error: 'id and status or notes required' }, { status: 400 });
   }
 
-  const { content, sha } = await getFile(APPLICATIONS_PATH);
-  const updated = updateApplicationStatus(content, id, status);
-  await updateFile(
-    APPLICATIONS_PATH,
-    updated,
-    sha,
-    `ui: update application #${id} status → ${status}`,
-  );
+  const updates: Record<string, unknown> = { updatedAt: new Date() };
+  if (status !== undefined) updates.status = status;
+  if (notes !== undefined) updates.notes = notes;
 
-  const applications = parseApplications(updated);
-  const app = applications.find((a) => a.id === id);
-  return NextResponse.json(app ?? { id, status });
+  const [updated] = await getDb()
+    .update(applications)
+    .set(updates)
+    .where(and(eq(applications.id, id), eq(applications.userEmail, user.email)))
+    .returning();
+
+  return NextResponse.json(updated);
+}
+
+export async function POST(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const body = await req.json();
+  const [created] = await getDb()
+    .insert(applications)
+    .values({ ...body, userEmail: user.email })
+    .returning();
+  return NextResponse.json(created, { status: 201 });
 }

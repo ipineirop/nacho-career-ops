@@ -1,29 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFile, listDirectory } from '@/lib/github';
-import { parseReportFilenames } from '@/lib/parsers';
 import { requireAuth } from '@/lib/require-auth';
+import { neon } from '@neondatabase/serverless';
+
+function getDb() {
+  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
+    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
+  return neon(url);
+}
 
 export async function GET(req: NextRequest) {
   const denied = await requireAuth();
   if (denied) return denied;
 
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
+  const id = req.nextUrl.searchParams.get('id');
+  const sql = getDb();
 
   if (id) {
-    // Return raw markdown content for a specific report
-    const files = await listDirectory('reports');
-    const reports = parseReportFilenames(files);
-    const report = reports.find((r) => r.id === id.padStart(3, '0'));
-    if (!report) {
-      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
-    }
-    const { content } = await getFile(report.path);
-    return NextResponse.json({ ...report, content });
+    const paddedId = id.padStart(3, '0');
+    const rows = await sql`
+      SELECT id, date, company, role, score, report_id, report_content
+      FROM applications
+      WHERE report_id = ${paddedId} OR report_id = ${String(parseInt(paddedId))}
+      LIMIT 1
+    `;
+    if (rows.length === 0) return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    const r = rows[0];
+    return NextResponse.json({
+      id: String(r.report_id).padStart(3, '0'),
+      slug: (r.company as string).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      date: r.date,
+      filename: `${String(r.report_id).padStart(3, '0')}-${(r.company as string).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${r.date}.md`,
+      path: '',
+      content: r.report_content ?? '_Report content not available_',
+    });
   }
 
-  // Return list of all reports
-  const files = await listDirectory('reports');
-  const reports = parseReportFilenames(files);
+  // List all reports with content
+  const rows = await sql`
+    SELECT id, date, company, role, score, report_id
+    FROM applications
+    WHERE report_id IS NOT NULL
+    ORDER BY id DESC
+  `;
+
+  const reports = rows.map((r) => ({
+    id: String(r.report_id).padStart(3, '0'),
+    slug: (r.company as string).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    date: r.date as string,
+    filename: `${String(r.report_id).padStart(3, '0')}-report.md`,
+    path: '',
+  }));
+
   return NextResponse.json(reports);
 }

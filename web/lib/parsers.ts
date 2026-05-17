@@ -44,21 +44,29 @@ export function parseApplications(raw: string): Application[] {
   return apps.sort((a, b) => a.id - b.id);
 }
 
-export function updateApplicationStatus(raw: string, id: number, newStatus: string): string {
+export function updateApplicationField(
+  raw: string,
+  id: number,
+  field: 'status' | 'notes',
+  value: string,
+): string {
+  const colIndex = field === 'status' ? 6 : 9;
   return raw
     .split('\n')
     .map((line) => {
       if (!line.trim().startsWith('|')) return line;
       const cells = line.split('|').map((c) => c.trim());
       if (parseInt(cells[1], 10) !== id) return line;
-
-      // Replace status cell (index 6) preserving padding
       const parts = line.split('|');
-      // Find the status cell by counting — same index 6
-      parts[6] = ` ${newStatus} `;
+      parts[colIndex] = ` ${value} `;
       return parts.join('|');
     })
     .join('\n');
+}
+
+// Keep backward compat
+export function updateApplicationStatus(raw: string, id: number, newStatus: string): string {
+  return updateApplicationField(raw, id, 'status', newStatus);
 }
 
 // ---------------------------------------------------------------------------

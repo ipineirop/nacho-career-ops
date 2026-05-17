@@ -1,24 +1,38 @@
-import { listDirectory } from '@/lib/github';
-import { parseReportFilenames } from '@/lib/parsers';
-import { ReportCard } from '@/components/reports/ReportCard';
+import { ReportsGrid } from '@/components/reports/ReportsGrid';
+import { neon } from '@neondatabase/serverless';
 
 export const dynamic = 'force-dynamic';
 
+function getDb() {
+  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
+    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
+  return neon(url);
+}
+
 export default async function ReportsPage() {
-  const files = await listDirectory('reports');
-  const reports = parseReportFilenames(files);
+  const sql = getDb();
+  const rows = await sql`
+    SELECT id, date, company, report_id
+    FROM applications
+    WHERE report_id IS NOT NULL
+    ORDER BY id DESC
+  `;
+
+  const reports = rows.map((r) => ({
+    id: String(r.report_id).padStart(3, '0'),
+    slug: (r.company as string).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    date: r.date as string,
+    filename: `${String(r.report_id).padStart(3, '0')}-report.md`,
+    path: '',
+  }));
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Reports</h1>
-        <span className="text-sm text-muted-foreground">{reports.length} evaluations</span>
+    <div className="p-8 space-y-4 max-w-6xl">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{reports.length} evaluations</p>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {reports.map((report) => (
-          <ReportCard key={report.id} report={report} />
-        ))}
-      </div>
+      <ReportsGrid reports={reports} />
     </div>
   );
 }

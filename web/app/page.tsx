@@ -1,90 +1,440 @@
-import { getFile } from '@/lib/github';
-import { parseApplications, parsePipeline } from '@/lib/parsers';
-import { StatsCard } from '@/components/dashboard/StatsCard';
-import { StatusBreakdown } from '@/components/dashboard/StatusBreakdown';
-import { ScoreHistogram } from '@/components/dashboard/ScoreHistogram';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getDb, applications, jobs } from '@/lib/db';
+import { eq, and } from 'drizzle-orm';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { ScoreChip } from '@/components/ui/score-chip';
+import { SalaryBand } from '@/components/ui/salary-band';
+import { StatusDot } from '@/components/ui/status-dot';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { neon } from '@neondatabase/serverless';
 
 export const dynamic = 'force-dynamic';
 
+function getInitials(s: string) {
+  return s.slice(0, 2).toUpperCase();
+}
+
+function statusToType(status: string): 'draft' | 'applied' | 'interview' | 'offer' | 'passed' {
+  const s = status.toLowerCase();
+  if (s.includes('interview') || s.includes('offer') && !s.includes('verbal')) return 'interview';
+  if (s.includes('offer')) return 'offer';
+  if (s.includes('applied')) return 'applied';
+  if (s.includes('reject') || s.includes('discard') || s.includes('skip') || s.includes('pass')) return 'passed';
+  return 'draft';
+}
+
 export default async function DashboardPage() {
-  const [{ content: appsMd }, { content: pipelineMd }] = await Promise.all([
-    getFile('data/applications.md'),
-    getFile('data/pipeline.md'),
+  // Redirect to onboarding if not completed
+  try {
+    const dbUrl = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
+      .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
+    const sql = neon(dbUrl);
+    const session2 = await getServerSession(authOptions);
+    const email = session2?.user?.email ?? '';
+    const rows = await sql`SELECT value FROM settings WHERE key = ${email + ':leadme_onboarding_complete'} LIMIT 1`;
+    if (!rows[0]) redirect('/onboarding');
+  } catch { redirect('/onboarding'); }
+
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email ?? '';
+
+  const [allApps, pendingJobs] = await Promise.all([
+    getDb().select().from(applications).where(eq(applications.userEmail, userEmail)).orderBy(applications.id),
+    getDb().select().from(jobs).where(and(eq(jobs.status, 'pending'), eq(jobs.userEmail, userEmail))),
   ]);
 
-  const applications = parseApplications(appsMd);
-  const pipeline = parsePipeline(pipelineMd);
+  const avgScore = allApps.length > 0
+    ? allApps.reduce((s, a) => s + (a.scoreNum ?? 0), 0) / allApps.length
+    : 0;
 
-  const pendingPipeline = pipeline.filter((j) => !j.checked);
-  const withPdf = applications.filter((a) => a.hasPdf).length;
-  const avgScore =
-    applications.length > 0
-      ? (applications.reduce((s, a) => s + a.scoreNum, 0) / applications.length).toFixed(1)
-      : '—';
+  const interviews = allApps.filter((a) => statusToType(a.status ?? '') === 'interview');
 
-  const recent = [...applications].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  // Follow-up engine: Applied/Responded with date > 7 days ago
+  const today = new Date();
+  const followups = allApps.filter((a) => {
+    const s = (a.status ?? '').toLowerCase();
+    if (!s.includes('applied') && !s.includes('responded')) return false;
+    const d = new Date(a.date);
+    return !isNaN(d.getTime()) && (today.getTime() - d.getTime()) / 86400000 > 7;
+  });
+
+  const topPicks = [...allApps]
+    .filter((a) => (a.scoreNum ?? 0) >= 4)
+    .sort((a, b) => (b.scoreNum ?? 0) - (a.scoreNum ?? 0))
+    .slice(0, 6);
+
+  const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }).toUpperCase();
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-xl font-semibold">Dashboard</h1>
+    <div style={{ padding: '24px 20px', maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatsCard title="Total evaluated" value={applications.length} />
-        <StatsCard title="PDFs generated" value={withPdf} />
-        <StatsCard title="Avg score" value={avgScore} sub="out of 5" />
-        <StatsCard title="Pipeline backlog" value={pendingPipeline.length} sub="pending evaluation" />
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div style={{
+            fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+            color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase',
+            marginBottom: 6,
+          }}>
+            {dayName} · {dateStr} · CDMX
+          </div>
+          <h1 className="font-editorial" style={{ fontSize: 'clamp(28px, 5vw, 44px)', lineHeight: 1, color: 'var(--lm-ink)', margin: 0 }}>
+            Good morning.
+          </h1>
+        </div>
+        {/* Mode toggle */}
+        <div style={{
+          display: 'inline-flex', border: '1px solid var(--lm-line)',
+          background: 'var(--lm-surface)', padding: 5, borderRadius: 999, gap: 2,
+        }}>
+          {['Need', 'Leverage', 'Open'].map((m, i) => (
+            <div key={m} style={{
+              padding: '4px 12px', borderRadius: 999,
+              fontFamily: 'var(--font-albert-sans)', fontSize: 12, fontWeight: 500,
+              background: i === 1 ? 'var(--lm-ink)' : 'transparent',
+              color: i === 1 ? 'var(--lm-bg)' : 'var(--lm-ink-3)',
+            }}>
+              {m}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">By status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StatusBreakdown applications={applications} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Score distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScoreHistogram applications={applications} />
-          </CardContent>
-        </Card>
+      {/* 4 stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: 12 }}>
+        <StatCard
+          label="TODAY'S BRIEF"
+          value={pendingJobs.length.toString()}
+          sub={`${topPicks.length} strong fit`}
+          subColor="var(--lm-accent)"
+        />
+        <StatCard
+          label="IN PIPELINE"
+          value={allApps.length.toString()}
+          sub={interviews.length > 0 ? `${interviews.length} in interview` : 'tracked'}
+        />
+        <StatCard
+          label="AVG SCORE"
+          value={avgScore > 0 ? (avgScore * 20).toFixed(0) : '—'}
+          sub="out of 100"
+        />
+        <StatCard
+          label="PENDING EVAL"
+          value={pendingJobs.length.toString()}
+          sub="in backlog"
+          highlight={pendingJobs.length > 0}
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Recent evaluations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="divide-y">
-            {recent.map((app) => (
-              <div key={app.id} className="flex items-center justify-between py-2.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{app.company}</p>
-                  <p className="truncate text-xs text-muted-foreground">{app.role}</p>
+      {/* Row: salary intel + today's focus */}
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]" style={{ gap: 12 }}>
+        {/* Salary intel */}
+        <div style={{
+          background: 'var(--lm-accent-soft)',
+          border: '1px solid transparent',
+          borderRadius: 10, padding: '18px 20px',
+          display: 'flex', flexDirection: 'column', gap: 12,
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+            color: 'var(--lm-accent)', letterSpacing: '1.2px', textTransform: 'uppercase',
+          }}>
+            ★ YOUR MARKET THIS WEEK
+          </div>
+          <div style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 17, color: 'var(--lm-ink)' }}>
+            Director of Ops · MX fintech
+          </div>
+          <SalaryBand
+            amount="MXN $1.9–2.4M"
+            label="MEDIAN BAND · BASE"
+            confidence={3}
+            bandStart={30}
+            bandWidth={35}
+            floor="FLOOR $95K"
+          />
+        </div>
+
+        {/* Today's focus */}
+        <div style={{
+          background: 'var(--lm-surface)',
+          border: '1px solid var(--lm-line)',
+          borderRadius: 10, padding: '18px 20px',
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+            color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase',
+            marginBottom: 14,
+          }}>
+            TODAY'S FOCUS
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {pendingJobs.length > 0 && (
+              <FocusItem n={1} text={`Evaluate ${pendingJobs.length} new lead${pendingJobs.length > 1 ? 's' : ''} in the brief`} href="/pipeline" />
+            )}
+            {followups.length > 0 && (
+              <FocusItem n={followups.length > 0 && pendingJobs.length > 0 ? 2 : 1} text={`Follow up with ${followups[0].company}${followups.length > 1 ? ` + ${followups.length - 1} more` : ''}`} href="/outreach" />
+            )}
+            {topPicks.length > 0 && (
+              <FocusItem n={pendingJobs.length > 0 || followups.length > 0 ? 3 : 1} text={`Tailor CV for ${topPicks[0].company}`} href="/cv" />
+            )}
+            {pendingJobs.length === 0 && followups.length === 0 && topPicks.length === 0 && (
+              <FocusItem n={1} text="Scan portals for new leads" href="/pipeline" />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Follow-up engine */}
+      {followups.length > 0 && (
+        <div style={{
+          background: 'var(--lm-signal-soft)',
+          border: '1px solid var(--lm-signal)',
+          borderRadius: 10, padding: '14px 18px',
+          display: 'flex', flexDirection: 'column', gap: 10,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+              color: 'var(--lm-signal)', letterSpacing: '1.2px', textTransform: 'uppercase',
+            }}>
+              ⚡ {followups.length} FOLLOW-UP{followups.length > 1 ? 'S' : ''} DUE
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {followups.map((app) => {
+              const days = Math.floor((today.getTime() - new Date(app.date).getTime()) / 86400000);
+              return (
+                <div key={app.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  background: 'var(--lm-surface)', borderRadius: 8, padding: '10px 14px',
+                }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 13.5, color: 'var(--lm-ink)' }}>
+                      {app.company}
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5, color: 'var(--lm-ink-3)', marginLeft: 8 }}>
+                      {app.role}
+                    </span>
+                  </div>
+                  <span style={{
+                    fontFamily: 'var(--font-geist-mono)', fontSize: 11,
+                    color: days > 14 ? 'var(--lm-signal)' : 'var(--lm-ink-3)',
+                    fontWeight: days > 14 ? 600 : 400,
+                  }}>
+                    {days}d ago
+                  </span>
+                  <Link
+                    href={`/outreach`}
+                    style={{
+                      padding: '4px 12px', borderRadius: 999,
+                      background: 'var(--lm-signal)', color: 'white',
+                      fontFamily: 'var(--font-albert-sans)', fontSize: 12, fontWeight: 500,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Follow up →
+                  </Link>
                 </div>
-                <div className="ml-4 flex items-center gap-3 shrink-0">
-                  <span className="text-sm font-semibold">{app.score}</span>
-                  {app.reportId && (
-                    <Link
-                      href={`/reports/${app.reportId}`}
-                      className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-                    >
-                      Report
-                    </Link>
-                  )}
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Territory map */}
+      {topPicks.length > 0 && (
+        <div style={{
+          background: 'var(--lm-canvas)',
+          border: '1px solid var(--lm-line)',
+          borderRadius: 10, padding: '14px 16px',
+          position: 'relative', minHeight: 320,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{
+              fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+              color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase',
+            }}>
+              YOUR TERRITORY
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {['close = better fit', 'size = score'].map((l) => (
+                <span key={l} style={{
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '3px 11px', borderRadius: 999,
+                  border: '1px solid var(--lm-line)',
+                  background: 'var(--lm-surface)',
+                  fontFamily: 'var(--font-albert-sans)', fontSize: 12,
+                  color: 'var(--lm-ink-3)',
+                }}>
+                  {l}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <TerritoryMap picks={topPicks} />
+        </div>
+      )}
+
+      {/* Recent evaluations table */}
+      {allApps.length > 0 && (
+        <div style={{
+          background: 'var(--lm-surface)',
+          border: '1px solid var(--lm-line)',
+          borderRadius: 10, overflow: 'hidden',
+        }}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--lm-line)' }}>
+            <span style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 17, color: 'var(--lm-ink)' }}>
+              Recent evaluations
+            </span>
+          </div>
+          {[...allApps].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map((app) => (
+            <div key={app.id} style={{
+              display: 'flex', alignItems: 'center', gap: 16,
+              padding: '10px 20px',
+              borderBottom: '1px dashed var(--lm-line)',
+            }}>
+              <StatusDot status={statusToType(app.status ?? '')} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, color: 'var(--lm-ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {app.company}
+                </div>
+                <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {app.role}
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 11, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {app.date}
+              </div>
+              {app.scoreNum != null && app.scoreNum > 0 && (
+                <ScoreChip score={Math.round((app.scoreNum ?? 0) * 20)} size="sm"
+                  variant={(app.scoreNum ?? 0) >= 4 ? 'default' : (app.scoreNum ?? 0) >= 2.5 ? 'muted' : 'muted'} />
+              )}
+              {app.reportId && (
+                <Link href={`/reports/${app.reportId}`}
+                  style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-accent)', textDecoration: 'none' }}>
+                  Report →
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub, subColor, highlight }: {
+  label: string; value: string; sub?: string; subColor?: string; highlight?: boolean;
+}) {
+  return (
+    <div style={{
+      background: highlight ? 'var(--lm-signal-soft)' : 'var(--lm-surface)',
+      border: `1px solid ${highlight ? 'var(--lm-signal)' : 'var(--lm-line)'}`,
+      borderRadius: 10, padding: '18px 20px',
+    }}>
+      <div style={{
+        fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+        color: highlight ? 'var(--lm-signal)' : 'var(--lm-ink-3)',
+        letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: 8,
+      }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 32, fontWeight: 700, color: 'var(--lm-ink)', lineHeight: 1 }}>
+        {value}
+      </div>
+      {sub && (
+        <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: subColor ?? 'var(--lm-ink-2)', marginTop: 6 }}>
+          {sub}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FocusItem({ n, text, href }: { n: number; text: string; href: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: 22, height: 22, borderRadius: 999, flexShrink: 0,
+        background: 'var(--lm-ink)', color: 'var(--lm-bg)',
+        fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
+      }}>
+        {n}
+      </span>
+      <span style={{ flex: 1, fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: 'var(--lm-ink)' }}>
+        {text}
+      </span>
+      <Link href={href} style={{
+        padding: '5px 12px', borderRadius: 999,
+        border: '1px solid var(--lm-line)', background: 'var(--lm-surface)',
+        fontFamily: 'var(--font-albert-sans)', fontSize: 12, fontWeight: 500,
+        color: 'var(--lm-ink)', textDecoration: 'none',
+      }}>
+        Open
+      </Link>
+    </div>
+  );
+}
+
+function TerritoryMap({ picks }: { picks: Array<{ company: string; scoreNum: number | null }> }) {
+  // Position nodes radially, close = higher score
+  const cx = 50, cy = 50;
+  const nodes = picks.slice(0, 7).map((p, i) => {
+    const score = (p.scoreNum ?? 0) * 20;
+    const dist = score >= 85 ? 18 : score >= 75 ? 28 : 36;
+    const angle = (i * (360 / Math.max(picks.length, 6))) * (Math.PI / 180);
+    const x = cx + dist * Math.cos(angle - Math.PI / 2);
+    const y = cy + dist * Math.sin(angle - Math.PI / 2);
+    const r = score >= 85 ? 32 : score >= 70 ? 26 : 22;
+    const strong = score >= 85;
+    return { ...p, x, y, r, strong, score };
+  });
+
+  return (
+    <div style={{ position: 'relative', height: 280 }}>
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        <circle cx="50%" cy="50%" r="80" fill="none" stroke="var(--lm-line)" strokeDasharray="3 5" />
+        <circle cx="50%" cy="50%" r="130" fill="none" stroke="var(--lm-line)" strokeDasharray="3 5" />
+        <circle cx="50%" cy="50%" r="180" fill="none" stroke="var(--lm-line)" strokeDasharray="3 5" />
+      </svg>
+      {/* You node */}
+      <div style={{
+        position: 'absolute',
+        left: `calc(50% - 32px)`, top: `calc(50% - 32px)`,
+        width: 64, height: 64, borderRadius: '50%',
+        background: 'var(--lm-ink)', color: 'var(--lm-bg)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 13,
+        border: '2px solid var(--lm-ink)',
+        zIndex: 2,
+      }}>
+        you
+      </div>
+      {nodes.map((n, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          left: `calc(${n.x}% - ${n.r}px)`,
+          top: `calc(${n.y}% - ${n.r}px)`,
+          width: n.r * 2, height: n.r * 2,
+          borderRadius: '50%',
+          background: n.strong ? 'var(--lm-accent)' : 'var(--lm-surface)',
+          color: n.strong ? 'var(--lm-accent-on)' : 'var(--lm-ink)',
+          border: `1px solid ${n.strong ? 'var(--lm-accent)' : 'var(--lm-line)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column',
+          fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 11, lineHeight: 1,
+          zIndex: 1,
+        }}>
+          <span>{n.company.slice(0, 6)}</span>
+          <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 9, opacity: 0.85, marginTop: 2 }}>
+            {n.score}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
