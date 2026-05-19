@@ -1,11 +1,17 @@
 'use client';
 
-import { signIn, getProviders } from 'next-auth/react';
+import { signIn, getProviders, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function SignInPage() {
+  const searchParams = useSearchParams();
+  const invitationCode = searchParams.get('code');
+  const { data: session } = useSession();
+
   const [hasLinkedIn, setHasLinkedIn] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [claimingCode, setClaimingCode] = useState(false);
 
   // Email OTP state
   const [email, setEmail] = useState('');
@@ -22,6 +28,50 @@ export default function SignInPage() {
       setLoaded(true);
     });
   }, []);
+
+  // Store invitation code in localStorage before OAuth
+  useEffect(() => {
+    if (invitationCode && typeof window !== 'undefined') {
+      localStorage.setItem('pendingInvitationCode', invitationCode);
+    }
+  }, [invitationCode]);
+
+  // If user is signed in and has an invitation code (from URL or localStorage), claim it
+  useEffect(() => {
+    if (!session || claimingCode) return;
+
+    const codeToUse = invitationCode || localStorage.getItem('pendingInvitationCode');
+    if (!codeToUse) {
+      // No code, just redirect home
+      window.location.href = '/';
+      return;
+    }
+
+    setClaimingCode(true);
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/claim-invitation', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: codeToUse }),
+        });
+        if (res.ok) {
+          localStorage.removeItem('pendingInvitationCode');
+          // Code claimed successfully, redirect home
+          window.location.href = '/';
+        } else {
+          // Even if claim fails, redirect home (user is authenticated)
+          localStorage.removeItem('pendingInvitationCode');
+          window.location.href = '/';
+        }
+      } catch (err) {
+        // Network error, still redirect home
+        localStorage.removeItem('pendingInvitationCode');
+        window.location.href = '/';
+      }
+    })();
+  }, [session, invitationCode, claimingCode]);
 
   async function sendCode() {
     setError('');
@@ -82,22 +132,35 @@ export default function SignInPage() {
             </p>
           </div>
 
+          {/* Invitation context */}
+          {invitationCode && (
+            <div style={{ padding: '12px 14px', borderRadius: 8, background: 'var(--lm-accent-soft, #e8f7f9)', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-accent, #0d7c89)' }}>
+              ✓ Signing up with invitation code <strong>{invitationCode.slice(0, 4)}***</strong>
+            </div>
+          )}
+
           {/* LinkedIn */}
           {(hasLinkedIn || !loaded) && (
             <button
               onClick={() => signIn('linkedin', { callbackUrl: '/' })}
-              disabled={!loaded}
+              disabled={!loaded || !!(claimingCode && session)}
               style={{
                 width: '100%', padding: '11px 22px', borderRadius: 999, background: '#0077b5',
                 color: '#ffffff', border: 'none', fontFamily: 'var(--font-albert-sans, system-ui), sans-serif',
-                fontWeight: 600, fontSize: 14, cursor: !loaded ? 'default' : 'pointer',
-                opacity: !loaded ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                fontWeight: 600, fontSize: 14, cursor: !loaded || (claimingCode && session) ? 'default' : 'pointer',
+                opacity: !loaded || (claimingCode && session) ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              Continue with LinkedIn
+              {claimingCode && session ? (
+                <>⏳ Claiming invitation…</>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  Continue with LinkedIn
+                </>
+              )}
             </button>
           )}
 

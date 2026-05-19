@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
+import { getDb, signinCodes } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
-function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
-}
 
 async function sendEmail(to: string, code: string): Promise<boolean> {
   const resendKey = process.env.RESEND_API_KEY;
@@ -39,19 +35,29 @@ export async function POST(req: NextRequest) {
 
   const normalized = email.toLowerCase().trim();
   const code = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit
-  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 min
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
-  const sql = getDb();
-  const key = `${normalized}:signin_code`;
-  await sql`
-    INSERT INTO settings (key, value, updated_at) VALUES (${key}, ${JSON.stringify({ code, expiresAt })}, NOW())
-    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-  `;
+  try {
+    const db = getDb();
 
-  const sent = await sendEmail(normalized, code);
-  if (!sent) return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    // Delete any existing code for this email
+    await db.delete(signinCodes).where(eq(signinCodes.email, normalized));
 
-  // In dev (no RESEND_API_KEY), return code so it can be shown in UI
-  const devMode = !process.env.RESEND_API_KEY;
-  return NextResponse.json({ ok: true, ...(devMode ? { devCode: code } : {}) });
+    // Insert new code
+    await db.insert(signinCodes).values({
+      email: normalized,
+      code,
+      expiresAt,
+    });
+
+    const sent = await sendEmail(normalized, code);
+    if (!sent) return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+
+    // In dev (no RESEND_API_KEY), return code so it can be shown in UI
+    const devMode = !process.env.RESEND_API_KEY;
+    return NextResponse.json({ ok: true, ...(devMode ? { devCode: code } : {}) });
+  } catch (err) {
+    console.error('Error sending signin code:', err);
+    return NextResponse.json({ error: 'Failed to send code' }, { status: 500 });
+  }
 }

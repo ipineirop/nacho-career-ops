@@ -1,12 +1,7 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { neon } from '@neondatabase/serverless';
-
-function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
-}
+import { getDb, users, signinCodes } from './db';
+import { eq } from 'drizzle-orm';
 
 const providers = [];
 
@@ -46,19 +41,30 @@ providers.push(
     async authorize(credentials) {
       if (!credentials?.email || !credentials?.code) return null;
       const email = credentials.email.toLowerCase().trim();
-      const key = `${email}:signin_code`;
       try {
-        const sql = getDb();
-        const rows = await sql`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
-        if (!(rows[0] as { value?: string } | undefined)?.value) return null;
-        const { code, expiresAt } = JSON.parse((rows[0] as { value: string }).value);
-        if (Date.now() > expiresAt) {
-          await sql`DELETE FROM settings WHERE key = ${key}`;
+        const db = getDb();
+
+        // Find the signin code
+        const rows = await db
+          .select()
+          .from(signinCodes)
+          .where(eq(signinCodes.email, email))
+          .limit(1);
+
+        if (!rows.length) return null;
+
+        const record = rows[0];
+        if (Date.now() > record.expiresAt.getTime()) {
+          // Code expired, delete it
+          await db.delete(signinCodes).where(eq(signinCodes.email, email));
           return null;
         }
-        if (String(code) !== String(credentials.code).trim()) return null;
-        // Consume code
-        await sql`DELETE FROM settings WHERE key = ${key}`;
+
+        if (String(record.code) !== String(credentials.code).trim()) return null;
+
+        // Code matches, delete it (consume the code)
+        await db.delete(signinCodes).where(eq(signinCodes.email, email));
+
         return { id: email, email, name: email.split('@')[0] };
       } catch { return null; }
     },
@@ -70,6 +76,32 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
   callbacks: {
     async signIn({ user, account }) {
+      if (!user?.email) return false;
+
+      try {
+        const db = getDb();
+
+        // Check if user exists
+        const existing = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.email, user.email))
+          .limit(1);
+
+        // If user doesn't exist, create them
+        if (existing.length === 0) {
+          await db
+            .insert(users)
+            .values({
+              email: user.email,
+              nameFull: user.name || user.email.split('@')[0],
+            });
+        }
+      } catch (err) {
+        console.error('Error in signIn callback:', err);
+        // Continue anyway - user can sign in even if DB write fails
+      }
+
       // LinkedIn: allow any user with email
       if (account?.provider === 'linkedin') return !!(user?.email || user?.name);
       // Email OTP: authorize() already validated — if we got here, it's valid

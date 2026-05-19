@@ -41,71 +41,54 @@ function blockLabel(heading: string): string {
 }
 
 interface Props {
-  stream: ReadableStream<Uint8Array> | null;
+  text: string;
   onComplete?: (text: string) => void;
+  isDone?: boolean;
 }
 
-export function StreamingOutput({ stream, onComplete }: Props) {
-  const [fullText, setFullText] = useState('');
+export function StreamingOutput({ text, onComplete, isDone }: Props) {
   const [completedBlocks, setCompletedBlocks] = useState<Block[]>([]);
   const [currentBlock, setCurrentBlock] = useState('');
-  const [done, setDone] = useState(false);
+  const prevTextRef = useRef('');
 
   useEffect(() => {
-    if (!stream) return;
-    setFullText('');
-    setCompletedBlocks([]);
-    setCurrentBlock('');
-    setDone(false);
-
-    let accumulated = '';
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
-
-    async function read() {
-      while (true) {
-        const { done: streamDone, value } = await reader.read();
-        if (streamDone) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        accumulated += chunk;
-
-        // Split on ## headings to find complete blocks
-        const blockSplit = accumulated.split(/(?=\n## |\n# )/);
-
-        // All but the last segment are "complete" blocks
-        const complete = blockSplit.slice(0, -1);
-        const inProgress = blockSplit[blockSplit.length - 1] ?? '';
-
-        if (complete.length > 0) {
-          setCompletedBlocks(
-            complete
-              .filter((p) => p.trim())
-              .map((part) => {
-                const lines = part.split('\n');
-                const heading = lines[0].replace(/^#+\s*/, '').trim();
-                return { heading, content: part.trim(), done: true };
-              }),
-          );
-        }
-
-        setCurrentBlock(inProgress);
-        setFullText(accumulated);
-      }
-
-      // On stream end, move everything to completed
-      const allBlocks = parseBlocks(accumulated);
-      setCompletedBlocks(allBlocks);
+    if (!text) {
+      setCompletedBlocks([]);
       setCurrentBlock('');
-      setDone(true);
-      onComplete?.(accumulated);
+      prevTextRef.current = '';
+      return;
     }
 
-    read().catch(console.error);
-    return () => { reader.cancel(); };
-  }, [stream, onComplete]);
+    // Split on ## headings to find complete blocks
+    const blockSplit = text.split(/(?=\n## |\n# )/);
 
-  if (!stream && !fullText) return null;
+    // All but the last segment are "complete" blocks
+    const complete = blockSplit.slice(0, -1);
+    const inProgress = blockSplit[blockSplit.length - 1] ?? '';
+
+    if (complete.length > 0) {
+      setCompletedBlocks(
+        complete
+          .filter((p) => p.trim())
+          .map((part) => {
+            const lines = part.split('\n');
+            const heading = lines[0].replace(/^#+\s*/, '').trim();
+            return { heading, content: part.trim(), done: true };
+          }),
+      );
+    }
+
+    setCurrentBlock(inProgress);
+    prevTextRef.current = text;
+  }, [text]);
+
+  useEffect(() => {
+    if (isDone && text) {
+      onComplete?.(text);
+    }
+  }, [isDone, text, onComplete]);
+
+  if (!text) return null;
 
   const totalBlocks = 9; // A-G + Score + Post-eval
   const progress = Math.min((completedBlocks.length / totalBlocks) * 100, 95);
@@ -113,7 +96,7 @@ export function StreamingOutput({ stream, onComplete }: Props) {
   return (
     <div className="space-y-4">
       {/* Progress bar */}
-      {!done && (
+      {!isDone && (
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur py-3 border-b border-border/40">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -161,7 +144,7 @@ export function StreamingOutput({ stream, onComplete }: Props) {
         </div>
       ))}
 
-      {/* In-progress block — plain text only to avoid markdown parse overhead during stream */}
+      {/* In-progress block */}
       {currentBlock && (
         <div className="rounded-xl border border-primary/30 bg-card shadow-sm overflow-hidden">
           <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/5 px-4 py-2.5">
@@ -175,13 +158,12 @@ export function StreamingOutput({ stream, onComplete }: Props) {
         </div>
       )}
 
-      {done && (
+      {isDone && (
         <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
           <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
           <span className="text-sm font-semibold text-emerald-800">Evaluation complete</span>
         </div>
       )}
-
     </div>
   );
 }

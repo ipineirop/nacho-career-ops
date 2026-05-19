@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getDb, roles, evaluations, evaluationDimensions, evaluationGaps, evaluationProofPoints, companies, NewRole, NewEvaluation } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 interface EvaluationInput {
   jd: string;
@@ -38,6 +38,23 @@ const anthropic = new Anthropic({
 
 export async function evaluateRole(input: EvaluationInput): Promise<EvaluationResult> {
   const db = getDb();
+
+  // Step 0: Check for duplicate evaluation if sourceRef provided
+  if (input.url) {
+    const sourceRef = input.url;
+    const existingEval = await db
+      .select({ id: evaluations.id, roleId: evaluations.roleId })
+      .from(evaluations)
+      .innerJoin(roles, eq(evaluations.roleId, roles.id))
+      .where(and(eq(evaluations.userId, input.userId), eq(roles.sourceRef, sourceRef)))
+      .limit(1);
+
+    if (existingEval.length > 0) {
+      throw new Error(
+        `This role has already been evaluated. Role ID: ${existingEval[0].roleId}`
+      );
+    }
+  }
 
   // Step 1: Extract role info from JD using Claude
   const extractionPrompt = `Extract the job role information from this job description or recruiter message:

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StreamingOutput } from '@/components/ai/StreamingOutput';
 import { FitBars } from '@/components/ui/fit-bars';
 import { SalaryBand } from '@/components/ui/salary-band';
@@ -14,12 +14,47 @@ export default function EvaluatePage() {
   const [stream, setStream] = useState<ReadableStream<Uint8Array> | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [streamText, setStreamText] = useState('');
+
+  useEffect(() => {
+    if (!stream) {
+      return;
+    }
+
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+
+    async function read() {
+      try {
+        while (true) {
+          const { done: isDone, value } = await reader.read();
+          if (isDone) {
+            setDone(true);
+            break;
+          }
+
+          const chunk = decoder.decode(value, { stream: true });
+          accumulated += chunk;
+          setStreamText(accumulated);
+        }
+      } catch (err) {
+        console.error('Stream read error:', err);
+      }
+    }
+
+    void read();
+    return () => {
+      reader.cancel().catch(() => {});
+    };
+  }, [stream]);
 
   async function handleRun() {
     if (!jd.trim() || loading) return;
     setLoading(true);
     setDone(false);
     setStream(null);
+    setStreamText('');
     try {
       const res = await fetch('/api/ai/evaluate', {
         method: 'POST',
@@ -27,7 +62,8 @@ export default function EvaluatePage() {
         body: JSON.stringify({ jd }),
       });
       if (!res.ok) throw new Error(await res.text());
-      if (!res.body) throw new Error('No stream');
+      if (!res.body) throw new Error('No response body');
+
       setStream(res.body);
     } catch (err) {
       console.error(err);
@@ -40,6 +76,7 @@ export default function EvaluatePage() {
   function handleClear() {
     setJd('');
     setStream(null);
+    setStreamText('');
     setDone(false);
   }
 
@@ -139,7 +176,7 @@ export default function EvaluatePage() {
       )}
 
       {/* Streaming output */}
-      {stream && (
+      {(stream || streamText) && (
         <div style={{
           background: 'var(--lm-surface)',
           border: '1px solid var(--lm-line)',
@@ -153,7 +190,7 @@ export default function EvaluatePage() {
           }}>
             EVALUATION IN PROGRESS
           </div>
-          <StreamingOutput stream={stream} onComplete={() => setDone(true)} />
+          <StreamingOutput text={streamText} isDone={done} onComplete={() => setDone(true)} />
           {done && (
             <div style={{ display: 'flex', gap: 8, paddingTop: 16, borderTop: '1px solid var(--lm-line)' }}>
               <a

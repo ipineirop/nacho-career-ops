@@ -10,7 +10,7 @@ import {
 // users — extends auth.users (Supabase Auth)
 // PK references auth.users(id), populated by trigger on signup
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey(), // FK to auth.users(id), ON DELETE CASCADE
+  id: uuid('id').defaultRandom().primaryKey(), // FK to auth.users(id), ON DELETE CASCADE
   email: text('email').notNull().unique(),
   nameFull: text('name_full'),
   namePreferred: text('name_preferred'),
@@ -425,6 +425,26 @@ export const documents = pgTable('documents', {
 }));
 
 // ============================================================
+// INVITATIONS — test user access codes
+// ============================================================
+
+export const invitations = pgTable('invitations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: text('code').notNull().unique(), // e.g., "TEST-ABC123-XYZ789"
+  createdBy: uuid('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  claimedBy: uuid('claimed_by').references(() => users.id, { onDelete: 'set null' }),
+  expiresAt: timestamp('expires_at').notNull(),
+  claimedAt: timestamp('claimed_at'),
+  status: text('status').notNull().default('active'), // active|claimed|expired|revoked
+  notes: text('notes'), // optional: who this code is for
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => ({
+  codeIdx: index('invitations_code_idx').on(t.code),
+  createdByIdx: index('invitations_created_by_idx').on(t.createdBy),
+  claimedByIdx: index('invitations_claimed_by_idx').on(t.claimedBy),
+}));
+
+// ============================================================
 // OAUTH TOKENS — for Gmail / Calendar / etc. refresh tokens
 // ============================================================
 
@@ -440,6 +460,18 @@ export const oauthTokens = pgTable('oauth_tokens', {
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({
   userProviderUniq: unique('oauth_user_provider_uniq').on(t.userId, t.provider),
+}));
+
+// signin_codes — temporary OTP codes for email authentication
+export const signinCodes = pgTable('signin_codes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull(),
+  code: text('code').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (t) => ({
+  emailUniq: unique('signin_codes_email_uniq').on(t.email),
+  emailIdx: index('signin_codes_email_idx').on(t.email),
 }));
 
 // ============================================================
@@ -497,6 +529,9 @@ export type NewPipelineStatus = typeof pipelineStatus.$inferInsert;
 export type Interaction = typeof interactions.$inferSelect;
 export type NewInteraction = typeof interactions.$inferInsert;
 
+export type Invitation = typeof invitations.$inferSelect;
+export type NewInvitation = typeof invitations.$inferInsert;
+
 export type Outcome = typeof outcomes.$inferSelect;
 export type NewOutcome = typeof outcomes.$inferInsert;
 
@@ -511,3 +546,6 @@ export type NewDocument = typeof documents.$inferInsert;
 
 export type OauthToken = typeof oauthTokens.$inferSelect;
 export type NewOauthToken = typeof oauthTokens.$inferInsert;
+
+export type SigninCode = typeof signinCodes.$inferSelect;
+export type NewSigninCode = typeof signinCodes.$inferInsert;

@@ -1,48 +1,61 @@
 import { NextRequest } from 'next/server';
-import { getAuthUser } from '@/lib/require-auth';
-import { loadPromptFiles, loadModeFile, streamClaude } from '@/lib/ai/stream';
+import { getAuthUserId } from '@/lib/auth-bridge';
+import { draftOutreach } from '@/lib/ai/outreach-engine';
+import { UnauthorizedError, ValidationError, handleApiError } from '@/lib/api/errors';
+import { logger } from '@/lib/api/logger';
+import { z } from 'zod';
+
+const draftOutreachSchema = z.object({
+  roleId: z.string().uuid('Invalid role ID'),
+  tone: z.enum(['warm', 'cool', 'decline']),
+});
+
+type DraftOutreachInput = z.infer<typeof draftOutreachSchema>;
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return new Response('Unauthorized', { status: 401 });
+  try {
+    const authUser = await getAuthUserId();
+    if (!authUser) {
+      throw new UnauthorizedError();
+    }
 
-  const { company, role, contactType, jd } = await req.json();
-  if (!company?.trim()) return new Response('Company required', { status: 400 });
+    const body = await req.json();
+    const input = draftOutreachSchema.parse(body);
 
-  const [{ shared, profile, cv }, contacto] = await Promise.all([
-    loadPromptFiles(user.email),
-    Promise.resolve(loadModeFile('contacto')),
-  ]);
+    logger.info('Outreach draft requested', {
+      userId: authUser.id,
+      roleId: input.roleId,
+      tone: input.tone,
+    });
 
-  const system = `# IMPORTANT — API CONTEXT
-You are running via the Anthropic API. You have NO tools. Do NOT output tool calls. All source files are pre-loaded below.
+    const result = await draftOutreach({
+      roleId: input.roleId,
+      userId: authUser.id,
+      tone: input.tone,
+    });
 
----
+    logger.info('Outreach draft completed', {
+      userId: authUser.id,
+      roleId: input.roleId,
+    });
 
-# System Context
-${shared}
-
----
-
-# User Profile
-${profile}
-
----
-
-# Candidate CV
-${cv}
-
----
-
-# Outreach Protocol
-${contacto}`;
-
-  const userMessage = `Draft outreach for:\nCompany: ${company}\nRole: ${role ?? 'unknown'}\nContact type: ${contactType ?? 'Hiring Manager'}${jd ? `\n\nJob Description:\n${jd}` : ''}`;
-
-  return new Response(streamClaude(system, userMessage), {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
-  });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: result,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.error('Outreach draft failed', error, { userId: (await getAuthUserId())?.id });
+    }
+    return handleApiError(error);
+  }
 }
