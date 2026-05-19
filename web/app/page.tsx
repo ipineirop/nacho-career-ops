@@ -155,40 +155,12 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Row: salary intel + today's focus */}
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]" style={{ gap: 12 }}>
-        {/* Salary intel */}
-        <div style={{
-          background: 'var(--lm-accent-soft)',
-          border: '1px solid transparent',
-          borderRadius: 10, padding: '18px 20px',
-          display: 'flex', flexDirection: 'column', gap: 12,
-        }}>
-          <div style={{
-            fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
-            color: 'var(--lm-accent)', letterSpacing: '1.2px', textTransform: 'uppercase',
-          }}>
-            ★ YOUR MARKET THIS WEEK
-          </div>
-          <div style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 17, color: 'var(--lm-ink)' }}>
-            Director of Ops · MX fintech
-          </div>
-          <SalaryBand
-            amount="MXN $1.9–2.4M"
-            label="MEDIAN BAND · BASE"
-            confidence={3}
-            bandStart={30}
-            bandWidth={35}
-            floor="FLOOR $95K"
-          />
-        </div>
-
-        {/* Today's focus */}
-        <div style={{
-          background: 'var(--lm-surface)',
-          border: '1px solid var(--lm-line)',
-          borderRadius: 10, padding: '18px 20px',
-        }}>
+      {/* Today's focus */}
+      <div style={{
+        background: 'var(--lm-surface)',
+        border: '1px solid var(--lm-line)',
+        borderRadius: 10, padding: '18px 20px',
+      }}>
           <div style={{
             fontFamily: 'var(--font-geist-mono)', fontSize: 10.5,
             color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase',
@@ -211,7 +183,6 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-      </div>
 
       {/* Follow-up engine */}
       {followups.length > 0 && (
