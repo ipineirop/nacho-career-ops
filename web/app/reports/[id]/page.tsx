@@ -1,35 +1,46 @@
 import { ReportViewer } from '@/components/reports/ReportViewer';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { notFound } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
+import { notFound, redirect } from 'next/navigation';
+import { getDb, evaluations, roles } from '@/lib/db';
+import { eq, and } from 'drizzle-orm';
+import { getAuthUserId } from '@/lib/auth-bridge';
 
 export const dynamic = 'force-dynamic';
 
-function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
-}
-
 export default async function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const authUser = await getAuthUserId();
+  if (!authUser) redirect('/auth/signin');
+
   const { id } = await params;
   const paddedId = id.padStart(3, '0');
-  const numericId = String(parseInt(id, 10));
 
-  const sql = getDb();
-  const rows = await sql`
-    SELECT id, date, company, role, score, report_id, report_content
-    FROM applications
-    WHERE report_id = ${paddedId} OR report_id = ${numericId}
-    ORDER BY id ASC
-    LIMIT 1
-  `;
+  const db = getDb();
+  const evalRecord = await db
+    .select()
+    .from(evaluations)
+    .where(
+      and(
+        eq(evaluations.displayId, paddedId),
+        eq(evaluations.userId, authUser.id)
+      )
+    )
+    .limit(1);
 
-  if (rows.length === 0) notFound();
+  if (evalRecord.length === 0) notFound();
 
-  const r = rows[0];
-  const content = (r.report_content as string) ?? '_Report content not available. Please re-evaluate this role._';
+  const evaluation = evalRecord[0];
+  const roleData = await db
+    .select()
+    .from(roles)
+    .where(eq(roles.id, evaluation.roleId))
+    .limit(1);
+
+  const role = roleData[0];
+  const content = evaluation.fullReportMarkdown ?? '_Report content not available. Please re-evaluate this role._';
+
+  const scoreNum = evaluation.overallScore ? Number(evaluation.overallScore) / 20 : null;
+  const dateStr = evaluation.evaluatedAt?.toISOString().split('T')[0] ?? '';
 
   return (
     <div className="p-8 max-w-4xl">
@@ -39,9 +50,9 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
 
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{r.company as string}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{role?.companyName || 'Unknown'}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {r.date as string} · #{paddedId} · {r.score as string}
+            {dateStr} · #{paddedId} · {scoreNum !== null ? Math.round(scoreNum * 20) : '—'}
           </p>
         </div>
       </div>
