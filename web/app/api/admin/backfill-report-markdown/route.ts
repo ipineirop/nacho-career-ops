@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     if (!role) continue;
 
     // Generate report markdown from existing data
-    const score = eval_.overallScore ? Math.round(eval_.overallScore) : 0;
+    const score = eval_.overallScore ? Math.round(Number(eval_.overallScore)) : 0;
     const reportMarkdown = `# ${role.companyName} · ${role.roleTitle}
 
 **Date:** ${eval_.evaluatedAt?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]}
