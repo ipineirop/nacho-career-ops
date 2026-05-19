@@ -22,7 +22,7 @@ const batchEvaluateSchema = z.object({
 type BatchEvaluateInput = z.infer<typeof batchEvaluateSchema>;
 
 export const runtime = 'nodejs';
-export const maxDuration = 600; // 10 minutes for batch
+export const maxDuration = 300; // 5 minutes max for hobby plan
 
 export async function POST(req: NextRequest) {
   try {
