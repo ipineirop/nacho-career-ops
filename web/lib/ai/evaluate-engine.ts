@@ -276,15 +276,47 @@ Return a JSON array with 5-8 proof points.`;
     proofPointsData = [];
   }
 
-  // Step 7: Store evaluation and related data
+  // Step 7: Generate full report markdown
+  const reportMarkdown = `# ${company_name} · ${role_title}
+
+**Date:** ${new Date().toISOString().split('T')[0]}
+
+## Overall Score: ${Math.round(overallScore * 20)}/100
+
+**Recommendation:** ${scoringData.recommendation.toUpperCase()}
+
+${scoringData.summary}
+
+## Dimension Scores
+
+${scoringData.dimensions.map((d: any) => `### ${d.name}: ${d.grade} (${d.score}/100)
+${d.reasoning}`).join('\n\n')}
+
+## Red Flags & Concerns
+
+${scoringData.red_flags && scoringData.red_flags.length > 0 ? scoringData.red_flags.map((flag: any) => `- **${flag.flag || flag.description}** (${flag.severity})
+  - Mitigation: ${flag.mitigation}`).join('\n') : 'None identified'}
+`;
+
+  // Step 8: Assign displayId (sequential report number)
+  const userEvals = await db
+    .select()
+    .from(evaluations)
+    .where(eq(evaluations.userId, input.userId));
+  const nextNum = userEvals.length + 1;
+  const displayId = String(nextNum).padStart(3, '0');
+
+  // Step 9: Store evaluation and related data
   const evaluationValues: any = {
     userId: input.userId,
     roleId,
     overallScore: Math.round(overallScore * 20), // Convert to 0-100
     recommendation: scoringData.recommendation,
     verdictSummary: scoringData.summary,
+    fullReportMarkdown: reportMarkdown,
     modelUsed: 'claude-sonnet-4-6',
     promptVersion: '1.0',
+    displayId,
   };
 
   if (scoringData.dimensions[0]) evaluationValues.cvMatchScore = scoringData.dimensions[0].score;
