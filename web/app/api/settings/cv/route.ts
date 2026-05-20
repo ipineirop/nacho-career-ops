@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/require-auth';
+import { getAuthUserId } from '@/lib/auth-bridge';
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic();
@@ -21,17 +21,31 @@ After the markdown CV, output a JSON block in this exact format (on its own line
   ],
   "languages": ["Spanish", "English"],
   "trajectory": "IC to Director in 8 years",
+  "pageCount": 2,
+  "format": "PDF",
+  "isLinkedInExport": false,
+  "outcomeCount": 11,
+  "unclearRoles": 1,
+  "yearSpan": 14,
   "unsure": [
     { "field": "team size at Company X", "extracted": "12", "confidence": "low" }
   ]
 }
 \`\`\`
 
+Notes for the JSON fields:
+- pageCount: approximate number of pages in the source
+- format: "PDF" or "DOCX" or "TEXT"
+- isLinkedInExport: true ONLY if the document has clear LinkedIn export markers (e.g., "linkedin.com/in/" URL, LinkedIn-style headers, "Top Skills" section). Otherwise false.
+- outcomeCount: total number of quantified outcomes/metrics across all roles
+- unclearRoles: number of roles where dates, scope, or outcomes are ambiguous
+- yearSpan: total span in years from earliest to latest role
+
 CV text to convert:
 `;
 
 export async function POST(req: NextRequest) {
-  const user = await getAuthUser();
+  const user = await getAuthUserId();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { text, base64, filename } = await req.json();
@@ -63,6 +77,39 @@ export async function POST(req: NextRequest) {
   }
 
   // Save to DB (no GitHub commit — avoids spurious Vercel deploys)
+  const { getDb, userProfiles } = await import('@/lib/db');
+  const { eq } = await import('drizzle-orm');
+
+  const db = getDb();
+
+  // Create or update user profile with CV data
+  const existingProfile = await db
+    .select()
+    .from(userProfiles)
+    .where(eq(userProfiles.userId, user.id))
+    .limit(1);
+
+  if (existingProfile.length > 0) {
+    // Update existing profile
+    await db
+      .update(userProfiles)
+      .set({
+        cvMarkdown: markdownCv,
+        cvUploadedAt: new Date(),
+        languages: signals.languages?.length > 0 ? signals.languages : undefined,
+      })
+      .where(eq(userProfiles.userId, user.id));
+  } else {
+    // Create new profile with CV
+    await db.insert(userProfiles).values({
+      userId: user.id,
+      cvMarkdown: markdownCv,
+      cvUploadedAt: new Date(),
+      languages: signals.languages?.length > 0 ? signals.languages : undefined,
+    });
+  }
+
+  // Also save to settings table for backwards compatibility
   const { neon } = await import('@neondatabase/serverless');
   const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
     .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');

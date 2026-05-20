@@ -9,6 +9,12 @@ interface CVSignals {
   roles: Array<{ company: string; role: string; years: number; current: boolean; metrics: string[] }>;
   languages: string[];
   trajectory: string;
+  pageCount?: number;
+  format?: string;
+  isLinkedInExport?: boolean;
+  outcomeCount?: number;
+  unclearRoles?: number;
+  yearSpan?: number;
   unsure: Array<{ field: string; extracted: string; confidence: string }>;
 }
 
@@ -102,32 +108,23 @@ export default function OnboardingPage() {
 
   const t = labels[lang];
 
-  // Animation loop for Step 2 - matches design (runs every 14 seconds)
+  // Animation for Step 2 - runs ONCE when we have real data (no loop)
   useEffect(() => {
-    if (step !== 2) return;
+    if (step !== 2 || !cvSignals) return;
 
     const STAGGER = [200, 1400, 2800, 4400, 6200, 8000, 9800];
-
-    function runAnimation() {
-      setReadingRows([false, false, false, false, false, false, false]);
-      STAGGER.forEach((delay, idx) => {
-        setTimeout(() => {
-          setReadingRows((prev) => {
-            const newRows = [...prev];
-            newRows[idx] = true;
-            return newRows;
-          });
-        }, delay);
-      });
-    }
-
-    // Run immediately
-    runAnimation();
-
-    // Loop every 14 seconds
-    const interval = setInterval(runAnimation, 14000);
-    return () => clearInterval(interval);
-  }, [step]);
+    setReadingRows([false, false, false, false, false, false, false]);
+    const timers = STAGGER.map((delay, idx) =>
+      setTimeout(() => {
+        setReadingRows((prev) => {
+          const newRows = [...prev];
+          newRows[idx] = true;
+          return newRows;
+        });
+      }, delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [step, cvSignals]);
 
   function generateArchetypes(signals: CVSignals): Archetype[] {
     const archs: Archetype[] = [
@@ -395,106 +392,75 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 2: Review with Loading Animation */}
+        {/* Step 2: Reading - extraction milestones with real data */}
         {step === 2 && (
-          <div className="animate-fade-in" style={{ position: 'relative' }}>
-            {showingLoadingPhase ? (
-              <div>
-                <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
-                  {lang === 'en' ? 'Reading your ' : 'Leyendo tu '}<em>{lang === 'en' ? 'career.' : 'carrera.'}</em>
-                </h1>
-                <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
-                  {lang === 'en' ? 'Pulling out the trajectory, scope, and outcomes. About thirty seconds.' : 'Extrayendo la trayectoria, alcance y resultados. Unos treinta segundos.'}
-                </p>
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+              {lang === 'en' ? 'Reading your ' : 'Leyendo tu '}<em>{lang === 'en' ? 'career.' : 'carrera.'}</em>
+            </h1>
+            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+              {lang === 'en' ? 'Pulling out the trajectory, scope, and outcomes. About thirty seconds.' : 'Extrayendo la trayectoria, alcance y resultados. Unos treinta segundos.'}
+            </p>
 
-                <div className="max-w-2xl p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  <div className="flex gap-3 py-3">
-                    <div className="flex-shrink-0 text-lg" style={{ color: isDark ? '#5cb1ff' : '#0d7c89' }}>⋮</div>
-                    <div className="text-sm animate-pulse" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
-                      {lang === 'en' ? 'Analyzing your resume...' : 'Analizando tu CV...'}
-                    </div>
+            <div className="max-w-2xl p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+              {!cvSignals ? (
+                <div className="flex gap-3 py-3">
+                  <div className="flex-shrink-0 text-lg animate-pulse" style={{ color: isDark ? '#5cb1ff' : '#0d7c89' }}>⋮</div>
+                  <div className="text-sm animate-pulse" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                    {lang === 'en' ? 'Analyzing your resume...' : 'Analizando tu CV...'}
                   </div>
                 </div>
-              </div>
-            ) : cvSignals ? (
-              <div>
-                <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
-                  {lang === 'en' ? 'Reading your ' : 'Leyendo tu '}<em>{lang === 'en' ? 'career.' : 'carrera.'}</em>
-                </h1>
-                <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
-                  {lang === 'en' ? 'Pulling out the trajectory, scope, and outcomes. About thirty seconds.' : 'Extrayendo la trayectoria, alcance y resultados. Unos treinta segundos.'}
-                </p>
-
-                <div className="max-w-2xl p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  {[
-                    { text: lang === 'en' ? 'Read the document · PDF detected' : 'Leer el documento · PDF detectado', icon: '✓' },
-                    { text: lang === 'en' ? `Found ${cvSignals?.roles?.length || 0} roles · ${cvSignals?.roles?.reduce((sum, r) => sum + (r.years || 0), 0)} years span` : `Encontrados ${cvSignals?.roles?.length || 0} roles · ${cvSignals?.roles?.reduce((sum, r) => sum + (r.years || 0), 0)} años de alcance`, icon: '✓' },
-                    { text: lang === 'en' ? `Current role · ${cvSignals?.roles?.[0]?.company || '–'} · ${cvSignals?.roles?.[0]?.role || '–'}` : `Rol actual · ${cvSignals?.roles?.[0]?.company || '–'} · ${cvSignals?.roles?.[0]?.role || '–'}`, icon: '✓' },
-                    { text: lang === 'en' ? `Prior roles · ${cvSignals?.roles?.slice(1, 4).map(r => r.company).join(', ') || '–'}, …` : `Roles anteriores · ${cvSignals?.roles?.slice(1, 4).map(r => r.company).join(', ') || '–'}, …`, icon: '✓' },
-                    { text: lang === 'en' ? `Extracted outcomes · ${(cvSignals?.roles || []).reduce((sum, r) => sum + (r.metrics?.length || 0), 0)} found · ${cvSignals?.unsure?.length || 0} unclear` : `Resultados extraídos · ${(cvSignals?.roles || []).reduce((sum, r) => sum + (r.metrics?.length || 0), 0)} encontrados · ${cvSignals?.unsure?.length || 0} poco claro`, icon: cvSignals?.unsure?.length ? '!' : '✓', color: cvSignals?.unsure?.length ? '#c97b0e' : undefined },
-                    { text: lang === 'en' ? `Trajectory · ${cvSignals?.trajectory || '–'}` : `Trayectoria · ${cvSignals?.trajectory || '–'}`, icon: '✓' },
-                    { text: lang === 'en' ? 'Ready. Your turn to check my work.' : 'Listo. Tu turno para verificar mi trabajo.', icon: '✓' },
-                  ].map((row, idx) => (
-                    <div
-                      key={idx}
-                      className="flex gap-3 py-3 border-b transition-all duration-400"
-                      style={{
-                        borderColor: idx === 6 ? 'transparent' : isDark ? '#2a3543' : '#e2e7e8',
-                        opacity: readingRows[idx] ? 1 : 0.2,
-                      }}
-                    >
-                      <div className="flex-shrink-0 text-lg" style={{ color: row.color || (isDark ? '#5cb1ff' : '#0d7c89') }}>
-                        {row.icon}
-                      </div>
-                      <div className="text-sm" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
-                        {row.text}
-                      </div>
+              ) : (
+                [
+                  { text: lang === 'en' ? `Read the document · ${cvSignals.pageCount ? cvSignals.pageCount + ' pages · ' : ''}${cvSignals.format || 'PDF'}${cvSignals.isLinkedInExport ? ' · LinkedIn export detected' : ''}` : `Documento leído · ${cvSignals.pageCount ? cvSignals.pageCount + ' páginas · ' : ''}${cvSignals.format || 'PDF'}${cvSignals.isLinkedInExport ? ' · exportación de LinkedIn detectada' : ''}`, icon: '✓' },
+                  { text: lang === 'en' ? `Found the experience section · ${cvSignals.roles?.length || 0} roles · ${cvSignals.yearSpan || cvSignals.roles?.reduce((s, r) => s + (r.years || 0), 0) || 0} years span` : `Sección de experiencia · ${cvSignals.roles?.length || 0} roles · ${cvSignals.yearSpan || cvSignals.roles?.reduce((s, r) => s + (r.years || 0), 0) || 0} años de alcance`, icon: '✓' },
+                  { text: lang === 'en' ? `Pulled current role · ${cvSignals.roles?.[0]?.company || '–'} · ${cvSignals.roles?.[0]?.role || '–'}` : `Rol actual · ${cvSignals.roles?.[0]?.company || '–'} · ${cvSignals.roles?.[0]?.role || '–'}`, icon: '✓' },
+                  { text: lang === 'en' ? `Pulled prior roles · ${cvSignals.roles?.slice(1, 5).map(r => r.company).join(', ') || '–'}${cvSignals.roles && cvSignals.roles.length > 5 ? ', …' : ''}` : `Roles anteriores · ${cvSignals.roles?.slice(1, 5).map(r => r.company).join(', ') || '–'}${cvSignals.roles && cvSignals.roles.length > 5 ? ', …' : ''}`, icon: '✓' },
+                  { text: lang === 'en' ? `Extracted quantified outcomes · ${cvSignals.outcomeCount ?? (cvSignals.roles || []).reduce((s, r) => s + (r.metrics?.length || 0), 0)} found${cvSignals.unclearRoles ? ` · ${cvSignals.unclearRoles} role${cvSignals.unclearRoles > 1 ? 's' : ''} unclear` : ''}` : `Resultados cuantificados · ${cvSignals.outcomeCount ?? (cvSignals.roles || []).reduce((s, r) => s + (r.metrics?.length || 0), 0)} encontrados${cvSignals.unclearRoles ? ` · ${cvSignals.unclearRoles} rol${cvSignals.unclearRoles > 1 ? 'es' : ''} poco claro${cvSignals.unclearRoles > 1 ? 's' : ''}` : ''}`, icon: cvSignals.unclearRoles ? '!' : '✓', color: cvSignals.unclearRoles ? '#c97b0e' : undefined },
+                  { text: lang === 'en' ? `Inferred trajectory · ${cvSignals.trajectory || '–'}` : `Trayectoria inferida · ${cvSignals.trajectory || '–'}`, icon: '✓' },
+                  { text: lang === 'en' ? 'Ready. Your turn to check my work.' : 'Listo. Tu turno para verificar mi trabajo.', icon: '✓' },
+                ].map((row, idx) => (
+                  <div
+                    key={idx}
+                    className="flex gap-3 py-3 border-b transition-all duration-400"
+                    style={{
+                      borderColor: idx === 6 ? 'transparent' : isDark ? '#2a3543' : '#e2e7e8',
+                      opacity: readingRows[idx] ? 1 : 0.2,
+                    }}
+                  >
+                    <div className="flex-shrink-0 text-lg" style={{ color: row.color || (isDark ? '#5cb1ff' : '#0d7c89') }}>
+                      {row.icon}
                     </div>
-                  ))}
-                </div>
+                    <div className="text-sm" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                      {row.text}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* CTA — appears after final row reveals (~9800ms + 400ms transition) */}
+            {cvSignals && readingRows[6] && (
+              <div className="max-w-2xl flex justify-end mt-6 animate-fade-in">
+                <button
+                  onClick={() => setStep(3)}
+                  className="px-6 py-3 rounded-full font-600 text-sm transition-all"
+                  style={{ background: isDark ? '#f4f6fa' : '#0a1f24', color: isDark ? '#0a0e14' : '#f6f8f8' }}
+                >
+                  {lang === 'en' ? 'Review what I found →' : 'Revisa lo que encontré →'}
+                </button>
               </div>
-            ) : null}
+            )}
           </div>
         )}
-        {step === 2 && !showingLoadingPhase && cvSignals && (
+        {false && step === 2 && cvSignals && (
           <div className="mt-8 animate-fade-in">
             <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
               {t.step2}
             </h1>
-            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
-              {lang === 'en' ? "Here's what we extracted from your CV. Review and continue." : 'Aquí está lo que extrajimos de tu CV. Revisa y continúa.'}
-            </p>
-
             <div className="max-w-2xl space-y-6">
-              {cvSignals.trajectory && (
-                <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
-                    {lang === 'en' ? 'Trajectory' : 'Trayectoria'}
-                  </div>
-                  <p className="font-500">{cvSignals.trajectory}</p>
-                </div>
-              )}
-
-              {cvSignals.languages && cvSignals.languages.length > 0 && (
-                <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
-                    {lang === 'en' ? 'Languages' : 'Idiomas'}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {cvSignals.languages.map((language) => (
-                      <span key={language} className="px-3 py-1 rounded-full text-sm" style={{ background: isDark ? '#0d7c89' : '#d6eef0', color: isDark ? '#f4f6fa' : '#0d7c89' }}>
-                        {language}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {cvSignals.roles && cvSignals.roles.length > 0 && (
                 <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  <div className="font-mono text-xs uppercase tracking-widest mb-3" style={{ color: isDark ? '#8893a3' : '#889399' }}>
-                    {lang === 'en' ? 'Roles' : 'Roles'}
-                  </div>
                   <div className="space-y-3">
                     {cvSignals.roles.slice(0, 3).map((role, idx) => (
                       <div key={idx} className="text-sm">
