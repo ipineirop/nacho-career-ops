@@ -445,7 +445,7 @@ export default function OnboardingPage() {
                 </p>
 
                 <div className="max-w-2xl space-y-6">
-                  {cvSignals.trajectory && (
+                  {cvSignals && cvSignals.trajectory && (
                     <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
                       <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
                         {lang === 'en' ? 'Trajectory' : 'Trayectoria'}
@@ -454,7 +454,7 @@ export default function OnboardingPage() {
                     </div>
                   )}
 
-                  {cvSignals.languages && cvSignals.languages.length > 0 && (
+                  {cvSignals && cvSignals.languages && cvSignals.languages.length > 0 && (
                     <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
                       <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
                         {lang === 'en' ? 'Languages' : 'Idiomas'}
@@ -469,7 +469,7 @@ export default function OnboardingPage() {
                     </div>
                   )}
 
-                  {cvSignals.roles && cvSignals.roles.length > 0 && (
+                  {cvSignals && cvSignals.roles && cvSignals.roles.length > 0 && (
                     <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
                       <div className="font-mono text-xs uppercase tracking-widest mb-3" style={{ color: isDark ? '#8893a3' : '#889399' }}>
                         {lang === 'en' ? 'Roles' : 'Roles'}
