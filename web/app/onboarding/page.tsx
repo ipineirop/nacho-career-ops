@@ -453,27 +453,6 @@ export default function OnboardingPage() {
             )}
           </div>
         )}
-        {false && step === 2 && cvSignals && (
-          <div className="mt-8 animate-fade-in">
-            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
-              {t.step2}
-            </h1>
-            <div className="max-w-2xl space-y-6">
-              {cvSignals.roles && cvSignals.roles.length > 0 && (
-                <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
-                  <div className="space-y-3">
-                    {cvSignals.roles.slice(0, 3).map((role, idx) => (
-                      <div key={idx} className="text-sm">
-                        <p className="font-500">{role.role}</p>
-                        <p style={{ color: isDark ? '#8893a3' : '#889399' }}>{role.company}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Step 3: Review Roles */}
         {step === 3 && cvSignals && (
