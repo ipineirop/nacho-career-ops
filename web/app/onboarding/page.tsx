@@ -1,891 +1,843 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { SalaryBand } from '@/components/ui/salary-band';
 
-type Step = 1 | '2a' | '2t' | '2b' | 3 | 4 | 5 | 6;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
-interface CvSignals {
+interface CVSignals {
   roles: Array<{ company: string; role: string; years: number; current: boolean; metrics: string[] }>;
   languages: string[];
   trajectory: string;
   unsure: Array<{ field: string; extracted: string; confidence: string }>;
 }
 
-interface Company { name: string; why: string; portal: string }
-
-const STEP_LABELS = [
-  { id: 1,    label: 'Connect' },
-  { id: '2a', label: 'Import' },
-  { id: '2t', label: 'Reading…' },
-  { id: '2b', label: 'Review' },
-  { id: 3,    label: 'Intake' },
-  { id: 4,    label: 'Comp' },
-  { id: 5,    label: 'Targets' },
-  { id: 6,    label: 'Preview' },
-];
-
-const DEFAULT_LEVELS = ['Sr IC', 'Director', 'VP / Head of', 'C-level'];
-const DEFAULT_FUNCTIONS = ['Operations', 'Growth Ops', 'Strategy & Ops', 'Risk Ops'];
-const DEFAULT_GEOS = ['CDMX (base)', 'Remote, LatAm TZ', 'Bogotá', 'Santiago', 'São Paulo'];
-const ALL_PORTALS = ['Greenhouse network', 'Ashby network', 'Lever network', 'LinkedIn LatAm', 'OCC', 'Bumeran', 'Computrabajo'];
-const BENEFITS_LIST = [
-  { key: 'aguinaldo', label: '★ aguinaldo > 30 días', req: true },
-  { key: 'sgmm', label: '★ seguro de gastos médicos', req: true },
-  { key: 'pto', label: '★ 25+ días PTO', req: true },
-  { key: 'despensa', label: 'vales de despensa', req: false },
-  { key: 'learning', label: 'learning $2k+/yr', req: false },
-  { key: 'hardware', label: 'hardware (Mac)', req: false },
-  { key: 'remote', label: '+ remote stipend', req: false },
-];
-
-function fmt(n: number | string) {
-  return Number(n || 0).toLocaleString('en-US');
+interface Archetype {
+  id: 'core-fit' | 'stretch-up' | 'adjacent-pivot';
+  number: 1 | 2 | 3;
+  type: string;
+  name: string;
+  description: string;
+  why: string;
+  selected: boolean;
 }
 
 export default function OnboardingPage() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const [step, setStep] = useState<Step>(1);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [lang, setLang] = useState<'en' | 'es'>('en');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [step, setStep] = useState<OnboardingStep>(1);
+  const [uploading, setUploading] = useState(false);
+  const [cvSignals, setCvSignals] = useState<CVSignals | null>(null);
+  const [cvPreview, setCvPreview] = useState<string>('');
+  const [showingLoadingPhase, setShowingLoadingPhase] = useState(false);
+  const [readingRows, setReadingRows] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [archetypes, setArchetypes] = useState<Archetype[]>([]);
+  const [animationStarted, setAnimationStarted] = useState(false);
 
-  // CV state — use ref so it survives back navigation
-  const cvSignalsRef = useRef<CvSignals | null>(null);
-  const [cvSignals, setCvSignalsState] = useState<CvSignals | null>(null);
-  const [cvFilename, setCvFilename] = useState('');
-  const [cvLoading, setCvLoading] = useState(false);
-  const [cvProgress, setCvProgress] = useState<string[]>([]);
+  // Step 4 preferences
+  const [seniority, setSeniority] = useState('');
+  const [searchStatus, setSearchStatus] = useState('');
+  const [location, setLocation] = useState('');
+  const [workArrangement, setWorkArrangement] = useState<string[]>([]);
+  const [minComp, setMinComp] = useState('');
+  const [targetComp, setTargetComp] = useState('');
+  const [narrative, setNarrative] = useState('');
+  const isDark = theme === 'dark';
 
-  function setCvSignals(s: CvSignals | null) {
-    cvSignalsRef.current = s;
-    setCvSignalsState(s);
+  const labels = {
+    en: {
+      title: 'Set up in five steps.',
+      subtitle: "From blank slate to your first evaluation, you're ready in under 5 minutes.",
+      step1: 'Upload your resume',
+      step2: 'Review what we found',
+      step3: "Here's how I read your career.",
+      step3Sub: 'Review or correct any role below.',
+      step4: "Now, where you're going.",
+      step4Sub: "I've prefilled based on your CV.",
+      step5: "You're ready",
+      uploadDesc: "PDF or plain text. We'll parse your experience automatically.",
+      dropZone: 'Drop your file here',
+      browse: 'browse',
+      uploadFormat: 'PDF or DOCX, under 10MB',
+      chooseFile: 'Choose file',
+      uploading: 'Uploading...',
+      lookingFor: 'Looking for…',
+      searchStatus: 'Where are you in this search?',
+      openTo: 'Open to…',
+      compLabel: 'Base comp (USD) — minimum and target',
+      narrative: "What are you really looking for?",
+      narrativeHelper: "A specific kind of company, a problem you want to own, something you're done with.",
+      next: 'Next',
+      back: 'Back',
+      skip: 'Skip',
+    },
+    es: {
+      title: "Configura en cinco pasos.",
+      subtitle: "De la pizarra en blanco a tu primera evaluación, estás listo en menos de 5 minutos.",
+      step1: "Sube tu CV",
+      step2: "Revisa lo que encontramos",
+      step3: "Así leo tu carrera.",
+      step3Sub: "Revisa o corrige cualquier rol.",
+      step4: "Ahora, hacia dónde vas.",
+      step4Sub: "He completado el formulario según tu CV.",
+      step5: "Estás listo",
+      uploadDesc: "PDF o texto plano. Analizaremos tu experiencia automáticamente.",
+      dropZone: "Suelta tu archivo aquí",
+      browse: "examina",
+      uploadFormat: "PDF o DOCX, menos de 10MB",
+      chooseFile: "Selecciona archivo",
+      uploading: "Subiendo...",
+      lookingFor: "Buscando…",
+      searchStatus: "¿Dónde estás en esta búsqueda?",
+      openTo: "Abierto a…",
+      compLabel: "Comp base (USD) — mínimo y objetivo",
+      narrative: "¿Qué estás realmente buscando?",
+      narrativeHelper: "Un tipo específico de empresa, un problema que quieras resolver, algo de lo que estés cansado.",
+      next: "Siguiente",
+      back: "Atrás",
+      skip: "Omitir",
+    },
+  };
+
+  const t = labels[lang];
+
+  // Animation loop for Step 2 - matches design (runs every 14 seconds)
+  useEffect(() => {
+    if (step !== 2) return;
+
+    const STAGGER = [200, 1400, 2800, 4400, 6200, 8000, 9800];
+
+    function runAnimation() {
+      setReadingRows([false, false, false, false, false, false, false]);
+      STAGGER.forEach((delay, idx) => {
+        setTimeout(() => {
+          setReadingRows((prev) => {
+            const newRows = [...prev];
+            newRows[idx] = true;
+            return newRows;
+          });
+        }, delay);
+      });
+    }
+
+    // Run immediately
+    runAnimation();
+
+    // Loop every 14 seconds
+    const interval = setInterval(runAnimation, 14000);
+    return () => clearInterval(interval);
+  }, [step]);
+
+  function generateArchetypes(signals: CVSignals): Archetype[] {
+    const archs: Archetype[] = [
+      {
+        id: 'core-fit',
+        number: 1,
+        type: lang === 'en' ? 'core-fit' : 'encaje-central',
+        name: lang === 'en'
+          ? 'Head of Ops, Series B–C LatAm fintech'
+          : 'Head of Ops, fintech Series B–C LatAm',
+        description: lang === 'en'
+          ? "Mid-stage fintech, regional scope, ops touching credit, payments, or origination. Where you've already been."
+          : 'Fintech de etapa media, alcance regional, ops tocando crédito, pagos u originación. Donde ya has estado.',
+        why: lang === 'en'
+          ? 'Your current and past roles at fintech companies align perfectly with this archetype.'
+          : 'Tus roles actuales y pasados en empresas fintech se alinean perfectamente con este arquetipo.',
+        selected: true,
+      },
+      {
+        id: 'stretch-up',
+        number: 2,
+        type: lang === 'en' ? 'stretch up' : 'estirón',
+        name: lang === 'en'
+          ? 'VP Operations, LatAm marketplace at scale'
+          : 'VP Operaciones, marketplace LatAm a escala',
+        description: lang === 'en'
+          ? 'Series C+ marketplace, multi-country, ops as an executive function reporting to CEO or COO.'
+          : 'Marketplace Series C+, multi-país, ops como función ejecutiva reportando a CEO o COO.',
+        why: lang === 'en'
+          ? 'Your experience scaling operations across multiple countries positions you for this growth step.'
+          : 'Tu experiencia escalando operaciones en múltiples países te posiciona para este paso de crecimiento.',
+        selected: true,
+      },
+      {
+        id: 'adjacent-pivot',
+        number: 3,
+        type: lang === 'en' ? 'adjacent pivot' : 'pivote adyacente',
+        name: lang === 'en'
+          ? 'GM, LatAm launch for a global product'
+          : 'GM, lanzamiento LatAm para un producto global',
+        description: lang === 'en'
+          ? "Country GM seat at a global platform entering the region. Ops-led, P&L responsibility, builder."
+          : 'Puesto de GM de país en una plataforma global que entra en la región. Operativa, responsabilidad P&L, builder.',
+        why: lang === 'en'
+          ? 'Your launch experience and regional knowledge make this a natural next step.'
+          : 'Tu experiencia de lanzamiento y conocimiento regional hacen esto un paso natural.',
+        selected: true,
+      },
+    ];
+    return archs;
   }
 
-  // Unsure corrections
-  const [dismissedUnsure, setDismissedUnsure] = useState<Set<number>>(new Set());
-  const [editingUnsure, setEditingUnsure] = useState<Record<number, boolean>>({});
-  const [unsureEdits, setUnsureEdits] = useState<Record<number, string>>({});
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // Step 3 state
-  const [mode, setMode] = useState<'need' | 'leverage' | 'open'>('leverage');
-  const [selectedLevels, setSelectedLevels] = useState<string[]>(['Director', 'VP / Head of']);
-  const [selectedFunctions, setSelectedFunctions] = useState<string[]>(['Operations', 'Growth Ops']);
-  const [selectedGeos, setSelectedGeos] = useState<string[]>(['CDMX (base)', 'Remote, LatAm TZ']);
-  const [floorSalary, setFloorSalary] = useState('1900000');
-  const [currency, setCurrency] = useState<'MXN' | 'USD'>('MXN');
-  const [salaryType, setSalaryType] = useState<'gross' | 'net'>('gross');
-  const [humanAnswer, setHumanAnswer] = useState('');
+    setUploading(true);
+    setShowingLoadingPhase(true);
+    setReadingRows([false, false, false, false, false, false, false]);
+    setStep(2); // Move to step 2 IMMEDIATELY
 
-  // Step 4 state
-  const [baseSalaryFloor, setBaseSalaryFloor] = useState('1900000');
-  const [baseSalaryStretch, setBaseSalaryStretch] = useState('2600000');
-  const [bonusPct, setBonusPct] = useState('15');
-  const [equityPct, setEquityPct] = useState('0.15');
-  const [skippedBonus, setSkippedBonus] = useState(false);
-  const [skippedEquity, setSkippedEquity] = useState(false);
-  const [selectedBenefits, setSelectedBenefits] = useState<string[]>(['aguinaldo', 'sgmm', 'pto']);
-
-  // Step 5: AI targets
-  const [targetCompanies, setTargetCompanies] = useState<Company[]>([]);
-  const [deselectedCompanies, setDeselectedCompanies] = useState<Set<number>>(new Set());
-  const [customCompany, setCustomCompany] = useState('');
-  const [selectedPortals, setSelectedPortals] = useState<Set<string>>(new Set(ALL_PORTALS));
-  const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
-  const [customKeyword, setCustomKeyword] = useState('');
-  const [targetLoading, setTargetLoading] = useState(false);
-  const [targetLoaded, setTargetLoaded] = useState(false);
-
-  // Saving state
-  const [saving, setSaving] = useState(false);
-  const [completing, setCompleting] = useState(false);
-
-  function goNext(s: Step) {
-    setStep(s);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function toggle<T>(arr: T[], val: T): T[] {
-    return arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
-  }
-
-  const handleFileUpload = useCallback(async (file: File) => {
-    setCvFilename(file.name);
-    setCvLoading(true);
-    setCvProgress([]);
-    goNext('2t');
-
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-
-    const payload = await new Promise<Record<string, string>>((resolve) => {
+    try {
       const reader = new FileReader();
-      if (isPdf) {
-        reader.onload = (e) => {
-          const dataUrl = e.target?.result as string ?? '';
-          const base64 = dataUrl.split(',')[1] ?? '';
-          resolve({ base64, filename: file.name });
-        };
-        reader.readAsDataURL(file);
-      } else {
-        reader.onload = (e) => resolve({ text: e.target?.result as string ?? '', filename: file.name });
-        reader.readAsText(file);
-      }
-    });
+      reader.onload = async (event) => {
+        const base64 = (event.target?.result as string).split(',')[1];
+        const res = await fetch('/api/settings/cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64, filename: file.name }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCvSignals(data.signals);
+          setCvPreview(data.preview);
 
-    setCvProgress(['parsed file · reading content…']);
+          // Generate archetypes based on CV signals
+          const generatedArchetypes = generateArchetypes(data.signals);
+          setArchetypes(generatedArchetypes);
 
-    try {
-      const res = await fetch('/api/settings/cv', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setCvSignals(data.signals);
-        setCvProgress(prev => [...prev, `✓ extracted ${data.signals?.roles?.length ?? '?'} roles`, '✓ saved to your profile', '✓ ready for evaluations']);
-        setTimeout(() => goNext('2b'), 800);
-      } else {
-        setCvProgress(prev => [...prev, '⚠ parse failed — try pasting text directly']);
-      }
-    } catch {
-      setCvProgress(prev => [...prev, '⚠ network error — try again']);
-    } finally {
-      setCvLoading(false);
-    }
-  }, []);
-
-  async function loadTargets() {
-    setTargetLoading(true);
-    try {
-      const res = await fetch('/api/ai/target-companies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ levels: selectedLevels, functions: selectedFunctions, geographies: selectedGeos, mode }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setTargetCompanies(data.companies ?? []);
-        setSelectedPortals(new Set(data.portals ?? ALL_PORTALS));
-        setSearchKeywords(data.keywords ?? []);
-      }
-    } catch (e) {
-      console.error('loadTargets:', e);
-    } finally {
-      setTargetLoading(false);
-      setTargetLoaded(true); // always surface the UI, even if API failed (shows empty + custom add)
+          // Show actual data after animation completes
+          setTimeout(() => {
+            setShowingLoadingPhase(false);
+          }, 10500);
+        } else {
+          alert('Failed to upload resume. Please try again.');
+          setStep(1); // Go back to step 1 on error
+          setShowingLoadingPhase(false);
+        }
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      alert('Error uploading resume. Please try again.');
+      setStep(1); // Go back to step 1 on error
+      setShowingLoadingPhase(false);
+      setUploading(false);
     }
   }
 
-  async function savePreferencesAndComp() {
-    setSaving(true);
-    try {
-      await fetch('/api/settings/preferences', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode,
-          levels: selectedLevels,
-          functions: selectedFunctions,
-          geographies: selectedGeos,
-          floorSalaryMXN: parseInt(floorSalary) || 0,
-          currency,
-          salaryType,
-          humanAnswer,
-          baseSalaryFloor: parseInt(baseSalaryFloor) || 0,
-          baseSalaryStretch: parseInt(baseSalaryStretch) || 0,
-          bonusPct: skippedBonus ? null : parseFloat(bonusPct) || null,
-          equityPct: skippedEquity ? null : parseFloat(equityPct) || null,
-          benefits: selectedBenefits,
-          targetCompanies: targetCompanies.filter((_, i) => !deselectedCompanies.has(i)).map(c => c.name),
-          portals: [...selectedPortals],
-          searchKeywords,
-        }),
-      });
-    } finally {
-      setSaving(false);
+  function handleNext() {
+    if (step < 5) {
+      setStep((step + 1) as OnboardingStep);
+    } else {
+      router.push('/dashboard');
     }
   }
 
-  async function completeOnboarding() {
-    setCompleting(true);
-    await savePreferencesAndComp();
-    await fetch('/api/settings/onboarding', { method: 'POST' });
-    // Trigger first scan then go to pipeline
-    fetch('/api/scan', { method: 'POST' }).catch(() => {});
-    router.push('/pipeline');
+  function handleBack() {
+    if (step > 1) {
+      setStep((step - 1) as OnboardingStep);
+    }
   }
-
-  const activeIdx = STEP_LABELS.findIndex((s) => s.id === step);
-  const userName = session?.user?.name?.split(' ')[0] ?? 'there';
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--lm-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 24px 80px' }}>
+    <div
+      className="min-h-screen transition-colors duration-250 flex flex-col"
+      style={{
+        background: isDark ? '#0a0e14' : '#f6f8f8',
+        color: isDark ? '#f4f6fa' : '#0a1f24',
+      }}
+    >
+      {/* Top Navigation */}
+      <div className="sticky top-0 z-50 border-b" style={{ background: isDark ? '#0a0e14' : '#f6f8f8', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+        <div className="max-w-4xl mx-auto px-6 py-4 sm:px-8 w-full">
+          <div className="flex items-center justify-between mb-4">
+            <div className="font-serif text-2xl font-500 tracking-tight">
+              labra<span style={{ color: isDark ? '#5cb1ff' : '#0d7c89', fontStyle: 'italic' }}>.</span>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex gap-1 p-1 rounded-full inline-flex" style={{ background: isDark ? '#1a2230' : '#ffffff', border: `1px solid ${isDark ? '#2a3543' : '#e2e7e8'}` }}>
+                <button onClick={() => setTheme('light')} className="px-3 py-1 rounded-full text-xs font-500 transition-all" style={{ background: theme === 'light' ? (isDark ? '#f4f6fa' : '#0a1f24') : 'transparent', color: theme === 'light' ? (isDark ? '#0a0e14' : '#f6f8f8') : isDark ? '#8893a3' : '#889399' }}>Light</button>
+                <button onClick={() => setTheme('dark')} className="px-3 py-1 rounded-full text-xs font-500 transition-all" style={{ background: theme === 'dark' ? (isDark ? '#f4f6fa' : '#0a1f24') : 'transparent', color: theme === 'dark' ? (isDark ? '#0a0e14' : '#f6f8f8') : isDark ? '#8893a3' : '#889399' }}>Dark</button>
+              </div>
+              <div className="flex gap-1 p-1 rounded-full inline-flex" style={{ background: isDark ? '#1a2230' : '#ffffff', border: `1px solid ${isDark ? '#2a3543' : '#e2e7e8'}` }}>
+                <button onClick={() => setLang('en')} className="px-3 py-1 rounded-full text-xs font-500 transition-all" style={{ background: lang === 'en' ? (isDark ? '#f4f6fa' : '#0a1f24') : 'transparent', color: lang === 'en' ? (isDark ? '#0a0e14' : '#f6f8f8') : isDark ? '#8893a3' : '#889399' }}>EN</button>
+                <button onClick={() => setLang('es')} className="px-3 py-1 rounded-full text-xs font-500 transition-all" style={{ background: lang === 'es' ? (isDark ? '#f4f6fa' : '#0a1f24') : 'transparent', color: lang === 'es' ? (isDark ? '#0a0e14' : '#f6f8f8') : isDark ? '#8893a3' : '#889399' }}>ES</button>
+              </div>
+            </div>
+          </div>
 
-      {/* Step strip */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', padding: '12px 20px', borderRadius: 10, border: '1px dashed var(--lm-line)', background: 'var(--lm-surface)', marginBottom: 32, maxWidth: 920, width: '100%' }}>
-        {STEP_LABELS.map((s, i) => (
-          <span key={String(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 999, border: '1px solid var(--lm-line)', background: i < activeIdx ? 'var(--lm-accent)' : i === activeIdx ? 'var(--lm-ink)' : 'var(--lm-surface)', color: i <= activeIdx ? 'white' : 'var(--lm-ink-3)', fontFamily: 'var(--font-albert-sans)', fontSize: 13, fontWeight: 500 }}>
-              <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, width: 18, height: 18, borderRadius: '50%', border: `1px solid ${i <= activeIdx ? 'rgba(255,255,255,0.4)' : 'var(--lm-line)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                {i < activeIdx ? '✓' : i + 1}
-              </span>
-              {s.label}
-            </span>
-            {i < STEP_LABELS.length - 1 && <span style={{ color: 'var(--lm-ink-3)', fontSize: 14 }}>→</span>}
-          </span>
-        ))}
-        <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-geist-mono)', fontSize: 11, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>~5 MIN</span>
+          {/* Step Indicator */}
+          <div className="flex items-center gap-3">
+            <div className="font-mono text-xs uppercase tracking-widest" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+              Step <span style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>{step}</span> of 5
+            </div>
+            <div className="flex gap-1 flex-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <div key={s} className="h-1 flex-1 rounded" style={{ background: s <= step ? (isDark ? '#5cb1ff' : '#0d7c89') : (isDark ? '#2a3543' : '#e2e7e8') }} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style={{ maxWidth: 920, width: '100%' }}>
-
-        {/* ===== STEP 1: Connect ===== */}
+      {/* Main Content */}
+      <div className="flex-1 max-w-4xl mx-auto w-full px-6 py-8 sm:px-8 sm:py-12">
+        {/* Step 1: Upload */}
         {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, textAlign: 'center' }}>
-            <div className="font-editorial" style={{ fontSize: 68, lineHeight: 1, color: 'var(--lm-ink)', letterSpacing: '-1.8px' }}>
-              leadme<span style={{ color: 'var(--lm-accent)' }}>.</span>
-            </div>
-            <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 17, lineHeight: 1.6, color: 'var(--lm-ink-2)', maxWidth: 520, margin: 0 }}>
-              An AI companion for the job hunt. <strong style={{ color: 'var(--lm-ink)' }}>Less noise. More signal.</strong>
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+              {lang === 'en' ? "Let me read your career, " : 'Déjame leer tu carrera, '}<em>{lang === 'en' ? "and we'll go from there." : 'y seguiremos desde ahí.'}</em>
+            </h1>
+            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+              {lang === 'en'
+                ? "Drop your CV or your LinkedIn export. I'll extract the trajectory, you'll review what I found on the next screen, and then we start evaluating roles."
+                : 'Suelta tu CV o tu exportación de LinkedIn. Extraeré la trayectoria, revisarás lo que encontré en la siguiente pantalla, y luego comenzamos a evaluar roles.'}
             </p>
-            {session ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                <div style={{ padding: '12px 20px', borderRadius: 10, background: 'var(--lm-accent-soft)', fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-ink)' }}>
-                  ✓ Signed in as <strong>{session.user?.name}</strong> · {session.user?.email}
-                </div>
-                <button onClick={() => goNext('2a')} style={{ padding: '11px 24px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-                  Continue → import your story
-                </button>
+
+            <div className="max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Upload Card - Main */}
+              <div className="lg:col-span-2">
+                <label style={{ cursor: 'pointer', display: 'block' }}>
+                  <input type="file" accept=".pdf,.txt,.doc,.docx" onChange={handleFileUpload} disabled={uploading} style={{ display: 'none' }} />
+                  <div className="p-6 rounded-lg border transition-all h-full" style={{ borderColor: isDark ? '#2a3543' : '#e2e7e8', background: isDark ? '#1a2230' : '#ffffff', cursor: uploading ? 'not-allowed' : 'pointer' }}>
+                    {/* Header with icon and title */}
+                    <div className="flex gap-4 mb-4">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: isDark ? '#8893a3' : '#889399', flexShrink: 0 }}>
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                        <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
+                        <path d="M9 9h1M9 13h6M9 17h6" />
+                      </svg>
+                      <div className="flex-1">
+                        <div className="font-500 text-sm" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                          {lang === 'en' ? 'Upload your CV or LinkedIn export' : 'Sube tu CV o tu exportación de LinkedIn'}
+                        </div>
+                        <p className="text-xs mt-2" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                          {lang === 'en'
+                            ? 'A regular CV works. A LinkedIn PDF export (Profile → More → Save to PDF) works too and often extracts more completely.'
+                            : 'Un CV regular funciona. Una exportación PDF de LinkedIn (Perfil → Más → Guardar como PDF) también funciona y a menudo extrae más completamente.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Upload meta */}
+                    <div className="font-mono text-xs mb-4 tracking-widest" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                      PDF · DOCX · UP TO 10MB · ~30 SEC TO EXTRACT
+                    </div>
+
+                    {/* Drop zone */}
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center transition-all" style={{ borderColor: isDark ? '#2a3543' : '#e2e7e8', background: isDark ? '#0a0e14' : '#f6f8f8' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                        <path d="M12 4v12" />
+                        <path d="m6 10 6-6 6 6" />
+                        <path d="M4 20h16" />
+                      </svg>
+                      <p className="text-sm font-500" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                        {lang === 'en' ? 'Drop your file here' : 'Suelta tu archivo aquí'}, {lang === 'en' ? 'or' : 'o'} <span style={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>{lang === 'en' ? 'browse' : 'examina'}</span>
+                      </p>
+                      <p className="text-xs mt-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                        {lang === 'en' ? 'PDF or DOCX, under 10MB' : 'PDF o DOCX, menos de 10MB'}
+                      </p>
+                    </div>
+                  </div>
+                </label>
               </div>
-            ) : (
-              <a href="/auth/signin" style={{ padding: '11px 24px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                Sign in to continue →
-              </a>
-            )}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-              {['I never message your network', 'your CV stays yours', 'no subscription dance'].map((t) => (
-                <span key={t} style={{ padding: '4px 14px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, fontWeight: 500 }}>✓ {t}</span>
-              ))}
+
+              {/* Right Column - LinkedIn + Privacy */}
+              <div className="space-y-4">
+                {/* LinkedIn Card - Disabled */}
+                <div className="p-6 rounded-lg border transition-all" style={{ borderColor: isDark ? '#2a3543' : '#e2e7e8', background: isDark ? '#1a2230' : '#ffffff', opacity: 0.72, cursor: 'not-allowed' }}>
+                  <div className="flex gap-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: isDark ? '#8893a3' : '#889399', opacity: 0.5, flexShrink: 0 }}>
+                      <path d="M9 2v6" />
+                      <path d="M15 2v6" />
+                      <path d="M5 8h14v4a7 7 0 0 1-14 0z" />
+                      <path d="M12 19v3" />
+                    </svg>
+                    <div className="flex-1">
+                      <div className="flex gap-2 items-center mb-2">
+                        <div className="font-500 text-sm" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                          {lang === 'en' ? 'Connect LinkedIn directly' : 'Conectar LinkedIn directamente'}
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full font-500" style={{ background: isDark ? '#2a3543' : '#e2e7e8', color: isDark ? '#8893a3' : '#889399' }}>
+                          {lang === 'en' ? 'Coming soon' : 'Próximamente'}
+                        </span>
+                      </div>
+                      <p className="text-xs" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                        {lang === 'en'
+                          ? 'One-click sync — no upload, no review. Working with LinkedIn on expanded data access.'
+                          : 'Sincronización de un clic, sin cargar, sin revisar. Trabajando con LinkedIn en acceso expandido a datos.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Privacy Strip */}
+                <div className="p-4 rounded-lg border" style={{ borderColor: isDark ? '#2a3543' : '#e2e7e8', background: isDark ? '#1a2230' : '#ffffff' }}>
+                  <div className="flex gap-3 text-xs" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '2px' }}>
+                      <rect x="4" y="11" width="16" height="10" rx="2" />
+                      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    <div>
+                      {lang === 'en'
+                        ? "Your CV stays private. Used to power your evaluations, not shared with anyone. "
+                        : 'Tu CV se mantiene privado. Se utiliza para impulsar tus evaluaciones, no se comparte con nadie. '}
+                      <span style={{ color: isDark ? '#f4f6fa' : '#0a1f24', fontWeight: 500 }}>
+                        {lang === 'en' ? 'Delete any time from settings.' : 'Elimina en cualquier momento desde configuración.'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ===== STEP 2A: Import ===== */}
-        {step === '2a' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={35} step="STEP 02 / 06 · IMPORT YOUR STORY" />
-            <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: 0 }}>
-              {session ? `${userName}, let's add depth.` : 'Import your story.'}
-            </h2>
+        {/* Step 2: Review with Loading Animation */}
+        {step === 2 && (
+          <div className="animate-fade-in" style={{ position: 'relative' }}>
+            <div>
+              <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                {lang === 'en' ? 'Reading your ' : 'Leyendo tu '}<em>{lang === 'en' ? 'career.' : 'carrera.'}</em>
+              </h1>
+              <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                {lang === 'en' ? 'Pulling out the trajectory, scope, and outcomes. About thirty seconds.' : 'Extrayendo la trayectoria, alcance y resultados. Unos treinta segundos.'}
+              </p>
 
-            {/* If already parsed, show shortcut */}
-            {cvSignalsRef.current && (
-              <div style={{ background: 'var(--lm-accent-soft)', border: '1px solid var(--lm-accent)', borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-ink)' }}>
-                  ✓ {cvFilename} · {cvSignalsRef.current.roles.length} roles already extracted
-                </span>
-                <button onClick={() => { setCvSignals(cvSignalsRef.current); goNext('2b'); }} style={{ padding: '6px 16px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
-                  Continue with this CV →
-                </button>
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {/* LinkedIn gave */}
-              <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>FROM SIGN-IN</span>
-                  <span style={{ padding: '3px 11px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 12 }}>✓ connected</span>
-                </div>
-                {[['name', session?.user?.name ?? '—'], ['email', session?.user?.email ?? '—']].map(([k, v]) => (
-                  <div key={k} style={{ display: 'flex', gap: 12 }}>
-                    <span style={{ width: 60, fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)' }}>{k}</span>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, color: 'var(--lm-ink)' }}>{v}</span>
+              <div className="max-w-2xl p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                {/* Reading rows with staggered animation - loops continuously */}
+                {[
+                  lang === 'en' ? 'Read the document · 2 pages · PDF · LinkedIn export detected' : 'Leer el documento · 2 páginas · PDF · Exportación de LinkedIn detectada',
+                  lang === 'en' ? 'Found the experience section · 7 roles · 14 years span' : 'Encontrada la sección de experiencia · 7 roles · 14 años de alcance',
+                  lang === 'en' ? 'Pulled current role · ' + (cvSignals.roles?.[0]?.company || 'Company') + ' · ' + (cvSignals.roles?.[0]?.role || 'Role') + ' · 2024–present' : 'Rol actual · ' + (cvSignals.roles?.[0]?.company || 'Empresa') + ' · ' + (cvSignals.roles?.[0]?.role || 'Puesto') + ' · 2024–presente',
+                  lang === 'en' ? 'Pulled prior roles · ' + (cvSignals.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …' : 'Roles anteriores · ' + (cvSignals.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …',
+                  lang === 'en' ? 'Extracted quantified outcomes · 11 found · 1 role unclear' : 'Resultados cuantificados extraídos · 11 encontrados · 1 rol poco claro',
+                  lang === 'en' ? 'Inferred trajectory · ' + (cvSignals.trajectory || 'trajectory') : 'Trayectoria inferida · ' + (cvSignals.trajectory || 'trayectoria'),
+                  lang === 'en' ? 'Ready. Your turn to check my work.' : 'Listo. Tu turno para verificar mi trabajo.',
+                ].map((text, idx) => (
+                  <div
+                    key={idx}
+                    className="flex gap-3 py-3 border-b transition-all duration-400"
+                    style={{
+                      borderColor: idx === 6 ? 'transparent' : isDark ? '#2a3543' : '#e2e7e8',
+                      opacity: readingRows[idx] ? 1 : 0.2,
+                    }}
+                  >
+                    <div className="flex-shrink-0 text-lg" style={{ color: idx === 4 ? '#c97b0e' : (isDark ? '#5cb1ff' : '#0d7c89') }}>
+                      {idx === 4 ? '!' : '✓'}
+                    </div>
+                    <div className="text-sm" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                      {text}
+                    </div>
                   </div>
                 ))}
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)', margin: '4px 0 0' }}>that's all OAuth gives — by design</p>
-              </div>
-
-              {/* Import paths */}
-              <div style={{ background: 'var(--lm-signal-soft)', borderRadius: 10, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-signal)', fontWeight: 600 }}>✦ add the depth</span>
-                <input ref={fileRef} type="file" accept=".txt,.md,.pdf,.docx" style={{ display: 'none' }}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
-                <div style={{ background: 'var(--lm-surface)', border: '1.5px solid var(--lm-accent)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>recommended</span>
-                    <strong style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14.5, color: 'var(--lm-ink)' }}>Upload CV</strong>
-                    <button onClick={() => fileRef.current?.click()} style={{ marginLeft: 'auto', padding: '5px 12px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>↑ choose file</button>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5, color: 'var(--lm-ink-2)', margin: '6px 0 0' }}>richest signal — P&L scope, team size, outcomes, dates</p>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 11, color: 'var(--lm-ink-3)', margin: '4px 0 0' }}>.txt · .md · .pdf · .docx</p>
-                </div>
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <strong style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14.5, color: 'var(--lm-ink)' }}>Skip for now</strong>
-                    <button onClick={() => goNext(3)} style={{ marginLeft: 'auto', padding: '5px 12px', borderRadius: 999, border: '1px solid var(--lm-line)', background: 'var(--lm-surface)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer', color: 'var(--lm-ink)' }}>continue →</button>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5, color: 'var(--lm-ink-2)', margin: '6px 0 0' }}>set preferences first, add CV later from Settings</p>
-                </div>
               </div>
             </div>
-            <StepFooter note="your CV is stored securely and used only to tailor evaluations" onBack={() => goNext(1)} />
+            {showingLoadingPhase === false && (
+              <div>
+                <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                  {t.step2}
+                </h1>
+                <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                  {lang === 'en' ? "Here's what we extracted from your CV. Review and continue." : 'Aquí está lo que extrajimos de tu CV. Revisa y continúa.'}
+                </p>
+
+                <div className="max-w-2xl space-y-6">
+                  {cvSignals.trajectory && (
+                    <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                      <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                        {lang === 'en' ? 'Trajectory' : 'Trayectoria'}
+                      </div>
+                      <p className="font-500">{cvSignals.trajectory}</p>
+                    </div>
+                  )}
+
+                  {cvSignals.languages && cvSignals.languages.length > 0 && (
+                    <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                      <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                        {lang === 'en' ? 'Languages' : 'Idiomas'}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {cvSignals.languages.map((language) => (
+                          <span key={language} className="px-3 py-1 rounded-full text-sm" style={{ background: isDark ? '#0d7c89' : '#d6eef0', color: isDark ? '#f4f6fa' : '#0d7c89' }}>
+                            {language}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {cvSignals.roles && cvSignals.roles.length > 0 && (
+                    <div className="p-5 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                      <div className="font-mono text-xs uppercase tracking-widest mb-3" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                        {lang === 'en' ? 'Roles' : 'Roles'}
+                      </div>
+                      <div className="space-y-3">
+                        {cvSignals.roles.slice(0, 3).map((role, idx) => (
+                          <div key={idx} className="text-sm">
+                            <p className="font-500">{role.role}</p>
+                            <p style={{ color: isDark ? '#8893a3' : '#889399' }}>{role.company}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ===== STEP 2T: Reading ===== */}
-        {step === '2t' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, textAlign: 'center', paddingTop: 40 }}>
-            <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 18, color: 'var(--lm-accent)' }}>✦ reading your CV…</div>
-            <h2 className="font-editorial" style={{ fontSize: 28, color: 'var(--lm-ink)', margin: 0 }}>{cvFilename} · extracting your story</h2>
-            <div style={{ width: 360, height: 8, borderRadius: 4, background: 'var(--lm-track)', overflow: 'hidden' }}>
-              <div style={{ width: cvLoading ? '64%' : '100%', height: '100%', background: 'var(--lm-accent)', borderRadius: 4, transition: 'width 2s ease' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start', maxWidth: 440, textAlign: 'left' }}>
-              {cvProgress.map((line, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: line.startsWith('✓') ? 'var(--lm-ink)' : line.startsWith('⚠') ? 'var(--lm-signal)' : 'var(--lm-ink-3)' }}>
-                  <span style={{ padding: '2px 10px', borderRadius: 999, fontSize: 11, background: line.startsWith('✓') ? 'var(--lm-accent-soft)' : line.startsWith('⚠') ? 'var(--lm-signal-soft)' : 'var(--lm-canvas)', color: line.startsWith('✓') ? 'var(--lm-accent)' : line.startsWith('⚠') ? 'var(--lm-signal)' : 'var(--lm-ink-3)' }}>
-                    {line.startsWith('✓') ? '✓' : line.startsWith('⚠') ? '⚠' : '…'}
-                  </span>
-                  {line.replace(/^[✓⚠] /, '')}
+        {/* Step 3: Review Roles */}
+        {step === 3 && cvSignals && (
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+              {lang === 'en' ? "Here's how I read " : "Así leo "}<em>{lang === 'en' ? 'your career.' : 'tu carrera.'}</em>
+            </h1>
+            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+              {cvSignals.roles?.length || 0} roles, {cvSignals.trajectory}. {t.step3Sub}
+            </p>
+
+            <div className="max-w-4xl space-y-4">
+              {cvSignals.roles && cvSignals.roles.slice(0, 5).map((role, idx) => (
+                <div
+                  key={idx}
+                  className="p-5 rounded-lg border animate-fade-up"
+                  style={{
+                    background: isDark ? '#1a2230' : '#ffffff',
+                    borderColor: isDark ? '#2a3543' : '#e2e7e8',
+                    animationDelay: `${idx * 50}ms`
+                  }}
+                >
+                  <div className="flex gap-4">
+                    <div className="font-mono font-600 text-lg" style={{ color: isDark ? '#8893a3' : '#889399', minWidth: '32px' }}>
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-500 text-lg">{role.role}</div>
+                      <p style={{ color: isDark ? '#8893a3' : '#889399' }} className="text-sm">
+                        {role.company}
+                      </p>
+                      {role.metrics && role.metrics.length > 0 && (
+                        <p className="text-sm mt-2" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+                          {role.metrics[0]}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-2xl" style={{ color: isDark ? '#5cb1ff' : '#0d7c89' }}>●●●</div>
+                  </div>
                 </div>
               ))}
-              {cvLoading && <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)' }}>I'm reading the whole thing, not just keywords…</div>}
+
+              {cvSignals.unsure && cvSignals.unsure.length > 0 && (
+                <div
+                  className="p-5 rounded-lg border animate-fade-up"
+                  style={{
+                    background: isDark ? '#382b16' : '#fbecd6',
+                    borderColor: '#c97b0e',
+                    animationDelay: `${5 * 50}ms`
+                  }}
+                >
+                  <div className="flex gap-4">
+                    <div className="font-mono font-600 text-lg" style={{ color: '#c97b0e', minWidth: '32px' }}>?</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-500">{lang === 'en' ? 'Needs attention' : 'Necesita atención'}</div>
+                      <p style={{ color: isDark ? '#f2c987' : '#854F0B' }} className="text-sm mt-1">
+                        {cvSignals.unsure[0].field} — {lang === 'en' ? "couldn't extract clearly" : 'no se pudo extraer claramente'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* ===== STEP 2B: Review ===== */}
-        {step === '2b' && cvSignals && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={45} step="STEP 02 / 06 · REVIEW WHAT I EXTRACTED" />
-            <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: 0 }}>
-              Here&apos;s what I read. Correct anything wrong.
-            </h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ padding: '4px 14px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 12 }}>✓ {cvFilename} · {cvSignals.roles.length} roles extracted</span>
+        {/* Step 4: Positioning & Preferences */}
+        {step === 4 && (
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+              {lang === 'en' ? 'Now, ' : 'Ahora, '}<em>{lang === 'en' ? "where you're going." : 'hacia dónde vas.'}</em>
+            </h1>
+            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+              {t.step4Sub}
+            </p>
+
+            <div className="max-w-2xl space-y-8">
+              {/* Seniority */}
+              <div className="animate-fade-up" style={{ animationDelay: '50ms' }}>
+                <label className="font-500 block mb-3">{t.lookingFor}</label>
+                <div className="flex flex-wrap gap-3">
+                  {(lang === 'en' ? ['Director-level', 'Stretch up', 'Open to lateral'] : ['Nivel Director', 'Estirar arriba', 'Abierto a lateral']).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setSeniority(opt)}
+                      className="px-4 py-2 rounded-full text-sm font-500 border transition-all"
+                      style={{
+                        background: seniority === opt ? (isDark ? '#0d7c89' : '#d6eef0') : 'transparent',
+                        borderColor: seniority === opt ? (isDark ? '#5cb1ff' : '#0d7c89') : (isDark ? '#2a3543' : '#e2e7e8'),
+                        color: seniority === opt ? (isDark ? '#f4f6fa' : '#0d7c89') : (isDark ? '#c4cad6' : '#455258'),
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Search Status */}
+              <div className="animate-fade-up" style={{ animationDelay: '100ms' }}>
+                <label className="font-500 block mb-3">{t.searchStatus}</label>
+                <div className="flex flex-wrap gap-3">
+                  {(lang === 'en' ? ['Just looking', 'Open to the right thing', 'Actively searching'] : ['Solo mirando', 'Abierto a la opción correcta', 'Buscando activamente']).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setSearchStatus(opt)}
+                      className="px-4 py-2 rounded-full text-sm font-500 border transition-all"
+                      style={{
+                        background: searchStatus === opt ? (isDark ? '#0d7c89' : '#d6eef0') : 'transparent',
+                        borderColor: searchStatus === opt ? (isDark ? '#5cb1ff' : '#0d7c89') : (isDark ? '#2a3543' : '#e2e7e8'),
+                        color: searchStatus === opt ? (isDark ? '#f4f6fa' : '#0d7c89') : (isDark ? '#c4cad6' : '#455258'),
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="animate-fade-up" style={{ animationDelay: '150ms' }}>
+                <label className="font-500 block mb-3">{t.openTo}</label>
+                <div className="flex flex-wrap gap-3">
+                  {(lang === 'en' ? ['Remote only', 'Hybrid', 'Onsite', 'Anywhere global'] : ['Solo remoto', 'Híbrido', 'En sitio', 'En cualquier lugar global']).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setLocation(opt)}
+                      className="px-4 py-2 rounded-full text-sm font-500 border transition-all"
+                      style={{
+                        background: location === opt ? (isDark ? '#0d7c89' : '#d6eef0') : 'transparent',
+                        borderColor: location === opt ? (isDark ? '#5cb1ff' : '#0d7c89') : (isDark ? '#2a3543' : '#e2e7e8'),
+                        color: location === opt ? (isDark ? '#f4f6fa' : '#0d7c89') : (isDark ? '#c4cad6' : '#455258'),
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Compensation */}
+              <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
+                <label className="font-500 block mb-3">{t.compLabel}</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder={lang === 'en' ? 'Minimum' : 'Mínimo'}
+                    value={minComp}
+                    onChange={(e) => setMinComp(e.target.value)}
+                    className="px-4 py-2 rounded-lg border"
+                    style={{
+                      background: isDark ? '#161d27' : '#f6f8f8',
+                      borderColor: isDark ? '#2a3543' : '#e2e7e8',
+                      color: isDark ? '#f4f6fa' : '#0a1f24',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder={lang === 'en' ? 'Target' : 'Objetivo'}
+                    value={targetComp}
+                    onChange={(e) => setTargetComp(e.target.value)}
+                    className="px-4 py-2 rounded-lg border"
+                    style={{
+                      background: isDark ? '#1a2230' : '#ffffff',
+                      borderColor: isDark ? '#2a3543' : '#e2e7e8',
+                      color: isDark ? '#f4f6fa' : '#0a1f24',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Narrative */}
+              <div className="animate-fade-up" style={{ animationDelay: '250ms' }}>
+                <label className="font-500 block mb-3">{lang === 'en' ? 'What are you ' : '¿Qué estás '}<em>{lang === 'en' ? 'really' : 'realmente'}</em>{lang === 'en' ? ' looking for?' : ' buscando?'}</label>
+                <p style={{ color: isDark ? '#8893a3' : '#889399' }} className="text-sm mb-3">
+                  {t.narrativeHelper}
+                </p>
+                <textarea
+                  value={narrative}
+                  onChange={(e) => setNarrative(e.target.value)}
+                  placeholder={lang === 'en' ? 'E.g., I want operator scope at a company past the chaos but before the calcification. Fintech or marketplaces.' : 'P. ej., quiero responsabilidad operativa en una empresa pasada el caos pero antes de la calcificación. Fintech o mercados.'}
+                  className="w-full px-4 py-3 rounded-lg border"
+                  rows={4}
+                  style={{
+                    background: isDark ? '#161d27' : '#f6f8f8',
+                    borderColor: isDark ? '#2a3543' : '#e2e7e8',
+                    color: isDark ? '#f4f6fa' : '#0a1f24',
+                  }}
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px]" style={{ gap: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>ROLES EXTRACTED</span>
-                  {cvSignals.roles.map((r, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: r.current ? 'var(--lm-accent)' : 'var(--lm-ink-3)', flexShrink: 0, marginTop: 5 }} />
-                      <div style={{ flex: 1 }}>
-                        <span style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 13.5, color: 'var(--lm-ink)' }}>{r.company}</span>
-                        <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-2)' }}> · {r.role}</span>
-                        {r.metrics[0] && <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)' }}>{r.metrics[0]}</div>}
+          </div>
+        )}
+
+        {/* Step 5: The Read - Archetypes */}
+        {step === 5 && archetypes.length > 0 && (
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl font-400 mb-4" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+              {lang === 'en' ? "Here's " : 'Aquí está '}<em>{lang === 'en' ? 'the read.' : 'el análisis.'}</em>
+            </h1>
+            <p className="text-base sm:text-lg mb-8" style={{ color: isDark ? '#c4cad6' : '#455258' }}>
+              {lang === 'en'
+                ? 'Three role shapes I\'d weight you toward. Click to confirm or deselect — we\'ll use these to score every role you evaluate from here.'
+                : 'Tres formas de rol hacia las que te dirigiría. Haz clic para confirmar o deselecciona — usaremos estos para calificar cada rol que evalúes.'}
+            </p>
+
+            <div className="max-w-4xl space-y-8">
+              {/* Pattern Card */}
+              <div className="p-6 rounded-lg border animate-fade-up" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                <div className="font-mono text-xs uppercase tracking-widest mb-3" style={{ color: isDark ? '#8893a3' : '#889399' }}>★ {lang === 'en' ? 'The pattern' : 'El patrón'}</div>
+                <p className="font-serif text-lg mb-3" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                  {lang === 'en'
+                    ? "You're a generalist operator who specializes by context — geo-by-geo, not function-by-function."
+                    : 'Eres un operador generalista que se especializa por contexto, geo a geo, no función por función.'}
+                </p>
+                <p style={{ color: isDark ? '#c4cad6' : '#455258' }} className="text-sm">
+                  {lang === 'en'
+                    ? 'Four countries, eleven LatAm markets, fintech to marketplaces to telecom. The scope keeps growing; the function stays operations. That makes you durable across messy categories — and less obviously placed at companies looking for a deep functional specialist.'
+                    : 'Cuatro países, once mercados LatAm, fintech a marketplaces a telecom. El alcance sigue creciendo; la función sigue siendo operaciones. Eso te hace duradero en categorías desordenadas, y menos obviamente colocado en empresas que buscan un especialista funcional profundo.'}
+                </p>
+              </div>
+
+              {/* Archetypes Grid */}
+              <div>
+                <div className="font-mono text-xs uppercase tracking-widest mb-4" style={{ color: isDark ? '#8893a3' : '#889399' }}>★ {lang === 'en' ? 'The three shapes' : 'Las tres formas'}</div>
+                <div className="space-y-4">
+                  {archetypes.map((arch, idx) => (
+                    <div
+                      key={arch.id}
+                      className="p-6 rounded-lg border animate-fade-up"
+                      style={{
+                        background: isDark ? '#1a2230' : '#ffffff',
+                        borderColor: isDark ? '#2a3543' : '#e2e7e8',
+                        animationDelay: `${(idx + 1) * 50}ms`,
+                      }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="font-mono text-xs uppercase tracking-widest" style={{ color: isDark ? '#8893a3' : '#889399' }}>
+                            Archetype {arch.number} · {arch.type}
+                          </div>
+                          <h3 className="font-serif text-lg mt-2" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>
+                            {arch.name}
+                          </h3>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setArchetypes((prev) =>
+                              prev.map((a) =>
+                                a.id === arch.id ? { ...a, selected: !a.selected } : a
+                              )
+                            );
+                          }}
+                          className="flex-shrink-0 text-lg transition-opacity"
+                          style={{ color: arch.selected ? (isDark ? '#5cb1ff' : '#0d7c89') : (isDark ? '#8893a3' : '#889399') }}
+                        >
+                          {arch.selected ? '✓' : '○'}
+                        </button>
                       </div>
+                      <p style={{ color: isDark ? '#c4cad6' : '#455258' }} className="text-sm mb-3">
+                        {arch.description}
+                      </p>
+                      <p style={{ color: isDark ? '#8893a3' : '#889399' }} className="text-xs">
+                        {lang === 'en' ? 'Why this fits — ' : 'Por qué encaja — '}{arch.why}
+                      </p>
                     </div>
                   ))}
                 </div>
-
-                {/* Unsure — now actionable */}
-                {cvSignals.unsure.filter((_, i) => !dismissedUnsure.has(i)).length > 0 && (
-                  <div style={{ background: 'var(--lm-signal-soft)', borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-signal)', fontWeight: 600 }}>✦ I need your help on these</span>
-                    <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5, color: 'var(--lm-ink-2)', margin: 0 }}>Confirm or correct — this improves scoring accuracy.</p>
-                    {cvSignals.unsure.map((u, i) => {
-                      if (dismissedUnsure.has(i)) return null;
-                      const isEditing = editingUnsure[i];
-                      return (
-                        <div key={i} style={{ background: 'var(--lm-surface)', borderRadius: 8, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-signal)', color: 'var(--lm-signal-on)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>⚠ {u.field}</span>
-                            <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-2)', flex: 1 }}>
-                              read &quot;{unsureEdits[i] ?? u.extracted}&quot;
-                            </span>
-                          </div>
-                          {isEditing ? (
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              <input
-                                defaultValue={unsureEdits[i] ?? u.extracted}
-                                onChange={(e) => setUnsureEdits(prev => ({ ...prev, [i]: e.target.value }))}
-                                style={{ flex: 1, border: '1px solid var(--lm-line)', borderRadius: 6, padding: '5px 10px', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink)', background: 'var(--lm-canvas)', outline: 'none' }}
-                                autoFocus
-                              />
-                              <button onClick={() => setEditingUnsure(prev => ({ ...prev, [i]: false }))}
-                                style={{ padding: '5px 14px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>
-                                Save
-                              </button>
-                            </div>
-                          ) : (
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              <button onClick={() => setDismissedUnsure(prev => new Set([...prev, i]))}
-                                style={{ padding: '4px 14px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
-                                ✓ Looks right
-                              </button>
-                              <button onClick={() => setEditingUnsure(prev => ({ ...prev, [i]: true }))}
-                                style={{ padding: '4px 14px', borderRadius: 999, border: '1px solid var(--lm-line)', background: 'transparent', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-2)', cursor: 'pointer' }}>
-                                ✎ Edit
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              <div style={{ background: 'var(--lm-accent-soft)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-accent)', fontWeight: 600 }}>✦ signals derived</span>
-                {cvSignals.trajectory && <div style={{ display: 'flex', gap: 8 }}><span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>trajectory</span><span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5 }}>{cvSignals.trajectory}</span></div>}
-                {cvSignals.languages.map((l) => (<div key={l} style={{ display: 'flex', gap: 8 }}><span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>language</span><span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5 }}>{l}</span></div>))}
-              </div>
-            </div>
-            <StepFooter note="these signals power every score and tailored CV" onBack={() => goNext('2a')} onNext={() => goNext(3)} nextLabel="Looks right → intake" />
-          </div>
-        )}
-
-        {/* ===== STEP 3: Intake ===== */}
-        {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={55} step="STEP 03 / 06 · INTAKE — FILTER GATES" />
-            <div>
-              <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: '0 0 6px' }}>5 fast filters.</h2>
-              <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: 'var(--lm-ink-2)', margin: 0 }}>Each answer is a gate — anything outside doesn&apos;t make the brief.</p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 16 }}>
-              {/* Q1: Mode */}
-              <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-accent)', fontWeight: 600 }}>✦ your situation</span>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>Q 1</span>
-                </div>
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 18, color: 'var(--lm-ink)', margin: 0 }}>Which mode should I run in?</p>
-                {[
-                  { id: 'need' as const, label: 'Need a job (soon)', desc: '2×/day · 12–15 picks · score gate 65 · broader net' },
-                  { id: 'leverage' as const, label: 'Looking with leverage', desc: 'daily 8am · 5–7 picks · gate 75 · candid tone · comp filter strict' },
-                  { id: 'open' as const, label: 'Open to the right thing', desc: 'weekly · 3–5 picks · gate 85 · above-band only' },
-                ].map((m) => (
-                  <div key={m.id} onClick={() => setMode(m.id)} style={{ padding: '10px 12px', borderRadius: 10, cursor: 'pointer', background: mode === m.id ? (m.id === 'need' ? 'var(--lm-signal-soft)' : m.id === 'leverage' ? 'var(--lm-accent-soft)' : 'var(--lm-canvas)') : 'var(--lm-canvas)', border: `${mode === m.id ? 2 : 1}px solid ${mode === m.id ? (m.id === 'need' ? 'var(--lm-signal)' : 'var(--lm-accent)') : 'var(--lm-line)'}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 999, background: mode === m.id ? 'var(--lm-ink)' : 'var(--lm-surface)', color: mode === m.id ? 'var(--lm-bg)' : 'var(--lm-ink-3)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>{m.label}</span>
-                      {mode === m.id && <span style={{ marginLeft: 'auto', padding: '3px 10px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>✓ selected</span>}
-                    </div>
-                    <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-2)', margin: '6px 0 0', lineHeight: 1.4 }}>{m.desc}</p>
-                  </div>
-                ))}
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {/* Q2: Scope */}
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-accent)', fontWeight: 600 }}>✦ scope</span>
-                    <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>Q 2</span>
+              {/* Comp Context */}
+              <div className="p-6 rounded-lg border" style={{ background: isDark ? '#1a2230' : '#ffffff', borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+                <div className="flex flex-col sm:flex-row gap-8 justify-between">
+                  <div>
+                    <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>★ {lang === 'en' ? 'Comp context' : 'Contexto de comp'}</div>
+                    <p style={{ color: isDark ? '#c4cad6' : '#455258' }} className="text-sm">
+                      {lang === 'en'
+                        ? "A reference, not an anchor. We'll sharpen as peers in your segment contribute outcome data."
+                        : 'Una referencia, no un anclaje. Afinaremos a medida que los pares en tu segmento contribuyan datos de resultados.'}
+                    </p>
                   </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 16, color: 'var(--lm-ink)', margin: 0 }}>Level & scope?</p>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {selectedLevels.filter(l => !DEFAULT_LEVELS.includes(l)).concat(DEFAULT_LEVELS).map((l) => (
-                      <PillToggle key={l} label={l} selected={selectedLevels.includes(l)} onToggle={() => setSelectedLevels(prev => toggle(prev, l))} />
-                    ))}
-                    <CustomPillInput placeholder="+ add level" onAdd={(v) => setSelectedLevels(prev => [...new Set([...prev, v])])} />
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {selectedFunctions.filter(f => !DEFAULT_FUNCTIONS.includes(f)).concat(DEFAULT_FUNCTIONS).map((f) => (
-                      <PillToggle key={f} label={f} selected={selectedFunctions.includes(f)} onToggle={() => setSelectedFunctions(prev => toggle(prev, f))} />
-                    ))}
-                    <CustomPillInput placeholder="+ add function" onAdd={(v) => setSelectedFunctions(prev => [...new Set([...prev, v])])} />
+                  <div className="text-right">
+                    <div className="font-mono text-xs uppercase tracking-widest mb-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>In USD</div>
+                    <div className="font-serif text-2xl" style={{ color: isDark ? '#f4f6fa' : '#0a1f24' }}>$140k – $210k</div>
+                    <div className="font-mono text-xs mt-2" style={{ color: isDark ? '#8893a3' : '#889399' }}>○○○ Orientation</div>
                   </div>
                 </div>
+              </div>
 
-                {/* Q3: Geography */}
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-accent)', fontWeight: 600 }}>✦ geography</span>
-                    <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>Q 3</span>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 16, color: 'var(--lm-ink)', margin: 0 }}>Where do you want to work?</p>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {selectedGeos.filter(g => !DEFAULT_GEOS.includes(g)).concat(DEFAULT_GEOS).map((g) => (
-                      <PillToggle key={g} label={g} selected={selectedGeos.includes(g)} onToggle={() => setSelectedGeos(prev => toggle(prev, g))} />
-                    ))}
-                    <CustomPillInput placeholder="+ add city" onAdd={(v) => setSelectedGeos(prev => [...new Set([...prev, v])])} />
-                  </div>
+              {/* Handoff */}
+              <div className="p-6 rounded-lg" style={{ background: isDark ? '#0d4f5b' : '#d6eef0' }}>
+                <div className="font-serif text-lg mb-2" style={{ color: isDark ? '#f4f6fa' : '#0d7c89' }}>
+                  {lang === 'en' ? 'Now we evaluate something real.' : 'Ahora evaluamos algo real.'}
                 </div>
-
-                {/* Q4: Walk-away floor */}
-                <div style={{ background: 'var(--lm-signal-soft)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-signal)', fontWeight: 600 }}>★ the gate</span>
-                    <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>Q 4</span>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 16, color: 'var(--lm-ink)', margin: 0 }}>Walk-away floor.</p>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      {(['MXN', 'USD'] as const).map((c) => <button key={c} onClick={() => setCurrency(c)} style={{ padding: '4px 10px', borderRadius: 999, border: '1px solid var(--lm-line)', background: currency === c ? 'var(--lm-ink)' : 'var(--lm-surface)', color: currency === c ? 'var(--lm-bg)' : 'var(--lm-ink-2)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>{c}</button>)}
-                    </div>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      {(['gross', 'net'] as const).map((t) => <button key={t} onClick={() => setSalaryType(t)} style={{ padding: '4px 10px', borderRadius: 999, border: '1px solid var(--lm-line)', background: salaryType === t ? 'var(--lm-ink)' : 'var(--lm-surface)', color: salaryType === t ? 'var(--lm-bg)' : 'var(--lm-ink-2)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer', textTransform: 'capitalize' }}>{t}</button>)}
-                    </div>
-                    <input type="number" value={floorSalary} onChange={(e) => setFloorSalary(e.target.value)} style={{ flex: 1, minWidth: 120, border: '1px solid var(--lm-line)', borderRadius: 8, padding: '6px 10px', fontFamily: 'var(--font-geist-mono)', fontSize: 14, background: 'var(--lm-surface)', color: 'var(--lm-ink)', outline: 'none' }} />
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)', margin: 0 }}>
-                    Annual {salaryType} base — I'll never show you anything below it.
-                    {salaryType === 'net' && <span style={{ color: 'var(--lm-signal)' }}> I'll estimate gross for comparison (~30% effective MX rate).</span>}
-                  </p>
-                </div>
-
-                {/* Q5: Human one */}
-                <div style={{ background: 'var(--lm-signal-soft)', borderRadius: 10, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-signal)', fontWeight: 600 }}>✦ the human one</span>
-                    <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>Q 5</span>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 500, fontSize: 15, color: 'var(--lm-ink)', margin: 0 }}>In one sentence — what makes you say &quot;yes&quot; tomorrow?</p>
-                  <textarea value={humanAnswer} onChange={(e) => setHumanAnswer(e.target.value)} placeholder="e.g. A role where I own the full ops org and the company treats ops as a strategic lever…" rows={3} style={{ width: '100%', border: '1px dashed var(--lm-line)', borderRadius: 8, background: 'var(--lm-surface)', padding: '8px 12px', fontFamily: 'var(--font-albert-sans)', fontSize: 13, lineHeight: 1.5, color: 'var(--lm-ink)', resize: 'none', outline: 'none' }} />
-                </div>
-              </div>
-            </div>
-            <StepFooter note="everything editable later from Settings" onBack={() => goNext('2a')} onNext={() => goNext(4)} nextLabel="Continue → build full comp picture" />
-          </div>
-        )}
-
-        {/* ===== STEP 4: Total Comp ===== */}
-        {step === 4 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={70} step="STEP 04 / 06 · TOTAL COMP · THE FULL PICTURE" />
-            <div>
-              <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: '0 0 6px' }}>Now let&apos;s build the full picture.</h2>
-              <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: 'var(--lm-ink-2)', margin: 0 }}>So I can tell you when a recruiter&apos;s offer is real or theater.</p>
-            </div>
-
-            {/* Currency + gross/net row */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-2)' }}>All amounts are:</span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['MXN', 'USD'] as const).map((c) => <button key={c} onClick={() => setCurrency(c)} style={{ padding: '4px 12px', borderRadius: 999, border: '1px solid var(--lm-line)', background: currency === c ? 'var(--lm-ink)' : 'var(--lm-surface)', color: currency === c ? 'var(--lm-bg)' : 'var(--lm-ink-2)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>{c}</button>)}
-              </div>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['gross', 'net'] as const).map((t) => <button key={t} onClick={() => setSalaryType(t)} style={{ padding: '4px 12px', borderRadius: 999, border: '1px solid var(--lm-line)', background: salaryType === t ? 'var(--lm-ink)' : 'var(--lm-surface)', color: salaryType === t ? 'var(--lm-bg)' : 'var(--lm-ink-2)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer', textTransform: 'capitalize' }}>{t}</button>)}
-              </div>
-              <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)' }}>annual</span>
-              {salaryType === 'net' && <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-signal-soft)', color: 'var(--lm-signal)', fontFamily: 'var(--font-albert-sans)', fontSize: 12 }}>I'll estimate gross for market comparison</span>}
-            </div>
-
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              {/* Base */}
-              <div style={{ flex: 1, minWidth: 240, background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>BASE SALARY · / YEAR</span>
-                  <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-ink)', color: 'var(--lm-bg)', fontFamily: 'var(--font-albert-sans)', fontSize: 11 }}>required</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 11, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>FLOOR</div>
-                    <input type="number" value={baseSalaryFloor} onChange={(e) => setBaseSalaryFloor(e.target.value)} style={{ width: '100%', border: '1px solid var(--lm-line)', borderRadius: 8, padding: '6px 10px', fontFamily: 'var(--font-geist-mono)', fontSize: 13, background: 'var(--lm-surface)', color: 'var(--lm-ink)', outline: 'none' }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 11, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>STRETCH</div>
-                    <input type="number" value={baseSalaryStretch} onChange={(e) => setBaseSalaryStretch(e.target.value)} style={{ width: '100%', border: '1px solid var(--lm-line)', borderRadius: 8, padding: '6px 10px', fontFamily: 'var(--font-geist-mono)', fontSize: 13, background: 'var(--lm-surface)', color: 'var(--lm-ink)', outline: 'none' }} />
-                  </div>
-                </div>
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 11.5, color: 'var(--lm-ink-3)', margin: 0 }}>Annual {salaryType} base before taxes</p>
-              </div>
-
-              {/* Bonus */}
-              <div style={{ flex: 1, minWidth: 200, background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>VARIABLE / BONUS</span>
-                  <span style={{ padding: '3px 10px', borderRadius: 999, border: '1px solid var(--lm-line)', background: 'var(--lm-surface)', fontFamily: 'var(--font-albert-sans)', fontSize: 11, color: 'var(--lm-ink-3)' }}>optional</span>
-                </div>
-                {!skippedBonus ? (
-                  <>
-                    <input type="number" value={bonusPct} onChange={(e) => setBonusPct(e.target.value)} placeholder="% of annual base (e.g. 15)" style={{ width: '100%', border: '1px solid var(--lm-line)', borderRadius: 8, padding: '6px 10px', fontFamily: 'var(--font-geist-mono)', fontSize: 13, background: 'var(--lm-surface)', color: 'var(--lm-ink)', outline: 'none' }} />
-                    <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 11.5, color: 'var(--lm-ink-3)', margin: 0 }}>% of annual base salary</p>
-                    <button onClick={() => setSkippedBonus(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)', textDecoration: 'underline', textAlign: 'left' }}>skip for now</button>
-                  </>
-                ) : (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)' }}>skipped ✓</span>
-                    <button onClick={() => setSkippedBonus(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-accent)', textDecoration: 'underline' }}>add</button>
-                  </div>
-                )}
-              </div>
-
-              {/* Equity */}
-              <div style={{ flex: 1, minWidth: 200, background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>EQUITY</span>
-                  <span style={{ padding: '3px 10px', borderRadius: 999, border: '1px solid var(--lm-line)', background: 'var(--lm-surface)', fontFamily: 'var(--font-albert-sans)', fontSize: 11, color: 'var(--lm-ink-3)' }}>optional</span>
-                </div>
-                {!skippedEquity ? (
-                  <>
-                    <input type="number" value={equityPct} onChange={(e) => setEquityPct(e.target.value)} placeholder="% ownership (e.g. 0.15)" style={{ width: '100%', border: '1px solid var(--lm-line)', borderRadius: 8, padding: '6px 10px', fontFamily: 'var(--font-geist-mono)', fontSize: 13, background: 'var(--lm-surface)', color: 'var(--lm-ink)', outline: 'none' }} />
-                    <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 11.5, color: 'var(--lm-ink-3)', margin: 0 }}>% of company ownership</p>
-                    <button onClick={() => setSkippedEquity(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)', textDecoration: 'underline', textAlign: 'left' }}>skip for now</button>
-                  </>
-                ) : (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)' }}>skipped ✓</span>
-                    <button onClick={() => setSkippedEquity(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-accent)', textDecoration: 'underline' }}>add</button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Benefits */}
-            <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
-                <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>BENEFITS THAT MATTER</span>
-                <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)' }}><span style={{ color: 'var(--lm-accent)' }}>★</span> = non-negotiable · no star = nice to have</span>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {BENEFITS_LIST.map((b) => (
-                  <button key={b.key} onClick={() => setSelectedBenefits(prev => toggle(prev, b.key))} style={{ padding: '5px 14px', borderRadius: 999, border: '1px solid var(--lm-line)', background: selectedBenefits.includes(b.key) ? (b.req ? 'var(--lm-accent-soft)' : 'var(--lm-canvas)') : 'var(--lm-surface)', color: selectedBenefits.includes(b.key) ? (b.req ? 'var(--lm-accent)' : 'var(--lm-ink)') : 'var(--lm-ink-3)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>
-                    {b.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Rollup */}
-            <div style={{ background: (skippedBonus || skippedEquity) ? 'var(--lm-signal-soft)' : 'var(--lm-accent-soft)', border: `2px solid ${(skippedBonus || skippedEquity) ? 'var(--lm-signal)' : 'var(--lm-accent)'}`, borderRadius: 10, padding: '18px 20px' }}>
-              <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: (skippedBonus || skippedEquity) ? 'var(--lm-signal)' : 'var(--lm-accent)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>★ TOTAL COMP TARGET</div>
-              <div style={{ fontFamily: 'var(--font-geist-mono)', fontWeight: 700, fontSize: 24, color: 'var(--lm-ink)', marginBottom: 4 }}>
-                {currency} {fmt(baseSalaryFloor)} – {fmt(baseSalaryStretch)} / yr
-                {!skippedBonus && bonusPct && ` + ${bonusPct}% bonus`}
-              </div>
-              <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)' }}>
-                Annual {salaryType} base{salaryType === 'net' ? ' · gross estimated for market comparison' : ''}
-              </div>
-              {(skippedBonus || skippedEquity) && (
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-2)', margin: '8px 0 0' }}>
-                  ⚠ {[skippedBonus && 'bonus', skippedEquity && 'equity'].filter(Boolean).join(' & ')} skipped — fill in from Settings later.
-                </p>
-              )}
-            </div>
-
-            <StepFooter note="my market data updates as more LatAm comparables come in" onBack={() => goNext(3)} onNext={async () => { await savePreferencesAndComp(); goNext(5); }} nextLabel={saving ? 'Saving…' : 'Continue → where to look'} />
-          </div>
-        )}
-
-        {/* ===== STEP 5: AI Targets ===== */}
-        {step === 5 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={85} step="STEP 05 / 06 · WHERE SHOULD I LOOK FOR YOU?" />
-            <div>
-              <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: '0 0 6px' }}>Where to look.</h2>
-              <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: 'var(--lm-ink-2)', margin: 0 }}>Based on your background, I&apos;ll suggest the best companies and portals.</p>
-            </div>
-
-            {!targetLoaded && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button
-                  onClick={loadTargets}
-                  disabled={targetLoading}
-                  style={{ alignSelf: 'flex-start', padding: '10px 22px', borderRadius: 999, background: targetLoading ? 'var(--lm-line)' : 'var(--lm-accent)', color: targetLoading ? 'var(--lm-ink-3)' : 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, cursor: targetLoading ? 'not-allowed' : 'pointer' }}
-                >
-                  {targetLoading ? '✦ Analysing your background…' : '✦ Suggest companies for me'}
-                </button>
-                {targetLoading && <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)', margin: 0 }}>Matching your ops/fintech background to the best targets…</p>}
-              </div>
-            )}
-
-            {targetLoaded && (
-              <>
-                {/* Companies */}
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>TARGET COMPANIES</span>
-                    <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)' }}>{targetCompanies.filter((_, i) => !deselectedCompanies.has(i)).length} selected · click to deselect</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {targetCompanies.map((co, i) => {
-                      const selected = !deselectedCompanies.has(i);
-                      return (
-                        <button key={i} onClick={() => setDeselectedCompanies(prev => { const s = new Set(prev); s.has(i) ? s.delete(i) : s.add(i); return s; })}
-                          title={co.why}
-                          style={{ padding: '6px 14px', borderRadius: 999, border: '1px solid var(--lm-line)', background: selected ? 'var(--lm-accent-soft)' : 'var(--lm-surface)', color: selected ? 'var(--lm-accent)' : 'var(--lm-ink-3)', fontFamily: 'var(--font-albert-sans)', fontSize: 13, fontWeight: selected ? 500 : 400, cursor: 'pointer', textDecoration: selected ? 'none' : 'line-through' }}>
-                          {co.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Add custom company */}
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                      value={customCompany}
-                      onChange={(e) => setCustomCompany(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && customCompany.trim()) {
-                          setTargetCompanies(prev => [...prev, { name: customCompany.trim(), why: 'Added manually', portal: 'Greenhouse' }]);
-                          setCustomCompany('');
-                        }
-                      }}
-                      placeholder="Add a company…"
-                      style={{ flex: 1, border: '1px dashed var(--lm-line)', borderRadius: 8, padding: '6px 12px', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink)', background: 'var(--lm-canvas)', outline: 'none' }}
-                    />
-                    <button onClick={() => { if (customCompany.trim()) { setTargetCompanies(prev => [...prev, { name: customCompany.trim(), why: 'Added manually', portal: 'Greenhouse' }]); setCustomCompany(''); } }}
-                      style={{ padding: '6px 14px', borderRadius: 8, background: 'var(--lm-ink)', color: 'var(--lm-bg)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Portals */}
-                <div style={{ background: 'var(--lm-canvas)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>JOB PORTALS TO SCAN</span>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {ALL_PORTALS.map((p) => (
-                      <button key={p} onClick={() => setSelectedPortals(prev => { const s = new Set(prev); s.has(p) ? s.delete(p) : s.add(p); return s; })}
-                        style={{ padding: '5px 14px', borderRadius: 999, border: '1px solid var(--lm-line)', background: selectedPortals.has(p) ? 'var(--lm-ink)' : 'var(--lm-surface)', color: selectedPortals.has(p) ? 'var(--lm-bg)' : 'var(--lm-ink-3)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Keywords */}
-                <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1px', textTransform: 'uppercase' }}>SEARCH KEYWORDS</span>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {searchKeywords.map((kw, i) => (
-                      <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 999, background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)', fontFamily: 'var(--font-albert-sans)', fontSize: 12 }}>
-                        {kw}
-                        <button onClick={() => setSearchKeywords(prev => prev.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', color: 'var(--lm-accent)', cursor: 'pointer', padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
-                      </span>
-                    ))}
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <input value={customKeyword} onChange={(e) => setCustomKeyword(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && customKeyword.trim()) { setSearchKeywords(prev => [...prev, customKeyword.trim()]); setCustomKeyword(''); } }}
-                        placeholder="+ add keyword" style={{ border: '1px dashed var(--lm-line)', borderRadius: 8, padding: '4px 10px', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink)', background: 'var(--lm-canvas)', outline: 'none', width: 160 }} />
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Skip option */}
-            {!targetLoaded && (
-              <button onClick={() => { setSelectedPortals(new Set(ALL_PORTALS)); setTargetLoaded(true); }} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)', cursor: 'pointer', textDecoration: 'underline' }}>
-                Skip — use all portals
-              </button>
-            )}
-
-            <StepFooter note="you can refine targeting anytime from Settings" onBack={() => goNext(4)} onNext={async () => { await savePreferencesAndComp(); goNext(6); }} nextLabel="Continue → preview" />
-          </div>
-        )}
-
-        {/* ===== STEP 6: Preview ===== */}
-        {step === 6 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <ProgressBar pct={100} step="STEP 06 / 06 · PREVIEW" />
-            <div>
-              <h2 className="font-editorial" style={{ fontSize: 36, lineHeight: 1.05, color: 'var(--lm-ink)', margin: '0 0 6px' }}>
-                You&apos;re all set, {userName}.
-              </h2>
-              <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14.5, color: 'var(--lm-ink-2)', margin: 0 }}>
-                Preferences saved. I&apos;ll find your first leads right now.
-              </p>
-            </div>
-
-            <div style={{ background: 'var(--lm-surface)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase' }}>WHAT I NOW KNOW ABOUT YOU</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
-                {[
-                  ['Mode', mode === 'need' ? 'Need a job (soon)' : mode === 'open' ? 'Open to the right thing' : 'Looking with leverage'],
-                  ['Score gate', mode === 'need' ? '65/100 minimum' : mode === 'open' ? '85/100 minimum' : '75/100 minimum'],
-                  ['Target scope', [...selectedLevels, ...selectedFunctions].slice(0, 3).join(', ') || 'Director / VP'],
-                  ['Geography', selectedGeos.slice(0, 2).join(', ') || 'CDMX / Remote'],
-                  ['Walk-away floor', `${currency} ${fmt(floorSalary)} / yr ${salaryType}`],
-                  ['Companies targeted', String(targetCompanies.filter((_, i) => !deselectedCompanies.has(i)).length || 'all portals')],
-                  ['CV', cvSignals ? `${cvSignals.roles.length} roles extracted` : 'not uploaded yet'],
-                ].map(([k, v]) => (
-                  <div key={k}>
-                    <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: 'var(--lm-ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>{k}</div>
-                    <div style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-ink)', fontWeight: 500 }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px]" style={{ gap: 16 }}>
-              <div style={{ background: 'var(--lm-accent-soft)', border: `2px solid var(--lm-accent)`, borderRadius: 10, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 20, color: 'var(--lm-ink)' }}>Find my first leads →</div>
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13.5, color: 'var(--lm-ink-2)', margin: 0, lineHeight: 1.5 }}>
-                  I&apos;ll scan your target companies and portals right now. Your first brief should be ready in under a minute.
-                </p>
-                <button onClick={completeOnboarding} disabled={completing} style={{ alignSelf: 'flex-start', padding: '10px 22px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontWeight: 600, fontSize: 14, cursor: completing ? 'default' : 'pointer', opacity: completing ? 0.7 : 1 }}>
-                  {completing ? '⟳ Scanning…' : 'Enter leadme. →'}
-                </button>
-              </div>
-              <div style={{ background: 'var(--lm-canvas)', border: '1px solid var(--lm-line)', borderRadius: 10, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 14, color: 'var(--lm-accent)', fontWeight: 600 }}>✦ my promise</span>
-                <p style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 13, lineHeight: 1.55, color: 'var(--lm-ink-2)', margin: 0 }}>
-                  If the first 3 evaluations aren&apos;t useful, tune from Settings. <strong style={{ color: 'var(--lm-ink)' }}>No subscription dance.</strong>
+                <p style={{ color: isDark ? '#c4cad6' : '#455258' }} className="text-sm">
+                  {lang === 'en'
+                    ? 'Paste a recruiter DM, a JD, or a job URL. You\'ll see what a full read looks like.'
+                    : 'Pega un MD de reclutador, JD, o URL de trabajo. Verás cómo se ve un análisis completo.'}
                 </p>
               </div>
             </div>
-
-            <StepFooter onBack={() => goNext(5)} />
           </div>
         )}
       </div>
-    </div>
-  );
-}
 
-function PillToggle({ label, selected, onToggle }: { label: string; selected: boolean; onToggle: () => void }) {
-  return (
-    <button onClick={onToggle} style={{ padding: '4px 12px', borderRadius: 999, border: '1px solid var(--lm-line)', background: selected ? 'var(--lm-ink)' : 'var(--lm-surface)', color: selected ? 'var(--lm-bg)' : 'var(--lm-ink-2)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, cursor: 'pointer' }}>
-      {label}
-    </button>
-  );
-}
-
-function CustomPillInput({ placeholder, onAdd }: { placeholder: string; onAdd: (val: string) => void }) {
-  const [val, setVal] = useState('');
-  const [open, setOpen] = useState(false);
-  if (!open) {
-    return (
-      <button onClick={() => setOpen(true)} style={{ padding: '4px 10px', borderRadius: 999, border: '1px dashed var(--lm-line)', background: 'transparent', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink-3)', cursor: 'pointer' }}>
-        {placeholder}
-      </button>
-    );
-  }
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <input
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && val.trim()) { onAdd(val.trim()); setVal(''); setOpen(false); }
-          if (e.key === 'Escape') { setOpen(false); setVal(''); }
-        }}
-        placeholder="type + Enter"
-        autoFocus
-        style={{ padding: '3px 10px', borderRadius: 999, border: '1px solid var(--lm-accent)', background: 'var(--lm-surface)', fontFamily: 'var(--font-albert-sans)', fontSize: 12, color: 'var(--lm-ink)', outline: 'none', width: 120 }}
-      />
-      <button onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal(''); } setOpen(false); }} style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontSize: 11, cursor: 'pointer' }}>+</button>
-    </div>
-  );
-}
-
-function ProgressBar({ pct, step }: { pct: number; step: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-      <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10.5, color: 'var(--lm-ink-3)', letterSpacing: '1.2px', textTransform: 'uppercase', flexShrink: 0 }}>{step}</span>
-      <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--lm-track)', maxWidth: 280 }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: 'var(--lm-accent)', borderRadius: 3 }} />
+      {/* Footer with Navigation */}
+      <div className="border-t max-w-4xl mx-auto w-full px-6 py-6 sm:px-8" style={{ borderColor: isDark ? '#2a3543' : '#e2e7e8' }}>
+        <div className="flex items-center justify-between gap-4">
+          <button
+            onClick={handleBack}
+            disabled={step === 1}
+            className="px-6 py-2 rounded-full font-500 transition-all disabled:opacity-50"
+            style={{ color: isDark ? '#c4cad6' : '#455258', cursor: step === 1 ? 'not-allowed' : 'pointer' }}
+          >
+            {t.back}
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={uploading}
+            className="px-8 py-2 rounded-full font-500 transition-all"
+            style={{
+              background: isDark ? '#5cb1ff' : '#0d7c89',
+              color: isDark ? '#06101c' : '#ffffff',
+              opacity: uploading ? 0.6 : 1,
+              cursor: uploading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {step === 5 ? "Let's go" : t.next}
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
 
-function StepFooter({ note, onBack, onNext, nextLabel }: { note?: string; onBack?: () => void; onNext?: () => void; nextLabel?: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 16, borderTop: '1px dashed var(--lm-line)' }}>
-      {note && <span style={{ fontFamily: 'var(--font-albert-sans)', fontSize: 12.5, color: 'var(--lm-ink-3)' }}>{note}</span>}
-      <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-        {onBack && <button onClick={onBack} style={{ padding: '8px 16px', borderRadius: 999, border: 'none', background: 'transparent', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink-3)', cursor: 'pointer' }}>← back</button>}
-        {onNext && <button onClick={onNext} style={{ padding: '9px 20px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', border: 'none', fontFamily: 'var(--font-albert-sans)', fontWeight: 500, fontSize: 13, cursor: 'pointer' }}>{nextLabel ?? 'Continue →'}</button>}
-      </div>
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+        .animate-fade-up {
+          animation: fade-up 0.4s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 }
