@@ -411,10 +411,10 @@ export default function OnboardingPage() {
                 {[
                   lang === 'en' ? 'Read the document · 2 pages · PDF · LinkedIn export detected' : 'Leer el documento · 2 páginas · PDF · Exportación de LinkedIn detectada',
                   lang === 'en' ? 'Found the experience section · 7 roles · 14 years span' : 'Encontrada la sección de experiencia · 7 roles · 14 años de alcance',
-                  lang === 'en' ? 'Pulled current role · ' + (cvSignals.roles?.[0]?.company || 'Company') + ' · ' + (cvSignals.roles?.[0]?.role || 'Role') + ' · 2024–present' : 'Rol actual · ' + (cvSignals.roles?.[0]?.company || 'Empresa') + ' · ' + (cvSignals.roles?.[0]?.role || 'Puesto') + ' · 2024–presente',
-                  lang === 'en' ? 'Pulled prior roles · ' + (cvSignals.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …' : 'Roles anteriores · ' + (cvSignals.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …',
+                  lang === 'en' ? 'Pulled current role · ' + (cvSignals?.roles?.[0]?.company || 'Company') + ' · ' + (cvSignals?.roles?.[0]?.role || 'Role') + ' · 2024–present' : 'Rol actual · ' + (cvSignals?.roles?.[0]?.company || 'Empresa') + ' · ' + (cvSignals?.roles?.[0]?.role || 'Puesto') + ' · 2024–presente',
+                  lang === 'en' ? 'Pulled prior roles · ' + (cvSignals?.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …' : 'Roles anteriores · ' + (cvSignals?.roles?.slice(1, 4).map(r => r.company).join(', ') || 'roles') + ', …',
                   lang === 'en' ? 'Extracted quantified outcomes · 11 found · 1 role unclear' : 'Resultados cuantificados extraídos · 11 encontrados · 1 rol poco claro',
-                  lang === 'en' ? 'Inferred trajectory · ' + (cvSignals.trajectory || 'trajectory') : 'Trayectoria inferida · ' + (cvSignals.trajectory || 'trayectoria'),
+                  lang === 'en' ? 'Inferred trajectory · ' + (cvSignals?.trajectory || 'trajectory') : 'Trayectoria inferida · ' + (cvSignals?.trajectory || 'trayectoria'),
                   lang === 'en' ? 'Ready. Your turn to check my work.' : 'Listo. Tu turno para verificar mi trabajo.',
                 ].map((text, idx) => (
                   <div
