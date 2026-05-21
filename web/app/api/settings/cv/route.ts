@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     cvUploadedAt: new Date(),
     languages: profile.languages?.length ? profile.languages : undefined,
     industries: profile.industries?.length ? profile.industries : undefined,
+    education: profile.education?.length ? profile.education : undefined,
     seniorityLevel: profile.seniorityLevel ?? undefined,
     primaryFunction: profile.primaryFunction ?? undefined,
   };
@@ -47,6 +48,16 @@ export async function POST(req: NextRequest) {
     await db.update(userProfiles).set(cvPatch).where(eq(userProfiles.userId, user.id));
   } else {
     await db.insert(userProfiles).values({ userId: user.id, ...cvPatch });
+  }
+
+  // Structured CV sections for re-rendering the markdown later. Best-effort:
+  // these columns may not exist until migration 0004 is applied.
+  try {
+    await db.update(userProfiles)
+      .set({ summaryMarkdown: profile.summary || undefined, skills: profile.skills?.length ? profile.skills : undefined })
+      .where(eq(userProfiles.userId, user.id));
+  } catch (err) {
+    console.error('summary/skills persist skipped (migration 0004 not applied?):', err);
   }
 
   // Structured career history is the source of truth for role facts. Seed it

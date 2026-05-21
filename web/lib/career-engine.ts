@@ -43,9 +43,20 @@ export interface EngineArchetype {
   why: string;
 }
 
+export interface EngineEducation {
+  institution: string;
+  degree?: string;
+  field?: string;
+  year?: string | number;
+  country?: string;
+}
+
 export interface CareerProfile {
   // ── Parsed CV ──────────────────────────────────────────────────
   roles: EngineRole[];
+  summary: string;
+  skills: string[];
+  education: EngineEducation[];
   languages: string[];
   trajectory: string;
   industries: string[];
@@ -76,10 +87,10 @@ export interface AnalyzeResult {
 }
 
 const EMPTY_PROFILE: CareerProfile = {
-  roles: [], languages: [], trajectory: '', industries: [], unsure: [],
-  seniorityLevel: null, primaryFunction: null, pattern: '', patternDetail: '',
-  trajectoryVelocity: null, domainConsistency: null, strengths: [], gaps: [],
-  archetypes: [],
+  roles: [], summary: '', skills: [], education: [], languages: [], trajectory: '',
+  industries: [], unsure: [], seniorityLevel: null, primaryFunction: null,
+  pattern: '', patternDetail: '', trajectoryVelocity: null, domainConsistency: null,
+  strengths: [], gaps: [], archetypes: [],
 };
 
 // The methodology. Two parts: faithful CV parsing, then an evidence-grounded
@@ -106,6 +117,9 @@ Then, on its own line after the markdown, output a JSON block in EXACTLY this sh
   "roles": [
     { "company": "Company", "role": "Title", "years": 2, "current": false, "metrics": ["metric 1"], "location": "City, Country", "industry": "fintech" }
   ],
+  "summary": "Senior financial journalist with 12 years across Chilean and Mexican markets…",
+  "skills": ["investigative reporting", "data journalism", "editing", "Spanish/English"],
+  "education": [{ "institution": "Universidad de Chile", "degree": "BA", "field": "Journalism", "year": 2011, "country": "CL" }],
   "languages": ["Spanish", "English"],
   "trajectory": "Reporter to senior business editor over 8 years",
   "industries": ["financial journalism", "media"],
@@ -135,6 +149,9 @@ Then, on its own line after the markdown, output a JSON block in EXACTLY this sh
 \`\`\`
 
 Field rules:
+- summary: 2–3 sentence professional summary, factual, in the candidate's field.
+- skills: the candidate's concrete skills/tools, as a flat array.
+- education: array of { institution, degree, field, year, country }; empty array if none in the CV.
 - industries: 1–3 lowercase domain labels the candidate actually worked in. Specific — never default to "tech".
 - primaryCity: most-recent city; omit if genuinely unknown.
 - countryCount: distinct countries worked in.
@@ -177,6 +194,9 @@ function coerceProfile(raw: unknown): CareerProfile {
 
   return {
     roles: arr<EngineRole>(r.roles),
+    summary: str(r.summary),
+    skills: arr<string>(r.skills),
+    education: arr<EngineEducation>(r.education),
     languages: arr<string>(r.languages),
     trajectory: str(r.trajectory),
     industries: arr<string>(r.industries),
@@ -297,4 +317,73 @@ export async function translateProfile(
   } catch {
     return fields;
   }
+}
+
+// ── Markdown rendering ─────────────────────────────────────────────
+// Render a CV markdown document from STRUCTURED data. This is what makes
+// the markdown a derived view: when roles are corrected (or any structured
+// field changes), we re-render rather than letting the prose drift.
+
+export interface RenderableRole {
+  company?: string;
+  role?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  seniority?: string;
+  location?: string;
+  metrics?: string[];
+}
+
+export interface RenderableCv {
+  summary?: string;
+  roles: RenderableRole[];
+  education?: EngineEducation[];
+  skills?: string[];
+  languages?: string[];
+}
+
+function span(r: RenderableRole): string {
+  const start = (r.startDate ?? '').toString().slice(0, 4);
+  const end = r.current ? 'Present' : (r.endDate ?? '').toString().slice(0, 4);
+  if (!start && !end) return '';
+  return ` (${[start, end].filter(Boolean).join('–')})`;
+}
+
+export function renderCvMarkdown(cv: RenderableCv): string {
+  const out: string[] = [];
+
+  if (cv.summary?.trim()) {
+    out.push(`## Summary\n\n${cv.summary.trim()}`);
+  }
+
+  const roles = (cv.roles ?? []).filter((r) => r.company || r.role);
+  if (roles.length) {
+    const blocks = roles.map((r) => {
+      const head = `### ${r.company ?? 'Company'} · ${r.role ?? 'Role'}${span(r)}`;
+      const bullets = (r.metrics ?? []).filter(Boolean).map((m) => `- ${m}`);
+      return [head, ...bullets].join('\n');
+    });
+    out.push(`## Experience\n\n${blocks.join('\n\n')}`);
+  }
+
+  const edu = (cv.education ?? []).filter((e) => e.institution || e.degree);
+  if (edu.length) {
+    const items = edu.map((e) => {
+      const left = [e.degree, e.field].filter(Boolean).join(', ');
+      const right = [e.institution, e.year].filter(Boolean).join(', ');
+      return `- ${[left, right].filter(Boolean).join(' — ')}`;
+    });
+    out.push(`## Education\n\n${items.join('\n')}`);
+  }
+
+  if (cv.skills?.length) {
+    out.push(`## Skills\n\n${cv.skills.join(', ')}`);
+  }
+
+  if (cv.languages?.length) {
+    out.push(`## Languages\n\n${cv.languages.join(', ')}`);
+  }
+
+  return out.join('\n\n').trim();
 }

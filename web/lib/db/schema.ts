@@ -33,6 +33,8 @@ export const userProfiles = pgTable('user_profiles', {
   industries: text('industries').array(),
   languages: jsonb('languages'), // [{code, fluency}]
   education: jsonb('education'), // [{institution, degree, field, year, country}]
+  summaryMarkdown: text('summary_markdown'), // CV summary prose (structured input for rendering)
+  skills: text('skills').array(),
   workAuthorization: text('work_authorization').array(),
   relocationWillingness: text('relocation_willingness'),
   remotePreference: text('remote_preference'),

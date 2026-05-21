@@ -109,7 +109,13 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
   const email = userRow[0]?.email ?? '';
 
   const [profileRow, prefRow, sigRow, careerRows] = await Promise.all([
-    db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1),
+    db.select({
+      seniorityLevel: userProfiles.seniorityLevel,
+      primaryFunction: userProfiles.primaryFunction,
+      industries: userProfiles.industries,
+      yearsOfExperience: userProfiles.yearsOfExperience,
+      remotePreference: userProfiles.remotePreference,
+    }).from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1),
     db.select().from(userPreferences)
       .where(and(eq(userPreferences.userId, userId), isNull(userPreferences.supersededAt)))
       .limit(1),

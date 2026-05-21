@@ -12,6 +12,7 @@ import {
 import { eq, and, isNull } from 'drizzle-orm';
 import { neon } from '@neondatabase/serverless';
 import { persistCareerHistory, type RoleInput } from '@/lib/ai/candidate-context';
+import { renderCvMarkdown, type RenderableCv } from '@/lib/career-engine';
 
 export const maxDuration = 60;
 
@@ -350,6 +351,43 @@ export async function POST(req: NextRequest) {
   const finalRoles = (body.roles ?? body.cvSignals?.roles ?? []) as RoleInput[];
   if (finalRoles.length) {
     await persistCareerHistory(user.id, finalRoles, 'user_input');
+
+    // Re-render the CV markdown from structured data so it reflects the
+    // corrections. Best-effort — depends on migration 0004 (summary/skills).
+    try {
+      const prof = await db
+        .select({
+          summaryMarkdown: userProfiles.summaryMarkdown,
+          skills: userProfiles.skills,
+          education: userProfiles.education,
+          languages: userProfiles.languages,
+        })
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, user.id))
+        .limit(1);
+      const p = prof[0];
+      const regenerated = renderCvMarkdown({
+        summary: p?.summaryMarkdown ?? undefined,
+        roles: finalRoles.map((r) => ({
+          company: r.company, role: r.role,
+          startDate: r.startDate, endDate: r.endDate, current: r.current,
+          seniority: r.seniority, location: r.location, metrics: r.metrics,
+        })),
+        education: (p?.education as RenderableCv['education']) ?? [],
+        skills: (p?.skills as string[] | null) ?? [],
+        languages: (p?.languages as string[] | null) ?? body.cvSignals?.languages ?? [],
+      });
+      if (regenerated) {
+        await db.update(userProfiles).set({ cvMarkdown: regenerated }).where(eq(userProfiles.userId, user.id));
+        await sql`
+          INSERT INTO settings (key, value, updated_at)
+          VALUES (${`${user.email}:cv_content`}, ${regenerated}, NOW())
+          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+        `;
+      }
+    } catch (err) {
+      console.error('CV markdown re-render skipped:', err);
+    }
   }
 
   // Persist the engine's archetypes + which the user confirmed. These are the
