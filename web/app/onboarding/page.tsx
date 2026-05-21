@@ -110,6 +110,20 @@ export default function OnboardingPage() {
   const [searchStatus, setSearchStatus] = useState<string>('Open to the right thing');
   const [locationPick, setLocationPick] = useState<string>('');
   const [workArrangement, setWorkArrangement] = useState<string[]>(['Hybrid OK', 'Remote-first']);
+  // Custom-pill additions from the AddOwn link on Step 4.
+  const [extraSeniorityPills, setExtraSeniorityPills] = useState<string[]>([]);
+  const [extraWorkPills, setExtraWorkPills] = useState<string[]>([]);
+  // Extra roles added via the "Missing a role? Add it." link on Step 3.
+  const [extraRoles, setExtraRoles] = useState<CVRole[]>([]);
+  // Role indexes the user has explicitly confirmed — suppress amber on these.
+  const [confirmedAmber, setConfirmedAmber] = useState<Set<number>>(new Set());
+  // Per-role edit overrides (merged on top of cvSignals.roles + extraRoles).
+  const [roleOverrides, setRoleOverrides] = useState<Record<number, Partial<CVRole>>>({});
+  // Index of the role currently being edited inline (or null).
+  const [editingRoleIdx, setEditingRoleIdx] = useState<number | null>(null);
+  // Comp settings.
+  const [compCurrency, setCompCurrency] = useState<'USD' | 'EUR' | 'MXN' | 'CLP' | 'ARS' | 'BRL' | 'COP'>('USD');
+  const [compPeriod, setCompPeriod] = useState<'annual' | 'monthly'>('annual');
   const [minComp, setMinComp] = useState<string>('140,000');
   const [targetComp, setTargetComp] = useState<string>('170,000');
   const [narrative, setNarrative] = useState<string>(
@@ -118,6 +132,16 @@ export default function OnboardingPage() {
 
   // Step 5 tooltip auto-show.
   const [tipOpen, setTipOpen] = useState(false);
+
+  // Viewport: collapse multi-column grids and trim header chrome on small screens.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   const isDark = theme === 'dark';
   const c = isDark ? TOKENS.dark : TOKENS.light;
@@ -214,7 +238,7 @@ export default function OnboardingPage() {
       s5TipDismiss: 'Got it',
       s5HandoffH: 'Now we evaluate ',
       s5HandoffHEm: 'something real.',
-      s5HandoffS: "Paste a recruiter DM, a JD, or a job URL. You'll see what a full read looks like.",
+      s5HandoffS: "Paste a recruiter DM, a job posting, or a job URL. You'll see what a full read looks like.",
       s5HandoffCTA: 'Open Evaluate →',
       s5Back: '‹ Back',
       s5MidConfirmed: (n: number) => `${n} archetype${n === 1 ? '' : 's'} confirmed · saved to your profile`,
@@ -301,7 +325,7 @@ export default function OnboardingPage() {
       s5TipDismiss: 'Entendido',
       s5HandoffH: 'Ahora evaluamos ',
       s5HandoffHEm: 'algo real.',
-      s5HandoffS: 'Pega un DM de reclutador, una JD, o una URL de trabajo. Verás cómo se ve una lectura completa.',
+      s5HandoffS: 'Pega un DM de reclutador, una oferta, o una URL de trabajo. Verás cómo se ve una lectura completa.',
       s5HandoffCTA: 'Abrir Evaluar →',
       s5Back: '‹ Atrás',
       s5MidConfirmed: (n: number) =>
@@ -464,30 +488,60 @@ export default function OnboardingPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
     setUploading(true);
     setReadingRows([false, false, false, false, false, false, false]);
     setStep(2);
 
+    const callApi = async (body: object) => {
+      const res = await fetch('/api/settings/cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCvSignals(data.signals);
+        setArchetypes(generateArchetypes(data.signals));
+      } else {
+        const errBody = await res.text().catch(() => '');
+        alert(`Failed to upload resume.${errBody ? ` (${res.status})` : ''} Please try again.`);
+        setStep(1);
+      }
+      setUploading(false);
+    };
+
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64 = (event.target?.result as string).split(',')[1];
-        const res = await fetch('/api/settings/cv', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ base64, filename: file.name }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setCvSignals(data.signals);
-          setArchetypes(generateArchetypes(data.signals));
-        } else {
-          alert('Failed to upload resume. Please try again.');
+      if (ext === 'pdf') {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = (event.target?.result as string).split(',')[1];
+          callApi({ base64, filename: file.name });
+        };
+        reader.readAsDataURL(file);
+      } else if (ext === 'txt' || ext === 'md') {
+        const text = await file.text();
+        callApi({ text, filename: file.name });
+      } else if (ext === 'docx' || ext === 'doc') {
+        // mammoth is a small (~75KB) browser-friendly docx→html/text extractor.
+        // Dynamic import keeps it out of the initial bundle.
+        const mammoth = await import('mammoth');
+        const arrayBuffer = await file.arrayBuffer();
+        const { value: text } = await mammoth.extractRawText({ arrayBuffer });
+        if (!text?.trim()) {
+          alert('Could not extract text from this document. Try saving as PDF.');
           setStep(1);
+          setUploading(false);
+          return;
         }
+        callApi({ text, filename: file.name });
+      } else {
+        alert('Unsupported file type. Use PDF, DOCX, TXT, or MD.');
+        setStep(1);
         setUploading(false);
-      };
-      reader.readAsDataURL(file);
+        return;
+      }
     } catch {
       alert('Error uploading resume. Please try again.');
       setStep(1);
@@ -503,18 +557,41 @@ export default function OnboardingPage() {
     cvSignals?.yearSpan ?? cvSignals?.roles?.reduce((s, r) => s + (r.years || 0), 0) ?? 0;
 
   // For Step 3 — assign confidence dots: first 2 + last 2 high, middle medium,
-  // any role flagged in cvSignals.unsure goes to amber.
+  // Amber assignment, strictly capped at cvSignals.unclearRoles. We score each
+  // role's likelihood of being the unclear one (field-mention beats no-metrics),
+  // then mark the top N. Otherwise the unsure[] array can mention multiple
+  // facets of a single role and the count drifts above what Step 2 reported.
   const roleConfidence = useMemo(() => {
     const roles = cvSignals?.roles ?? [];
-    const unsureCompanies = new Set(
-      (cvSignals?.unsure ?? []).map((u) => u.extracted.toLowerCase())
+    const budget = cvSignals?.unclearRoles ?? 0;
+    if (budget === 0) {
+      return roles.map((_, idx) =>
+        idx < 2 || idx >= roles.length - 2 ? ('high' as const) : ('medium' as const)
+      );
+    }
+    const unsureFields = (cvSignals?.unsure ?? [])
+      .map((u) => (u.field ?? '').toLowerCase())
+      .filter(Boolean);
+    const scored = roles.map((r, idx) => {
+      const company = (r.company ?? '').toLowerCase();
+      const fieldHits = company ? unsureFields.filter((f) => f.includes(company)).length : 0;
+      const noMetrics = !r.metrics || r.metrics.length === 0;
+      const score = fieldHits * 10 + (noMetrics ? 1 : 0);
+      return { idx, score };
+    });
+    const amberIndexes = new Set(
+      scored
+        .filter((s) => s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, budget)
+        .map((s) => s.idx)
     );
-    return roles.map((r, idx) => {
-      if (unsureCompanies.has(r.company.toLowerCase())) return 'amber' as const;
+    return roles.map((_, idx) => {
+      if (amberIndexes.has(idx) && !confirmedAmber.has(idx)) return 'amber' as const;
       if (idx < 2 || idx >= roles.length - 2) return 'high' as const;
       return 'medium' as const;
     });
-  }, [cvSignals]);
+  }, [cvSignals, confirmedAmber]);
 
   const amberCount = roleConfidence.filter((c) => c === 'amber').length;
   const archConfirmedCount = archetypes.filter((a) => a.selected).length;
@@ -546,6 +623,7 @@ export default function OnboardingPage() {
         color: c.ink,
         fontFamily: '"Albert Sans", system-ui, sans-serif',
         transition: 'background .25s, color .25s',
+        overflowX: 'hidden',
       }}
     >
       {/* ─────────── Top chrome ─────────── */}
@@ -561,7 +639,7 @@ export default function OnboardingPage() {
           className="max-w-5xl mx-auto"
           style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 16, flexWrap: 'wrap' }}>
             {/* Brand */}
             <div
               style={{
@@ -586,12 +664,12 @@ export default function OnboardingPage() {
                 color: c.ink3,
               }}
             >
-              Step <span style={{ color: c.ink, fontWeight: 600 }}>{step}</span> of 5 —{' '}
-              {t.stepNames[step - 1]}
+              Step <span style={{ color: c.ink, fontWeight: 600 }}>{step}</span> of 5
+              {!isMobile && <> — {t.stepNames[step - 1]}</>}
             </div>
 
             {/* Step bars — done/current use --ink, future use --line */}
-            <div style={{ display: 'flex', gap: 4, flex: 1, maxWidth: 220 }}>
+            <div style={{ display: 'flex', gap: 4, flex: 1, maxWidth: 220, minWidth: 80 }}>
               {[1, 2, 3, 4, 5].map((s) => (
                 <div
                   key={s}
@@ -680,8 +758,12 @@ export default function OnboardingPage() {
                   color: c.ink3,
                 }}
               >
-                <span>{signedInEmail}</span>
-                <span style={{ opacity: 0.5 }}>·</span>
+                {!isMobile && (
+                  <>
+                    <span>{signedInEmail}</span>
+                    <span style={{ opacity: 0.5 }}>·</span>
+                  </>
+                )}
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
                   style={{
@@ -782,7 +864,7 @@ export default function OnboardingPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)',
             gap: 16,
             marginTop: 6,
           }}
@@ -1304,7 +1386,30 @@ export default function OnboardingPage() {
   // ─── Step 3 ────────────────────────────────────────────────────────
   function renderStep3() {
     if (!cvSignals) return null;
-    const roles = cvSignals.roles ?? [];
+    const baseRoles = [...(cvSignals.roles ?? []), ...extraRoles];
+    const roles = baseRoles.map((r, i) => ({ ...r, ...(roleOverrides[i] ?? {}) }));
+    const thisYear = new Date().getFullYear();
+    // Display order: most recent first.
+    //
+    // Anthropic's JSON omits startDate/endDate for CV roles — it only returns
+    // `years`. To merge those with user-added roles that DO have dates, we
+    // synthesize an end-year for the undated ones from their position in the
+    // (already-chronological) CV list, decaying by 1y per slot. That keeps the
+    // CV's original order intact while letting any dated role slot in by year.
+    const sortKey = (r: CVRole, fallbackIdx: number) => {
+      const end = r.current ? thisYear : parseInt(r.endDate ?? '', 10);
+      const start = parseInt(r.startDate ?? '', 10);
+      if (Number.isFinite(end)) {
+        // Dated: end year primary, start year as tiebreaker (later start wins).
+        return end * 10000 + (Number.isFinite(start) ? start : 0);
+      }
+      // Undated CV role — synthesize from position so order matches the CV.
+      return (thisYear - fallbackIdx) * 10000;
+    };
+    const displayOrder = roles
+      .map((r, idx) => ({ idx, key: sortKey(r, idx) }))
+      .sort((a, b) => b.key - a.key)
+      .map((o) => o.idx);
 
     return (
       <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -1352,19 +1457,42 @@ export default function OnboardingPage() {
         </div>
 
         {/* Role rows */}
-        {roles.map((role, idx) => {
+        {displayOrder.map((idx, displayPos) => {
+          const role = roles[idx];
           const conf = roleConfidence[idx];
           const isAmber = conf === 'amber';
           const dots = conf === 'high' ? '●●●' : conf === 'medium' ? '●●○' : '●○○';
+          if (editingRoleIdx === idx) {
+            return (
+              <RoleForm
+                key={`edit-${idx}`}
+                initial={role}
+                onSave={(r) => {
+                  setRoleOverrides((prev) => ({ ...prev, [idx]: r }));
+                  setEditingRoleIdx(null);
+                  // Editing implicitly confirms — drop the amber state.
+                  setConfirmedAmber((prev) => {
+                    const next = new Set(prev);
+                    next.add(idx);
+                    return next;
+                  });
+                }}
+                onCancel={() => setEditingRoleIdx(null)}
+                submitLabel={lang === 'en' ? 'Save changes' : 'Guardar cambios'}
+              />
+            );
+          }
           return (
             <div
               key={idx}
               className="animate-fade-up"
               style={{
-                animationDelay: `${idx * 40}ms`,
+                animationDelay: `${displayPos * 40}ms`,
                 display: 'grid',
-                gridTemplateColumns: '56px minmax(0, 1.6fr) minmax(0, 1fr) 100px',
-                gap: 18,
+                gridTemplateColumns: isMobile
+                  ? '56px minmax(0, 1fr) auto'
+                  : '56px minmax(0, 1.6fr) minmax(0, 1fr) 100px',
+                gap: isMobile ? 12 : 18,
                 alignItems: 'start',
                 background: isAmber ? c.signalSoft : c.surface,
                 border: `0.75px solid ${isAmber ? c.signal : c.line}`,
@@ -1391,7 +1519,7 @@ export default function OnboardingPage() {
                   flexShrink: 0,
                 }}
               >
-                {String(idx + 1).padStart(2, '0')}
+                {String(displayPos + 1).padStart(2, '0')}
               </div>
 
               {/* meta */}
@@ -1475,15 +1603,30 @@ export default function OnboardingPage() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {[
-                    role.startDate || role.endDate
-                      ? `${role.startDate ?? ''}${role.endDate ? ` – ${role.endDate}` : role.current ? ' – present' : ''}`
-                      : `${role.years} ${lang === 'en' ? 'yrs' : 'años'}`,
-                    role.teamSize ? `${lang === 'en' ? 'Team' : 'Equipo'} ${role.teamSize}` : null,
-                    role.location ?? null,
-                  ]
-                    .filter(Boolean)
-                    .join('  ·  ')}
+                  {(() => {
+                    const sN = parseInt(role.startDate ?? '', 10);
+                    const eN = parseInt(role.endDate ?? '', 10);
+                    let dateStr = '';
+                    if (Number.isFinite(sN) || Number.isFinite(eN)) {
+                      const lo = Number.isFinite(sN) && Number.isFinite(eN) ? Math.min(sN, eN) : (Number.isFinite(sN) ? sN : eN);
+                      const hi = Number.isFinite(sN) && Number.isFinite(eN) ? Math.max(sN, eN) : (Number.isFinite(eN) ? eN : sN);
+                      const hiStr = role.current ? (lang === 'en' ? 'present' : 'presente') : String(hi);
+                      dateStr = Number.isFinite(sN) && Number.isFinite(eN) && sN !== eN
+                        ? `${lo} – ${hiStr}`
+                        : (role.current ? `${lo} – ${hiStr}` : String(lo));
+                    } else {
+                      dateStr = role.years > 0
+                        ? `${role.years} ${lang === 'en' ? 'yrs' : 'años'}`
+                        : '—';
+                    }
+                    return [
+                      dateStr,
+                      role.teamSize ? `${lang === 'en' ? 'Team' : 'Equipo'} ${role.teamSize}` : null,
+                      role.location ?? null,
+                    ]
+                      .filter(Boolean)
+                      .join('  ·  ');
+                  })()}
                 </div>
               </div>
 
@@ -1498,6 +1641,7 @@ export default function OnboardingPage() {
                   fontSize: 13,
                   lineHeight: 1.5,
                   color: isAmber ? c.signalInk : c.ink2,
+                  ...(isMobile ? { gridColumn: '1 / -1' } : null),
                 }}
               >
                 {role.metrics?.[0] ? (
@@ -1505,21 +1649,80 @@ export default function OnboardingPage() {
                 ) : isAmber ? (
                   <>
                     {lang === 'en'
-                      ? "Couldn't extract a clear quantified outcome. "
-                      : 'No se pudo extraer un resultado cuantificado claro. '}
-                    <b style={{ color: c.signalInk, fontWeight: 600, cursor: 'pointer' }}>
-                      {t.s3AddOne}
-                    </b>
+                      ? "Couldn't extract a clear quantified outcome."
+                      : 'No se pudo extraer un resultado cuantificado claro.'}
                   </>
                 ) : (
                   <span style={{ opacity: 0.82 }}>
                     {lang === 'en' ? 'No specific outcome extracted.' : 'Sin resultado específico extraído.'}
                   </span>
                 )}
+                {isAmber && (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      paddingTop: 8,
+                      borderTop: `0.5px dashed ${c.signal}`,
+                      display: 'flex',
+                      gap: 10,
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <button
+                      onClick={() =>
+                        setConfirmedAmber((prev) => {
+                          const next = new Set(prev);
+                          next.add(idx);
+                          return next;
+                        })
+                      }
+                      style={{
+                        padding: '7px 16px',
+                        borderRadius: 999,
+                        background: c.signal,
+                        color: '#1a1208',
+                        border: `1.5px solid ${c.signal}`,
+                        fontFamily: '"Geist Mono", monospace',
+                        fontSize: 11,
+                        letterSpacing: '0.7px',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {lang === 'en' ? 'Looks right ✓' : 'Se ve bien ✓'}
+                    </button>
+                    <button
+                      onClick={() => setEditingRoleIdx(idx)}
+                      style={{
+                        padding: '7px 16px',
+                        borderRadius: 999,
+                        background: 'transparent',
+                        color: c.signalInk,
+                        border: `1.5px solid ${c.signal}`,
+                        fontFamily: '"Geist Mono", monospace',
+                        fontSize: 11,
+                        letterSpacing: '0.7px',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {lang === 'en' ? 'Edit role →' : 'Editar rol →'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* confidence dots */}
-              <div style={{ textAlign: 'right', paddingTop: 4 }}>
+              <div
+                style={{
+                  textAlign: 'right',
+                  paddingTop: 4,
+                  ...(isMobile ? { gridColumn: 3, gridRow: 1, alignSelf: 'center', paddingTop: 0 } : null),
+                }}
+              >
                 <span
                   style={{
                     fontFamily: '"Geist Mono", monospace',
@@ -1536,41 +1739,7 @@ export default function OnboardingPage() {
         })}
 
         {/* Add row */}
-        <div
-          style={{
-            border: `1px dashed ${c.line}`,
-            borderRadius: 12,
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            fontFamily: '"Albert Sans"',
-            fontSize: 13,
-            color: c.ink3,
-          }}
-        >
-          <span
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              border: `1px dashed ${c.ink3}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 12,
-            }}
-          >
-            +
-          </span>
-          <span>
-            {t.s3Add}
-            <span style={{ color: c.ink2, textDecoration: 'underline', textUnderlineOffset: 3 }}>
-              {t.s3AddLink}
-            </span>
-            .
-          </span>
-        </div>
+        <AddRoleButton onAdd={(r) => setExtraRoles((prev) => [...prev, r])} />
 
         {/* Footer */}
         <div
@@ -1636,12 +1805,16 @@ export default function OnboardingPage() {
     const seniorityFromCV = cvSignals ? inferSeniority(cvSignals.roles?.[0]) : 'Director';
     const indStr = industries.slice(0, 2).join(' & ');
 
-    // Question 1: archetype-shaped pills derived from CV
-    const lookingForPills = [
-      `${seniorityFromCV}, ${industries[0] ?? 'fintech'}`,
-      `${seniorityFromCV}, ${industries[1] ?? industries[0] ?? 'marketplaces'}`,
-      `${inferNextLevel(seniorityFromCV)}, ${industries[0] ?? 'fintech'}`,
-    ];
+    // Question 1: archetype-shaped pills derived from CV, plus user-added customs.
+    // De-duplicated because industries[0] and industries[1] can match.
+    const lookingForPills = Array.from(
+      new Set([
+        `${seniorityFromCV}, ${industries[0] ?? 'fintech'}`,
+        `${seniorityFromCV}, ${industries[1] ?? industries[0] ?? 'marketplaces'}`,
+        `${inferNextLevel(seniorityFromCV)}, ${industries[0] ?? 'fintech'}`,
+        ...extraSeniorityPills,
+      ])
+    );
 
     const searchStatusPills =
       lang === 'en'
@@ -1653,10 +1826,12 @@ export default function OnboardingPage() {
         ? [`${primaryCity} only`, 'Anywhere LatAm', 'LatAm + remote global', 'Open globally']
         : [`Solo ${primaryCity}`, 'Cualquier parte LatAm', 'LatAm + remoto global', 'Abierto globalmente'];
 
-    const workPills =
-      lang === 'en'
+    const workPills = [
+      ...(lang === 'en'
         ? ['Onsite OK', 'Hybrid OK', 'Remote-first', 'No preference']
-        : ['Oficina OK', 'Híbrido OK', 'Remoto primero', 'Sin preferencia'];
+        : ['Oficina OK', 'Híbrido OK', 'Remoto primero', 'Sin preferencia']),
+      ...extraWorkPills,
+    ];
 
     return (
       <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -1710,7 +1885,12 @@ export default function OnboardingPage() {
                 </QPill>
               ))}
             </PillRow>
-            <AddOwn />
+            <AddOwn
+              onAdd={(v) => {
+                setExtraSeniorityPills((prev) => (prev.includes(v) ? prev : [...prev, v]));
+                setSeniorityPick(v);
+              }}
+            />
           </QBlock>
 
           {/* Q2 — Search status */}
@@ -1759,7 +1939,12 @@ export default function OnboardingPage() {
                 </QPill>
               ))}
             </PillRow>
-            <AddOwn />
+            <AddOwn
+              onAdd={(v) => {
+                setExtraWorkPills((prev) => (prev.includes(v) ? prev : [...prev, v]));
+                setWorkArrangement((prev) => (prev.includes(v) ? prev : [...prev, v]));
+              }}
+            />
             <Caption>
               {t.s4Q4Caption1}
               <b style={{ color: c.ink, fontWeight: 500 }}>"{arrangementQuote}"</b>
@@ -1779,10 +1964,76 @@ export default function OnboardingPage() {
           <QBlock isLast={false}>
             <Prompt>{t.s4Q5}</Prompt>
             <Helper>{t.s4Q5Help}</Helper>
+            {/* Currency + period controls */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  gap: 2,
+                  padding: 3,
+                  borderRadius: 999,
+                  border: `0.75px solid ${c.line}`,
+                  background: c.surface,
+                }}
+              >
+                {(['USD', 'EUR', 'MXN', 'CLP', 'ARS', 'BRL', 'COP'] as const).map((cur) => (
+                  <button
+                    key={cur}
+                    onClick={() => setCompCurrency(cur)}
+                    style={{
+                      border: 0,
+                      padding: '4px 10px',
+                      borderRadius: 999,
+                      fontFamily: '"Geist Mono", monospace',
+                      fontSize: 11,
+                      fontWeight: 500,
+                      letterSpacing: '0.5px',
+                      cursor: 'pointer',
+                      background: compCurrency === cur ? c.ink : 'transparent',
+                      color: compCurrency === cur ? c.bg : c.ink3,
+                    }}
+                  >
+                    {cur}
+                  </button>
+                ))}
+              </div>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  gap: 2,
+                  padding: 3,
+                  borderRadius: 999,
+                  border: `0.75px solid ${c.line}`,
+                  background: c.surface,
+                }}
+              >
+                {(['annual', 'monthly'] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setCompPeriod(p)}
+                    style={{
+                      border: 0,
+                      padding: '4px 12px',
+                      borderRadius: 999,
+                      fontFamily: '"Albert Sans"',
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      background: compPeriod === p ? c.ink : 'transparent',
+                      color: compPeriod === p ? c.bg : c.ink3,
+                    }}
+                  >
+                    {p === 'annual'
+                      ? (lang === 'en' ? 'Annual' : 'Anual')
+                      : (lang === 'en' ? 'Monthly' : 'Mensual')}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                 gap: 12,
                 maxWidth: 480,
               }}
@@ -1973,7 +2224,7 @@ export default function OnboardingPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))',
             gap: 14,
           }}
         >
@@ -2079,10 +2330,12 @@ export default function OnboardingPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)',
             border: `0.75px solid ${c.line}`,
             borderRadius: 13,
-            overflow: 'hidden',
+            // overflow: visible (not hidden) so the orientation tooltip can pop
+            // outside the strip without being clipped. Inner cells get explicit
+            // corner radii below to keep the rounded look.
             background: c.surface,
           }}
         >
@@ -2125,7 +2378,8 @@ export default function OnboardingPage() {
             style={{
               background: c.canvas,
               padding: '18px 22px',
-              borderLeft: `0.75px solid ${c.line}`,
+              [isMobile ? 'borderTop' : 'borderLeft']: `0.75px solid ${c.line}`,
+              borderRadius: isMobile ? '0 0 12px 12px' : '0 12px 12px 0',
               display: 'flex',
               flexDirection: 'column',
               gap: 6,
@@ -2166,7 +2420,7 @@ export default function OnboardingPage() {
                     position: 'absolute',
                     right: 0,
                     bottom: 'calc(100% + 10px)',
-                    width: 280,
+                    width: 'min(280px, calc(100vw - 48px))',
                     background: c.ink,
                     color: c.bg,
                     borderRadius: 11,
@@ -2455,23 +2709,303 @@ export default function OnboardingPage() {
     );
   }
 
-  function AddOwn() {
+  function AddRoleButton({ onAdd }: { onAdd: (r: CVRole) => void }) {
+    const [open, setOpen] = useState(false);
+    if (!open) {
+      return (
+        <div
+          onClick={() => setOpen(true)}
+          style={{
+            border: `1px dashed ${c.line}`,
+            borderRadius: 12,
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontFamily: '"Albert Sans"',
+            fontSize: 13,
+            color: c.ink3,
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              border: `1px dashed ${c.ink3}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 12,
+            }}
+          >
+            +
+          </span>
+          <span>
+            {t.s3Add}
+            <span style={{ color: c.ink2, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+              {t.s3AddLink}
+            </span>
+            .
+          </span>
+        </div>
+      );
+    }
     return (
-      <span
+      <RoleForm
+        onSave={(r) => { onAdd(r); setOpen(false); }}
+        onCancel={() => setOpen(false)}
+        submitLabel={lang === 'en' ? 'Add role' : 'Añadir rol'}
+      />
+    );
+  }
+
+  function RoleForm({
+    initial,
+    onSave,
+    onCancel,
+    submitLabel,
+  }: {
+    initial?: Partial<CVRole>;
+    onSave: (r: CVRole) => void;
+    onCancel: () => void;
+    submitLabel: string;
+  }) {
+    const thisYear = new Date().getFullYear();
+    const [company, setCompany] = useState(initial?.company ?? '');
+    const [role, setRole] = useState(initial?.role ?? '');
+    const [fromYear, setFromYear] = useState(initial?.startDate ?? '');
+    const [toYear, setToYear] = useState(initial?.current ? '' : (initial?.endDate ?? ''));
+    const [current, setCurrent] = useState(!!initial?.current);
+    const [outcome, setOutcome] = useState(initial?.metrics?.[0] ?? '');
+
+    const commit = () => {
+      const co = company.trim();
+      const ro = role.trim();
+      const fromN = parseInt(fromYear, 10);
+      const toN = current ? thisYear : parseInt(toYear, 10);
+      if (!co || !ro) { onCancel(); return; }
+      const years = Number.isFinite(fromN) && Number.isFinite(toN) && toN >= fromN ? toN - fromN : 0;
+      const cleanOutcome = outcome.trim();
+      onSave({
+        company: co,
+        role: ro,
+        years,
+        current,
+        metrics: cleanOutcome ? [cleanOutcome] : [],
+        startDate: Number.isFinite(fromN) ? String(fromN) : undefined,
+        endDate: current ? undefined : (Number.isFinite(toN) ? String(toN) : undefined),
+      });
+    };
+
+    const fieldStyle: React.CSSProperties = {
+      padding: '8px 12px',
+      borderRadius: 8,
+      border: `0.75px solid ${c.line}`,
+      background: c.surface,
+      color: c.ink,
+      fontFamily: '"Albert Sans"',
+      fontSize: 13,
+      outline: 'none',
+      minWidth: 0,
+    };
+
+    const fromN = parseInt(fromYear, 10);
+    const toN = parseInt(toYear, 10);
+    const allYears = Array.from({ length: 45 }, (_, i) => thisYear - i);
+    // From can't be after To (when To is set). To can't be before From.
+    const fromOptions = Number.isFinite(toN) ? allYears.filter((y) => y <= toN) : allYears;
+    const toOptions = Number.isFinite(fromN) ? allYears.filter((y) => y >= fromN) : allYears;
+
+    return (
+      <div
         style={{
-          fontFamily: '"Fraunces", serif',
-          fontStyle: 'italic',
-          fontSize: 13.5,
-          color: c.ink2,
-          textDecoration: 'underline',
-          textDecorationColor: c.ink3,
-          textUnderlineOffset: 4,
-          cursor: 'pointer',
-          alignSelf: 'flex-start',
+          border: `1px dashed ${c.line}`,
+          borderRadius: 12,
+          padding: '14px 16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
         }}
       >
-        {t.s4Addown}
-      </span>
+        <input
+          autoFocus={!initial}
+          placeholder={lang === 'en' ? 'Company' : 'Empresa'}
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && commit()}
+          style={fieldStyle}
+        />
+        <input
+          placeholder={lang === 'en' ? 'Role' : 'Rol'}
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && commit()}
+          style={fieldStyle}
+        />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr auto',
+            gap: 8,
+            alignItems: 'center',
+          }}
+        >
+          <select
+            value={fromYear}
+            onChange={(e) => setFromYear(e.target.value)}
+            style={{ ...fieldStyle, appearance: 'auto' }}
+          >
+            <option value="">{lang === 'en' ? 'From' : 'Desde'}</option>
+            {fromOptions.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <select
+            value={current ? '' : toYear}
+            onChange={(e) => setToYear(e.target.value)}
+            disabled={current}
+            style={{ ...fieldStyle, appearance: 'auto', opacity: current ? 0.5 : 1 }}
+          >
+            <option value="">{lang === 'en' ? 'To' : 'Hasta'}</option>
+            {toOptions.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontFamily: '"Albert Sans"',
+              fontSize: 12.5,
+              color: c.ink2,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              gridColumn: isMobile ? '1 / -1' : 'auto',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={current}
+              onChange={(e) => setCurrent(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            {lang === 'en' ? 'Current role' : 'Rol actual'}
+          </label>
+        </div>
+        <textarea
+          placeholder={lang === 'en'
+            ? 'Outcome — one line, ideally with a number'
+            : 'Resultado — una línea, idealmente con un número'}
+          value={outcome}
+          onChange={(e) => setOutcome(e.target.value)}
+          rows={2}
+          style={{
+            ...fieldStyle,
+            resize: 'vertical',
+            fontFamily: '"Albert Sans"',
+            lineHeight: 1.4,
+          }}
+        />
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 2 }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: '8px 14px',
+              background: 'transparent',
+              border: 0,
+              color: c.ink3,
+              fontFamily: '"Geist Mono", monospace',
+              fontSize: 11,
+              cursor: 'pointer',
+            }}
+          >
+            {lang === 'en' ? 'Cancel' : 'Cancelar'}
+          </button>
+          <button
+            onClick={commit}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 999,
+              background: c.ink,
+              color: c.bg,
+              border: 0,
+              fontFamily: '"Albert Sans"',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            {submitLabel}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function AddOwn({ onAdd }: { onAdd?: (value: string) => void }) {
+    const [editing, setEditing] = useState(false);
+    const [value, setValue] = useState('');
+
+    const commit = () => {
+      const v = value.trim();
+      if (!v) {
+        setEditing(false);
+        return;
+      }
+      onAdd?.(v);
+      setValue('');
+      setEditing(false);
+    };
+
+    if (!editing) {
+      return (
+        <span
+          onClick={() => setEditing(true)}
+          style={{
+            fontFamily: '"Fraunces", serif',
+            fontStyle: 'italic',
+            fontSize: 13.5,
+            color: c.ink2,
+            textDecoration: 'underline',
+            textDecorationColor: c.ink3,
+            textUnderlineOffset: 4,
+            cursor: 'pointer',
+            alignSelf: 'flex-start',
+          }}
+        >
+          {t.s4Addown}
+        </span>
+      );
+    }
+
+    return (
+      <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start', alignItems: 'center' }}>
+        <input
+          autoFocus
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit();
+            if (e.key === 'Escape') { setValue(''); setEditing(false); }
+          }}
+          onBlur={commit}
+          placeholder={lang === 'en' ? 'Your own…' : 'El tuyo…'}
+          style={{
+            padding: '6px 12px',
+            borderRadius: 999,
+            border: `0.75px solid ${c.line}`,
+            background: c.surface,
+            color: c.ink,
+            fontFamily: '"Albert Sans"',
+            fontSize: 13,
+            outline: 'none',
+            minWidth: 180,
+          }}
+        />
+      </div>
     );
   }
 
@@ -2539,7 +3073,10 @@ export default function OnboardingPage() {
               minWidth: 0,
             }}
           />
-          <span style={{ color: c.ink3, fontWeight: 500, fontSize: 11.5, marginLeft: 4 }}>USD</span>
+          <span style={{ color: c.ink3, fontWeight: 500, fontSize: 11.5, marginLeft: 4 }}>
+            {compCurrency}
+            {compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : ''}
+          </span>
         </div>
       </div>
     );

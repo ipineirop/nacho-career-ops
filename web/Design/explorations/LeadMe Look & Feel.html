@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Look &amp; Feel · 3 directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Söhne:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,wght@0,400..700;1,400..700&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #ebe9e3;
+    --doc-ink: #14140f;
+    --doc-ink-2: #4a4a44;
+    --doc-ink-3: #87867f;
+    --doc-line: #cfcdc4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Manrope", system-ui, sans-serif;
+    background: var(--page-bg);
+    color: var(--doc-ink);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc-page { max-width: 1480px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  /* Doc header */
+  .doc-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;
+    padding-bottom: 24px; border-bottom: 1px solid var(--doc-ink);
+    margin-bottom: 16px;
+  }
+  .doc-head h1 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-variation-settings: "SOFT" 50;
+    font-size: 56px; line-height: 1; margin: 0; letter-spacing: -1px;
+  }
+  .doc-head h1 em { font-style: italic; }
+  .doc-head .sub {
+    max-width: 560px; color: var(--doc-ink-2);
+    font-size: 14.5px; line-height: 1.55;
+  }
+  .doc-head .meta {
+    display: inline-flex; gap: 10px; align-items: center;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--doc-ink-3); letter-spacing: 0.4px;
+    text-transform: uppercase; margin-top: 4px;
+  }
+
+  /* Brief banner */
+  .brief {
+    display: grid; grid-template-columns: 200px 1fr; gap: 24px;
+    padding: 18px 0 28px; border-bottom: 1px dashed var(--doc-line);
+    margin-bottom: 36px;
+  }
+  .brief .label {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--doc-ink-3); letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .brief .body {
+    font-family: "Manrope", sans-serif; font-size: 14.5px; line-height: 1.6;
+    color: var(--doc-ink-2); max-width: 880px;
+  }
+  .brief .body b { color: var(--doc-ink); font-weight: 600; }
+  .brief .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .brief .pill {
+    border: 1px solid var(--doc-ink); padding: 2px 10px; border-radius: 999px;
+    font-size: 12px; background: transparent; color: var(--doc-ink);
+  }
+  .brief .pill.strike { text-decoration: line-through; color: var(--doc-ink-3); border-color: var(--doc-line); }
+
+  /* Direction card */
+  .dir {
+    margin-bottom: 56px;
+    background: white;
+    border: 1px solid var(--doc-ink);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .dir-head {
+    display: flex; gap: 24px; align-items: stretch;
+    padding: 24px 28px; border-bottom: 1px solid var(--doc-line);
+  }
+  .dir-head .num {
+    font-family: "Geist Mono", monospace; font-size: 12px; letter-spacing: 1px;
+    color: var(--doc-ink-3); text-transform: uppercase;
+  }
+  .dir-head h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-variation-settings: "SOFT" 50;
+    font-size: 38px; line-height: 1; margin: 4px 0 0;
+    letter-spacing: -.5px;
+  }
+  .dir-head h2 em { font-style: italic; }
+  .dir-head .tag {
+    font-size: 13.5px; line-height: 1.55; color: var(--doc-ink-2);
+    max-width: 560px; margin-top: 8px;
+  }
+  .dir-head .refs {
+    margin-left: auto; display: flex; flex-direction: column; gap: 8px;
+    align-items: flex-end; min-width: 240px;
+  }
+  .dir-head .refs .lbl {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--doc-ink-3); letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .dir-head .refs .ref {
+    font-size: 13px; color: var(--doc-ink-2); font-style: italic;
+  }
+  .dir-body { padding: 24px 28px 32px; }
+
+  /* Specimen grid */
+  .specimen {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .spec-block {
+    border: 1px solid var(--doc-line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .spec-block .spec-label {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--doc-ink-3); letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 10px 14px;
+    border-bottom: 1px dashed var(--doc-line);
+    background: #fafaf7;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .spec-block .spec-body { padding: 16px; }
+
+  /* Palette */
+  .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .swatch { border-radius: 4px; aspect-ratio: 1 / 1.1; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(0,0,0,.06); }
+  .swatch .name { font-family: "Geist Mono", monospace; font-size: 10px; letter-spacing: 0.4px; text-transform: uppercase; opacity: .9; }
+  .swatch .hex { font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: 0.4px; }
+
+  /* Type specimen */
+  .type-line { margin-bottom: 12px; }
+  .type-line .tl-meta {
+    font-family: "Geist Mono", monospace; font-size: 10px; color: var(--doc-ink-3);
+    letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .type-line .tl-sample { line-height: 1.05; }
+  .type-line .tl-mini { font-size: 13px; color: var(--doc-ink-2); margin-top: 4px; line-height: 1.5; }
+
+  /* Annotation */
+  .annot {
+    margin: 22px 0 0;
+    padding: 14px 16px;
+    background: #f6f4ee;
+    border-left: 2px solid var(--doc-ink);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--doc-ink-2);
+  }
+  .annot b { color: var(--doc-ink); font-weight: 600; }
+
+  /* ========== DIRECTION 01 · LEDGER ========== */
+  .dir-01 .dir-head {
+    background: #f6f3ea;
+  }
+  .dir-01 .dir-head h2,
+  .dir-01 .dir-head .num { color: #0f1410; }
+  .dir-01 .dir-head .ref { color: #4a4e44; }
+  /* Tokens */
+  .dir-01 { --d-bg: #f6f3ea; --d-paper: #fcfaf2; --d-ink: #0f1410; --d-ink-2: #4a4e44; --d-ink-3: #87887d; --d-line: #d5d1c1; --d-accent: #1f6f4f; --d-accent-soft: #def0e3; --d-warn: #b8743b; --d-flag: #a13b2f; }
+
+  /* ========== DIRECTION 02 · MOVE ========== */
+  .dir-02 .dir-head { background: #ffffff; border-bottom: 1px solid #ececea; }
+  .dir-02 .dir-head h2 { color: #0a0a0a; font-family: "Albert Sans", sans-serif; font-weight: 600; letter-spacing: -1px; }
+  .dir-02 { --d-bg: #ffffff; --d-paper: #ffffff; --d-ink: #0a0a0a; --d-ink-2: #545454; --d-ink-3: #8e8e8e; --d-line: #ececea; --d-accent: #0a8a5a; --d-accent-soft: #e6f5ee; --d-warn: #b8743b; --d-flag: #a13b2f; }
+
+  /* ========== DIRECTION 03 · BRIEFING ========== */
+  .dir-03 .dir-head { background: #14181d; color: #f0eee4; }
+  .dir-03 .dir-head h2 { color: #f0eee4; }
+  .dir-03 .dir-head .num { color: #8a8c83; }
+  .dir-03 .dir-head .tag { color: #b6b6ab; }
+  .dir-03 .dir-head .lbl { color: #8a8c83; }
+  .dir-03 .dir-head .ref { color: #b6b6ab; }
+  .dir-03 { --d-bg: #14181d; --d-paper: #1a1f25; --d-ink: #f0eee4; --d-ink-2: #b6b6ab; --d-ink-3: #8a8c83; --d-line: #2c333b; --d-accent: #4ca59a; --d-accent-soft: #1a3835; --d-warn: #d4a14b; --d-flag: #d96d5a; }
+
+  /* ===== rendered samples · live tokens ===== */
+  .sample-frame {
+    border: 1px solid var(--d-line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--d-bg);
+    color: var(--d-ink);
+  }
+  .sample-frame .frame-head {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--d-line);
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--d-ink-3); letter-spacing: .5px; text-transform: uppercase;
+    background: var(--d-paper);
+  }
+  .sample-frame .frame-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Direction 01 — Ledger sample */
+  .dir-01 .editorial-h {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-variation-settings: "SOFT" 60;
+    font-size: 28px; line-height: 1.1; letter-spacing: -0.3px; color: var(--d-ink);
+  }
+  .dir-01 .editorial-h em { font-style: italic; font-feature-settings: "ss01"; }
+  .dir-01 .editorial-kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--d-ink-3);
+  }
+  .dir-01 .body-copy { font-family: "Manrope", sans-serif; font-size: 14.5px; line-height: 1.55; color: var(--d-ink-2); }
+  .dir-01 .ui-text { font-family: "Manrope", sans-serif; }
+  .dir-01 .mono-text { font-family: "Geist Mono", monospace; }
+
+  /* Direction 02 — Move sample */
+  .dir-02 .editorial-h {
+    font-family: "Albert Sans", sans-serif; font-weight: 600;
+    font-size: 30px; line-height: 1.05; letter-spacing: -0.6px; color: var(--d-ink);
+  }
+  .dir-02 .editorial-kicker {
+    font-family: "Albert Sans", sans-serif; font-weight: 600; font-size: 11px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--d-ink-3);
+  }
+  .dir-02 .body-copy { font-family: "Albert Sans", sans-serif; font-size: 14.5px; line-height: 1.5; color: var(--d-ink-2); font-weight: 400; }
+  .dir-02 .ui-text { font-family: "Albert Sans", sans-serif; }
+  .dir-02 .mono-text { font-family: "Geist Mono", monospace; }
+
+  /* Direction 03 — Briefing sample */
+  .dir-03 .editorial-h {
+    font-family: "Newsreader", serif; font-weight: 400;
+    font-size: 30px; line-height: 1.1; letter-spacing: -0.4px; color: var(--d-ink);
+  }
+  .dir-03 .editorial-h em { font-style: italic; color: #e2dfd1; }
+  .dir-03 .editorial-kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--d-ink-3);
+  }
+  .dir-03 .body-copy { font-family: "Space Grotesk", sans-serif; font-size: 14.5px; line-height: 1.55; color: var(--d-ink-2); }
+  .dir-03 .ui-text { font-family: "Space Grotesk", sans-serif; }
+  .dir-03 .mono-text { font-family: "Geist Mono", monospace; }
+
+  /* shared sample components */
+  .lead-card {
+    border: 1px solid var(--d-line); border-radius: 6px; padding: 16px 18px; background: var(--d-paper);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .lead-card .row { display: flex; gap: 12px; align-items: center; }
+  .lead-card .col { display: flex; flex-direction: column; gap: 6px; }
+  .lead-card .avatar {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px; flex-shrink: 0;
+    border: 1px solid var(--d-line);
+  }
+  .dir-01 .lead-card .avatar { background: var(--d-accent-soft); color: var(--d-accent); border-color: var(--d-accent); }
+  .dir-02 .lead-card .avatar { background: var(--d-accent-soft); color: var(--d-accent); border-color: var(--d-accent); border-radius: 10px; }
+  .dir-03 .lead-card .avatar { background: var(--d-accent-soft); color: var(--d-accent); border-color: var(--d-line); }
+
+  .score-chip {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 16px;
+    background: var(--d-accent); color: white; flex-shrink: 0;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--d-line); background: var(--d-paper); color: var(--d-ink-2);
+  }
+  .pill.accent { background: var(--d-accent-soft); color: var(--d-accent); border-color: transparent; }
+  .pill.warn { background: transparent; color: var(--d-warn); border-color: var(--d-warn); }
+  .pill.flag { background: transparent; color: var(--d-flag); border-color: var(--d-flag); }
+  .pill.solid { background: var(--d-ink); color: var(--d-bg); border-color: var(--d-ink); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 13.5px; font-weight: 500;
+    border: 1px solid var(--d-ink); background: var(--d-paper); color: var(--d-ink);
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--d-ink); color: var(--d-bg); border-color: var(--d-ink); }
+  .dir-02 .btn.primary { background: var(--d-accent); color: white; border-color: var(--d-accent); border-radius: 999px; padding: 7px 16px; }
+  .dir-03 .btn.primary { background: var(--d-accent); color: #0a0d11; border-color: var(--d-accent); }
+  .btn.ghost { background: transparent; border-color: var(--d-line); color: var(--d-ink-2); }
+
+  /* salary band */
+  .salary-band {
+    border: 1px solid var(--d-line); border-radius: 6px;
+    padding: 10px 12px; background: var(--d-paper);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .salary-band .meter {
+    position: relative; height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, transparent 0%, var(--d-line) 20%, var(--d-line) 80%, transparent 100%);
+  }
+  .salary-band .meter .band {
+    position: absolute; top: 0; height: 100%; border-radius: 4px;
+    background: var(--d-accent); opacity: .35;
+  }
+  .salary-band .meter .pin {
+    position: absolute; top: -3px; width: 2px; height: 14px;
+    background: var(--d-flag);
+  }
+  .salary-band .meta { display: flex; gap: 8px; align-items: center; font-size: 11.5px; }
+
+  /* spec callout */
+  .callout {
+    border-top: 1px dashed var(--doc-line);
+    padding-top: 16px; margin-top: 16px;
+    display: grid; grid-template-columns: 200px 1fr; gap: 24px;
+    font-size: 13px;
+  }
+  .callout dt {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--doc-ink-3); letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .callout dd { margin: 0; color: var(--doc-ink-2); line-height: 1.55; }
+  .callout dd b { color: var(--doc-ink); font-weight: 600; }
+
+  /* decision footer */
+  .decision {
+    margin-top: 40px; padding: 24px 28px;
+    background: white; border: 1px solid var(--doc-ink); border-radius: 8px;
+  }
+  .decision h3 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 24px; margin: 0 0 12px; letter-spacing: -.3px;
+  }
+  .decision .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+  .decision .opt {
+    border: 1px solid var(--doc-line); border-radius: 6px; padding: 14px 16px;
+    font-size: 13.5px; line-height: 1.5; color: var(--doc-ink-2);
+  }
+  .decision .opt b { color: var(--doc-ink); }
+</style>
+</head>
+<body>
+<div class="doc-page">
+
+  <header class="doc-head">
+    <div>
+      <h1>Look &amp; <em>feel</em></h1>
+      <div class="meta">v0.1 · 3 directions · for review</div>
+    </div>
+    <div class="sub">
+      Translating the wireframes into a voice. Sweet spot between <b>Linear-style pro tool</b> and <b>warm-companion trust</b> — calibrated <b>4/10 on the warmth scale</b>, professional first. No oranges. No purples. Sketchy hand-feel retired. Uber Eats restaurant app as the gravitational anchor.
+    </div>
+  </header>
+
+  <!-- ====== BRIEF ====== -->
+  <div class="brief">
+    <div class="label">the brief</div>
+    <div class="body">
+      LeadMe is a quiet, trusted advisor — not a job board, not a CRM, not a chatbot. The product surface should feel like <b>a sharp desk tool that respects your time</b>: confident typography, generous spacing, a single decisive accent color, and editorial moments for the Brief itself.
+      <div class="pills">
+        <span class="pill">calm pro tool</span>
+        <span class="pill">honest, candid voice</span>
+        <span class="pill">editorial restraint</span>
+        <span class="pill">LatAm-aware, not LatAm-decorated</span>
+        <span class="pill strike">orange accent</span>
+        <span class="pill strike">purple accent</span>
+        <span class="pill strike">paper texture / hand-drawn</span>
+        <span class="pill strike">badge / counter overload</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 01 · LEDGER                                          -->
+  <!-- ============================================================ -->
+  <section class="dir dir-01">
+    <div class="dir-head">
+      <div>
+        <div class="num">DIRECTION 01</div>
+        <h2>Ledger</h2>
+        <div class="tag">A calm, slightly editorial pro tool. Cream-paper neutrals updated to feel modern — not vintage. A single deep <b>forest green</b> as the load-bearing accent. Serif headlines for the Brief; clean sans for everything else. Reads as the careful tool a <em>finance ops director</em> would actually want to open in the morning.</div>
+      </div>
+      <div class="refs">
+        <div class="lbl">References</div>
+        <div class="ref">FT Weekend · Mercury (early) · Vercel docs · Substack Pro</div>
+        <div class="lbl" style="margin-top: 4px;">Warmth · 4 / 10</div>
+      </div>
+    </div>
+    <div class="dir-body">
+
+      <div class="specimen">
+        <div class="spec-block">
+          <div class="spec-label">Palette · 5 tokens</div>
+          <div class="spec-body">
+            <div class="palette">
+              <div class="swatch" style="background: #f6f3ea; color: #14140f;"><span class="name">paper</span><span class="hex">#F6F3EA</span></div>
+              <div class="swatch" style="background: #fcfaf2; color: #14140f;"><span class="name">surface</span><span class="hex">#FCFAF2</span></div>
+              <div class="swatch" style="background: #0f1410; color: #f6f3ea;"><span class="name">ink</span><span class="hex">#0F1410</span></div>
+              <div class="swatch" style="background: #1f6f4f; color: white;"><span class="name">accent</span><span class="hex">#1F6F4F</span></div>
+              <div class="swatch" style="background: #def0e3; color: #1f6f4f;"><span class="name">accent-soft</span><span class="hex">#DEF0E3</span></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;">
+              <div class="swatch" style="background: #b8743b; color: white; aspect-ratio: 2/1;"><span class="name">warn</span><span class="hex">#B8743B</span></div>
+              <div class="swatch" style="background: #a13b2f; color: white; aspect-ratio: 2/1;"><span class="name">flag</span><span class="hex">#A13B2F</span></div>
+            </div>
+            <div style="font-size: 12px; color: var(--doc-ink-3); margin-top: 12px; line-height: 1.5;">Warm "below-band" warn brown — sits in the orange family but pulled toward earth. Used <em>sparingly</em>, for actual under-market flags only.</div>
+          </div>
+        </div>
+
+        <div class="spec-block">
+          <div class="spec-label">Type · serif × sans pairing</div>
+          <div class="spec-body" style="background: #fcfaf2;">
+            <div class="type-line">
+              <div class="tl-meta">Fraunces · variable serif · headlines &amp; brief</div>
+              <div class="tl-sample" style="font-family: 'Fraunces', serif; font-variation-settings: 'SOFT' 60; font-weight: 400; font-size: 40px; letter-spacing: -0.5px; color: #14140f;">Today's brief, <em>quietly</em>.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta">Manrope · neutral sans · UI &amp; body</div>
+              <div class="tl-sample" style="font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 500; color: #14140f;">5 picks worth your time. 18 muted.</div>
+              <div class="tl-mini" style="font-family: 'Manrope', sans-serif;">Body copy stays in Manrope — humanist enough to read warm, geometric enough to hold a table together. 14.5px on a 1.55 line, by default.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta">Geist Mono · numerics, labels, the receipts</div>
+              <div class="tl-sample" style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #4a4e44; letter-spacing: 0.4px;">MXN $1.9M · est · medium confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live sample: Discover card -->
+      <div class="sample-frame">
+        <div class="frame-head"><span>leadme.app / discover / kavak</span><span style="margin-left: auto;">discover · brief sample</span></div>
+        <div class="frame-body">
+          <div class="editorial-kicker">No. 1 · strong fit · 2 days ago · linkedin latam</div>
+          <div class="editorial-h">Kavak just opened <em>your seat</em>.</div>
+
+          <div class="lead-card">
+            <div class="row">
+              <div class="avatar">KV</div>
+              <div class="col" style="flex: 1;">
+                <div class="ui-text" style="font-weight: 600; font-size: 16px;">Director of Operations</div>
+                <div class="ui-text" style="font-size: 13.5px; color: var(--d-ink-2);">Kavak · CDMX · Hybrid · Mobility / fintech</div>
+              </div>
+              <div class="score-chip">91</div>
+            </div>
+
+            <div class="salary-band">
+              <div class="row" style="font-size: 13px;">
+                <span class="mono-text" style="font-weight: 500; color: var(--d-ink);">USD $115–145k</span>
+                <span class="mono-text" style="color: var(--d-ink-3); font-size: 11.5px;">est · base</span>
+                <span class="pill accent" style="margin-left: auto;">in your band</span>
+              </div>
+              <div class="meter">
+                <div class="band" style="left: 38%; width: 32%;"></div>
+                <div class="pin" style="left: 52%;"></div>
+              </div>
+              <div class="meta">
+                <span class="mono-text" style="color: var(--d-ink-3);">your floor $95k</span>
+                <span class="mono-text" style="margin-left: auto; color: var(--d-ink-3);">confidence ●●●</span>
+              </div>
+            </div>
+
+            <div class="body-copy">
+              Scope matches your Clip role almost line-for-line — ops org of 40+, fraud + risk + biz ops. <b style="color: var(--d-ink);">Susana M.</b> (ex-Cornershop, 4 mutuals) is the hiring manager.
+            </div>
+
+            <div class="row">
+              <button class="btn primary">Tailor &amp; apply</button>
+              <button class="btn">Evaluate</button>
+              <button class="btn ghost">Save</button>
+              <button class="btn ghost" style="margin-left: auto;">Mute</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annot">
+        <b>Why this works.</b> Cream paper instead of pure white gives the Brief a quiet "you're reading something" feel without being precious. The serif is reserved for moments — headlines, the editor's note — never for UI. Geist Mono carries the data-feel that an ops director appreciates. One green, used decisively.
+      </div>
+
+      <dl class="callout">
+        <dt>Best for</dt>
+        <dd>Reading-forward surfaces — Discover, Evaluate's verdict, Brief headers. Where the product wants to feel <b>considered</b>.</dd>
+        <dt>Weakest at</dt>
+        <dd>Dense table screens — Tracker can risk feeling too "letterheaded." Solvable by tightening density on those screens specifically.</dd>
+        <dt>The risk</dt>
+        <dd>If we drift too far editorial, it loses the "tool" identity. <b>Anchor: every action button is rectangular and decisive — no soft pills for primary CTAs.</b></dd>
+      </dl>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 02 · MOVE                                            -->
+  <!-- ============================================================ -->
+  <section class="dir dir-02">
+    <div class="dir-head">
+      <div>
+        <div class="num">DIRECTION 02</div>
+        <h2 style="font-family: 'Albert Sans', sans-serif; font-weight: 600;">Move</h2>
+        <div class="tag">The closest sibling to Uber Eats restaurant app. Pure white, confident emerald-green, geometric humanist sans throughout. Modern, fast, no-nonsense — built for someone who works in a data dashboard half the day and wants this to feel like the same class of tool.</div>
+      </div>
+      <div class="refs">
+        <div class="lbl">References</div>
+        <div class="ref">Uber Eats restaurant · Linear · Cron · Cash for Business</div>
+        <div class="lbl" style="margin-top: 4px;">Warmth · 4 / 10</div>
+      </div>
+    </div>
+    <div class="dir-body">
+
+      <div class="specimen">
+        <div class="spec-block">
+          <div class="spec-label">Palette · 5 tokens</div>
+          <div class="spec-body">
+            <div class="palette">
+              <div class="swatch" style="background: #ffffff; color: #0a0a0a; border: 1px solid #ececea;"><span class="name">white</span><span class="hex">#FFFFFF</span></div>
+              <div class="swatch" style="background: #f7f7f5; color: #0a0a0a;"><span class="name">canvas</span><span class="hex">#F7F7F5</span></div>
+              <div class="swatch" style="background: #0a0a0a; color: white;"><span class="name">ink</span><span class="hex">#0A0A0A</span></div>
+              <div class="swatch" style="background: #0a8a5a; color: white;"><span class="name">accent</span><span class="hex">#0A8A5A</span></div>
+              <div class="swatch" style="background: #e6f5ee; color: #0a8a5a;"><span class="name">accent-soft</span><span class="hex">#E6F5EE</span></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;">
+              <div class="swatch" style="background: #b8743b; color: white; aspect-ratio: 2/1;"><span class="name">warn</span><span class="hex">#B8743B</span></div>
+              <div class="swatch" style="background: #a13b2f; color: white; aspect-ratio: 2/1;"><span class="name">flag</span><span class="hex">#A13B2F</span></div>
+            </div>
+            <div style="font-size: 12px; color: var(--doc-ink-3); margin-top: 12px; line-height: 1.5;">Slightly cooler green than Direction 01 — emerald, not forest. Reads more "tech" / less "country club." Same warn / flag pair (kept conservative, brown over orange).</div>
+          </div>
+        </div>
+
+        <div class="spec-block">
+          <div class="spec-label">Type · single-family confidence</div>
+          <div class="spec-body" style="background: white;">
+            <div class="type-line">
+              <div class="tl-meta">Albert Sans · 600 · headlines</div>
+              <div class="tl-sample" style="font-family: 'Albert Sans', sans-serif; font-weight: 600; font-size: 40px; letter-spacing: -0.8px; color: #0a0a0a;">Today's brief.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta">Albert Sans · 500 · UI &amp; body</div>
+              <div class="tl-sample" style="font-family: 'Albert Sans', sans-serif; font-size: 17px; font-weight: 500; color: #0a0a0a;">5 picks worth your time. 18 muted.</div>
+              <div class="tl-mini" style="font-family: 'Albert Sans', sans-serif;">Albert Sans is the Uber Move sibling we can actually use freely. Humanist-geometric, very legible at small sizes, distinct from Inter. Body in 400, UI in 500, headlines in 600.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta">Geist Mono · numerics &amp; codes</div>
+              <div class="tl-sample" style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #545454; letter-spacing: 0.4px;">MXN $1.9M · est · medium confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample-frame">
+        <div class="frame-head"><span>leadme.app / discover / kavak</span><span style="margin-left: auto;">discover · brief sample</span></div>
+        <div class="frame-body">
+          <div class="editorial-kicker">No. 1 · Strong fit · 2 days ago</div>
+          <div class="editorial-h">Kavak just opened your seat.</div>
+
+          <div class="lead-card">
+            <div class="row">
+              <div class="avatar">KV</div>
+              <div class="col" style="flex: 1;">
+                <div class="ui-text" style="font-weight: 600; font-size: 16px;">Director of Operations</div>
+                <div class="ui-text" style="font-size: 13.5px; color: var(--d-ink-2);">Kavak · CDMX · Hybrid · Mobility / fintech</div>
+              </div>
+              <div class="score-chip" style="border-radius: 12px;">91</div>
+            </div>
+
+            <div class="salary-band">
+              <div class="row" style="font-size: 13px;">
+                <span class="ui-text" style="font-weight: 600; color: var(--d-ink);">USD $115–145k</span>
+                <span class="mono-text" style="color: var(--d-ink-3); font-size: 11.5px;">est · base</span>
+                <span class="pill accent" style="margin-left: auto;">In your band</span>
+              </div>
+              <div class="meter">
+                <div class="band" style="left: 38%; width: 32%;"></div>
+                <div class="pin" style="left: 52%;"></div>
+              </div>
+              <div class="meta">
+                <span class="mono-text" style="color: var(--d-ink-3);">Your floor $95k</span>
+                <span class="mono-text" style="margin-left: auto; color: var(--d-ink-3);">Confidence ●●●</span>
+              </div>
+            </div>
+
+            <div class="body-copy">
+              Scope matches your Clip role almost line-for-line — ops org of 40+, fraud + risk + biz ops. <b style="color: var(--d-ink);">Susana M.</b> (ex-Cornershop, 4 mutuals) is the hiring manager.
+            </div>
+
+            <div class="row">
+              <button class="btn primary">Tailor &amp; apply</button>
+              <button class="btn">Evaluate</button>
+              <button class="btn ghost">Save</button>
+              <button class="btn ghost" style="margin-left: auto;">Mute</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annot">
+        <b>Why this works.</b> The Uber Eats DNA you mentioned, translated to a different industry. Single typeface family (Albert Sans) gives consistency and speed; the green carries all the brand affect. Pure white feels modern and confident — but the typographic warmth of Albert Sans keeps it from feeling clinical.
+      </div>
+
+      <dl class="callout">
+        <dt>Best for</dt>
+        <dd>Daily-use surfaces — Tracker, Tailor, Settings. Anywhere density and clarity matter more than ceremony.</dd>
+        <dt>Weakest at</dt>
+        <dd>The editorial moments. Brief headlines can feel a touch generic without a serif accent. Solvable by reserving a single "editorial" style — Albert Sans 600 oversized — for those screens.</dd>
+        <dt>The risk</dt>
+        <dd>Without a serif moment somewhere, the product loses the "considered companion" trust signal. <b>Anchor: use oversized type and lots of negative space on the Brief — make scale do the editorial work.</b></dd>
+      </dl>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 03 · BRIEFING                                        -->
+  <!-- ============================================================ -->
+  <section class="dir dir-03">
+    <div class="dir-head">
+      <div>
+        <div class="num">DIRECTION 03</div>
+        <h2>Briefing</h2>
+        <div class="tag">A dark, expert-feeling surface. Deep ink-neutral background, petrol-teal accent, soft serif for headlines. The vibe is <em>analyst's terminal at 7am</em> — a tool that says you already know what you're doing. Highest-contrast option, most distinctive, biggest "you've seen this before" risk.</div>
+      </div>
+      <div class="refs">
+        <div class="lbl">References</div>
+        <div class="ref">Stratechery · Bloomberg modernized · Pitch · Vercel dashboard</div>
+        <div class="lbl" style="margin-top: 4px;">Warmth · 3 / 10</div>
+      </div>
+    </div>
+    <div class="dir-body">
+
+      <div class="specimen">
+        <div class="spec-block">
+          <div class="spec-label">Palette · 5 tokens</div>
+          <div class="spec-body">
+            <div class="palette">
+              <div class="swatch" style="background: #14181d; color: #f0eee4;"><span class="name">ground</span><span class="hex">#14181D</span></div>
+              <div class="swatch" style="background: #1a1f25; color: #f0eee4;"><span class="name">surface</span><span class="hex">#1A1F25</span></div>
+              <div class="swatch" style="background: #f0eee4; color: #14181d;"><span class="name">ink</span><span class="hex">#F0EEE4</span></div>
+              <div class="swatch" style="background: #4ca59a; color: #14181d;"><span class="name">accent</span><span class="hex">#4CA59A</span></div>
+              <div class="swatch" style="background: #1a3835; color: #4ca59a;"><span class="name">accent-soft</span><span class="hex">#1A3835</span></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;">
+              <div class="swatch" style="background: #d4a14b; color: #14181d; aspect-ratio: 2/1;"><span class="name">warn</span><span class="hex">#D4A14B</span></div>
+              <div class="swatch" style="background: #d96d5a; color: #14181d; aspect-ratio: 2/1;"><span class="name">flag</span><span class="hex">#D96D5A</span></div>
+            </div>
+            <div style="font-size: 12px; color: var(--doc-ink-3); margin-top: 12px; line-height: 1.5;">Petrol teal lands clearly on the dark ground without screaming. The warm bone "ink" reads as paper-against-night — adds a literary feel. <em>One dark mode by default, light mode optional.</em></div>
+          </div>
+        </div>
+
+        <div class="spec-block">
+          <div class="spec-label">Type · soft serif × technical sans</div>
+          <div class="spec-body" style="background: #14181d;">
+            <div class="type-line">
+              <div class="tl-meta" style="color: #8a8c83;">Newsreader · soft serif · headlines &amp; brief</div>
+              <div class="tl-sample" style="font-family: 'Newsreader', serif; font-weight: 400; font-size: 40px; letter-spacing: -0.5px; color: #f0eee4;">Today's <em style="color: #b6b6ab;">brief</em>.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta" style="color: #8a8c83;">Space Grotesk · UI &amp; body</div>
+              <div class="tl-sample" style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 500; color: #f0eee4;">5 picks worth your time. 18 muted.</div>
+              <div class="tl-mini" style="color: #b6b6ab; font-family: 'Space Grotesk', sans-serif;">Space Grotesk gives that slight Bloomberg-terminal-but-friendly cadence. Modern, technical, distinctive. 14.5px / 1.55.</div>
+            </div>
+            <div class="type-line">
+              <div class="tl-meta" style="color: #8a8c83;">Geist Mono · receipts</div>
+              <div class="tl-sample" style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #b6b6ab; letter-spacing: 0.4px;">MXN $1.9M · est · medium confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample-frame">
+        <div class="frame-head"><span>leadme.app / discover / kavak</span><span style="margin-left: auto;">discover · brief sample</span></div>
+        <div class="frame-body">
+          <div class="editorial-kicker">No. 1 · Strong fit · 2d · LinkedIn LatAm</div>
+          <div class="editorial-h">Kavak just opened <em>your seat</em>.</div>
+
+          <div class="lead-card">
+            <div class="row">
+              <div class="avatar">KV</div>
+              <div class="col" style="flex: 1;">
+                <div class="ui-text" style="font-weight: 500; font-size: 16px;">Director of Operations</div>
+                <div class="ui-text" style="font-size: 13.5px; color: var(--d-ink-2);">Kavak · CDMX · Hybrid · Mobility / fintech</div>
+              </div>
+              <div class="score-chip" style="background: var(--d-accent); color: #0a0d11;">91</div>
+            </div>
+
+            <div class="salary-band">
+              <div class="row" style="font-size: 13px;">
+                <span class="ui-text" style="font-weight: 600; color: var(--d-ink);">USD $115–145k</span>
+                <span class="mono-text" style="color: var(--d-ink-3); font-size: 11.5px;">est · base</span>
+                <span class="pill accent" style="margin-left: auto;">in your band</span>
+              </div>
+              <div class="meter">
+                <div class="band" style="left: 38%; width: 32%;"></div>
+                <div class="pin" style="left: 52%;"></div>
+              </div>
+              <div class="meta">
+                <span class="mono-text" style="color: var(--d-ink-3);">your floor $95k</span>
+                <span class="mono-text" style="margin-left: auto; color: var(--d-ink-3);">confidence ●●●</span>
+              </div>
+            </div>
+
+            <div class="body-copy">
+              Scope matches your Clip role almost line-for-line — ops org of 40+, fraud + risk + biz ops. <b style="color: var(--d-ink);">Susana M.</b> (ex-Cornershop, 4 mutuals) is the hiring manager.
+            </div>
+
+            <div class="row">
+              <button class="btn primary">Tailor &amp; apply</button>
+              <button class="btn">Evaluate</button>
+              <button class="btn ghost">Save</button>
+              <button class="btn ghost" style="margin-left: auto;">Mute</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annot">
+        <b>Why this works.</b> Dark surfaces signal "expert tool, used in the morning, used in focus" — closer to Bloomberg than Indeed. The teal is the calmest accent we tested; it never competes with content. Newsreader-as-serif gives the Brief literary gravitas without being precious.
+      </div>
+
+      <dl class="callout">
+        <dt>Best for</dt>
+        <dd>People who live in dark mode anyway and want the product to feel like the only thing on their screen that <b>belongs</b> there.</dd>
+        <dt>Weakest at</dt>
+        <dd>Wider audience. Dark-first is a strong opinion — early users may bounce if they expect a light "consumer-y" feel. Lower trust signal for first-timers.</dd>
+        <dt>The risk</dt>
+        <dd>Dark themes age fast and read same-y across products. <b>Anchor: lean hard on Newsreader for the editorial moments — that's the part competitors won't copy.</b></dd>
+      </dl>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- DECISION                                                      -->
+  <!-- ============================================================ -->
+  <section class="decision">
+    <h3>My recommendation</h3>
+    <div style="font-size: 14.5px; line-height: 1.6; color: var(--doc-ink-2); max-width: 880px;">
+      <b style="color: var(--doc-ink);">Direction 02 · Move</b>, with one borrow from Ledger. The Uber Eats DNA you cited is real and the strategy doc keeps using words like "candid," "honest," "decisive" — Move is the only direction that <em>looks like</em> those words. But we should reserve a serif (Fraunces or similar) for the Brief headlines specifically — that's where the product earns its "considered companion" trust signal that pure sans struggles to deliver. Everything else stays Move.
+    </div>
+    <div class="opts">
+      <div class="opt"><b>If you say "go":</b> I push Move + serif accent through Discover, Evaluate, and Onboarding Step 1 at hi-fi. ~ one pass.</div>
+      <div class="opt"><b>If you want to mix:</b> tell me which two pieces from another direction to graft in (e.g. Ledger's cream paper, or Briefing's dark mode option).</div>
+      <div class="opt"><b>If none lands:</b> tell me <em>which screen</em> in the wireframes you imagine first — and what the recruiter DM evaluation should feel like emotionally — and I'll iterate the palette from there.</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

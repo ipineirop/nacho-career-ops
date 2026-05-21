@@ -15,6 +15,9 @@ export default function EvaluatePage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     if (!stream) {
@@ -82,14 +85,14 @@ export default function EvaluatePage() {
 
   const INPUT_LABELS: Record<InputMode, string> = {
     dm: 'Recruiter DM',
-    url: 'Job URL',
-    jd: 'Paste JD',
+    url: 'Role URL',
+    jd: 'Role Details',
   };
 
   const PLACEHOLDERS: Record<InputMode, string> = {
     dm: 'Paste a recruiter message — "Hi Nacho! We just opened a Head of Ops seat…"',
     url: 'https://careers.company.com/jobs/director-operations',
-    jd: 'Paste the full job description here…',
+    jd: 'Paste the full role details here…',
   };
 
   return (
@@ -233,15 +236,13 @@ export default function EvaluatePage() {
         </div>
       )}
 
-      {/* Design system demo — verdict layout shown when no active eval */}
-      {!stream && !jd && (
-        <EvaluateDemo />
-      )}
     </div>
   );
 }
 
-function EvaluateDemo() {
+// Removed EvaluateDemo - only show input form, not hardcoded example
+
+function EvaluateDemoHidden() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{

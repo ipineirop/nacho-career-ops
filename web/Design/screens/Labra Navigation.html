@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="en" data-lang="en" class="theme-light">
+<head>
+<meta charset="utf-8" />
+<title>Labra — Navigation pattern · v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS — Labra Design System v1.0                              */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+
+  /* i18n */
+  [data-lang="en"] .es { display: none; }
+  [data-lang="es"] .en { display: none; }
+
+  /* ============================================================ */
+  /* TOP CHROME                                                     */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 12px; font-family: "Geist Mono", monospace;
+    font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .top .toggles { display: flex; gap: 8px; align-items: center; }
+  .seg {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 4px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .seg button {
+    border: 0; background: transparent;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .seg button.on { background: var(--ink); color: var(--bg); }
+  .version {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+
+  /* ============================================================ */
+  /* PAGE                                                           */
+  /* ============================================================ */
+  .stage { max-width: 1640px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  .hero { margin: 0 0 36px; max-width: 1040px; }
+  .hero .kicker {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 60px; line-height: 1; margin: 0; letter-spacing: -1.6px; color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; }
+  .hero p {
+    font-family: "Albert Sans"; font-size: 16.5px; line-height: 1.6;
+    color: var(--ink-2); margin: 14px 0 0; max-width: 880px; text-wrap: pretty;
+  }
+  .hero p b { color: var(--ink); font-weight: 600; }
+
+  /* locked-decisions panel */
+  .decisions {
+    margin-top: 28px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  .decision {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .decision .pn {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .decision .pt {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 17px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .decision .pt em { font-style: italic; }
+  .decision .pd {
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.5; color: var(--ink-2);
+  }
+
+  /* ============================================================ */
+  /* SCREEN BLOCKS                                                  */
+  /* ============================================================ */
+  .screen { margin-bottom: 72px; scroll-margin-top: 80px; }
+  .screen-label {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 16px; padding: 0 4px; flex-wrap: wrap;
+  }
+  .screen-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 10px; border-radius: 999px; background: var(--canvas);
+  }
+  .screen-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 30px; line-height: 1; margin: 0; letter-spacing: -0.8px; color: var(--ink);
+  }
+  .screen-label h2 em { font-style: italic; }
+  .screen-note {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink-2);
+    max-width: 820px; margin: -4px 0 22px 4px; line-height: 1.55; text-wrap: pretty;
+  }
+  .screen-note b { color: var(--ink); font-weight: 600; }
+
+  .frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+  }
+  .frame-bar {
+    height: 34px; background: var(--canvas);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  }
+  .frame-bar .fdot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .frame-bar .url {
+    margin-left: 12px; font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.3px;
+  }
+
+  /* ============================================================ */
+  /* DESKTOP RAIL                                                   */
+  /* ============================================================ */
+  .app {
+    display: grid; grid-template-columns: 240px 1fr;
+    min-height: 640px; background: var(--bg);
+  }
+  .rail {
+    width: 240px; height: 100%;
+    background: var(--surface-2);
+    border-right: 0.75px solid var(--line);
+    padding: 24px 16px 20px;
+    display: flex; flex-direction: column;
+  }
+  .rail .brand-r {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; color: var(--ink);
+    padding: 0 4px;
+  }
+  .rail .brand-r .dot { color: var(--accent); font-style: italic; }
+  .rail .nav-list {
+    margin-top: 32px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .rail .nav-item {
+    display: block;
+    padding: 10px 12px; border-radius: 10px;
+    font-family: "Albert Sans"; font-size: 14px; font-weight: 400;
+    color: var(--ink-2);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .rail .nav-item:hover { background: var(--canvas); color: var(--ink); }
+  .rail .nav-item.on,
+  .nav-item.on {
+    background: var(--ink); color: var(--surface); font-weight: 500;
+  }
+  .rail .nav-item.on:hover,
+  .nav-item.on:hover { background: var(--ink); }
+  .rail .spacer { flex: 1; }
+  .rail .userline {
+    padding: 0 4px;
+  }
+  .rail .userline .divider {
+    height: 0.5px; background: var(--line); margin: 0 -4px 16px;
+  }
+  .rail .userline .name {
+    font-family: "Albert Sans"; font-size: 14px; font-weight: 500;
+    color: var(--ink); line-height: 1.2;
+  }
+  .rail .userline .email {
+    margin-top: 4px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .rail .userline .signout {
+    margin-top: 12px;
+    font-family: "Albert Sans"; font-size: 13px;
+    color: var(--ink-3); cursor: pointer;
+    display: inline-block;
+  }
+  .rail .userline .signout:hover { color: var(--ink); }
+
+  .pageshell {
+    padding: 56px 64px;
+    overflow: hidden;
+  }
+  .pageshell .pg-kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+  .pageshell .pg-title {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 44px; line-height: 1.05; margin: 0;
+    letter-spacing: -1.2px; color: var(--ink);
+  }
+  .pageshell .pg-title em { font-style: italic; }
+  .pageshell .pg-sub {
+    font-family: "Albert Sans"; font-size: 15px;
+    color: var(--ink-2); margin-top: 14px; max-width: 540px; line-height: 1.55;
+  }
+
+  /* annotation overlays */
+  .annot-wrap { position: relative; }
+  .annot {
+    position: absolute;
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 0.4px; color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+    pointer-events: none;
+  }
+  .annot .ln { background: var(--accent); }
+  .annot.h .ln { height: 1px; }
+  .annot.v .ln { width: 1px; }
+  .annot .tag {
+    background: var(--accent); color: var(--accent-on);
+    padding: 2px 7px; border-radius: 4px;
+    font-weight: 500; white-space: nowrap;
+  }
+
+  /* ============================================================ */
+  /* SIDE-BY-SIDE — three active states                              */
+  /* ============================================================ */
+  .triptych {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  .triptych .frame { display: flex; flex-direction: column; }
+  .triptych .app { min-height: 480px; }
+  .triptych .pageshell { padding: 36px 28px; }
+  .triptych .pageshell .pg-title { font-size: 30px; letter-spacing: -0.7px; }
+  .triptych .pageshell .pg-sub { font-size: 13px; margin-top: 10px; }
+  .triptych .caption {
+    padding: 14px 18px 16px;
+    border-top: 0.5px solid var(--line);
+    background: var(--canvas);
+  }
+  .triptych .caption .ck {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .triptych .caption .ct {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .triptych .caption .ct b { color: var(--ink); font-weight: 600; }
+
+  /* ============================================================ */
+  /* MOBILE                                                         */
+  /* ============================================================ */
+  .mob-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    align-items: start;
+  }
+  .phone {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    width: 280px; height: 580px;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .phone .statusbar {
+    height: 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--ink-2); letter-spacing: 0.4px;
+    background: var(--surface);
+  }
+  .phone .m-top {
+    height: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--line);
+  }
+  .phone .m-top .brand-m {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 19px; line-height: 1; color: var(--ink);
+  }
+  .phone .m-top .brand-m .dot { color: var(--accent); font-style: italic; }
+  .phone .m-top .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--canvas);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .phone .m-body {
+    flex: 1;
+    padding: 24px 18px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .phone .m-body .mb-kicker {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .phone .m-body .mb-h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 28px; line-height: 1.05; margin: 0;
+    letter-spacing: -0.7px; color: var(--ink);
+  }
+  .phone .m-body .mb-h1 em { font-style: italic; }
+  .phone .m-body .mb-sub {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    margin-top: 10px; line-height: 1.5;
+  }
+  .phone .m-tabs {
+    height: 56px; display: flex;
+    background: var(--surface);
+    border-top: 0.5px solid var(--line);
+  }
+  .phone .m-tab {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-size: 13px;
+    color: var(--ink-3); font-weight: 400;
+    cursor: pointer;
+  }
+  .phone .m-tab.on { color: var(--ink); font-weight: 500; }
+  .phone .m-tab:hover:not(.on) { color: var(--ink-2); }
+
+  /* mobile sheet */
+  .phone .scrim {
+    position: absolute; inset: 0;
+    background: rgba(10,31,36,0.42);
+    z-index: 8;
+  }
+  .phone .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--surface);
+    border-top-left-radius: 18px; border-top-right-radius: 18px;
+    padding: 14px 18px 20px;
+    z-index: 9;
+    box-shadow: 0 -10px 30px rgba(10,31,36,0.12);
+  }
+  .phone .sheet .handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--line); margin: 0 auto 14px;
+  }
+  .phone .sheet .s-name {
+    font-family: "Albert Sans"; font-size: 16px; font-weight: 500;
+    color: var(--ink); line-height: 1.2;
+  }
+  .phone .sheet .s-email {
+    margin-top: 6px;
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    color: var(--ink-3); letter-spacing: 0.2px;
+  }
+  .phone .sheet .s-divider {
+    height: 0.5px; background: var(--line); margin: 14px -18px;
+  }
+  .phone .sheet .s-row {
+    padding: 10px 0;
+    font-family: "Albert Sans"; font-size: 15px; color: var(--ink);
+    cursor: pointer;
+  }
+
+  .mob-row .mob-caption {
+    text-align: center;
+    margin-top: 14px;
+  }
+  .mob-row .mob-caption .ck {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .mob-row .mob-caption .ct {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .mob-row .mob-caption .ct b { color: var(--ink); font-weight: 600; }
+
+  /* ============================================================ */
+  /* SPEC TABLES & ANATOMY                                          */
+  /* ============================================================ */
+  .twocol {
+    display: grid; grid-template-columns: 380px 1fr; gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 1200px) {
+    .twocol { grid-template-columns: 1fr; gap: 24px; }
+  }
+  .anatomy {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; padding: 24px;
+    position: relative;
+  }
+  .spec-list {
+    display: flex; flex-direction: column;
+  }
+  .spec-list .row {
+    display: grid; grid-template-columns: 140px 1fr;
+    padding: 11px 0;
+    border-bottom: 0.5px solid var(--line-2);
+    align-items: baseline;
+  }
+  .spec-list .row:last-child { border-bottom: 0; }
+  .spec-list .row:first-child { padding-top: 0; }
+  .spec-list .row .k {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .spec-list .row .v {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink);
+    line-height: 1.5;
+  }
+  .spec-list .row .v .mono {
+    font-family: "Geist Mono", monospace; font-size: 12.5px;
+    color: var(--ink-2);
+  }
+  .spec-list .row .v b { font-weight: 600; }
+
+  /* active-state matrix */
+  .matrix {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+  .matrix .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; padding: 22px 24px 24px;
+  }
+  .matrix .card .mk {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .matrix .card .mt {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1.1; letter-spacing: -0.4px;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .matrix .card .mt em { font-style: italic; }
+  .matrix .card .demo {
+    background: var(--canvas);
+    border-radius: 10px;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 16px;
+  }
+  .matrix .pill {
+    display: block; padding: 10px 12px;
+    border-radius: 10px;
+    font-family: "Albert Sans"; font-size: 14px;
+    color: var(--ink-2); font-weight: 400;
+  }
+  .matrix .pill.on { background: var(--ink); color: var(--surface); font-weight: 500; }
+  .matrix .tabcell {
+    flex: 1; padding: 14px 0;
+    font-family: "Albert Sans"; font-size: 13px;
+    color: var(--ink-3); font-weight: 400;
+    text-align: center;
+  }
+  .matrix .tabcell.on { color: var(--ink); font-weight: 500; }
+  .matrix .demo.tabs {
+    flex-direction: row; padding: 0;
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+  }
+  .matrix .card .mp {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink-2);
+    line-height: 1.55; text-wrap: pretty;
+  }
+  .matrix .card .mp b { color: var(--ink); font-weight: 600; }
+
+  /* consistency table */
+  .table {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .table .trow {
+    display: grid; grid-template-columns: 240px 1fr 1fr;
+    border-top: 0.5px solid var(--line-2);
+    padding: 16px 20px;
+    align-items: baseline;
+  }
+  .table .trow:first-child {
+    border-top: 0;
+    background: var(--canvas);
+    padding: 12px 20px;
+  }
+  .table .trow .th {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .table .trow .lab {
+    font-family: "Albert Sans"; font-size: 13.5px; font-weight: 500;
+    color: var(--ink);
+  }
+  .table .trow .lab .note {
+    display: block; font-weight: 400; font-size: 12px;
+    color: var(--ink-3); margin-top: 2px;
+  }
+  .table .trow .val {
+    font-family: "Albert Sans"; font-size: 13.5px;
+    color: var(--ink-2); line-height: 1.5; text-wrap: pretty;
+  }
+  .table .trow .val b { color: var(--ink); font-weight: 600; }
+  .table .trow.divider {
+    background: var(--canvas);
+    padding: 8px 20px;
+  }
+  .table .trow.divider .th {
+    grid-column: 1 / -1;
+    color: var(--ink-2);
+  }
+
+  /* footer notes */
+  .deferred {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 28px;
+  }
+  .deferred h3 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 20px; line-height: 1.1; margin: 0 0 12px;
+    letter-spacing: -0.4px; color: var(--ink);
+  }
+  .deferred ul {
+    margin: 0; padding: 0 0 0 18px;
+    font-family: "Albert Sans"; font-size: 13.5px;
+    color: var(--ink-2); line-height: 1.6;
+  }
+  .deferred ul li { margin-bottom: 6px; }
+  .deferred ul li b { color: var(--ink); font-weight: 600; }
+  .deferred-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+
+  /* small helpers */
+  .label-row {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .label-row .lk {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .label-row .lt {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink);
+    font-weight: 500;
+  }
+  .label-row .lh {
+    flex: 1; height: 1px; background: var(--line-2);
+  }
+</style>
+</head>
+<body data-screen-label="00 Navigation Handoff">
+
+<!-- ============================================================ -->
+<!-- TOP CHROME                                                   -->
+<!-- ============================================================ -->
+<header class="top">
+  <span class="brand">labra<span class="dot">.</span><span class="system">Navigation · v1</span></span>
+  <span class="spacer"></span>
+  <span class="version">2026-05-19 · locked</span>
+  <div class="toggles">
+    <div class="seg" role="tablist" aria-label="Language">
+      <button class="on" data-lang-set="en">EN</button>
+      <button data-lang-set="es">ES</button>
+    </div>
+    <div class="seg" role="tablist" aria-label="Theme">
+      <button class="on" data-theme-set="light">Light</button>
+      <button data-theme-set="dark">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main class="stage">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="kicker">
+      <span class="en">Design handoff · cross-cutting decision</span>
+      <span class="es">Entrega de diseño · decisión transversal</span>
+    </div>
+    <h1>
+      <span class="en">The <em>shape</em> of every screen.</span>
+      <span class="es">La <em>forma</em> de cada pantalla.</span>
+    </h1>
+    <p>
+      <span class="en">Labra has three destinations in v1 — <b>Evaluate</b>, <b>Tracker</b>, <b>Settings</b> — and two viewports that behave differently. Desktop gets a persistent <b>240&nbsp;px side rail</b>; mobile gets a <b>slim top bar + bottom tab bar</b>. Same destinations, different geometry. No hamburger, no drawer, no side-rail-on-mobile. This document is the source of truth for both.</span>
+      <span class="es">Labra tiene tres destinos en v1 — <b>Evaluar</b>, <b>Tracker</b>, <b>Ajustes</b> — y dos viewports que se comportan distinto. Escritorio recibe un <b>side rail persistente de 240&nbsp;px</b>; móvil recibe una <b>barra superior delgada + tab bar inferior</b>. Mismos destinos, geometría distinta. Sin hamburguesa, sin drawer, sin side-rail en móvil. Este documento es la fuente de verdad para ambos.</span>
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <span class="pn">01 / Scope</span>
+        <span class="pt"><span class="en"><em>Three</em> destinations</span><span class="es"><em>Tres</em> destinos</span></span>
+        <span class="pd">
+          <span class="en">Evaluate, Tracker, Settings. Pattern is right-sized for three; not pre-built for Discover, Tailor, Market.</span>
+          <span class="es">Evaluar, Tracker, Ajustes. Patrón hecho para tres; no preparado para Discover, Tailor, Market.</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">02 / Desktop</span>
+        <span class="pt"><span class="en">Left side <em>rail</em></span><span class="es">Side <em>rail</em> izquierdo</span></span>
+        <span class="pd">
+          <span class="en">240 px, persistent, not collapsible in v1. Brand top, nav middle, userline pinned bottom.</span>
+          <span class="es">240 px, persistente, no colapsable en v1. Marca arriba, nav al centro, userline anclado abajo.</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">03 / Mobile</span>
+        <span class="pt"><span class="en">Top + <em>bottom</em></span><span class="es">Arriba + <em>abajo</em></span></span>
+        <span class="pd">
+          <span class="en">48 px top bar (brand + avatar) and 56 px bottom tab bar (three equal cells, text-only).</span>
+          <span class="es">Barra superior de 48 px (marca + avatar) y tab bar inferior de 56 px (tres celdas iguales, solo texto).</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">04 / Active</span>
+        <span class="pt"><span class="en"><em>Two</em> patterns, one system</span><span class="es"><em>Dos</em> patrones, un sistema</span></span>
+        <span class="pd">
+          <span class="en">Filled pill on the rail. Color + weight shift on the tab bar. Pattern is determined by chrome geometry.</span>
+          <span class="es">Pill rellenado en el rail. Cambio de color + peso en la tab bar. Patrón determinado por la geometría del chrome.</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN A — Desktop rail anatomy                              -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="01 Desktop rail anatomy">
+    <div class="screen-label">
+      <span class="num">A · Desktop</span>
+      <h2><span class="en"><em>Side rail</em> anatomy</span><span class="es">Anatomía del <em>side rail</em></span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Persistent left rail, anchored to the viewport edge. Three sections, stacked: <b>brand wordmark</b> top, <b>nav items</b> middle, <b>userline</b> pinned bottom. Width is 240 px — wider than the Notion/Linear 200 px standard, to match Labra's editorial register.</span>
+      <span class="es">Rail izquierdo persistente, anclado al borde del viewport. Tres secciones, apiladas: <b>marca</b> arriba, <b>items de nav</b> al centro, <b>userline</b> anclado abajo. Ancho de 240 px — más ancho que el estándar Notion/Linear de 200 px, para coincidir con el registro editorial de Labra.</span>
+    </p>
+
+    <div class="twocol">
+      <div class="spec-list">
+        <div class="row"><span class="k">Width</span><span class="v"><b>240 px</b> · <span class="mono">left edge anchored</span></span></div>
+        <div class="row"><span class="k">Height</span><span class="v">Full viewport · <span class="mono">100vh</span></span></div>
+        <div class="row"><span class="k">Padding</span><span class="v"><span class="mono">16 px</span> horizontal · <span class="mono">24 px</span> top · <span class="mono">20 px</span> bottom</span></div>
+        <div class="row"><span class="k">Brand</span><span class="v">Fraunces <b>500</b> · 22 px · period in <span class="mono">--accent</span> italic · not tappable</span></div>
+        <div class="row"><span class="k">Brand gap</span><span class="v"><span class="mono">32 px</span> below wordmark before first nav item</span></div>
+        <div class="row"><span class="k">Nav item</span><span class="v">Full-width pill · ~208 px wide · <b>40 px</b> tall · <span class="mono">10/12</span> padding</span></div>
+        <div class="row"><span class="k">Nav gap</span><span class="v"><span class="mono">4 px</span> between items</span></div>
+        <div class="row"><span class="k">Label</span><span class="v">Albert Sans <b>14 px</b> · weight 500 active · 400 inactive · left-aligned</span></div>
+        <div class="row"><span class="k">Userline</span><span class="v">Pinned to bottom · name + email + sign-out · <b>no avatar</b></span></div>
+        <div class="row"><span class="k">Divider</span><span class="v"><span class="mono">0.5 px</span> in <span class="mono">--line</span> · 16 px above &amp; below</span></div>
+        <div class="row"><span class="k">Sign-out</span><span class="v">Direct text affordance · one tap · no menu, no chevron</span></div>
+      </div>
+
+      <div class="anatomy">
+        <div class="frame annot-wrap">
+          <div class="frame-bar">
+            <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+            <span class="url">app.labra.work/evaluate</span>
+          </div>
+          <div class="app">
+            <aside class="rail">
+              <div class="brand-r">labra<span class="dot">.</span></div>
+              <nav class="nav-list">
+                <a class="nav-item on"><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                <a class="nav-item"><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                <a class="nav-item"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+              </nav>
+              <div class="spacer"></div>
+              <div class="userline">
+                <div class="divider"></div>
+                <div class="name">Sofía Mendoza</div>
+                <div class="email">sofia.mendoza@gmail.com</div>
+                <div class="signout">
+                  <span class="en">Sign out</span><span class="es">Cerrar sesión</span>
+                </div>
+              </div>
+            </aside>
+            <div class="pageshell">
+              <div class="pg-kicker">
+                <span class="en">Evaluate</span><span class="es">Evaluar</span>
+              </div>
+              <h2 class="pg-title">
+                <span class="en">Paste a recruiter message, a JD, a URL.</span>
+                <span class="es">Pega un mensaje de reclutador, un JD, una URL.</span>
+              </h2>
+              <p class="pg-sub">
+                <span class="en">Page content lives in the column to the right of the rail. The rail is persistent across all routes — it does not slide, hide, or animate between screens.</span>
+                <span class="es">El contenido de la página vive en la columna a la derecha del rail. El rail es persistente en todas las rutas — no se desliza, oculta ni anima entre pantallas.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN B — Desktop active states walkthrough                 -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="02 Desktop active states">
+    <div class="screen-label">
+      <span class="num">B · Desktop</span>
+      <h2><span class="en">Active state — <em>filled pill</em>, one per route</span><span class="es">Estado activo — <em>pill rellenado</em>, uno por ruta</span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Only one destination is active at a time. The filled <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span> background is the unambiguous active affordance — label flips to <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--surface</span> and weight shifts to 500. No icon, no underline, no indicator bar.</span>
+      <span class="es">Solo un destino está activo a la vez. El fondo <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span> es el indicador inequívoco — la etiqueta cambia a <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--surface</span> con peso 500. Sin ícono, sin subrayado, sin barra indicadora.</span>
+    </p>
+
+    <div class="triptych">
+      <!-- Evaluate active -->
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">/evaluate</span>
+        </div>
+        <div class="app">
+          <aside class="rail">
+            <div class="brand-r">labra<span class="dot">.</span></div>
+            <nav class="nav-list">
+              <a class="nav-item on"><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a class="nav-item"><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a class="nav-item"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <div class="divider"></div>
+              <div class="name">Sofía Mendoza</div>
+              <div class="email">sofia.mendoza@gmail.com</div>
+              <div class="signout"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></div>
+            </div>
+          </aside>
+          <div class="pageshell">
+            <div class="pg-kicker"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <h2 class="pg-title"><span class="en">Verdict in &lt;15s.</span><span class="es">Veredicto en &lt;15s.</span></h2>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="ck"><span class="en">Route · /evaluate</span><span class="es">Ruta · /evaluate</span></div>
+          <div class="ct">
+            <span class="en"><b>Evaluate</b> is active. Default landing surface on session start.</span>
+            <span class="es"><b>Evaluar</b> está activo. Superficie por defecto al iniciar sesión.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracker active -->
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">/tracker</span>
+        </div>
+        <div class="app">
+          <aside class="rail">
+            <div class="brand-r">labra<span class="dot">.</span></div>
+            <nav class="nav-list">
+              <a class="nav-item"><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a class="nav-item on"><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a class="nav-item"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <div class="divider"></div>
+              <div class="name">Sofía Mendoza</div>
+              <div class="email">sofia.mendoza@gmail.com</div>
+              <div class="signout"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></div>
+            </div>
+          </aside>
+          <div class="pageshell">
+            <div class="pg-kicker"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <h2 class="pg-title"><span class="en">Every role, one log.</span><span class="es">Cada rol, un log.</span></h2>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="ck"><span class="en">Route · /tracker</span><span class="es">Ruta · /tracker</span></div>
+          <div class="ct">
+            <span class="en"><b>Tracker</b> is active. Pill swaps; rest of rail unchanged.</span>
+            <span class="es"><b>Tracker</b> está activo. El pill se intercambia; el resto del rail no cambia.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings active -->
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">/settings</span>
+        </div>
+        <div class="app">
+          <aside class="rail">
+            <div class="brand-r">labra<span class="dot">.</span></div>
+            <nav class="nav-list">
+              <a class="nav-item"><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a class="nav-item"><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a class="nav-item on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <div class="divider"></div>
+              <div class="name">Sofía Mendoza</div>
+              <div class="email">sofia.mendoza@gmail.com</div>
+              <div class="signout"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></div>
+            </div>
+          </aside>
+          <div class="pageshell">
+            <div class="pg-kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+            <h2 class="pg-title"><span class="en">Your <em>profile</em>, plainly.</span><span class="es">Tu <em>perfil</em>, llanamente.</span></h2>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="ck"><span class="en">Route · /settings</span><span class="es">Ruta · /settings</span></div>
+          <div class="ct">
+            <span class="en"><b>Settings</b> is active. Userline below is unaffected by route changes.</span>
+            <span class="es"><b>Ajustes</b> está activo. El userline abajo no se ve afectado por cambios de ruta.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN C — Rail item states                                   -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="03 Rail item states">
+    <div class="screen-label">
+      <span class="num">C · Desktop</span>
+      <h2><span class="en">Nav item — <em>four</em> states</span><span class="es">Item de nav — <em>cuatro</em> estados</span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">All four states for the rail nav item, isolated. Transitions are instant in v1 — no animation, no fade. Route transition handles motion if any is desired.</span>
+      <span class="es">Los cuatro estados del item de nav del rail, aislados. Las transiciones son instantáneas en v1 — sin animación, sin fade. La transición de ruta maneja cualquier movimiento si se desea.</span>
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+
+      <!-- inactive -->
+      <div class="frame" style="padding:24px;">
+        <div class="label-row"><span class="lk">State · 01</span><span class="lt"><span class="en">Inactive</span><span class="es">Inactivo</span></span><span class="lh"></span></div>
+        <div style="background:var(--surface-2);padding:14px;border-radius:10px;width:208px;">
+          <div class="nav-item" style="background:transparent;color:var(--ink-2);font-weight:400;">
+            <span class="en">Tracker</span><span class="es">Tracker</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);line-height:1.7;">
+          bg · transparent<br>
+          fg · --ink-2<br>
+          weight · 400
+        </div>
+      </div>
+
+      <!-- hover -->
+      <div class="frame" style="padding:24px;">
+        <div class="label-row"><span class="lk">State · 02</span><span class="lt"><span class="en">Hover</span><span class="es">Hover</span></span><span class="lh"></span></div>
+        <div style="background:var(--surface-2);padding:14px;border-radius:10px;width:208px;">
+          <div class="nav-item" style="background:var(--canvas);color:var(--ink);font-weight:400;">
+            <span class="en">Tracker</span><span class="es">Tracker</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);line-height:1.7;">
+          bg · --canvas<br>
+          fg · --ink<br>
+          weight · 400
+        </div>
+      </div>
+
+      <!-- active -->
+      <div class="frame" style="padding:24px;">
+        <div class="label-row"><span class="lk">State · 03</span><span class="lt"><span class="en">Active</span><span class="es">Activo</span></span><span class="lh"></span></div>
+        <div style="background:var(--surface-2);padding:14px;border-radius:10px;width:208px;">
+          <div class="nav-item on">
+            <span class="en">Tracker</span><span class="es">Tracker</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);line-height:1.7;">
+          bg · --ink<br>
+          fg · --surface<br>
+          weight · 500
+        </div>
+      </div>
+
+      <!-- sign-out hover -->
+      <div class="frame" style="padding:24px;">
+        <div class="label-row"><span class="lk">State · 04</span><span class="lt"><span class="en">Sign-out · hover</span><span class="es">Cerrar sesión · hover</span></span><span class="lh"></span></div>
+        <div style="background:var(--surface-2);padding:14px;border-radius:10px;width:208px;">
+          <div style="font-family:'Albert Sans';font-size:14px;font-weight:500;color:var(--ink);line-height:1.2;">Sofía Mendoza</div>
+          <div style="margin-top:4px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);">sofia.mendoza@gmail.com</div>
+          <div style="margin-top:12px;font-family:'Albert Sans';font-size:13px;color:var(--ink);cursor:pointer;text-decoration:none;">
+            <span class="en">Sign out</span><span class="es">Cerrar sesión</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);line-height:1.7;">
+          default · --ink-3<br>
+          hover · --ink<br>
+          weight · 400
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN D — Mobile chrome anatomy                              -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="04 Mobile chrome anatomy">
+    <div class="screen-label">
+      <span class="num">D · Mobile</span>
+      <h2><span class="en">Mobile chrome — <em>top</em> + <em>bottom</em></span><span class="es">Chrome móvil — <em>arriba</em> + <em>abajo</em></span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Two pieces of chrome on mobile, both pinned. The slim top bar carries brand + avatar; the bottom tab bar carries the three destinations. <b>No hamburger.</b> <b>No drawer.</b> <b>No side-rail-on-mobile.</b> Mobile and desktop look structurally different — this is intentional.</span>
+      <span class="es">Dos piezas de chrome en móvil, ambas ancladas. La barra superior delgada lleva marca + avatar; la tab bar inferior lleva los tres destinos. <b>Sin hamburguesa.</b> <b>Sin drawer.</b> <b>Sin side-rail en móvil.</b> Móvil y escritorio se ven estructuralmente distintos — es intencional.</span>
+    </p>
+
+    <div class="twocol">
+      <div class="spec-list">
+        <div class="row"><span class="k">Top bar</span><span class="v"><b>48 px</b> tall · full width · pinned top</span></div>
+        <div class="row"><span class="k">Top · left</span><span class="v">Brand wordmark · Fraunces 500 · 19 px · 16 px from edge</span></div>
+        <div class="row"><span class="k">Top · right</span><span class="v">Avatar circle · <b>32 px</b> · initials · 16 px from edge</span></div>
+        <div class="row"><span class="k">Top · title</span><span class="v"><b>No current-page title</b> · lives in page H1 below chrome</span></div>
+        <div class="row"><span class="k">Avatar tap</span><span class="v">Opens bottom sheet · name, email, sign-out</span></div>
+        <div class="row"><span class="k">Tab bar</span><span class="v"><b>56 px</b> tall · pinned bottom · above iOS home indicator</span></div>
+        <div class="row"><span class="k">Tab cells</span><span class="v">Three · <b>33.3%</b> width each · equal spacing</span></div>
+        <div class="row"><span class="k">Tab label</span><span class="v">Albert Sans 13 px · centered · <b>no icon</b></span></div>
+        <div class="row"><span class="k">Active state</span><span class="v">Color + weight shift · <span class="mono">--ink</span> at 500 · no fill</span></div>
+        <div class="row"><span class="k">Inactive state</span><span class="v"><span class="mono">--ink-3</span> at 400</span></div>
+        <div class="row"><span class="k">Tap target</span><span class="v">Full cell width &amp; height · not just the label</span></div>
+        <div class="row"><span class="k">Breakpoint</span><span class="v">Below <b>768 px</b> · mobile pattern · switches, does not degrade</span></div>
+      </div>
+
+      <div class="anatomy">
+        <div class="mob-row" style="grid-template-columns:1fr;">
+          <div>
+            <div class="phone">
+              <div class="statusbar">
+                <span>9:41</span>
+                <span>●●● ⌃ 🔋</span>
+              </div>
+              <div class="m-top">
+                <span class="brand-m">labra<span class="dot">.</span></span>
+                <span class="avatar">SM</span>
+              </div>
+              <div class="m-body">
+                <div class="mb-kicker"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+                <h3 class="mb-h1"><span class="en">Paste a JD.</span><span class="es">Pega un JD.</span></h3>
+                <p class="mb-sub">
+                  <span class="en">Page content sits between the top bar and the tab bar. Vertical padding accounts for chrome height; scroll containers stop at chrome edges.</span>
+                  <span class="es">El contenido va entre la barra superior y la tab bar. El padding vertical considera la altura del chrome; los contenedores de scroll se detienen en los bordes.</span>
+                </p>
+              </div>
+              <div class="m-tabs">
+                <div class="m-tab on"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+                <div class="m-tab"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+                <div class="m-tab"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+              </div>
+            </div>
+            <div class="mob-caption">
+              <div class="ck">280 × 580 · <span class="en">composite anatomy</span><span class="es">anatomía compuesta</span></div>
+              <div class="ct">
+                <span class="en">Default loading state · <b>Evaluate</b> active.</span>
+                <span class="es">Estado por defecto · <b>Evaluar</b> activo.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN E — Mobile active states + avatar sheet                -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="05 Mobile active states">
+    <div class="screen-label">
+      <span class="num">E · Mobile</span>
+      <h2><span class="en">Tab bar — <em>color + weight</em> shift</span><span class="es">Tab bar — cambio de <em>color + peso</em></span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Active label is <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span> at weight 500; inactive is <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink-3</span> at weight 400. <b>No fill, no underline, no indicator bar.</b> Distinct from the desktop filled-pill — this is the second active-state pattern in the system.</span>
+      <span class="es">Etiqueta activa en <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span> con peso 500; inactiva en <span class="mono" style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink-3</span> con peso 400. <b>Sin relleno, sin subrayado, sin barra indicadora.</b> Distinto del pill rellenado de escritorio — es el segundo patrón de estado activo del sistema.</span>
+    </p>
+
+    <div class="mob-row">
+
+      <div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌃ 🔋</span></div>
+          <div class="m-top">
+            <span class="brand-m">labra<span class="dot">.</span></span>
+            <span class="avatar">SM</span>
+          </div>
+          <div class="m-body">
+            <div class="mb-kicker"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <h3 class="mb-h1"><span class="en">Verdict in &lt;15s.</span><span class="es">Veredicto en &lt;15s.</span></h3>
+          </div>
+          <div class="m-tabs">
+            <div class="m-tab on"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <div class="m-tab"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <div class="m-tab"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+          </div>
+        </div>
+        <div class="mob-caption">
+          <div class="ck"><span class="en">Route · /evaluate</span><span class="es">Ruta · /evaluate</span></div>
+          <div class="ct"><span class="en"><b>Evaluate</b> active.</span><span class="es"><b>Evaluar</b> activo.</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌃ 🔋</span></div>
+          <div class="m-top">
+            <span class="brand-m">labra<span class="dot">.</span></span>
+            <span class="avatar">SM</span>
+          </div>
+          <div class="m-body">
+            <div class="mb-kicker"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <h3 class="mb-h1"><span class="en">Every role, logged.</span><span class="es">Cada rol, registrado.</span></h3>
+          </div>
+          <div class="m-tabs">
+            <div class="m-tab"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <div class="m-tab on"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <div class="m-tab"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+          </div>
+        </div>
+        <div class="mob-caption">
+          <div class="ck"><span class="en">Route · /tracker</span><span class="es">Ruta · /tracker</span></div>
+          <div class="ct"><span class="en"><b>Tracker</b> active.</span><span class="es"><b>Tracker</b> activo.</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌃ 🔋</span></div>
+          <div class="m-top">
+            <span class="brand-m">labra<span class="dot">.</span></span>
+            <span class="avatar">SM</span>
+          </div>
+          <div class="m-body">
+            <div class="mb-kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+            <h3 class="mb-h1"><span class="en">Your <em>profile</em>.</span><span class="es">Tu <em>perfil</em>.</span></h3>
+          </div>
+          <div class="m-tabs">
+            <div class="m-tab"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <div class="m-tab"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <div class="m-tab on"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+          </div>
+        </div>
+        <div class="mob-caption">
+          <div class="ck"><span class="en">Route · /settings</span><span class="es">Ruta · /settings</span></div>
+          <div class="ct"><span class="en"><b>Settings</b> active.</span><span class="es"><b>Ajustes</b> activo.</span></div>
+        </div>
+      </div>
+
+      <!-- Avatar sheet -->
+      <div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌃ 🔋</span></div>
+          <div class="m-top">
+            <span class="brand-m">labra<span class="dot">.</span></span>
+            <span class="avatar" style="background:var(--ink);color:var(--surface);">SM</span>
+          </div>
+          <div class="m-body">
+            <div class="mb-kicker" style="opacity:.5;"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <h3 class="mb-h1" style="opacity:.4;"><span class="en">Paste a JD.</span><span class="es">Pega un JD.</span></h3>
+          </div>
+          <div class="m-tabs">
+            <div class="m-tab on" style="opacity:.5;"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+            <div class="m-tab" style="opacity:.5;"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+            <div class="m-tab" style="opacity:.5;"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="handle"></div>
+            <div class="s-name">Sofía Mendoza</div>
+            <div class="s-email">sofia.mendoza@gmail.com</div>
+            <div class="s-divider"></div>
+            <div class="s-row"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></div>
+          </div>
+        </div>
+        <div class="mob-caption">
+          <div class="ck"><span class="en">Avatar tap → sheet</span><span class="es">Tap avatar → sheet</span></div>
+          <div class="ct"><span class="en">Swipe-down or tap outside to dismiss.</span><span class="es">Swipe abajo o tap afuera para cerrar.</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN F — Active-state matrix                                -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="06 Active-state matrix">
+    <div class="screen-label">
+      <span class="num">F · System</span>
+      <h2><span class="en">Two active patterns, <em>one system</em></span><span class="es">Dos patrones activos, <em>un sistema</em></span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Both patterns coexist. <b>The pattern is determined by chrome geometry, not by the screen.</b> Future chrome elements that aren't side rails or bottom tab bars require a deliberate choice between these two — or a third pattern, if needed.</span>
+      <span class="es">Ambos patrones coexisten. <b>El patrón se determina por la geometría del chrome, no por la pantalla.</b> Futuros elementos de chrome que no sean side rails ni tab bars inferiores requieren elegir deliberadamente entre estos dos — o un tercero, si hace falta.</span>
+    </p>
+
+    <div class="matrix">
+
+      <div class="card">
+        <div class="mk"><span class="en">Pattern · 01</span><span class="es">Patrón · 01</span></div>
+        <div class="mt"><span class="en"><em>Filled pill</em> — side rail</span><span class="es"><em>Pill rellenado</em> — side rail</span></div>
+        <div class="demo">
+          <div class="pill"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+          <div class="pill on"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+          <div class="pill"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+        </div>
+        <p class="mp">
+          <span class="en"><b>Used on:</b> desktop side rail. <b>Mechanic:</b> background flips to <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span>, label flips to <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--surface</span>, weight 400 → 500. Pre-existing pattern from Verdict / Tracker / Settings.</span>
+          <span class="es"><b>Usado en:</b> side rail de escritorio. <b>Mecánica:</b> fondo a <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span>, etiqueta a <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--surface</span>, peso 400 → 500. Patrón preexistente de Verdict / Tracker / Ajustes.</span>
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="mk"><span class="en">Pattern · 02</span><span class="es">Patrón · 02</span></div>
+        <div class="mt"><span class="en"><em>Color + weight</em> — tab bar</span><span class="es"><em>Color + peso</em> — tab bar</span></div>
+        <div class="demo tabs">
+          <div class="tabcell"><span class="en">Evaluate</span><span class="es">Evaluar</span></div>
+          <div class="tabcell on"><span class="en">Tracker</span><span class="es">Tracker</span></div>
+          <div class="tabcell"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+        </div>
+        <p class="mp">
+          <span class="en"><b>Used on:</b> mobile bottom tab bar. <b>Mechanic:</b> label color <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink-3</span> → <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span>, weight 400 → 500. No fill, no underline, no indicator. New pattern, established by this spec.</span>
+          <span class="es"><b>Usado en:</b> tab bar inferior móvil. <b>Mecánica:</b> color de etiqueta <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink-3</span> → <span style="font-family:'Geist Mono',monospace;font-size:12.5px">--ink</span>, peso 400 → 500. Sin relleno, subrayado o indicador. Patrón nuevo, establecido por esta spec.</span>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN G — Cross-viewport consistency table                   -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="07 Cross-viewport behavior">
+    <div class="screen-label">
+      <span class="num">G · System</span>
+      <h2><span class="en">What's <em>consistent</em>, what's not</span><span class="es">Qué es <em>consistente</em>, qué no</span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">Mobile and desktop look structurally different. The pattern uses the convention for each viewport rather than forcing structural parity. Below: what stays the same across both, and what intentionally doesn't.</span>
+      <span class="es">Móvil y escritorio se ven estructuralmente distintos. El patrón usa la convención de cada viewport en lugar de forzar paridad estructural. Abajo: qué se mantiene igual en ambos, y qué intencionalmente no.</span>
+    </p>
+
+    <div class="table">
+      <div class="trow">
+        <span class="th"><span class="en">Property</span><span class="es">Propiedad</span></span>
+        <span class="th"><span class="en">Desktop</span><span class="es">Escritorio</span></span>
+        <span class="th"><span class="en">Mobile</span><span class="es">Móvil</span></span>
+      </div>
+
+      <div class="trow divider"><span class="th"><span class="en">Stays consistent</span><span class="es">Se mantiene</span></span></div>
+
+      <div class="trow">
+        <span class="lab"><span class="en">Destinations</span><span class="es">Destinos</span><span class="note"><span class="en">Same three, same order</span><span class="es">Mismos tres, mismo orden</span></span></span>
+        <span class="val">Evaluate · Tracker · Settings</span>
+        <span class="val">Evaluate · Tracker · Settings</span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Labels (ES)</span><span class="es">Etiquetas (ES)</span><span class="note"><span class="en">"Tracker" intentionally untranslated</span><span class="es">"Tracker" intencionalmente sin traducir</span></span></span>
+        <span class="val">Evaluar · Tracker · Ajustes</span>
+        <span class="val">Evaluar · Tracker · Ajustes</span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Brand wordmark</span><span class="es">Marca</span></span>
+        <span class="val"><span class="en">Top of rail · Fraunces 22 px</span><span class="es">Arriba del rail · Fraunces 22 px</span></span>
+        <span class="val"><span class="en">Left of top bar · Fraunces 19 px</span><span class="es">Izquierda de la barra · Fraunces 19 px</span></span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Sign-out reachable</span><span class="es">Cerrar sesión accesible</span></span>
+        <span class="val"><b>1 tap</b> · <span class="en">direct text in rail</span><span class="es">texto directo en rail</span></span>
+        <span class="val"><b>2 taps</b> · <span class="en">avatar → sheet</span><span class="es">avatar → sheet</span></span>
+      </div>
+
+      <div class="trow divider"><span class="th"><span class="en">Intentionally differs</span><span class="es">Difiere intencionalmente</span></span></div>
+
+      <div class="trow">
+        <span class="lab"><span class="en">Chrome geometry</span><span class="es">Geometría del chrome</span></span>
+        <span class="val"><span class="en"><b>Left side rail</b> · 240 px wide · persistent</span><span class="es"><b>Side rail izquierdo</b> · 240 px · persistente</span></span>
+        <span class="val"><span class="en"><b>Top bar</b> 48 px + <b>tab bar</b> 56 px</span><span class="es"><b>Top bar</b> 48 px + <b>tab bar</b> 56 px</span></span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Active-state treatment</span><span class="es">Tratamiento de estado activo</span></span>
+        <span class="val"><span class="en"><b>Filled pill</b> · --ink bg, --surface label</span><span class="es"><b>Pill rellenado</b> · fondo --ink, etiqueta --surface</span></span>
+        <span class="val"><span class="en"><b>Color + weight</b> · --ink at 500</span><span class="es"><b>Color + peso</b> · --ink en 500</span></span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Destination order</span><span class="es">Orden de destinos</span></span>
+        <span class="val"><span class="en">Top → bottom</span><span class="es">Arriba → abajo</span></span>
+        <span class="val"><span class="en">Left → right</span><span class="es">Izquierda → derecha</span></span>
+      </div>
+      <div class="trow">
+        <span class="lab"><span class="en">Page title in chrome</span><span class="es">Título de página en chrome</span></span>
+        <span class="val"><span class="en">No · lives in page H1</span><span class="es">No · vive en el H1 de la página</span></span>
+        <span class="val"><span class="en">No · lives in page H1</span><span class="es">No · vive en el H1 de la página</span></span>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SCREEN H — Deferred & out of scope                            -->
+  <!-- ============================================================ -->
+  <section class="screen" data-screen-label="08 Deferred">
+    <div class="screen-label">
+      <span class="num">H · Open</span>
+      <h2><span class="en">Deferred &amp; <em>out of scope</em></span><span class="es">Diferido y <em>fuera de alcance</em></span></h2>
+    </div>
+    <p class="screen-note">
+      <span class="en">What this spec does <b>not</b> decide. Each item below is tracked separately and will be revisited in design-system maintenance or a future session.</span>
+      <span class="es">Lo que esta spec <b>no</b> decide. Cada item abajo se rastrea por separado y se revisará en mantenimiento del design system o en una sesión futura.</span>
+    </p>
+
+    <div class="deferred-grid">
+      <div class="deferred">
+        <h3><span class="en">Deferred to design system</span><span class="es">Diferido al design system</span></h3>
+        <ul>
+          <li><span class="en"><b>Rail surface &amp; border tokens</b> — inherit from panel convention used on Tracker / Verdict.</span><span class="es"><b>Superficie y borde del rail</b> — heredan de la convención de paneles de Tracker / Verdict.</span></li>
+          <li><span class="en"><b>Top bar &amp; tab bar surface tokens</b> — inherit from chrome convention.</span><span class="es"><b>Tokens de superficie de top bar y tab bar</b> — heredan de la convención de chrome.</span></li>
+          <li><span class="en"><b>Breakpoint</b> — recommended 768 px. No graceful degradation between sizes; switches at the breakpoint.</span><span class="es"><b>Breakpoint</b> — recomendado 768 px. Sin degradación gradual; cambia en el breakpoint.</span></li>
+          <li><span class="en"><b>Active-state animation</b> — recommended: instant switch, route transition handles any motion.</span><span class="es"><b>Animación de estado activo</b> — recomendado: cambio instantáneo, la transición de ruta maneja el movimiento.</span></li>
+          <li><span class="en"><b>Avatar visual</b> — initials circle in v1; exact background/fallback logic open.</span><span class="es"><b>Visual del avatar</b> — círculo de iniciales en v1; lógica exacta de fondo/fallback abierta.</span></li>
+        </ul>
+      </div>
+
+      <div class="deferred">
+        <h3><span class="en">Out of this spec's scope</span><span class="es">Fuera del alcance de esta spec</span></h3>
+        <ul>
+          <li><span class="en"><b>Retroactive cleanup</b> of Onboarding, Verdict, Tracker, Settings to apply this pattern. Tracked separately.</span><span class="es"><b>Limpieza retroactiva</b> de Onboarding, Verdict, Tracker, Ajustes. Se rastrea por separado.</span></li>
+          <li><span class="en"><b>Mobile sheet visuals</b> — scrim opacity, sheet height, swipe-to-dismiss motion. Deferred to sheet/modal session.</span><span class="es"><b>Visual del sheet móvil</b> — opacidad del scrim, altura, gesto de cierre. Diferido a sesión de sheet/modal.</span></li>
+          <li><span class="en"><b>Notification badges</b> on nav items — no notifications ship in v1; pattern deferred until they do.</span><span class="es"><b>Badges de notificación</b> en items de nav — no hay notificaciones en v1; diferido hasta que existan.</span></li>
+          <li><span class="en"><b>Collapse / expand</b> behavior for the rail — not in v1. Revisit when nav grows to 5+ items.</span><span class="es"><b>Colapso / expansión</b> del rail — no en v1. Revisar cuando crezca a 5+ items.</span></li>
+          <li><span class="en"><b>Icon system</b> for nav items — revisit when nav grows to 5+ items (Discover / Tailor / Market).</span><span class="es"><b>Sistema de íconos</b> para items de nav — revisar cuando crezca a 5+ items (Discover / Tailor / Market).</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- footer -->
+  <footer style="margin-top:60px;padding-top:24px;border-top:0.5px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:24px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-3);letter-spacing:0.4px;">
+    <span><span class="en">Labra · navigation pattern · v1 · locked 2026-05-19</span><span class="es">Labra · patrón de navegación · v1 · cerrado 2026-05-19</span></span>
+    <span><span class="en">END OF HANDOFF</span><span class="es">FIN DE LA ENTREGA</span></span>
+  </footer>
+
+</main>
+
+<script>
+  // language toggle
+  document.querySelectorAll('[data-lang-set]').forEach(b => {
+    b.addEventListener('click', () => {
+      const lang = b.getAttribute('data-lang-set');
+      document.documentElement.setAttribute('data-lang', lang);
+      document.querySelectorAll('[data-lang-set]').forEach(x => x.classList.toggle('on', x === b));
+    });
+  });
+  // theme toggle
+  document.querySelectorAll('[data-theme-set]').forEach(b => {
+    b.addEventListener('click', () => {
+      const t = b.getAttribute('data-theme-set');
+      document.documentElement.classList.remove('theme-light','theme-dark');
+      document.documentElement.classList.add('theme-' + t);
+      document.querySelectorAll('[data-theme-set]').forEach(x => x.classList.toggle('on', x === b));
+    });
+  });
+</script>
+
+</body>
+</html>

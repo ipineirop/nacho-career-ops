@@ -1,0 +1,1234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Design System v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS — light + dark                                          */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-on:   #ffffff;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-on:   #0a0e14;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+  .theme-dark .body-copy { font-weight: 450; }
+
+  /* ============================================================ */
+  /* TOP CHROME                                                     */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px;
+    color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .top .actions { display: flex; gap: 8px; align-items: center; }
+  .mode-toggle {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 5px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .mode-toggle button {
+    border: 0; background: transparent;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .mode-toggle button.on { background: var(--ink); color: var(--bg); }
+  .version {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+
+  /* ============================================================ */
+  /* PAGE                                                           */
+  /* ============================================================ */
+  .layout {
+    max-width: 1480px; margin: 0 auto;
+    display: grid; grid-template-columns: 220px 1fr;
+    gap: 32px; padding: 24px 32px 80px;
+  }
+  .toc {
+    position: sticky; top: 80px;
+    align-self: start;
+    padding: 14px 0;
+  }
+  .toc .group {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 6px; padding: 0 12px;
+  }
+  .toc a {
+    display: block;
+    padding: 6px 12px; border-radius: 8px;
+    text-decoration: none;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 2px;
+  }
+  .toc a:hover { background: var(--canvas); color: var(--ink); }
+  .toc a.active { background: var(--ink); color: var(--bg); }
+  .toc .sub { padding-left: 22px; font-size: 12.5px; font-weight: 400; color: var(--ink-3); }
+  .toc .sub:hover { background: var(--canvas); color: var(--ink-2); }
+  .toc .sep { height: 1px; background: var(--line); margin: 12px 0; }
+
+  .content { min-width: 0; }
+  .doc-hero { padding: 28px 0 36px; border-bottom: 1px solid var(--line); margin-bottom: 36px; }
+  .doc-hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 68px; line-height: 1; margin: 0; letter-spacing: -1.8px;
+  }
+  .doc-hero h1 em { font-style: italic; }
+  .doc-hero .lead {
+    font-family: "Albert Sans"; font-size: 17px; line-height: 1.6;
+    color: var(--ink-2); max-width: 720px; margin-top: 14px;
+  }
+  .doc-hero .lead b { color: var(--ink); font-weight: 600; }
+
+  section { padding: 24px 0 16px; }
+  section.gap { padding-top: 48px; }
+  h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 38px; line-height: 1.05; margin: 0 0 10px; letter-spacing: -0.9px;
+  }
+  h2 em { font-style: italic; }
+  h2 .num {
+    display: inline-block;
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-right: 16px; vertical-align: middle;
+    padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface);
+  }
+  .sec-lead {
+    font-family: "Albert Sans"; font-size: 15px; line-height: 1.6;
+    color: var(--ink-2); max-width: 720px; margin-bottom: 28px;
+  }
+  .sec-lead b { color: var(--ink); font-weight: 600; }
+
+  h3 {
+    font-family: "Albert Sans"; font-weight: 600;
+    font-size: 18px; line-height: 1.2; margin: 32px 0 14px;
+    color: var(--ink);
+  }
+  h4 {
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 10px;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px; margin-bottom: 16px;
+  }
+  .card.canvas { background: var(--canvas); }
+  .card.tight { padding: 16px 18px; }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px;
+  }
+
+  /* ============================================================ */
+  /* SWATCHES                                                       */
+  /* ============================================================ */
+  .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .swatch {
+    border-radius: 10px; padding: 14px; min-height: 110px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border: 1px solid rgba(0,0,0,.04);
+  }
+  .swatch .nm {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500;
+    opacity: .95;
+  }
+  .swatch .hx {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.4px; opacity: .85;
+  }
+  .swatch .role {
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500; opacity: .85;
+  }
+
+  .modes-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .mode-pane {
+    border-radius: 12px; padding: 20px 22px;
+    border: 1px solid var(--line);
+  }
+  .mode-pane.light { background: #ffffff; }
+  .mode-pane.dark { background: #0a0e14; }
+  .mode-pane .pane-label {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .mode-pane.light .pane-label { color: #889399; }
+  .mode-pane.dark .pane-label { color: #8893a3; }
+
+  /* token table */
+  .tok-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tok-table th, .tok-table td {
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .tok-table th {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-3);
+    font-weight: 500;
+  }
+  .tok-table td.tok {
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    color: var(--ink);
+  }
+  .tok-table td.val { color: var(--ink-2); }
+  .tok-table .chip {
+    display: inline-block; width: 18px; height: 18px; border-radius: 4px;
+    border: 1px solid rgba(0,0,0,.1); vertical-align: middle; margin-right: 8px;
+  }
+  .tok-table tr:last-child td { border-bottom: none; }
+
+  /* ============================================================ */
+  /* TYPE SPECIMEN                                                  */
+  /* ============================================================ */
+  .type-row {
+    padding: 20px 0; border-bottom: 1px dashed var(--line);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-meta {
+    display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap;
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .type-meta .label-pill {
+    border: 1px solid var(--line); padding: 1px 8px; border-radius: 999px;
+    color: var(--ink-2);
+  }
+  .type-meta .role-x {
+    margin-left: auto; color: var(--ink-2); text-transform: none;
+    font-family: "Albert Sans"; letter-spacing: 0; font-size: 13px;
+  }
+
+  /* spacing visual */
+  .space-grid { display: flex; gap: 16px; align-items: flex-end; }
+  .space-block {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-3);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .space-block .blk {
+    background: var(--accent); border-radius: 2px;
+  }
+
+  /* component demo */
+  .demo {
+    border: 1px dashed var(--line); border-radius: 12px;
+    padding: 24px; background: var(--canvas);
+    margin-bottom: 12px;
+  }
+  .demo.dark {
+    background: #0a0e14; border-color: #2a3543;
+  }
+  .demo .demo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .props {
+    background: var(--canvas); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px;
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    color: var(--ink-2); line-height: 1.6; margin-top: 10px;
+  }
+  .props b { color: var(--ink); font-weight: 500; }
+  .props .nm { color: var(--accent); }
+
+  /* component primitives — used in demos */
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 11px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 500; font-size: 12px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2);
+  }
+  .pill.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .pill.signal { background: var(--signal); color: var(--signal-on); border-color: transparent; }
+  .pill.signal-soft { color: var(--signal); border-color: var(--signal); background: transparent; }
+  .pill.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .pill.lg { padding: 5px 14px; font-size: 13px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+  .btn.signal { background: var(--signal); color: var(--signal-on); border-color: var(--signal); }
+  .btn.sm { padding: 6px 12px; font-size: 12px; }
+  .btn.lg { padding: 11px 22px; font-size: 14px; font-weight: 600; }
+
+  .avatar-co {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .avatar-co.sm { width: 32px; height: 32px; font-size: 11px; border-radius: 9px; }
+  .avatar-co.lg { width: 56px; height: 56px; font-size: 16px; border-radius: 14px; }
+  .avatar-people {
+    width: 36px; height: 36px; border-radius: 999px;
+    background: var(--signal-soft); color: var(--signal);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 12px;
+  }
+
+  .score {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--accent); color: var(--accent-on);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 700; font-size: 20px;
+    flex-shrink: 0;
+  }
+  .score.sm { width: 44px; height: 44px; font-size: 16px; border-radius: 10px; }
+  .score.flag { background: var(--signal); color: var(--signal-on); }
+  .score.muted { background: var(--canvas); color: var(--ink-2); }
+
+  .salary {
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; background: var(--canvas);
+    display: flex; flex-direction: column; gap: 8px;
+    max-width: 380px;
+  }
+  .salary .row { display: flex; align-items: center; gap: 10px; }
+  .meter {
+    position: relative; height: 10px; border-radius: 5px;
+    background: var(--track);
+  }
+  .meter .band {
+    position: absolute; top: 0; height: 100%; border-radius: 5px;
+    background: var(--accent); opacity: .35;
+  }
+  .meter .pin {
+    position: absolute; top: -3px; width: 2px; height: 16px;
+    background: var(--signal);
+  }
+  .meter .pin::after {
+    content: ''; position: absolute; top: -3px; left: -3px;
+    width: 8px; height: 8px; background: var(--signal); border-radius: 50%;
+  }
+
+  .fits { display: flex; flex-direction: column; gap: 8px; max-width: 380px; }
+  .fit-bar { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+  .fit-bar .label-bar {
+    width: 70px; font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .fit-bar .track {
+    flex: 1; height: 6px; border-radius: 3px; background: var(--track);
+    position: relative; overflow: hidden;
+  }
+  .fit-bar .fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--accent); border-radius: 3px;
+  }
+  .fit-bar .fill.soft { background: var(--accent); opacity: .55; }
+  .fit-bar .fill.signal { background: var(--signal); }
+  .fit-bar .grade {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink); width: 22px; text-align: right;
+  }
+
+  .mono { font-family: "Geist Mono", monospace; letter-spacing: 0.4px; }
+  .h-editorial {
+    font-family: "Fraunces", serif; font-weight: 400;
+    line-height: 1.05; letter-spacing: -0.5px;
+    color: var(--ink); margin: 0;
+  }
+  .h-editorial em { font-style: italic; }
+
+  /* rules */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rule {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .rule .rule-num {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .rule .rule-title {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 19px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .rule .rule-title em { font-style: italic; }
+  .rule .rule-body {
+    font-family: "Albert Sans"; font-size: 13.5px; line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .rule .rule-body b { color: var(--ink); font-weight: 600; }
+  .rule .rule-body code {
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    background: var(--canvas); padding: 1px 6px; border-radius: 4px;
+  }
+
+  /* status dot demo */
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ink-2); display: inline-block;
+  }
+  .status-dot.applied { background: var(--signal); }
+  .status-dot.interview { background: var(--accent); }
+  .status-dot.offer { background: var(--ink); }
+  .status-dot.draft { background: var(--ink-3); }
+
+  /* code block */
+  .code {
+    background: var(--canvas); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; font-family: "Geist Mono", monospace; font-size: 12px;
+    color: var(--ink-2); line-height: 1.6; overflow-x: auto;
+    white-space: pre;
+  }
+  .code .k { color: var(--accent); }
+  .code .c { color: var(--ink-3); }
+
+  /* footer */
+  .footer {
+    margin-top: 60px; padding: 24px 0;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-family: "Geist Mono"; font-size: 10.5px; color: var(--ink-3);
+    letter-spacing: 0.8px; text-transform: uppercase;
+  }
+
+  /* dark-mode targeted lifts (mirror hi-fi v0.2 dark-mode fixes) */
+  .theme-dark .editor-note { background: #16283a; }
+</style>
+</head>
+<body class="theme-light">
+
+  <!-- TOP CHROME -->
+  <div class="top">
+    <div class="brand">leadme<span class="dot">.</span><span class="system">Design System</span></div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <span class="version">v1.0 · May 2026</span>
+      <div class="mode-toggle">
+        <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+        <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- TOC -->
+    <aside class="toc">
+      <div class="group">Foundations</div>
+      <a href="#color">Color</a>
+      <a href="#type">Type</a>
+      <a href="#spacing">Spacing &amp; Radius</a>
+      <div class="sep"></div>
+      <div class="group">Components</div>
+      <a href="#buttons">Buttons</a>
+      <a href="#pills">Pills</a>
+      <a href="#avatars">Avatars &amp; Score</a>
+      <a href="#cards">Cards</a>
+      <a href="#salary">Salary band</a>
+      <a href="#fits">Fit bars</a>
+      <a href="#status">Status &amp; pipeline</a>
+      <a href="#nav">Navigation</a>
+      <div class="sep"></div>
+      <div class="group">Patterns</div>
+      <a href="#brief">Editor's note + Pick</a>
+      <a href="#verdict">Evaluate verdict</a>
+      <a href="#territory">Territory map</a>
+      <div class="sep"></div>
+      <div class="group">Principles</div>
+      <a href="#rules">Ten rules</a>
+      <a href="#voice">Voice</a>
+    </aside>
+
+
+    <main class="content">
+
+      <!-- HERO -->
+      <div class="doc-hero">
+        <h1>The <em>system</em>.</h1>
+        <p class="lead">
+          One palette, two modes, three typefaces, ten rules. Every component on every screen of LeadMe lives inside this book. <b>If something isn't here, it isn't in the product yet.</b>
+        </p>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- COLOR                                                          -->
+      <!-- ============================================================ -->
+      <section id="color">
+        <h2><span class="num">01</span>Color</h2>
+        <p class="sec-lead">
+          <b>One accent.</b> Petrol on light, sky-blue on dark — same role, mode-mapped. <b>One signal.</b> Burnt amber on light, saffron on dark, used only for under-market and stale-state warnings. Pulled deliberately away from safety-orange, toward saffron / brass.
+        </p>
+
+        <h3>Light mode · Petrol</h3>
+        <div class="mode-pane light" style="border-radius: 12px;">
+          <div class="pane-label"><span>Petrol</span><span style="margin-left:auto;">tokens · light</span></div>
+          <div class="swatch-grid" style="margin-bottom: 10px;">
+            <div class="swatch" style="background:#ffffff; color:#0a1f24; border:1px solid #e2e7e8;"><span class="nm">Surface</span><span class="hx">#FFFFFF</span></div>
+            <div class="swatch" style="background:#f6f8f8; color:#0a1f24;"><span class="nm">Canvas</span><span class="hx">#F6F8F8</span></div>
+            <div class="swatch" style="background:#f0f4f4; color:#0a1f24;"><span class="nm">Canvas-2</span><span class="hx">#F0F4F4</span></div>
+            <div class="swatch" style="background:#0a1f24; color:#fff;"><span class="nm">Ink</span><span class="hx">#0A1F24</span></div>
+          </div>
+          <div class="swatch-grid">
+            <div class="swatch" style="background:#0d7c89; color:#fff;"><span class="nm">Accent</span><span class="hx">#0D7C89</span><span class="role">primary action</span></div>
+            <div class="swatch" style="background:#d6eef0; color:#0d7c89;"><span class="nm">Accent-soft</span><span class="hx">#D6EEF0</span><span class="role">positive fill</span></div>
+            <div class="swatch" style="background:#c97b0e; color:#fff;"><span class="nm">★ Signal</span><span class="hx">#C97B0E</span><span class="role">warning</span></div>
+            <div class="swatch" style="background:#fbecd6; color:#c97b0e;"><span class="nm">Signal-soft</span><span class="hx">#FBECD6</span><span class="role">soft warning</span></div>
+          </div>
+        </div>
+
+        <h3>Dark mode · Midnight</h3>
+        <div class="mode-pane dark" style="border-radius: 12px;">
+          <div class="pane-label" style="color: #8893a3;"><span>Midnight</span><span style="margin-left:auto;">tokens · dark</span></div>
+          <div class="swatch-grid" style="margin-bottom: 10px;">
+            <div class="swatch" style="background:#0a0e14; color:#f4f6fa; border:1px solid #2a3543;"><span class="nm">Ground</span><span class="hx">#0A0E14</span></div>
+            <div class="swatch" style="background:#1a2230; color:#f4f6fa;"><span class="nm">Surface</span><span class="hx">#1A2230</span></div>
+            <div class="swatch" style="background:#0f1620; color:#f4f6fa;"><span class="nm">Canvas</span><span class="hx">#0F1620</span></div>
+            <div class="swatch" style="background:#f4f6fa; color:#0a0e14;"><span class="nm">Ink</span><span class="hx">#F4F6FA</span></div>
+          </div>
+          <div class="swatch-grid">
+            <div class="swatch" style="background:#5cb1ff; color:#06101c;"><span class="nm">Accent</span><span class="hx">#5CB1FF</span><span class="role">primary action</span></div>
+            <div class="swatch" style="background:#1a2d44; color:#5cb1ff;"><span class="nm">Accent-soft</span><span class="hx">#1A2D44</span><span class="role">positive fill</span></div>
+            <div class="swatch" style="background:#ecae4d; color:#0a0e14;"><span class="nm">★ Signal</span><span class="hx">#ECAE4D</span><span class="role">warning</span></div>
+            <div class="swatch" style="background:#382b16; color:#ecae4d;"><span class="nm">Signal-soft</span><span class="hx">#382B16</span><span class="role">soft warning</span></div>
+          </div>
+        </div>
+
+        <h3>Text tokens</h3>
+        <table class="tok-table">
+          <thead>
+            <tr><th>Token</th><th>Light</th><th>Dark</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tok">--ink</td><td><span class="chip" style="background:#0a1f24;"></span>#0A1F24</td><td><span class="chip" style="background:#f4f6fa;"></span>#F4F6FA</td><td class="val">Primary text, headlines, key labels</td></tr>
+            <tr><td class="tok">--ink-2</td><td><span class="chip" style="background:#455258;"></span>#455258</td><td><span class="chip" style="background:#c4cad6;"></span>#C4CAD6</td><td class="val">Body copy, secondary text</td></tr>
+            <tr><td class="tok">--ink-3</td><td><span class="chip" style="background:#889399;"></span>#889399</td><td><span class="chip" style="background:#8893a3;"></span>#8893A3</td><td class="val">Mono labels, meta, kickers</td></tr>
+            <tr><td class="tok">--line</td><td><span class="chip" style="background:#e2e7e8;"></span>#E2E7E8</td><td><span class="chip" style="background:#2a3543;"></span>#2A3543</td><td class="val">Borders, dividers</td></tr>
+            <tr><td class="tok">--track</td><td><span class="chip" style="background:#edf1f1;"></span>#EDF1F1</td><td><span class="chip" style="background:#2a3543;"></span>#2A3543</td><td class="val">Progress / meter tracks</td></tr>
+          </tbody>
+        </table>
+
+        <div class="card canvas" style="margin-top: 20px;">
+          <h4>★ Rule on the signal color</h4>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2);">
+            <b style="color: var(--ink);">No warn-vs-flag hierarchy by hue.</b> One signal color, two intensities. <strong>Filled pill</strong> = serious ("16% under market," "level mismatch"). <strong>Outlined pill</strong> = soft ("stale 5d," "fields skipped"). Pill style does the hierarchy. The color stays consistent.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- TYPE                                                           -->
+      <!-- ============================================================ -->
+      <section class="gap" id="type">
+        <h2><span class="num">02</span>Type</h2>
+        <p class="sec-lead">
+          Three families, strict roles. <b>Fraunces</b> for editorial moments only. <b>Albert Sans</b> for everything else. <b>Geist Mono</b> for all numerics, labels, and receipts.
+        </p>
+
+        <div class="card">
+          <div class="type-row">
+            <div class="type-meta">
+              <span>Fraunces</span>
+              <span class="label-pill">serif · variable</span>
+              <span class="label-pill">italic-capable</span>
+              <span class="role-x">role · editorial moments only · 22 / 28 / 48+</span>
+            </div>
+            <div style="font-family: 'Fraunces', serif; font-weight: 400; font-size: 64px; line-height: 1; letter-spacing: -1.8px; color: var(--ink);">Today's <em>brief</em>.</div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <span>Fraunces</span>
+              <span class="label-pill">verdict</span>
+              <span class="role-x">22–28px · Evaluate verdict + Brief pick titles</span>
+            </div>
+            <div style="font-family: 'Fraunces', serif; font-weight: 400; font-size: 28px; line-height: 1.05; letter-spacing: -0.5px; color: var(--ink);">Kavak just opened <em>your seat</em>.</div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <span>Albert Sans</span>
+              <span class="label-pill">sans · humanist</span>
+              <span class="role-x">role · all UI, body, product headings</span>
+            </div>
+            <div style="font-family: 'Albert Sans', sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; letter-spacing: -0.8px; color: var(--ink);">Director of Operations</div>
+            <div style="font-family: 'Albert Sans', sans-serif; font-weight: 500; font-size: 17px; color: var(--ink); margin-top: 8px;">5 picks worth your time. 18 muted.</div>
+            <div style="font-family: 'Albert Sans', sans-serif; font-size: 14.5px; color: var(--ink-2); margin-top: 6px;">Body copy lives here at 14.5px / 1.55. Buttons, navigation, pills, all UI labels. 600 for product headings, 500 for UI labels, 400 for body.</div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <span>Geist Mono</span>
+              <span class="label-pill">monospace</span>
+              <span class="role-x">role · numerics, receipts, kicker labels · always uppercase for labels</span>
+            </div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 18px; color: var(--ink); letter-spacing: 0.4px;">USD $115–145K · MXN $1.9–2.6M · CONFIDENCE ●●●</div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--ink-3); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 10px;">ISSUE №14 · THURSDAY MAY 14 · CDMX</div>
+          </div>
+        </div>
+
+        <h3>Type scale</h3>
+        <table class="tok-table">
+          <thead>
+            <tr><th>Name</th><th>Family</th><th>Size / line</th><th>Weight</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tok">display-xl</td><td>Fraunces</td><td>68 / 68 · -1.8</td><td>400</td><td class="val">Doc hero only</td></tr>
+            <tr><td class="tok">editorial-l</td><td>Fraunces</td><td>48 / 50 · -1.2</td><td>400</td><td class="val">Brief hero ("Today's brief.")</td></tr>
+            <tr><td class="tok">editorial-m</td><td>Fraunces</td><td>28 / 30 · -0.5</td><td>400</td><td class="val">Pick title, Evaluate verdict</td></tr>
+            <tr><td class="tok">editorial-s</td><td>Fraunces</td><td>22 / 24 · -0.4</td><td>400</td><td class="val">Verdict subhead</td></tr>
+            <tr><td class="tok">product-l</td><td>Albert Sans</td><td>32 / 36 · -0.8</td><td>600</td><td class="val">Tracker title, Onboarding header</td></tr>
+            <tr><td class="tok">product-m</td><td>Albert Sans</td><td>17 / 24</td><td>600</td><td class="val">Card titles, role names</td></tr>
+            <tr><td class="tok">product-s</td><td>Albert Sans</td><td>14 / 20</td><td>500</td><td class="val">UI labels, button text</td></tr>
+            <tr><td class="tok">body</td><td>Albert Sans</td><td>14.5 / 22</td><td>400</td><td class="val">Body copy (450 in dark mode)</td></tr>
+            <tr><td class="tok">body-s</td><td>Albert Sans</td><td>13 / 18</td><td>400</td><td class="val">Secondary body</td></tr>
+            <tr><td class="tok">kicker</td><td>Geist Mono</td><td>10.5 / 14 · +1.2</td><td>500</td><td class="val">Uppercase labels, meta lines</td></tr>
+            <tr><td class="tok">data</td><td>Geist Mono</td><td>12–14 / 16 · +0.4</td><td>500</td><td class="val">Numerics, dates, salaries</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- SPACING & RADIUS                                               -->
+      <!-- ============================================================ -->
+      <section class="gap" id="spacing">
+        <h2><span class="num">03</span>Spacing &amp; Radius</h2>
+        <p class="sec-lead">
+          <b>One spacing scale.</b> Nothing exists between the steps. <b>Two radii.</b> Nothing else exists.
+        </p>
+
+        <div class="card">
+          <h4>Spacing · 4 / 8 / 12 / 16 / 24 / 32 / 48 (px)</h4>
+          <div class="space-grid">
+            <div class="space-block"><div class="blk" style="width: 4px; height: 24px;"></div><span>4</span></div>
+            <div class="space-block"><div class="blk" style="width: 8px; height: 32px;"></div><span>8</span></div>
+            <div class="space-block"><div class="blk" style="width: 12px; height: 40px;"></div><span>12</span></div>
+            <div class="space-block"><div class="blk" style="width: 16px; height: 48px;"></div><span>16</span></div>
+            <div class="space-block"><div class="blk" style="width: 24px; height: 56px;"></div><span>24</span></div>
+            <div class="space-block"><div class="blk" style="width: 32px; height: 64px;"></div><span>32</span></div>
+            <div class="space-block"><div class="blk" style="width: 48px; height: 80px;"></div><span>48</span></div>
+          </div>
+          <div class="props" style="margin-top: 24px;"><b>Density follows surface.</b> Brief/Evaluate breathe (22–32px padding). Tracker tightens (10–14px row padding). The product feels editorial where it reads, tabular where it operates.</div>
+        </div>
+
+        <div class="card">
+          <h4>Radius · 10 / 999 (px). Two values, no in-between.</h4>
+          <div style="display: flex; gap: 24px; align-items: center; padding: 14px 0;">
+            <div style="width: 100px; height: 100px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono'; font-size: 11px; color: var(--accent); letter-spacing: 0.5px;">10 PX</div>
+            <div style="font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink-2); max-width: 320px; line-height: 1.55;"><b style="color: var(--ink);">10px</b> — cards, score chips, modals, salary bands, lead cards, avatar squares</div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: center; padding: 14px 0; border-top: 1px dashed var(--line);">
+            <div style="width: 100px; height: 100px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono'; font-size: 11px; color: var(--accent); letter-spacing: 0.5px;">999 PX</div>
+            <div style="font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink-2); max-width: 320px; line-height: 1.55;"><b style="color: var(--ink);">999px</b> — pills, buttons, people avatars, status dots, segmented toggles</div>
+          </div>
+          <div class="props" style="margin-top: 14px;"><b>No shadows. Ever.</b> Hierarchy comes from borders, radius, density — never blur. A dropped shadow is the design failing.</div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- BUTTONS                                                        -->
+      <!-- ============================================================ -->
+      <section class="gap" id="buttons">
+        <h2><span class="num">04</span>Buttons</h2>
+        <p class="sec-lead">Pill-shaped always (999px). Three variants. Three sizes. Combine freely.</p>
+
+        <div class="demo">
+          <div class="demo-row">
+            <button class="btn primary lg">Tailor &amp; apply</button>
+            <button class="btn lg">Evaluate</button>
+            <button class="btn ghost lg">Save</button>
+          </div>
+          <div class="demo-row" style="margin-top: 14px;">
+            <button class="btn primary">Tailor &amp; apply</button>
+            <button class="btn">Evaluate</button>
+            <button class="btn ghost">Save</button>
+            <button class="btn signal">Open under-market reply</button>
+          </div>
+          <div class="demo-row" style="margin-top: 14px;">
+            <button class="btn primary sm">Open</button>
+            <button class="btn sm">Edit</button>
+            <button class="btn ghost sm">Mute</button>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">primary</span> — Accent fill, primary action, one per surface · <b>Tailor &amp; apply</b>, <b>Looks right → intake</b><br/>
+          <span class="nm">default</span> — Bordered, neutral · <b>Evaluate</b>, <b>Edit</b>, <b>Open</b><br/>
+          <span class="nm">ghost</span> — No background, no border, low-weight actions · <b>Mute</b>, <b>Skip</b><br/>
+          <span class="nm">signal</span> — Used only for actions that explicitly act on a warning (rare)
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- PILLS                                                          -->
+      <!-- ============================================================ -->
+      <section class="gap" id="pills">
+        <h2><span class="num">05</span>Pills</h2>
+        <p class="sec-lead">The product's main micro-label. Five variants. Always 999px. Always 12–13px.</p>
+
+        <div class="demo">
+          <div class="demo-row">
+            <span class="pill">neutral · default</span>
+            <span class="pill solid">solid · filter on</span>
+            <span class="pill accent">accent · in your band</span>
+            <span class="pill signal">signal · 16% under market</span>
+            <span class="pill signal-soft">signal-soft · stale 5d</span>
+          </div>
+          <div class="demo-row" style="margin-top: 14px;">
+            <span class="pill lg">large variant</span>
+            <span class="pill accent lg">in your band</span>
+            <span class="pill signal lg">16% under market</span>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">accent</span> — positive metadata · <b>in your band</b>, <b>strong fit</b>, <b>fresh</b><br/>
+          <span class="nm">signal</span> — <b>serious</b> warning · filled, used for under-market &amp; level-mismatch flags<br/>
+          <span class="nm">signal-soft</span> — soft warning · outlined, used for <b>stale 5d</b>, <b>fields skipped</b><br/>
+          <span class="nm">solid</span> — selection / active state in segmented controls and filter strips<br/>
+          <span class="nm">neutral</span> — default tag, metadata, switches off
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- AVATARS & SCORE                                                -->
+      <!-- ============================================================ -->
+      <section class="gap" id="avatars">
+        <h2><span class="num">06</span>Avatars &amp; Score</h2>
+        <p class="sec-lead">
+          <b>Companies are squares.</b> <code style="font-family:'Geist Mono'; font-size: 12px; background: var(--canvas); padding: 1px 6px; border-radius: 4px;">10–12px radius</code>, accent-soft background, two-letter initials. <b>People are circles.</b> 999px, signal-soft background. <b>Never photos or logos in MVP.</b>
+        </p>
+
+        <div class="demo">
+          <h4>Company avatars (squares)</h4>
+          <div class="demo-row">
+            <span class="avatar-co sm">KV</span>
+            <span class="avatar-co">KV</span>
+            <span class="avatar-co lg">KV</span>
+            <span class="avatar-co" style="background: var(--signal-soft); color: var(--signal);">ST</span>
+          </div>
+
+          <h4 style="margin-top: 24px;">People avatars (circles)</h4>
+          <div class="demo-row">
+            <span class="avatar-people">NL</span>
+            <span class="avatar-people" style="background: var(--accent-soft); color: var(--accent);">SM</span>
+          </div>
+
+          <h4 style="margin-top: 24px;">Score chips · 10px radius squares, never circles</h4>
+          <div class="demo-row">
+            <span class="score">91</span>
+            <span class="score sm">82</span>
+            <span class="score flag">82</span>
+            <span class="score muted">52</span>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">score</span> — <b>56×56 verdict</b>, <b>44×44 list</b>. Albert Sans 700/20px. Never circles. Never anywhere else.<br/>
+          <span class="nm">score.flag</span> — Score chip rendered amber when verdict has a serious signal (under-market, etc.)<br/>
+          <span class="nm">score.muted</span> — Sub-threshold leads (under 60 typically)
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- CARDS                                                          -->
+      <!-- ============================================================ -->
+      <section class="gap" id="cards">
+        <h2><span class="num">07</span>Cards</h2>
+        <p class="sec-lead">Always 10px radius. Always bordered. Three surface variants. Padding follows the spacing scale.</p>
+
+        <div class="demo">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <div class="card" style="margin: 0;">
+              <h4>Default · surface</h4>
+              <div style="font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink-2); line-height: 1.55;">Lead cards, pick rows, tracker rows. Live on canvas backgrounds.</div>
+            </div>
+            <div class="card canvas" style="margin: 0;">
+              <h4>Canvas · sunk</h4>
+              <div style="font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink-2); line-height: 1.55;">Used inside a surface card when needing additional depth. Salary bands, code snippets.</div>
+            </div>
+            <div class="card" style="margin: 0; background: var(--accent-soft); border-color: transparent;">
+              <h4 style="color: var(--accent);">Accent · highlighted</h4>
+              <div style="font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink); line-height: 1.55;">Editor's notes, focus cards. Always accent-soft fill, no border.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- SALARY BAND                                                    -->
+      <!-- ============================================================ -->
+      <section class="gap" id="salary">
+        <h2><span class="num">08</span>Salary band</h2>
+        <p class="sec-lead">The LatAm moat made tangible. Always uses three layers: <b>amount</b> + <b>meter</b> + <b>confidence</b>. Pin marks "their offer" relative to market.</p>
+
+        <div class="demo">
+          <h4>In-band (good)</h4>
+          <div class="salary">
+            <div class="row" style="font-size: 13.5px;">
+              <span style="font-weight: 600;">USD $115–145k</span>
+              <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">EST · BASE</span>
+              <span class="pill accent" style="margin-left: auto;">in your band</span>
+            </div>
+            <div class="meter"><div class="band" style="left: 38%; width: 32%;"></div></div>
+            <div class="row" style="font-size: 11px;">
+              <span class="mono" style="color: var(--ink-3);">YOUR FLOOR $95K</span>
+              <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH</span>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 24px;">Under-market (flagged)</h4>
+          <div class="salary">
+            <div class="row" style="font-size: 13.5px;">
+              <span style="font-weight: 600;">MXN $1.6M</span>
+              <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">THEIR OFFER</span>
+              <span class="pill signal" style="margin-left: auto;">≈ 16% under market</span>
+            </div>
+            <div class="meter">
+              <div class="band" style="left: 35%; width: 35%;"></div>
+              <div class="pin" style="left: 22%;"></div>
+            </div>
+            <div class="row" style="font-size: 11px;">
+              <span class="mono" style="color: var(--ink-3);">MARKET $1.9–2.4M</span>
+              <span class="mono" style="margin-left: auto; color: var(--ink-3);">4 LATAM COMPARABLES</span>
+            </div>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">amount</span> — Always Albert Sans 600 · currency in mono uppercase<br/>
+          <span class="nm">meter</span> — Track always var(--track). Band is accent at 35% opacity. Pin only appears when offer falls outside band.<br/>
+          <span class="nm">confidence</span> — Three dots: ●●● HIGH (3+ sources), ●●○ MEDIUM, ●○○ LOW
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- FIT BARS                                                       -->
+      <!-- ============================================================ -->
+      <section class="gap" id="fits">
+        <h2><span class="num">09</span>Fit bars</h2>
+        <p class="sec-lead">The A–F scoring breakdown. 10 dimensions, but only show the ones that move the needle.</p>
+
+        <div class="demo">
+          <div class="fits">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width: 88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width: 90%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width: 60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill signal" style="width: 40%;"></span></span><span class="grade">D</span></div>
+            <div class="fit-bar"><span class="label-bar">stage</span><span class="track"><span class="fill" style="width: 82%;"></span></span><span class="grade">A-</span></div>
+            <div class="fit-bar"><span class="label-bar">location</span><span class="track"><span class="fill" style="width: 100%;"></span></span><span class="grade">A+</span></div>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">fill</span> — Accent · grade A/A+/A-/B+<br/>
+          <span class="nm">fill.soft</span> — Accent at 55% opacity · grade B/C+/C<br/>
+          <span class="nm">fill.signal</span> — Signal amber · grade D/F · always paired with a signal pill above
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- STATUS                                                         -->
+      <!-- ============================================================ -->
+      <section class="gap" id="status">
+        <h2><span class="num">10</span>Status &amp; pipeline</h2>
+        <p class="sec-lead">Five pipeline states. Tiny dots, always inline with text. Never the primary indicator alone.</p>
+
+        <div class="demo">
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;"><span class="status-dot draft"></span><span style="font-family: 'Albert Sans'; font-size: 13px;">Drafting</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span class="status-dot applied"></span><span style="font-family: 'Albert Sans'; font-size: 13px;">Applied</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span class="status-dot interview"></span><span style="font-family: 'Albert Sans'; font-size: 13px;">Interview</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span class="status-dot offer"></span><span style="font-family: 'Albert Sans'; font-size: 13px;">Offer</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span class="status-dot"></span><span style="font-family: 'Albert Sans'; font-size: 13px;">Passed</span></div>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">draft</span> — Ink-3 grey · saved, drafting, assessing<br/>
+          <span class="nm">applied</span> — Signal amber · "stale 5d" upgrades to signal pill<br/>
+          <span class="nm">interview</span> — Accent · screen / onsite / hiring mgr call<br/>
+          <span class="nm">offer</span> — Ink solid · verbal or written offer received<br/>
+          <span class="nm">passed</span> — Ink-2 muted · auto-passed or withdrawn
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- NAVIGATION                                                     -->
+      <!-- ============================================================ -->
+      <section class="gap" id="nav">
+        <h2><span class="num">11</span>Navigation</h2>
+        <p class="sec-lead">One sidebar pattern across every product surface. Active state is ink-filled. Evaluate is the only CTA inside nav.</p>
+
+        <div class="demo">
+          <div style="background: var(--canvas); border: 1px solid var(--line); border-radius: 10px; padding: 18px 14px; max-width: 240px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; line-height: 1; padding: 0 8px 10px;">leadme<span style="color: var(--accent);">.</span></div>
+            <div style="padding: 8px 10px; border-radius: 8px; background: var(--ink); color: var(--bg); font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; display: flex; align-items: center;">Discover <span style="margin-left:auto; padding: 0 7px; border-radius: 999px; font-family: 'Geist Mono'; font-size: 10px; background: var(--bg); color: var(--ink);">7</span></div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-2);">Home</div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-2); display: flex; align-items: center;">Tracker <span style="margin-left:auto; padding: 0 7px; border-radius: 999px; font-family: 'Geist Mono'; font-size: 10px; background: var(--accent-soft); color: var(--accent);">8</span></div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-2);">Tailor</div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-2);">Prep</div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-3);">Network</div>
+            <div style="padding: 8px 10px; border-radius: 8px; font-family: 'Albert Sans'; font-size: 13.5px; font-weight: 500; color: var(--ink-2);">Settings</div>
+            <button class="btn primary" style="margin-top: 8px; justify-content: center; border-radius: 10px;">✦ Evaluate</button>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">active</span> — Ink-filled, paper text · only one active at a time<br/>
+          <span class="nm">badge</span> — Mono numeric in pill · accent-soft for inbox-style counts<br/>
+          <span class="nm">Evaluate CTA</span> — Always 10px-radius (not pill), accent-filled, sits below nav. The aha-moment shortcut.
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- BRIEF                                                          -->
+      <!-- ============================================================ -->
+      <section class="gap" id="brief">
+        <h2><span class="num">12</span>Editor's note + Pick</h2>
+        <p class="sec-lead">The Brief is editorial. Headlines in Fraunces italic. Pulled quotes from the editor's note set the daily tone.</p>
+
+        <div class="demo" style="padding: 40px;">
+          <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1.2px; text-transform: uppercase;">Issue №14 · Thursday May 14 · CDMX</span>
+          <h2 class="h-editorial" style="font-size: 44px; margin: 6px 0 20px;">Today's <em>brief</em>.</h2>
+
+          <div style="background: var(--accent-soft); border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; position: relative;">
+            <span style="position: absolute; top: -10px; left: 18px; font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); background: var(--canvas); padding: 2px 10px; border-radius: 999px;">Editor's note</span>
+            <p style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.5; color: var(--ink); margin: 0;">Tight slate today. <b style="font-weight: 500;">Kavak</b> just opened a Director of Operations seat that matches your scope at Clip almost <em style="font-style: italic;">line-for-line</em>. I quieted 18 listings — mostly Sr IC and one recruiter with comp 40% below market.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 320px; gap: 28px;">
+            <div>
+              <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1.2px; text-transform: uppercase;">№ 1 · Strong fit · 2d · LinkedIn LatAm</span>
+              <div style="margin-top: 6px;"><span class="h-editorial" style="font-size: 28px;">Kavak just opened <em>your seat</em>.</span></div>
+              <div style="display: flex; gap: 14px; margin-top: 14px; align-items: center;">
+                <span class="avatar-co">KV</span>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 16px;">Director of Operations</span>
+                  <span style="font-family: 'Albert Sans'; font-size: 13px; color: var(--ink-2);">Kavak · CDMX · Hybrid · Mobility / fintech</span>
+                </div>
+                <span class="score" style="margin-left: auto;">91</span>
+              </div>
+              <p style="font-family: 'Albert Sans'; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); margin: 14px 0 0;">Scope matches your Clip role almost line-for-line — ops org of 40+, fraud + risk + biz ops. <b style="color: var(--ink); font-weight: 600;">Susana M.</b> (ex-Cornershop, 4 mutuals) is the hiring manager.</p>
+              <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="btn primary">Tailor &amp; apply</button>
+                <button class="btn">Evaluate</button>
+                <button class="btn ghost" style="margin-left: auto;">Mute</button>
+              </div>
+            </div>
+            <div>
+              <div class="salary" style="max-width: none;">
+                <div class="row" style="font-size: 13.5px;">
+                  <span style="font-weight: 600;">USD $115–145k</span>
+                  <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">EST · BASE</span>
+                  <span class="pill accent" style="margin-left: auto;">in your band</span>
+                </div>
+                <div class="meter">
+                  <div class="band" style="left: 38%; width: 32%;"></div>
+                  <div class="pin" style="left: 52%;"></div>
+                </div>
+                <div class="row" style="font-size: 11px;">
+                  <span class="mono" style="color: var(--ink-3);">FLOOR $95K</span>
+                  <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- VERDICT                                                        -->
+      <!-- ============================================================ -->
+      <section class="gap" id="verdict">
+        <h2><span class="num">13</span>Evaluate verdict</h2>
+        <p class="sec-lead">The aha-moment composition. Score chip · editorial headline · salary check · fit bars · draft reply. Top to bottom, no exceptions.</p>
+
+        <div class="demo">
+          <div style="display: flex; flex-direction: column; gap: 18px; max-width: 480px;">
+            <div style="display: flex; gap: 14px; align-items: center;">
+              <span class="score flag">82</span>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1.2px; text-transform: uppercase;">Verdict</span>
+                <span class="h-editorial" style="font-size: 22px;">Worth your time — <em>with caveats</em>.</span>
+              </div>
+            </div>
+
+            <div class="card canvas tight" style="margin: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                <span class="mono" style="font-size: 10.5px; color: var(--signal); letter-spacing: 1.2px; text-transform: uppercase;">★ Salary check</span>
+                <span class="pill signal">≈ 16% under market</span>
+              </div>
+              <div class="salary" style="background: var(--surface); max-width: none;">
+                <div class="row" style="font-size: 13.5px;">
+                  <span style="font-weight: 600;">MXN $1.6M</span>
+                  <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">THEIR OFFER</span>
+                  <span class="mono" style="margin-left: auto; color: var(--ink-3); font-size: 10.5px;">MARKET $1.9–2.4M</span>
+                </div>
+                <div class="meter">
+                  <div class="band" style="left: 35%; width: 35%;"></div>
+                  <div class="pin" style="left: 22%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card tight" style="margin: 0;">
+              <h4 style="margin-bottom: 10px;">Fit · A–F across 10 dimensions</h4>
+              <div class="fits">
+                <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width: 88%;"></span></span><span class="grade">A</span></div>
+                <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width: 90%;"></span></span><span class="grade">A</span></div>
+                <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width: 60%;"></span></span><span class="grade">C+</span></div>
+                <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill signal" style="width: 40%;"></span></span><span class="grade">D</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- TERRITORY                                                      -->
+      <!-- ============================================================ -->
+      <section class="gap" id="territory">
+        <h2><span class="num">14</span>Territory map</h2>
+        <p class="sec-lead">The Home dashboard's spatial view. You at the center, leads as nodes. <b>Close = better fit. Size = score.</b> Built on the canvas surface with dashed concentric rings.</p>
+
+        <div class="demo">
+          <div style="position: relative; height: 320px; background: var(--canvas); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;">
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%;">
+              <circle cx="50%" cy="50%" r="80" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+              <circle cx="50%" cy="50%" r="140" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+            </svg>
+            <div style="position: absolute; left: calc(50% - 32px); top: calc(50% - 32px); width: 64px; height: 64px; border-radius: 50%; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; font-family: 'Albert Sans'; font-weight: 600; font-size: 13px; border: 2px solid var(--ink);">you</div>
+            <div style="position: absolute; left: 26%; top: 22%; width: 64px; height: 64px; border-radius: 50%; background: var(--accent); color: var(--accent-on); display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Albert Sans'; font-weight: 600; font-size: 11px; line-height: 1; border: 1px solid var(--accent);"><span>Kavak</span><span style="font-family: 'Geist Mono'; font-size: 10px; opacity: .85; margin-top: 2px;">91</span></div>
+            <div style="position: absolute; left: 64%; top: 18%; width: 58px; height: 58px; border-radius: 50%; background: var(--accent); color: var(--accent-on); display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Albert Sans'; font-weight: 600; font-size: 11px; line-height: 1; border: 1px solid var(--accent);"><span>Plaid</span><span style="font-family: 'Geist Mono'; font-size: 10px; opacity: .85; margin-top: 2px;">87</span></div>
+            <div style="position: absolute; left: 78%; top: 46%; width: 52px; height: 52px; border-radius: 50%; background: var(--surface); color: var(--ink); display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Albert Sans'; font-weight: 600; font-size: 11px; line-height: 1; border: 1px solid var(--line);"><span>VTEX</span><span style="font-family: 'Geist Mono'; font-size: 10px; opacity: .85; margin-top: 2px;">85</span></div>
+            <div style="position: absolute; left: 22%; top: 70%; width: 46px; height: 46px; border-radius: 50%; background: var(--surface); color: var(--ink); display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Albert Sans'; font-weight: 600; font-size: 10px; line-height: 1; border: 1px solid var(--line);"><span>Stori</span><span style="font-family: 'Geist Mono'; font-size: 9px; opacity: .85; margin-top: 2px;">82</span></div>
+          </div>
+        </div>
+        <div class="props">
+          <span class="nm">node-strong</span> — Accent fill, white text · score ≥ 85<br/>
+          <span class="nm">node</span> — Surface fill, ink text, bordered · score 60–84<br/>
+          <span class="nm">node-muted</span> — Reduced opacity · score &lt; 60<br/>
+          Rings always 80 / 140 / 200 px radii from center. Always dashed.
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- RULES                                                          -->
+      <!-- ============================================================ -->
+      <section class="gap" id="rules">
+        <h2><span class="num">15</span>The ten <em>rules</em></h2>
+        <p class="sec-lead">Restrictions are the brand. If the system can't say it, the design is wrong before the system is.</p>
+
+        <div class="rules">
+          <div class="rule">
+            <span class="rule-num">01</span>
+            <span class="rule-title">One accent. One signal.</span>
+            <span class="rule-body">Petrol/Sky for action. Amber for warning. <b>That's the entire chromatic palette.</b> Third color = wrong design.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">02</span>
+            <span class="rule-title">Two radii. Forever.</span>
+            <span class="rule-body"><code>10px</code> for cards, score chips, modals, salary bands. <code>999px</code> for pills, buttons, people avatars. Nothing else exists.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">03</span>
+            <span class="rule-title">No shadows. <em>Ever.</em></span>
+            <span class="rule-body">Hierarchy comes from borders, radius, density — never blur. A dropped shadow is the design failing.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">04</span>
+            <span class="rule-title">One spacing scale.</span>
+            <span class="rule-body"><code>4 · 8 · 12 · 16 · 24 · 32 · 48</code> px. Nothing in between. Ever.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">05</span>
+            <span class="rule-title">Avatars are <em>squares</em>.</span>
+            <span class="rule-body">Companies: 10–12px radius squares, accent-soft, two-letter initials. People: 999px circles. Never photos. Never logos in MVP.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">06</span>
+            <span class="rule-title">Numbers wear a uniform.</span>
+            <span class="rule-body">All scores, percentages, currency, dates render in <b>Geist Mono</b>. Labels uppercase. The "receipts" feel comes from this consistency.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">07</span>
+            <span class="rule-title">Serif is a <em>moment</em>.</span>
+            <span class="rule-body">Fraunces appears at exactly four sizes: 22 (verdict), 28 (brief pick), 44 (brief hero), 68 (doc hero). Never paragraphs.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">08</span>
+            <span class="rule-title">Density follows surface.</span>
+            <span class="rule-body">Brief / Evaluate breathe — 22–32px padding. Tracker tightens — 10–14px row padding. Editorial where it reads, tabular where it operates.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">09</span>
+            <span class="rule-title">Score chips are <em>iconic</em>.</span>
+            <span class="rule-body">Always 56×56 (verdict) or 44×44 (list). Always 10–14px radius. <b>Never a circle.</b> Never anywhere else.</span>
+          </div>
+          <div class="rule">
+            <span class="rule-num">10</span>
+            <span class="rule-title">No icons until earned.</span>
+            <span class="rule-body">Words over glyphs. If a label needs an icon to be understood, the label is wrong. Iconography only after every screen ships text-first.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- VOICE                                                          -->
+      <!-- ============================================================ -->
+      <section class="gap" id="voice">
+        <h2><span class="num">16</span>Voice</h2>
+        <p class="sec-lead">The product is a candid, calm advisor — never desperate, never breathless. It speaks like someone who's read your CV and respects your time.</p>
+
+        <div class="card">
+          <h4>Do</h4>
+          <div style="font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.35; color: var(--ink); margin-bottom: 14px;">"Kavak just opened <em style="font-style: italic;">your seat</em>."</div>
+          <div style="font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.35; color: var(--ink); margin-bottom: 14px;">"Worth your time — <em style="font-style: italic;">with caveats</em>."</div>
+          <div style="font-family: 'Albert Sans'; font-size: 14.5px; color: var(--ink-2); line-height: 1.6;">'Competitive' is doing a lot of work in that DM. Market for Head of Ops at a Series C MX fintech with your scope: <b style="color: var(--ink); font-weight: 600;">$1.9–2.4M MXN + 0.1–0.25% equity</b>.</div>
+        </div>
+
+        <div class="card" style="background: var(--signal-soft); border-color: var(--signal);">
+          <h4 style="color: var(--signal);">Don't</h4>
+          <div style="font-family: 'Albert Sans'; font-size: 14px; color: var(--ink-2); line-height: 1.7;">
+            ✕ "🎉 We found 7 amazing opportunities for you!"<br/>
+            ✕ "Don't miss out on these matches — apply now!"<br/>
+            ✕ "Score: 82/100 — Good match"<br/>
+            ✕ "Time to take your career to the next level."
+          </div>
+        </div>
+
+        <div class="props" style="margin-top: 18px;">
+          <span class="nm">Tone</span> — candid, dry, informed. Speaks <em>to</em> a Director, not <em>at</em> a user.<br/>
+          <span class="nm">Diction</span> — short clauses. Em-dashes. Italics for emphasis sparingly. No exclamation marks.<br/>
+          <span class="nm">Honesty</span> — when something's unclear, say so. "Medium confidence · 2 sources" beats false certainty.<br/>
+          <span class="nm">Never</span> — gamification, urgency tactics, emoji, sales-y CTAs, "we" as in the product.
+        </div>
+      </section>
+
+
+      <div class="footer">LeadMe · Design System v1.0 · Built from wireframes v0.5 + Hi-fi v0.1</div>
+
+    </main>
+  </div>
+
+
+<script>
+  function setMode(mode) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add('theme-' + mode);
+    document.getElementById('mode-light').classList.toggle('on', mode === 'light');
+    document.getElementById('mode-dark').classList.toggle('on', mode === 'dark');
+    try { localStorage.setItem('leadme-ds-mode', mode); } catch(e) {}
+  }
+  try {
+    const saved = localStorage.getItem('leadme-ds-mode');
+    if (saved) setMode(saved);
+  } catch(e) {}
+
+  // TOC active state on scroll
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sectionEls = [...tocLinks].map(a => document.querySelector(a.getAttribute('href')));
+  function updateToc() {
+    let active = 0;
+    for (let i = 0; i < sectionEls.length; i++) {
+      if (sectionEls[i] && sectionEls[i].getBoundingClientRect().top < 160) active = i;
+    }
+    tocLinks.forEach((a, i) => a.classList.toggle('active', i === active));
+  }
+  window.addEventListener('scroll', updateToc);
+  updateToc();
+  tocLinks.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+</script>
+</body>
+</html>

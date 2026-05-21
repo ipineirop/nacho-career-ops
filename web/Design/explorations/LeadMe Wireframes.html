@@ -1,0 +1,2283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Wireframe Explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;600;700&family=Gloria+Hallelujah&family=Patrick+Hand&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1817;
+    --ink-2: #4a4642;
+    --ink-3: #8b857d;
+    --paper: #f7f3eb;
+    --paper-2: #fefcf7;
+    --line: #c8c1b4;
+    --line-2: #e3ddd0;
+    --coral: #e07a5f;
+    --teal: #3a9d8a;
+    --amber: #e8c14a;
+    --highlight: #fff3b0;
+    --muted-bg: #efe9dc;
+    --shadow: 0 1px 0 rgba(0,0,0,.04), 0 6px 18px -8px rgba(40,30,20,.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Patrick Hand", "Kalam", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.35;
+    /* paper texture via repeating gradient */
+    background-image:
+      radial-gradient(rgba(0,0,0,.018) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,.012) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+  }
+  .page {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  header.top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+  }
+  header.top h1 {
+    font-family: "Caveat", cursive;
+    font-weight: 700;
+    font-size: 56px;
+    margin: 0;
+    letter-spacing: .5px;
+    line-height: .95;
+  }
+  header.top h1 .stamp {
+    display: inline-block;
+    transform: rotate(-3deg);
+    border: 2px solid var(--coral);
+    color: var(--coral);
+    font-family: "Special Elite", monospace;
+    font-size: 14px;
+    padding: 3px 9px 1px;
+    margin-left: 14px;
+    letter-spacing: 1px;
+    vertical-align: middle;
+  }
+  header.top .sub {
+    font-family: "Kalam", cursive;
+    color: var(--ink-2);
+    max-width: 540px;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  header.top .sub b { color: var(--ink); font-weight: 700; }
+
+  /* Tab control */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    appearance: none;
+    border: 2px solid var(--ink);
+    background: var(--paper-2);
+    color: var(--ink);
+    font-family: "Kalam", cursive;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 10px 18px 8px;
+    cursor: pointer;
+    border-radius: 24px 22px 26px 20px / 22px 24px 20px 26px;
+    transform: rotate(-.4deg);
+    transition: transform .15s ease, background .15s;
+  }
+  .tab:nth-child(2) { transform: rotate(.4deg); }
+  .tab:nth-child(3) { transform: rotate(-.2deg); }
+  .tab:nth-child(4) { transform: rotate(.5deg); }
+  .tab:hover { background: var(--muted-bg); }
+  .tab[aria-selected="true"] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .tab .num {
+    display: inline-block;
+    font-family: "Special Elite", monospace;
+    font-size: 11px;
+    opacity: .65;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* Direction header */
+  .dir-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 22px;
+    padding: 18px 22px;
+    border: 2px solid var(--ink);
+    background: var(--paper-2);
+    border-radius: 8px 12px 6px 10px;
+    box-shadow: var(--shadow);
+  }
+  .dir-head h2 {
+    font-family: "Caveat", cursive;
+    font-size: 38px;
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .dir-head .tagline {
+    font-family: "Kalam", cursive;
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+  .dir-head .pillars {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: auto;
+    align-items: center;
+  }
+  .pillar {
+    border: 1.5px solid var(--ink);
+    padding: 4px 10px 2px;
+    border-radius: 14px;
+    font-family: "Kalam", cursive;
+    font-size: 13px;
+    background: var(--paper);
+  }
+  .pillar.coral { background: #fce4dc; }
+  .pillar.teal  { background: #dff0eb; }
+  .pillar.amber { background: #fbeec8; }
+
+  /* Frame grid */
+  .frames {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 22px;
+  }
+  .frame {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 4px 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .frame.span-2 { grid-column: span 2; }
+  .frame > .caption {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 14px 6px;
+    border-bottom: 1.5px dashed var(--line);
+  }
+  .frame > .caption .num {
+    font-family: "Special Elite", monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .frame > .caption .name {
+    font-family: "Caveat", cursive;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .frame > .caption .note {
+    margin-left: auto;
+    font-family: "Kalam", cursive;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .frame > .body {
+    padding: 10px;
+    flex: 1;
+    display: flex;
+  }
+
+  /* Mock window chrome inside frame */
+  .mock {
+    flex: 1;
+    border: 1.5px solid var(--ink);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    border-radius: 4px 6px 4px 6px;
+    overflow: hidden;
+  }
+  .mock .chrome {
+    height: 22px;
+    background: var(--paper);
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  .mock .chrome .dot {
+    width: 8px; height: 8px;
+    border: 1.2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper-2);
+  }
+  .mock .chrome .url {
+    margin-left: 6px;
+    font-family: "Special Elite", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 1px 8px 0;
+    border-radius: 8px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .mock .screen { flex: 1; display: flex; min-height: 0; }
+
+  /* Sidebar (Direction 1 mostly) */
+  .sidebar {
+    width: 140px;
+    background: #1c1a17;
+    color: #d9d3c4;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-right: 1.5px solid var(--ink);
+    font-family: "Kalam", cursive;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .sidebar .brand {
+    font-family: "Caveat", cursive;
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    padding: 2px 4px 6px;
+    border-bottom: 1px dashed #4a443a;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  .sidebar .brand .dot { color: var(--coral); }
+  .sidebar .nav-item {
+    padding: 4px 8px 2px;
+    border-radius: 4px;
+    color: #d9d3c4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sidebar .nav-item .ico {
+    width: 12px; height: 12px;
+    border: 1px solid #8b857d;
+    border-radius: 2px;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .sidebar .nav-item.active {
+    background: #2d2a25;
+    color: white;
+  }
+  .sidebar .nav-item.active .ico { border-color: var(--coral); background: var(--coral); }
+  .sidebar .nav-cta {
+    margin-top: auto;
+    background: linear-gradient(135deg, var(--coral), #c8523a);
+    color: white;
+    border-radius: 4px;
+    padding: 5px 8px 3px;
+    text-align: center;
+    font-family: "Caveat", cursive;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .sidebar .user {
+    margin-top: 6px;
+    border-top: 1px dashed #4a443a;
+    padding-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    color: #8b857d;
+  }
+  .sidebar .user .av {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 1px solid #4a443a;
+  }
+
+  /* Generic placeholder primitives */
+  .content { flex: 1; padding: 12px; overflow: hidden; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .grow { flex: 1; min-width: 0; }
+  .h-title { font-family: "Caveat", cursive; font-size: 22px; line-height: 1; }
+  .h-mini { font-family: "Caveat", cursive; font-size: 15px; color: var(--ink-2); }
+  .label { font-family: "Special Elite", monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); text-transform: uppercase; }
+  .pill {
+    border: 1.2px solid var(--ink);
+    padding: 1px 8px 0;
+    border-radius: 12px;
+    font-size: 12px;
+    background: white;
+    line-height: 1.4;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: "Kalam", cursive;
+  }
+  .pill.solid { background: var(--ink); color: white; }
+  .pill.coral { background: #fce4dc; }
+  .pill.teal { background: #dff0eb; }
+  .pill.amber { background: #fbeec8; }
+  .pill.muted { color: var(--ink-3); border-color: var(--line); background: var(--paper); }
+  .btn {
+    border: 1.5px solid var(--ink);
+    background: white;
+    padding: 3px 10px 1px;
+    border-radius: 4px;
+    font-family: "Kalam", cursive;
+    font-size: 13px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn.primary { background: var(--ink); color: white; }
+  .btn.coral { background: var(--coral); color: white; border-color: var(--coral); }
+  .btn.teal { background: var(--teal); color: white; border-color: var(--teal); }
+  .btn.ghost { background: transparent; }
+  .btn.sm { font-size: 12px; padding: 2px 8px 0; }
+  .line-text {
+    height: 7px; background: var(--line-2); border-radius: 2px; display: block;
+  }
+  .line-text.dark { background: var(--ink); opacity: .8; }
+  .line-text.coral { background: #f4baa6; }
+  .line-text.teal { background: #a6d4ca; }
+  .line-text.amber { background: #f0d680; }
+  .line-text.short { width: 30%; }
+  .line-text.med { width: 55%; }
+  .line-text.long { width: 80%; }
+  .line-text.full { width: 100%; }
+  .lt-stack { display: flex; flex-direction: column; gap: 4px; }
+  .avatar {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--muted-bg); border: 1.2px solid var(--ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Caveat", cursive; font-weight: 700; font-size: 13px; line-height: 1;
+  }
+  .avatar.lg { width: 36px; height: 36px; font-size: 16px; border-radius: 8px; }
+  .avatar.coral { background: #fce4dc; }
+  .avatar.teal { background: #dff0eb; }
+  .avatar.amber { background: #fbeec8; }
+  .avatar.purple { background: #e6dff2; }
+  .card {
+    border: 1.2px solid var(--ink);
+    border-radius: 4px;
+    padding: 8px 10px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .card.dashed { border-style: dashed; }
+  .card.muted { background: var(--paper); }
+  .card.coral { background: #fff6f2; }
+  .card.teal { background: #f0f8f5; }
+  .card.amber { background: #fff8dc; }
+  .divider { border-top: 1px dashed var(--line); margin: 4px 0; }
+  .vdivider { border-left: 1px dashed var(--line); margin: 0 4px; align-self: stretch; }
+  .ai-highlight {
+    background: linear-gradient(transparent 55%, var(--highlight) 55% 95%, transparent 95%);
+    padding: 0 2px;
+  }
+  .ai-tag {
+    font-family: "Caveat", cursive;
+    color: var(--coral);
+    font-size: 14px;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .ai-tag::before { content: "✦"; font-size: 12px; }
+
+  /* lead row */
+  .lead {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px dashed var(--line);
+    align-items: center;
+  }
+  .lead:hover { background: var(--paper); }
+  .lead .meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .lead .ttl { display: flex; align-items: baseline; gap: 6px; }
+  .lead .ttl .co { font-weight: 700; font-family: "Kalam", cursive; font-size: 14px; }
+  .lead .ttl .role { color: var(--ink-2); font-size: 13px; }
+  .lead .sub-meta { display: flex; gap: 8px; font-size: 11px; color: var(--ink-3); font-family: "Kalam", cursive; }
+  .lead .right { display: flex; align-items: center; gap: 6px; }
+  .score {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Caveat", cursive; font-weight: 700; font-size: 16px;
+    line-height: 1;
+  }
+  .score.hi { background: var(--teal); color: white; border-color: var(--teal); }
+  .score.mid { background: var(--amber); }
+  .score.lo { background: var(--muted-bg); color: var(--ink-3); }
+
+  /* Mode toggle (3-pill) */
+  .mode-toggle {
+    display: inline-flex; border: 1.5px solid var(--ink); border-radius: 18px;
+    padding: 2px; background: var(--paper-2); gap: 2px;
+  }
+  .mode-toggle .seg {
+    padding: 2px 10px 0; border-radius: 14px; font-size: 12px;
+    font-family: "Kalam", cursive;
+  }
+  .mode-toggle .seg.on { background: var(--ink); color: white; }
+  .mode-toggle .seg.amber { background: #f6d984; color: var(--ink); border: none; }
+  .mode-toggle .seg.teal { background: #a6d4ca; color: var(--ink); }
+
+  /* Direction-specific overrides applied via tab class on body */
+  /* Direction 2 (brief) — warm paper card */
+  .brief-paper {
+    background: #fbf5e6 !important;
+  }
+  .serif {
+    font-family: "Caveat", cursive;
+  }
+  .editorial-title {
+    font-family: "Caveat", cursive;
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: .3px;
+  }
+  .rule {
+    height: 1px; background: var(--ink); width: 30px;
+  }
+  .rule.long { width: 80px; }
+
+  /* Direction 3 (companion) — chat */
+  .chat-pane {
+    width: 38%;
+    background: #f8f3e8;
+    border-right: 1.5px solid var(--ink);
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+    flex-shrink: 0;
+  }
+  .bubble {
+    border: 1.2px solid var(--ink);
+    border-radius: 10px 10px 10px 2px;
+    padding: 6px 8px;
+    background: white;
+    font-size: 13px;
+    line-height: 1.35;
+    max-width: 88%;
+  }
+  .bubble.me {
+    border-radius: 10px 10px 2px 10px;
+    background: #ecf3ff;
+    align-self: flex-end;
+  }
+  .bubble.ai { background: #fff8dc; }
+  .bubble small { color: var(--ink-3); font-size: 11px; }
+
+  /* Direction 4 (atlas) — graph paper */
+  .atlas-bg {
+    background-color: #f3efe4;
+    background-image:
+      linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.05) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+  .dot-node {
+    position: absolute;
+    border: 1.5px solid var(--ink);
+    background: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Caveat", cursive; font-weight: 700;
+  }
+
+  /* Tab panels */
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+
+  /* Footer */
+  footer.foot {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 2px dashed var(--line);
+    font-family: "Kalam", cursive;
+    color: var(--ink-3);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  /* Tweak panel anchor (Tweaks-driven; just placeholder) */
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px;
+    font-family: "Kalam", cursive;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .legend .lg {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 8px 0;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--paper-2);
+  }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--ink); }
+  .swatch.coral { background: var(--coral); }
+  .swatch.teal { background: var(--teal); }
+  .swatch.amber { background: var(--amber); }
+  .swatch.hi { background: var(--highlight); }
+  .swatch.ink { background: var(--ink); }
+
+  /* ----- screen-specific small layouts ----- */
+  .topbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1.5px solid var(--ink);
+    background: var(--paper-2);
+    flex-wrap: wrap;
+  }
+  .stats-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 8px 12px;
+    background: var(--paper);
+    border-bottom: 1px dashed var(--line);
+    font-size: 12px;
+  }
+  .twocol {
+    display: grid; grid-template-columns: 1fr 220px; gap: 10px;
+    flex: 1; min-height: 0; padding: 10px;
+  }
+
+  /* dashboard small chart */
+  .barchart { display: flex; gap: 4px; align-items: flex-end; height: 60px; padding: 6px 0; }
+  .barchart .bar { width: 14px; background: var(--ink); border-radius: 2px 2px 0 0; }
+  .barchart .bar.coral { background: var(--coral); }
+  .barchart .bar.teal { background: var(--teal); }
+  .barchart .bar.amber { background: var(--amber); }
+  .barchart .bar.muted { background: var(--line); }
+
+  /* progress */
+  .prog {
+    height: 8px; border: 1.2px solid var(--ink); border-radius: 4px; overflow: hidden;
+    background: var(--paper); position: relative;
+  }
+  .prog .fill { height: 100%; background: var(--teal); }
+  .prog .fill.coral { background: var(--coral); }
+  .prog .fill.amber { background: var(--amber); }
+
+  /* tracker columns / table */
+  .tracker-row {
+    display: grid; grid-template-columns: 1.4fr .8fr .6fr .6fr 40px;
+    gap: 8px; padding: 6px 10px; border-bottom: 1px dashed var(--line); align-items: center; font-size: 12px;
+  }
+  .tracker-row.head { background: var(--paper); font-family: "Special Elite", monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); text-transform: uppercase; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; border: 1px solid var(--ink);
+  }
+  .status-dot.applied { background: var(--amber); }
+  .status-dot.interview { background: var(--teal); }
+  .status-dot.offer { background: var(--coral); }
+  .status-dot.passed { background: var(--line); }
+  .status-dot.draft { background: white; }
+
+  /* helper: scribble line */
+  .scribble {
+    border-top: 2px solid var(--ink);
+    border-radius: 50%;
+    height: 0;
+    margin: 4px 0;
+    opacity: .5;
+  }
+
+  /* Stamp/note */
+  .sticky {
+    background: #fff3b0;
+    border: 1px solid #d8be4a;
+    padding: 6px 10px;
+    font-family: "Kalam", cursive;
+    font-size: 12px;
+    transform: rotate(-1.2deg);
+    box-shadow: 1px 2px 0 rgba(0,0,0,.08);
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .sticky.coral { background: #fce4dc; border-color: #d99b88; transform: rotate(.8deg); }
+  .sticky.teal { background: #dff0eb; border-color: #87bdb1; transform: rotate(-.6deg); }
+
+  /* small icons */
+  .ico-sq { display:inline-block; width:11px; height:11px; border:1.3px solid var(--ink); border-radius:2px; vertical-align: middle; }
+  .ico-cr { display:inline-block; width:11px; height:11px; border:1.3px solid var(--ink); border-radius:50%; vertical-align: middle; }
+
+  .full-screen { min-height: 480px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div>
+      <h1>LeadMe <span class="stamp">WIREFRAMES · v0.1</span></h1>
+      <div class="h-mini" style="font-family:'Kalam',cursive; color:var(--ink-2); margin-top:6px;">an AI companion for the job hunt — less noise, more signal</div>
+    </div>
+    <div class="sub">
+      Four directions, nine screens each. Same product spine — onboarding, lead inbox, fit analysis, tracker, tailoring, interview prep, networking, dashboard, settings — explored through <b>four different metaphors</b> for how the AI shows up. Pick what feels right, mix what doesn't.
+    </div>
+  </header>
+
+  <div class="legend">
+    <div class="lg"><span class="swatch ink"></span> structure / chrome</div>
+    <div class="lg"><span class="swatch hi"></span> AI-generated content</div>
+    <div class="lg"><span class="swatch coral"></span> primary action</div>
+    <div class="lg"><span class="swatch teal"></span> good fit / positive signal</div>
+    <div class="lg"><span class="swatch amber"></span> in-progress / attention</div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  data-tab="t1"><span class="num">01</span>Quiet Inbox</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="t2"><span class="num">02</span>Daily Brief</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="t3"><span class="num">03</span>Companion</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="t4"><span class="num">04</span>Atlas</button>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- DIRECTION 1 — QUIET INBOX                                          -->
+  <!-- ================================================================== -->
+  <section class="tabpanel active" id="t1">
+    <div class="dir-head">
+      <div>
+        <h2>01 · Quiet Inbox</h2>
+        <div class="tagline">Linear-flavored. Dense. AI is invisible — it just scores, filters, and tailors. Power user reads ten leads in a minute, archives most of them.</div>
+      </div>
+      <div class="pillars">
+        <span class="pillar">⌘K everything</span>
+        <span class="pillar coral">keyboard first</span>
+        <span class="pillar teal">AI ambient</span>
+      </div>
+    </div>
+
+    <div class="frames">
+      <!-- 1. Onboarding -->
+      <div class="frame">
+        <div class="caption"><span class="num">01</span><span class="name">Onboarding</span><span class="note">connect → import → preferences</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/welcome · step 2 of 4</span></div>
+          <div class="screen" style="background:white;">
+            <div class="content" style="padding:18px 22px;">
+              <div class="label">step 02 / 04</div>
+              <div class="h-title" style="font-size:26px;">Let's pull in your story.</div>
+              <div class="line-text long"></div>
+              <div class="prog" style="margin: 4px 0 10px;"><div class="fill" style="width:50%;"></div></div>
+              <div class="row" style="gap:10px;">
+                <div class="card teal grow">
+                  <div class="row"><span class="avatar teal">in</span><div class="grow"><b style="font-family:'Kalam'">LinkedIn</b><div class="label" style="margin-top:2px;">connected ✓</div></div></div>
+                  <div class="line-text short"></div>
+                </div>
+                <div class="card dashed grow">
+                  <div class="row"><span class="avatar">CV</span><div class="grow"><b style="font-family:'Kalam'">Upload resume</b><div class="label" style="margin-top:2px;">.pdf or .md</div></div></div>
+                  <div class="btn sm" style="align-self:flex-start;">Drop file</div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="h-mini">What kind of move are you making?</div>
+              <div class="mode-toggle">
+                <span class="seg amber">Need a job</span>
+                <span class="seg on">Looking around</span>
+                <span class="seg teal">Career pivot</span>
+              </div>
+              <div class="row" style="gap:8px; margin-top:6px;">
+                <span class="pill">Remote</span>
+                <span class="pill">+ Mexico City</span>
+                <span class="pill muted">+ add location</span>
+              </div>
+              <div class="row" style="gap:8px;">
+                <span class="pill teal">Senior IC</span>
+                <span class="pill">Manager</span>
+                <span class="pill muted">+ levels</span>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px dashed var(--line);">
+                <span class="label">2 of 4 · 90s left</span>
+                <div class="row"><span class="btn ghost sm">back</span><span class="btn coral">Continue</span></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 2. Dashboard -->
+      <div class="frame">
+        <div class="caption"><span class="num">02</span><span class="name">Dashboard / Home</span><span class="note">first thing you see, daily</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/home</span></div>
+          <div class="screen">
+            <aside class="sidebar">
+              <div class="brand">leadme<span class="dot">.</span></div>
+              <div class="nav-item active"><span class="ico"></span>Home</div>
+              <div class="nav-item"><span class="ico"></span>Discover <span style="margin-left:auto; background:var(--coral); color:white; font-size:10px; padding:0 5px; border-radius:8px;">14</span></div>
+              <div class="nav-item"><span class="ico"></span>Tracker</div>
+              <div class="nav-item"><span class="ico"></span>Tailor</div>
+              <div class="nav-item"><span class="ico"></span>Interview</div>
+              <div class="nav-item"><span class="ico"></span>Network</div>
+              <div class="nav-item"><span class="ico"></span>Settings</div>
+              <div class="nav-cta">✦ Evaluate</div>
+              <div class="user"><span class="av"></span><div class="grow"><div>Maya R.</div><div style="font-size:10px;">looking around</div></div></div>
+            </aside>
+            <div class="content">
+              <div class="row" style="justify-content:space-between;">
+                <div class="h-title">Tuesday, 14 new leads in the inbox.</div>
+                <div class="mode-toggle"><span class="seg amber">Need</span><span class="seg on">Looking</span><span class="seg teal">Pivot</span></div>
+              </div>
+              <div class="row" style="gap:6px;">
+                <div class="card grow"><div class="label">inbox</div><div style="font-family:'Caveat'; font-size:24px; line-height:1;">14</div><div class="h-mini" style="color:var(--teal)">3 strong fit</div></div>
+                <div class="card grow"><div class="label">in pipeline</div><div style="font-family:'Caveat'; font-size:24px; line-height:1;">9</div><div class="h-mini">2 awaiting reply</div></div>
+                <div class="card grow"><div class="label">interviews</div><div style="font-family:'Caveat'; font-size:24px; line-height:1;">2</div><div class="h-mini">Thu &amp; Fri</div></div>
+                <div class="card grow"><div class="label">offers</div><div style="font-family:'Caveat'; font-size:24px; line-height:1;">—</div><div class="h-mini">soon ✦</div></div>
+              </div>
+              <div class="card">
+                <div class="row" style="justify-content:space-between;"><div class="h-mini">Activity (last 14 days)</div><span class="label">apps · replies · interviews</span></div>
+                <div class="barchart">
+                  <div class="bar muted" style="height:30%"></div>
+                  <div class="bar muted" style="height:50%"></div>
+                  <div class="bar coral" style="height:65%"></div>
+                  <div class="bar coral" style="height:40%"></div>
+                  <div class="bar teal" style="height:70%"></div>
+                  <div class="bar muted" style="height:25%"></div>
+                  <div class="bar amber" style="height:85%"></div>
+                  <div class="bar coral" style="height:50%"></div>
+                  <div class="bar teal" style="height:60%"></div>
+                  <div class="bar coral" style="height:78%"></div>
+                  <div class="bar muted" style="height:32%"></div>
+                  <div class="bar amber" style="height:48%"></div>
+                  <div class="bar coral" style="height:55%"></div>
+                  <div class="bar teal" style="height:90%"></div>
+                </div>
+              </div>
+              <div class="card amber">
+                <div class="row"><span class="ai-tag">Today's focus</span><span class="label" style="margin-left:auto;">3 minutes</span></div>
+                <div style="font-size:13px;">Reply to <b>Lattice recruiter</b> · Triage <b>14 new leads</b> · Prep notes for <b>Vercel onsite</b>.</div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 3. Discover (lead inbox) -->
+      <div class="frame span-2">
+        <div class="caption"><span class="num">03</span><span class="name">Discover — the lead inbox</span><span class="note">the core screen · keyboard-driven triage</span></div>
+        <div class="body"><div class="mock full-screen">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/discover</span></div>
+          <div class="screen">
+            <aside class="sidebar">
+              <div class="brand">leadme<span class="dot">.</span></div>
+              <div class="nav-item"><span class="ico"></span>Home</div>
+              <div class="nav-item active"><span class="ico"></span>Discover <span style="margin-left:auto; background:var(--coral); color:white; font-size:10px; padding:0 5px; border-radius:8px;">14</span></div>
+              <div class="nav-item"><span class="ico"></span>Tracker</div>
+              <div class="nav-item"><span class="ico"></span>Tailor</div>
+              <div class="nav-item"><span class="ico"></span>Interview</div>
+              <div class="nav-item"><span class="ico"></span>Network</div>
+              <div class="nav-item"><span class="ico"></span>Settings</div>
+              <div class="nav-cta">✦ Evaluate</div>
+              <div class="user"><span class="av"></span><div class="grow"><div>Maya R.</div></div></div>
+            </aside>
+            <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+              <div class="topbar">
+                <div class="row" style="gap:6px;">
+                  <span style="font-family:'Caveat'; font-size:24px; line-height:1;">⌖</span>
+                  <div class="h-title">Discover</div>
+                </div>
+                <div class="mode-toggle"><span class="seg amber">Need a job</span><span class="seg on">Looking around</span><span class="seg teal">Career pivot</span></div>
+                <div style="margin-left:auto;" class="row">
+                  <span class="label">last scan · 2h ago · 14 new</span>
+                  <span class="btn">Scan ▾</span>
+                  <span class="btn coral">⌘K</span>
+                </div>
+              </div>
+              <div class="stats-row">
+                <span class="pill teal">47 pending</span>
+                <span class="pill muted">23 reviewed</span>
+                <span class="pill muted">112 discarded</span>
+                <span style="margin: 0 6px; color:var(--line);">|</span>
+                <span class="pill">Remote ✓</span>
+                <span class="pill">Mexico City ✓</span>
+                <span class="pill muted">+ Greenhouse</span>
+                <span class="pill muted">+ Ashby</span>
+                <span class="pill muted">+ ≥ $140k</span>
+                <span style="margin-left:auto;" class="row">
+                  <span class="pill solid">Inbox · 47</span>
+                  <span class="pill muted">Reviewed</span>
+                  <span class="pill muted">Discarded</span>
+                </span>
+              </div>
+              <div style="flex:1; overflow:hidden; padding: 4px 0; display:flex; flex-direction:column;">
+                <!-- lead rows -->
+                <div class="lead" style="background:#fffaf3;">
+                  <span class="avatar coral">VC</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Vercel</span><span class="role">Senior Product Designer, Platform</span><span class="pill teal" style="font-size:10px;">strong fit</span></div>
+                    <div class="sub-meta"><span>Remote · US/EU</span><span>$180–220k</span><span><span class="ai-highlight">matches your "infra UX" interest</span></span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">greenhouse · 3d</span>
+                    <span class="score hi">92</span>
+                    <span class="btn coral sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar teal">LA</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Lattice</span><span class="role">Lead Designer, Performance</span></div>
+                    <div class="sub-meta"><span>SF · Hybrid</span><span>$170–200k</span><span>via LinkedIn</span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">linkedin · 1d</span>
+                    <span class="score mid">71</span>
+                    <span class="btn sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar amber">RA</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Ramp</span><span class="role">Staff Product Designer</span></div>
+                    <div class="sub-meta"><span>NYC · Hybrid</span><span>$210–260k</span><span><span class="ai-highlight">2 ex-coworkers there</span></span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">ashby · 6h</span>
+                    <span class="score hi">86</span>
+                    <span class="btn coral sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar purple">FN</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Figma</span><span class="role">Sr. Designer, AI</span></div>
+                    <div class="sub-meta"><span>Remote</span><span>n/a</span><span>via referrer hint</span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">greenhouse · 2h</span>
+                    <span class="score mid">74</span>
+                    <span class="btn sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar">DV</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">DataDog</span><span class="role">Sr. UX Researcher</span></div>
+                    <div class="sub-meta"><span>NYC</span><span>$160–185k</span><span>off-target seniority</span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">linkedin · 4d</span>
+                    <span class="score lo">52</span>
+                    <span class="btn sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar coral">NT</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Notion</span><span class="role">Product Designer, Calendar</span><span class="pill teal" style="font-size:10px;">salary band match</span></div>
+                    <div class="sub-meta"><span>Remote · Americas</span><span>$165–195k</span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">greenhouse · 1d</span>
+                    <span class="score hi">81</span>
+                    <span class="btn coral sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div class="lead">
+                  <span class="avatar teal">AC</span>
+                  <div class="meta">
+                    <div class="ttl"><span class="co">Anthropic</span><span class="role">Design Engineer</span></div>
+                    <div class="sub-meta"><span>Remote</span><span>not listed</span><span>requires applied research bg</span></div>
+                  </div>
+                  <div class="right">
+                    <span class="pill muted" style="font-size:10px;">greenhouse · 5h</span>
+                    <span class="score mid">68</span>
+                    <span class="btn sm">Evaluate</span>
+                    <span class="btn ghost sm">Skip</span>
+                  </div>
+                </div>
+                <div style="margin-top:auto; padding: 8px 12px; border-top:1px dashed var(--line); display:flex; justify-content:space-between; align-items:center; font-family:'Kalam';">
+                  <span class="label">↑↓ navigate · E evaluate · X skip · ⌫ discard</span>
+                  <span class="label">showing 7 of 47 — scroll for more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4. Job detail + fit analysis -->
+      <div class="frame">
+        <div class="caption"><span class="num">04</span><span class="name">Job detail + fit analysis</span><span class="note">opens in-page · the deep read</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/discover/vercel-spd-platform</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row" style="gap:10px;">
+                <span class="avatar coral lg">VC</span>
+                <div class="grow">
+                  <div class="h-title">Vercel · Sr Product Designer, Platform</div>
+                  <div class="h-mini">Remote · US/EU · $180–220k · greenhouse · posted 3d ago</div>
+                </div>
+                <div class="score hi" style="width:48px; height:48px; font-size:22px;">92</div>
+              </div>
+              <div class="row">
+                <span class="btn coral">Tailor &amp; Apply</span>
+                <span class="btn">Add to tracker</span>
+                <span class="btn ghost">Discard</span>
+                <span class="btn ghost" style="margin-left:auto;">Open on greenhouse ↗</span>
+              </div>
+              <div class="divider"></div>
+              <div class="row" style="align-items:flex-start; gap:14px;">
+                <div class="col grow" style="gap:6px;">
+                  <div class="label">why it fits</div>
+                  <div class="lt-stack">
+                    <span class="line-text long"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text med"></span>
+                    <span><span class="ai-highlight">"design systems × platform infra"</span> ← <span class="ai-tag">your trail</span></span>
+                  </div>
+                  <div class="label" style="margin-top:8px;">where to push</div>
+                  <div class="lt-stack">
+                    <span class="line-text long"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text short"></span>
+                  </div>
+                </div>
+                <div style="width: 150px; display:flex; flex-direction:column; gap:6px;">
+                  <div class="label">fit breakdown</div>
+                  <div class="row"><span style="width:60px; font-size:11px;">skills</span><div class="prog grow"><div class="fill" style="width:90%;"></div></div></div>
+                  <div class="row"><span style="width:60px; font-size:11px;">level</span><div class="prog grow"><div class="fill" style="width:80%;"></div></div></div>
+                  <div class="row"><span style="width:60px; font-size:11px;">domain</span><div class="prog grow"><div class="fill amber" style="width:65%;"></div></div></div>
+                  <div class="row"><span style="width:60px; font-size:11px;">comp</span><div class="prog grow"><div class="fill" style="width:95%;"></div></div></div>
+                  <div class="row"><span style="width:60px; font-size:11px;">location</span><div class="prog grow"><div class="fill" style="width:100%;"></div></div></div>
+                  <div class="divider"></div>
+                  <div class="label">people you know</div>
+                  <div class="row" style="gap:-4px;"><span class="avatar teal" style="margin-right:-6px;">EM</span><span class="avatar coral" style="margin-right:-6px;">JS</span><span class="avatar amber">+3</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 5. Tracker -->
+      <div class="frame">
+        <div class="caption"><span class="num">05</span><span class="name">Application tracker</span><span class="note">list metaphor · inline edits</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tracker</span></div>
+          <div class="screen">
+            <div class="content" style="padding:8px 0;">
+              <div style="padding: 4px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="h-title">Pipeline · 9 active</div>
+                <div class="row"><span class="pill muted">All</span><span class="pill">Applied 3</span><span class="pill teal">Interview 2</span><span class="pill coral">Offer 0</span><span class="pill muted">Passed</span></div>
+              </div>
+              <div class="tracker-row head">
+                <span>Company / role</span><span>Status</span><span>Score</span><span>Last touch</span><span></span>
+              </div>
+              <div class="tracker-row"><span><b>Vercel</b> · Sr PD, Platform</span><span><span class="status-dot draft"></span>Drafting</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">92</span><span>—</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Lattice</b> · Lead Designer</span><span><span class="status-dot applied"></span>Applied</span><span class="score mid" style="width:24px; height:24px; font-size:11px;">71</span><span>2d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Ramp</b> · Staff PD</span><span><span class="status-dot interview"></span>Phone screen Thu</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">86</span><span>today</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Vercel-Edge</b> · Sr PD</span><span><span class="status-dot interview"></span>Onsite Fri</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">88</span><span>yesterday</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Notion</b> · PD Calendar</span><span><span class="status-dot applied"></span>Applied</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">81</span><span>4d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Linear</b> · Sr Designer</span><span><span class="status-dot passed"></span>Passed (auto)</span><span class="score mid" style="width:24px; height:24px; font-size:11px;">68</span><span>1w ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Anthropic</b> · DE</span><span><span class="status-dot draft"></span>Saved</span><span class="score mid" style="width:24px; height:24px; font-size:11px;">68</span><span>—</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Figma</b> · Sr Designer, AI</span><span><span class="status-dot applied"></span>Applied</span><span class="score mid" style="width:24px; height:24px; font-size:11px;">74</span><span>3d ago</span><span>⋯</span></div>
+              <div style="padding: 8px 12px; display:flex; gap:8px; align-items:center; border-top:1px dashed var(--line);">
+                <span class="ai-tag">3 stale</span><span class="h-mini" style="color:var(--ink-3);">Notion, Figma, Lattice — nudge today?</span><span class="btn sm" style="margin-left:auto;">Draft nudges</span>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 6. Tailoring -->
+      <div class="frame">
+        <div class="caption"><span class="num">06</span><span class="name">AI tailoring · CV + cover letter</span><span class="note">side-by-side, diff highlights</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tailor/vercel-spd-platform</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row" style="justify-content:space-between;">
+                <div class="h-title">Tailor for Vercel · Sr PD, Platform</div>
+                <div class="row"><span class="btn ghost sm">Reset</span><span class="btn sm">Export .pdf</span><span class="btn coral sm">Use this version</span></div>
+              </div>
+              <div class="row" style="gap:6px;"><span class="pill teal">CV</span><span class="pill muted">Cover letter</span><span class="pill muted">LinkedIn message</span><span style="margin-left:auto;" class="ai-tag">12 edits suggested</span></div>
+              <div class="row" style="gap:10px; align-items:flex-start;">
+                <div class="card grow muted">
+                  <div class="label">your CV</div>
+                  <div class="lt-stack">
+                    <span class="line-text full"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text short"></span>
+                    <span class="line-text full"></span>
+                  </div>
+                </div>
+                <div class="card grow">
+                  <div class="row"><span class="label">tailored</span><span class="ai-tag" style="margin-left:auto;">AI</span></div>
+                  <div class="lt-stack">
+                    <span class="line-text full"></span>
+                    <span class="line-text long teal"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text full coral"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text short teal"></span>
+                    <span class="line-text full"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="card amber" style="margin-top:auto;">
+                <div class="row"><span class="ai-tag">why these edits</span><span class="label" style="margin-left:auto;">click any line to see source</span></div>
+                <div style="font-size:12px;">Reordered platform-engineering work to top. Replaced “design systems lead” with <span class="ai-highlight">"design system + infra UX"</span> to mirror the JD. Cut B2C examples.</div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 7. Interview prep -->
+      <div class="frame">
+        <div class="caption"><span class="num">07</span><span class="name">Interview prep</span><span class="note">per role · refreshes daily</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/interview/ramp-staff-pd</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row"><div class="h-title">Ramp · Staff PD prep</div><span class="pill teal" style="margin-left:auto;">Phone screen · Thu 2pm</span></div>
+              <div class="row" style="gap:6px;"><span class="pill solid">Likely questions</span><span class="pill muted">Their products</span><span class="pill muted">People you'll meet</span><span class="pill muted">Your stories</span></div>
+              <div class="card">
+                <div class="label">most likely to be asked</div>
+                <div style="font-family:'Kalam'; font-size:13px;">1. Walk me through a recent project where you partnered with eng on a thorny technical UX problem.</div>
+                <div style="font-family:'Kalam'; font-size:13px;">2. Ramp's “bill pay” is dense — how would you simplify it for first-time users?</div>
+                <div style="font-family:'Kalam'; font-size:13px;">3. Tell me about a time you pushed back on a PM.</div>
+              </div>
+              <div class="row" style="gap:10px; align-items:flex-start;">
+                <div class="card grow">
+                  <div class="label">your stories ↔ their questions</div>
+                  <div class="row"><span class="pill teal">Drift onboarding</span><span class="h-mini">→ Q1</span></div>
+                  <div class="row"><span class="pill teal">Stripe Atlas</span><span class="h-mini">→ Q1, Q3</span></div>
+                  <div class="row"><span class="pill amber">+ pick a 3rd story</span></div>
+                </div>
+                <div class="card grow">
+                  <div class="label">who you'll meet</div>
+                  <div class="row"><span class="avatar coral">EA</span><div><b style="font-family:'Kalam'">Emily A.</b><div class="h-mini">Head of Design · ex-Stripe</div></div></div>
+                  <div class="row"><span class="avatar teal">RM</span><div><b style="font-family:'Kalam'">Rohan M.</b><div class="h-mini">EM · was at Plaid w/ you?</div></div></div>
+                </div>
+              </div>
+              <div class="row" style="margin-top:auto;"><span class="btn">Quiz me ↗</span><span class="btn ghost">Add a note</span><span class="btn coral" style="margin-left:auto;">Mark prep done</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 8. Networking -->
+      <div class="frame">
+        <div class="caption"><span class="num">08</span><span class="name">Networking / outreach</span><span class="note">warm intros + draft messages</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/network</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row"><div class="h-title">Warm paths</div><span class="h-mini" style="margin-left:auto;">from your LinkedIn · 412 connections crossed</span></div>
+              <div class="row" style="gap:6px;"><span class="pill solid">By company</span><span class="pill muted">By person</span><span class="pill muted">Sent · 4</span></div>
+              <div class="card">
+                <div class="row" style="gap:8px;"><span class="avatar coral">VC</span><b style="font-family:'Kalam'">Vercel</b><span class="h-mini">3 warm paths</span><span style="margin-left:auto;" class="pill teal">strong fit · 92</span></div>
+                <div class="row"><span class="avatar teal">EM</span><div class="grow"><b style="font-family:'Kalam'">Elena M.</b> · Design Mgr, Vercel<div class="h-mini">overlapped w/ you at Stripe · 2022</div></div><span class="btn sm coral">Draft DM ✦</span></div>
+                <div class="row"><span class="avatar amber">JS</span><div class="grow"><b style="font-family:'Kalam'">Juno S.</b> · IC, Vercel<div class="h-mini">your friend Ana follows him</div></div><span class="btn sm">Ask Ana</span></div>
+              </div>
+              <div class="card amber">
+                <div class="row"><span class="ai-tag">drafted for Elena</span><span class="label" style="margin-left:auto;">LinkedIn DM · 78 words</span></div>
+                <div style="font-size:12.5px; line-height:1.45;">Hey Elena — saw the <span class="ai-highlight">Platform PD</span> role open up. We overlapped briefly at Stripe in '22 (you were on the dashboard team). Curious if there's a shared problem space worth a 15-min chat before I apply through the front door…</div>
+                <div class="row"><span class="btn sm ghost">Edit</span><span class="btn sm ghost">Regenerate</span><span class="btn sm coral" style="margin-left:auto;">Open in LinkedIn ↗</span></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 9. Settings -->
+      <div class="frame">
+        <div class="caption"><span class="num">09</span><span class="name">Settings</span><span class="note">Profile · LinkedIn · CV · Sources · Notify</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/settings/cv</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row" style="gap:6px;"><span class="pill muted">Profile</span><span class="pill muted">LinkedIn</span><span class="pill solid">CV</span><span class="pill muted">Sources</span><span class="pill muted">Notifications</span><span class="pill muted">Billing</span></div>
+              <div class="h-title">Your CV</div>
+              <div class="h-mini">Used by every evaluation and the Tailor screen. Markdown OK.</div>
+              <div class="card" style="background:var(--paper); flex:1;">
+                <div class="lt-stack" style="gap:5px;">
+                  <span class="line-text full dark"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text med"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text short"></span>
+                  <span class="line-text med dark"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text med"></span>
+                </div>
+              </div>
+              <div class="row"><span class="label">4,219 chars · last updated 6 days ago</span><span class="btn ghost sm" style="margin-left:auto;">Pull from LinkedIn</span><span class="btn coral sm">Save</span></div>
+              <div class="sticky">Tip: paste your LinkedIn export or existing CV — the AI reads it to tailor every evaluation.</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- DIRECTION 2 — DAILY BRIEF                                          -->
+  <!-- ================================================================== -->
+  <section class="tabpanel" id="t2">
+    <div class="dir-head" style="background:#fbf5e6;">
+      <div>
+        <h2>02 · Daily Brief</h2>
+        <div class="tagline">Editorial. Each morning a tight, curated digest — “here are the 6 worth your time today” — with an editor's note from the AI explaining why. Less is more, by design.</div>
+      </div>
+      <div class="pillars">
+        <span class="pillar amber">curated &lt; 10/day</span>
+        <span class="pillar">slow product</span>
+        <span class="pillar coral">AI as editor</span>
+      </div>
+    </div>
+
+    <div class="frames">
+
+      <!-- 1. Onboarding -->
+      <div class="frame">
+        <div class="caption"><span class="num">01</span><span class="name">Onboarding · the intake interview</span><span class="note">conversational, no forms</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/welcome</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:22px 28px;">
+              <div class="label">the intake · 5 min</div>
+              <div class="editorial-title" style="font-size:34px;">Tell me what you're looking for —<br/>I'll do the looking.</div>
+              <div class="rule long" style="margin: 8px 0 4px;"></div>
+              <div class="card" style="background:white;">
+                <div class="row"><span class="avatar coral">✦</span><div class="grow"><span class="ai-highlight">First — link your LinkedIn or drop a CV. I'll learn your story.</span></div></div>
+                <div class="row" style="gap:6px;"><span class="btn coral sm">Connect LinkedIn</span><span class="btn sm">Upload CV</span></div>
+              </div>
+              <div class="card" style="background:white;">
+                <div class="row"><span class="avatar teal">✦</span><div class="grow"><span class="ai-highlight">What's the situation?</span></div></div>
+                <div class="row" style="gap:6px;">
+                  <span class="pill amber">I need work — soon</span>
+                  <span class="pill">I'm looking around</span>
+                  <span class="pill teal">I want to change lanes</span>
+                </div>
+              </div>
+              <div class="card" style="background:white;">
+                <div class="row"><span class="avatar amber">✦</span><div class="grow"><span class="ai-highlight">What does “a good lead” look like for you?</span></div></div>
+                <div class="lt-stack"><span class="line-text full"></span><span class="line-text long"></span><span class="line-text med"></span></div>
+                <div class="row" style="gap:6px;"><span class="pill muted">e.g. remote</span><span class="pill muted">e.g. Series B+</span><span class="pill muted">e.g. design tooling</span></div>
+              </div>
+              <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+                <span class="label">we don't spam · 1 brief per morning</span>
+                <span class="btn coral">Send my first brief tomorrow →</span>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 2. Dashboard / Home -->
+      <div class="frame">
+        <div class="caption"><span class="num">02</span><span class="name">Home — your week, at a glance</span><span class="note">read it like a paper</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/home</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:18px 24px;">
+              <div class="row"><span class="label">Tuesday · May 14</span><span class="label" style="margin-left:auto;">Issue №47</span></div>
+              <div class="rule long"></div>
+              <div class="editorial-title" style="font-size:36px;">Good morning, Maya.</div>
+              <div style="font-family:'Kalam'; font-size:14px; line-height:1.5;">Six new leads worth your time today, plus one nudge for <b>Lattice</b> who's been quiet, and a heads-up about Thursday's <b>Ramp</b> phone screen. I quieted 31 listings that didn't match — read why below.</div>
+              <div class="row" style="gap:10px;">
+                <div class="card grow"><div class="label">today's brief</div><div class="editorial-title">6 leads</div><div class="h-mini" style="color:var(--teal);">2 strong fit</div></div>
+                <div class="card grow"><div class="label">in pipeline</div><div class="editorial-title">9</div><div class="h-mini">2 awaiting reply</div></div>
+                <div class="card grow"><div class="label">this week</div><div class="editorial-title">2 interviews</div><div class="h-mini">Thu &amp; Fri</div></div>
+              </div>
+              <div class="rule long"></div>
+              <div class="row" style="gap:10px; align-items:flex-start;">
+                <div class="col grow">
+                  <div class="label">what i'm doing for you</div>
+                  <div class="card dashed" style="background:white;">
+                    <div class="row"><span class="ai-tag">scanning</span><span class="h-mini" style="margin-left:auto;">12 portals · LinkedIn</span></div>
+                    <div class="prog"><div class="fill teal" style="width:72%;"></div></div>
+                    <div class="h-mini">last scan 6h ago · next in 18h</div>
+                  </div>
+                </div>
+                <div class="col grow">
+                  <div class="label">read next</div>
+                  <div class="lt-stack">
+                    <span class="line-text full"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text med"></span>
+                  </div>
+                  <span class="btn sm coral" style="align-self:flex-start;">Open today's brief →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 3. Discover — the brief -->
+      <div class="frame span-2">
+        <div class="caption"><span class="num">03</span><span class="name">Discover — today's brief</span><span class="note">the editorial digest · 6–10 picks/day</span></div>
+        <div class="body"><div class="mock full-screen">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/brief/2026-05-14</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding: 20px 32px;">
+              <div class="row"><span class="label">Issue №47 · May 14</span><div class="mode-toggle" style="margin-left:auto;"><span class="seg amber">Need</span><span class="seg on">Looking</span><span class="seg teal">Pivot</span></div></div>
+              <div class="editorial-title" style="font-size:42px; line-height:1;">Today's brief.</div>
+              <div class="rule"></div>
+              <!-- editor's note -->
+              <div class="card amber" style="background:#fff3b0; border-color:#d8be4a;">
+                <div class="row"><span class="ai-tag">Editor's note</span><span class="label" style="margin-left:auto;">~ 40 sec read</span></div>
+                <div style="font-family:'Kalam'; font-size:14px; line-height:1.5;">
+                  Big news in your slice: <b>Vercel</b> opened a Platform PD seat — exactly the design × infra crossover you've been hunting. <b>Ramp</b>'s Staff role is a stretch but I think you have the receipts. I quieted 31 listings (mostly junior B2C) — see the “muted” pile if you want to second-guess me.
+                </div>
+              </div>
+              <div class="row" style="gap:14px; align-items:flex-start;">
+                <!-- Picks column -->
+                <div class="col grow" style="gap:10px;">
+                  <div class="label">the picks · 6</div>
+                  <!-- Pick 1 -->
+                  <div class="card" style="background:white;">
+                    <div class="row"><span class="label">№1 · strong fit</span><span class="label" style="margin-left:auto;">3 day old · greenhouse</span></div>
+                    <div class="row" style="gap:10px;">
+                      <span class="avatar coral lg">VC</span>
+                      <div class="grow">
+                        <div class="editorial-title" style="font-size:22px;">Vercel · Sr Product Designer, Platform</div>
+                        <div class="h-mini">Remote · US/EU · $180–220k</div>
+                      </div>
+                      <div class="score hi">92</div>
+                    </div>
+                    <div style="font-family:'Kalam'; font-size:13px; line-height:1.45;">
+                      <span class="ai-highlight">"design systems × platform infra"</span> — they want exactly the rare overlap you spent two years building at Stripe Atlas. <b>Elena M.</b> (you overlapped 2022) is hiring manager.
+                    </div>
+                    <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn sm">Save for later</span><span class="btn ghost sm">Mute</span><span class="h-mini" style="margin-left:auto;">↗ greenhouse</span></div>
+                  </div>
+                  <!-- Pick 2 -->
+                  <div class="card" style="background:white;">
+                    <div class="row"><span class="label">№2 · stretch</span><span class="label" style="margin-left:auto;">6h ago · ashby</span></div>
+                    <div class="row" style="gap:10px;">
+                      <span class="avatar amber lg">RA</span>
+                      <div class="grow">
+                        <div class="editorial-title" style="font-size:22px;">Ramp · Staff Product Designer</div>
+                        <div class="h-mini">NYC · Hybrid · $210–260k</div>
+                      </div>
+                      <div class="score hi">86</div>
+                    </div>
+                    <div style="font-family:'Kalam'; font-size:13px; line-height:1.45;">
+                      Level is one notch above your last title — but <span class="ai-highlight">you've been shipping at Staff-scope</span> for 18 months. Two of your old Plaid coworkers landed here last year.
+                    </div>
+                    <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn sm">Save for later</span><span class="btn ghost sm">Mute</span></div>
+                  </div>
+                  <!-- Pick 3 (compact) -->
+                  <div class="card" style="background:white;">
+                    <div class="row" style="gap:10px;">
+                      <span class="avatar teal lg">NT</span>
+                      <div class="grow">
+                        <div class="editorial-title" style="font-size:20px;">Notion · PD, Calendar</div>
+                        <div class="h-mini">Remote · Americas · $165–195k · salary in your band</div>
+                      </div>
+                      <div class="score hi">81</div>
+                    </div>
+                    <div class="row"><span class="btn sm">Read why ↓</span><span class="btn ghost sm">Mute</span><span class="btn coral sm" style="margin-left:auto;">Tailor &amp; apply →</span></div>
+                  </div>
+                  <!-- Pick 4 compact -->
+                  <div class="card" style="background:white;">
+                    <div class="row" style="gap:10px;">
+                      <span class="avatar purple lg">FN</span>
+                      <div class="grow">
+                        <div class="editorial-title" style="font-size:20px;">Figma · Sr Designer, AI</div>
+                        <div class="h-mini">Remote · Comp not listed</div>
+                      </div>
+                      <div class="score mid">74</div>
+                    </div>
+                    <div class="row"><span class="btn sm">Read why ↓</span><span class="btn ghost sm">Mute</span><span class="btn coral sm" style="margin-left:auto;">Tailor &amp; apply →</span></div>
+                  </div>
+                  <div class="h-mini" style="text-align:center; color:var(--ink-3);">… 2 more picks below ⌄</div>
+                </div>
+                <!-- Side rail -->
+                <div class="col" style="width: 200px; gap:8px;">
+                  <div class="label">also from today</div>
+                  <div class="card" style="background:white;">
+                    <div class="row"><span class="ai-tag">31 muted</span></div>
+                    <div class="h-mini">Mostly junior or wrong stack. Open if you're curious.</div>
+                    <div class="btn ghost sm">Show muted ↓</div>
+                  </div>
+                  <div class="label" style="margin-top:6px;">on your desk</div>
+                  <div class="card amber"><b style="font-family:'Kalam'">Lattice</b><div class="h-mini">applied 5d · no reply · nudge?</div></div>
+                  <div class="card teal"><b style="font-family:'Kalam'">Ramp screen</b><div class="h-mini">Thu 2pm · prep ready</div></div>
+                  <div class="label" style="margin-top:6px;">tomorrow's brief</div>
+                  <div class="card dashed" style="background:white;"><div class="row"><span class="ai-tag">scanning</span></div><div class="prog"><div class="fill teal" style="width:42%;"></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4. Job detail -->
+      <div class="frame">
+        <div class="caption"><span class="num">04</span><span class="name">Job detail · the long read</span><span class="note">editorial article, with margins</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/brief/vercel-spd-platform</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:18px 28px;">
+              <div class="label">№1 · strong fit · 3 day old · greenhouse</div>
+              <div class="editorial-title" style="font-size:32px;">Vercel wants a designer who can hold infra in their head.</div>
+              <div class="row"><span class="avatar coral">VC</span><div class="h-mini">Sr Product Designer, Platform · Remote · $180–220k</div><div class="score hi" style="margin-left:auto;">92</div></div>
+              <div class="rule"></div>
+              <div class="row" style="gap:18px; align-items:flex-start;">
+                <div class="col grow">
+                  <div class="lt-stack">
+                    <span class="line-text full"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text med"></span>
+                  </div>
+                  <div class="card amber">
+                    <span class="label">pull quote</span>
+                    <div style="font-family:'Caveat'; font-size:20px; line-height:1.2;">“You'll partner with platform eng on developer-facing primitives that ship to millions of builds a day.”</div>
+                  </div>
+                  <div class="lt-stack">
+                    <span class="line-text full"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text long"></span>
+                  </div>
+                </div>
+                <div class="col" style="width:140px;">
+                  <div class="label">fit</div>
+                  <div class="row"><span style="width:54px; font-size:11px;">skills</span><div class="prog grow"><div class="fill" style="width:90%;"></div></div></div>
+                  <div class="row"><span style="width:54px; font-size:11px;">level</span><div class="prog grow"><div class="fill" style="width:80%;"></div></div></div>
+                  <div class="row"><span style="width:54px; font-size:11px;">domain</span><div class="prog grow"><div class="fill amber" style="width:65%;"></div></div></div>
+                  <div class="rule"></div>
+                  <div class="label">paths in</div>
+                  <div class="row"><span class="avatar teal" style="margin-right:-6px;">EM</span><span class="avatar coral">JS</span></div>
+                </div>
+              </div>
+              <div class="row" style="margin-top:auto;"><span class="btn coral">Tailor &amp; apply</span><span class="btn">Add to tracker</span><span class="btn ghost">Mute</span><span class="h-mini" style="margin-left:auto;">↗ greenhouse</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 5. Tracker -->
+      <div class="frame">
+        <div class="caption"><span class="num">05</span><span class="name">Pipeline · a ledger</span><span class="note">list, but as a journal</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/pipeline</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:16px 24px;">
+              <div class="editorial-title">Your pipeline.</div>
+              <div class="h-mini">9 active conversations, this week.</div>
+              <div class="rule"></div>
+              <div class="col" style="gap:8px;">
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">Thu, 16</span>
+                  <div class="grow">Phone screen — <b>Ramp</b> (Staff PD)</div>
+                  <span class="pill teal">prep ready</span>
+                </div>
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">Fri, 17</span>
+                  <div class="grow">Onsite — <b>Vercel-Edge</b> (Sr PD)</div>
+                  <span class="pill amber">2 stories left</span>
+                </div>
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">applied</span>
+                  <div class="grow"><b>Lattice</b> · Lead Designer · 5d, silent</div>
+                  <span class="pill coral">nudge?</span>
+                </div>
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">applied</span>
+                  <div class="grow"><b>Notion</b> · PD, Calendar · 4d</div>
+                  <span class="pill muted">wait</span>
+                </div>
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">drafting</span>
+                  <div class="grow"><b>Vercel</b> · Sr PD, Platform · today's pick</div>
+                  <span class="pill teal">finish?</span>
+                </div>
+                <div class="row" style="border-bottom: 1px dashed var(--line); padding-bottom: 6px;">
+                  <span class="label" style="width:80px;">saved</span>
+                  <div class="grow"><b>Anthropic</b> · Design Engineer</div>
+                  <span class="pill muted">decide by Mon</span>
+                </div>
+              </div>
+              <div class="sticky" style="margin-top:auto;">3 are stale. I drafted nudges — want to send them as one batch?</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 6. Tailoring -->
+      <div class="frame">
+        <div class="caption"><span class="num">06</span><span class="name">Tailor · a margin note edit</span><span class="note">draft + annotations</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tailor/vercel-spd-platform</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:14px 22px;">
+              <div class="row"><div class="editorial-title" style="font-size:24px;">Your CV, tuned for Vercel.</div><span class="btn coral sm" style="margin-left:auto;">Export</span></div>
+              <div class="rule"></div>
+              <div class="row" style="gap:14px; align-items:flex-start;">
+                <div class="col grow card" style="background:white;">
+                  <div class="lt-stack">
+                    <span class="line-text full dark"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text long coral"></span>
+                    <span class="line-text med teal"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text long"></span>
+                  </div>
+                </div>
+                <div class="col" style="width: 160px; gap:8px;">
+                  <div class="card amber" style="font-size:11.5px;"><span class="ai-tag">moved</span> Platform work to the top — recruiter scans first 1/3.</div>
+                  <div class="card coral" style="background:#fff6f2; font-size:11.5px;"><span class="ai-tag">cut</span> The B2C section — not their world.</div>
+                  <div class="card teal" style="font-size:11.5px;"><span class="ai-tag">rephrased</span> “design systems lead” → <span class="ai-highlight">"design system + infra UX"</span> to mirror the JD.</div>
+                </div>
+              </div>
+              <div class="row" style="margin-top:auto;"><span class="btn ghost sm">CV</span><span class="btn ghost sm">Cover letter</span><span class="btn ghost sm">LinkedIn DM</span><span class="btn sm coral" style="margin-left:auto;">Use this version</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 7. Interview prep -->
+      <div class="frame">
+        <div class="caption"><span class="num">07</span><span class="name">Interview prep · the dossier</span><span class="note">printable one-pager</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/prep/ramp</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:14px 22px;">
+              <div class="row"><div class="editorial-title">Ramp · the dossier.</div><span class="label" style="margin-left:auto;">Phone screen · Thu 2pm</span></div>
+              <div class="rule"></div>
+              <div class="row" style="gap:14px; align-items:flex-start;">
+                <div class="col grow">
+                  <div class="label">3 questions almost certain</div>
+                  <div class="card" style="background:white;">
+                    <div style="font-family:'Caveat'; font-size:18px;">“Walk me through a thorny eng/design partnership.”</div>
+                    <div class="h-mini"><span class="ai-tag">your move:</span> Drift onboarding</div>
+                  </div>
+                  <div class="card" style="background:white;">
+                    <div style="font-family:'Caveat'; font-size:18px;">“How would you simplify bill-pay?”</div>
+                    <div class="h-mini"><span class="ai-tag">your move:</span> Stripe Atlas case</div>
+                  </div>
+                  <div class="card" style="background:white;">
+                    <div style="font-family:'Caveat'; font-size:18px;">“Tell me about pushing back on a PM.”</div>
+                    <div class="h-mini"><span class="ai-tag">your move:</span> ✦ pick a 3rd</div>
+                  </div>
+                </div>
+                <div class="col" style="width: 170px; gap:6px;">
+                  <div class="label">who you'll meet</div>
+                  <div class="card" style="background:white;"><b style="font-family:'Kalam'">Emily A.</b><div class="h-mini">Head of Design · ex-Stripe '21</div></div>
+                  <div class="card" style="background:white;"><b style="font-family:'Kalam'">Rohan M.</b><div class="h-mini">EM · overlapped at Plaid</div></div>
+                  <div class="label">about the company</div>
+                  <div class="card" style="background:white; font-size:11.5px;">Series D · 800 ppl · just shipped <span class="ai-highlight">Travel</span>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 8. Networking -->
+      <div class="frame">
+        <div class="caption"><span class="num">08</span><span class="name">Networking · warm paths</span><span class="note">letter-of-introduction tone</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/paths</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:14px 22px;">
+              <div class="editorial-title">Three doors at Vercel.</div>
+              <div class="h-mini">Across your LinkedIn — including 2nd-degree.</div>
+              <div class="rule"></div>
+              <div class="col" style="gap:10px;">
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="avatar teal">EM</span><div class="grow"><b style="font-family:'Kalam'">Elena M.</b> · Design Manager, Vercel<div class="h-mini">overlap: Stripe Atlas, 2022 (4 months)</div></div><span class="pill teal">warm</span></div>
+                  <div style="font-size:13px;"><span class="ai-highlight">Draft: a soft 78-word DM mentioning Atlas onboarding — ask for 15 min before applying.</span></div>
+                  <div class="row"><span class="btn ghost sm">Edit draft</span><span class="btn coral sm">Open in LinkedIn ↗</span></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="avatar amber">JS</span><div class="grow"><b style="font-family:'Kalam'">Juno S.</b> · IC, Vercel<div class="h-mini">2nd-degree via Ana R.</div></div><span class="pill amber">via friend</span></div>
+                  <div class="row"><span class="btn sm">Ask Ana for an intro</span></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="avatar coral">DL</span><div class="grow"><b style="font-family:'Kalam'">Devi L.</b> · Recruiter, Vercel<div class="h-mini">cold but high response rate</div></div><span class="pill muted">cold</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 9. Settings -->
+      <div class="frame">
+        <div class="caption"><span class="num">09</span><span class="name">Settings · the editor's preferences</span><span class="note">curated, sectioned</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/settings</span></div>
+          <div class="screen brief-paper">
+            <div class="content" style="padding:14px 24px;">
+              <div class="editorial-title" style="font-size:26px;">Preferences.</div>
+              <div class="rule"></div>
+              <div class="col" style="gap:10px;">
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label" style="width:90px;">situation</span><div class="mode-toggle"><span class="seg amber">Need</span><span class="seg on">Looking</span><span class="seg teal">Pivot</span></div></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label" style="width:90px;">brief size</span><div class="grow"><div class="row" style="gap:6px;"><span class="pill">3</span><span class="pill solid">6</span><span class="pill">10</span><span class="pill muted">all</span></div></div></div>
+                  <div class="row"><span class="label" style="width:90px;">cadence</span><div class="grow"><div class="row" style="gap:6px;"><span class="pill muted">live</span><span class="pill solid">daily 8am</span><span class="pill">weekly</span></div></div></div>
+                  <div class="row"><span class="label" style="width:90px;">tone</span><div class="grow"><div class="row" style="gap:6px;"><span class="pill solid">candid</span><span class="pill">cheerleader</span><span class="pill">terse</span></div></div></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label" style="width:90px;">linkedin</span><div class="grow row"><span class="pill teal">connected</span><span class="h-mini">412 conns scanned · last 6h ago</span></div></div>
+                  <div class="row"><span class="label" style="width:90px;">cv</span><div class="grow row"><span class="pill">edit ↗</span><span class="h-mini">updated 6 days ago</span></div></div>
+                </div>
+              </div>
+              <div class="sticky teal" style="margin-top:auto;">You can ask me to mute a whole company forever, or open more sources. Just say it in the chat.</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- DIRECTION 3 — COMPANION                                            -->
+  <!-- ================================================================== -->
+  <section class="tabpanel" id="t3">
+    <div class="dir-head">
+      <div>
+        <h2>03 · Companion</h2>
+        <div class="tagline">Two-pane app. Chat with the AI on the left, canvas on the right. Leads drag from the conversation into a tracker. The product feels like working alongside a careers assistant.</div>
+      </div>
+      <div class="pillars">
+        <span class="pillar coral">AI front + center</span>
+        <span class="pillar">drag → drop</span>
+        <span class="pillar teal">conversational</span>
+      </div>
+    </div>
+
+    <div class="frames">
+
+      <!-- 1. Onboarding -->
+      <div class="frame">
+        <div class="caption"><span class="num">01</span><span class="name">Onboarding · a first conversation</span><span class="note">chat-led intake</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/welcome</span></div>
+          <div class="screen">
+            <div class="chat-pane" style="width:100%;">
+              <div class="bubble ai"><span class="ai-tag">Hi Maya</span><br/>I'm here to help you find your next role. <span class="ai-highlight">First — drop your LinkedIn or CV?</span></div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Connect LinkedIn</span><span class="btn sm">Upload CV</span></div>
+              <div class="bubble me">connected ✓</div>
+              <div class="bubble ai">Got it — 7 years, designer, last at Stripe Atlas. Beautiful. <br/><span class="ai-highlight">What's the situation right now?</span></div>
+              <div class="row" style="gap:6px;"><span class="pill amber">need work soon</span><span class="pill">looking around</span><span class="pill teal">pivoting</span></div>
+              <div class="bubble me">Looking around · open to remote · Mexico City OK</div>
+              <div class="bubble ai">Cool. One last thing — <span class="ai-highlight">describe a role you'd be excited to wake up for.</span> A sentence is fine.</div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;"><span class="line-text full"></span><span class="line-text med"></span></div><span class="btn coral">Send →</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 2. Dashboard -->
+      <div class="frame">
+        <div class="caption"><span class="num">02</span><span class="name">Home · chat + canvas</span><span class="note">the default working surface</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="row"><span class="avatar coral">✦</span><b style="font-family:'Caveat'; font-size:20px;">LeadMe</b><span class="label" style="margin-left:auto;">good morning</span></div>
+              <div class="bubble ai"><span class="ai-highlight">14 new leads since last night.</span> 3 strong, 4 maybe, 7 noise. Want to triage?</div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Triage now</span><span class="btn sm">Just the strong</span></div>
+              <div class="bubble ai">Also: <b>Lattice</b> hasn't replied in 5 days. Nudge?</div>
+              <div class="row" style="gap:6px;"><span class="btn sm">Draft nudge</span><span class="btn ghost sm">Skip</span></div>
+              <div class="bubble me">show me ramp prep</div>
+              <div class="bubble ai">→ opened to the right. Anything else?</div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">ask anything…</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="h-mini">canvas · Ramp · Staff PD prep</div>
+              <div class="card teal"><b style="font-family:'Kalam'">Phone screen Thu 2pm</b><div class="h-mini">3 likely Qs · 2 stories ready · 1 to pick</div></div>
+              <div class="card"><div class="label">likely questions</div><div class="lt-stack"><span class="line-text full"></span><span class="line-text long"></span><span class="line-text med"></span></div></div>
+              <div class="card"><div class="label">your stories</div><div class="row" style="gap:4px;"><span class="pill teal">Drift</span><span class="pill teal">Atlas</span><span class="pill amber">+ 3rd</span></div></div>
+              <div class="card amber" style="margin-top:auto;"><span class="ai-tag">drag to chat to ask follow-ups</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 3. Discover (chat + cards) -->
+      <div class="frame span-2">
+        <div class="caption"><span class="num">03</span><span class="name">Discover · triage in conversation</span><span class="note">cards inline in the chat · drag right to keep</span></div>
+        <div class="body"><div class="mock full-screen">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/discover</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="row"><span class="avatar coral">✦</span><b style="font-family:'Caveat'; font-size:20px;">Discover</b><div class="mode-toggle" style="margin-left:auto;"><span class="seg amber">N</span><span class="seg on">L</span><span class="seg teal">P</span></div></div>
+              <div class="bubble ai">Here are <span class="ai-highlight">14 new leads</span>. I'll show them one at a time — keep, skip, or ask me anything.</div>
+
+              <div class="card" style="background:white; padding:6px 8px;">
+                <div class="row" style="gap:8px;"><span class="avatar coral">VC</span><div class="grow"><b style="font-family:'Kalam'">Vercel</b><div class="h-mini">Sr PD, Platform · Remote · $180–220k</div></div><div class="score hi">92</div></div>
+                <div class="h-mini" style="font-size:12px;">design × infra UX, perfect match for your trail.</div>
+                <div class="row"><span class="btn coral sm">Keep →</span><span class="btn ghost sm">Skip</span><span class="btn sm">Tell me more</span></div>
+              </div>
+
+              <div class="bubble me">tell me about ramp</div>
+              <div class="bubble ai">Staff seat. One notch up — <span class="ai-highlight">but you've been at staff scope.</span> Two ex-Plaid coworkers there. Wanna see it?</div>
+              <div class="card" style="background:white; padding:6px 8px;">
+                <div class="row" style="gap:8px;"><span class="avatar amber">RA</span><div class="grow"><b style="font-family:'Kalam'">Ramp</b><div class="h-mini">Staff PD · NYC · $210–260k</div></div><div class="score hi">86</div></div>
+                <div class="row"><span class="btn coral sm">Keep →</span><span class="btn ghost sm">Skip</span></div>
+              </div>
+
+              <div class="bubble ai">11 more after these. Or want me to <span class="ai-highlight">just push the 3 strong ones into your tracker</span>?</div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Yes, do that</span><span class="btn sm">Keep going one-by-one</span></div>
+
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">e.g. "skip anything under 70"</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="row" style="justify-content:space-between;"><div class="h-title">Today's keepers</div><span class="pill muted">drag a card here</span></div>
+              <div class="card teal">
+                <div class="row" style="gap:8px;"><span class="avatar coral">VC</span><div class="grow"><b style="font-family:'Kalam'">Vercel</b> · Sr PD, Platform<div class="h-mini">moved here just now</div></div><div class="score hi">92</div></div>
+                <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn ghost sm">Open job ↗</span></div>
+              </div>
+              <div class="card">
+                <div class="row" style="gap:8px;"><span class="avatar coral">NT</span><div class="grow"><b style="font-family:'Kalam'">Notion</b> · PD, Calendar</div><div class="score hi">81</div></div>
+                <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn ghost sm">Open job ↗</span></div>
+              </div>
+              <div class="card dashed muted">
+                <div class="h-mini" style="text-align:center;">drop a card here to keep · or "keep all strong" in chat</div>
+              </div>
+              <div class="card amber" style="margin-top:auto;">
+                <span class="ai-tag">today's session</span>
+                <div class="h-mini">2 kept · 4 skipped · 8 unseen · ~ 4 min in</div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4. Job detail -->
+      <div class="frame">
+        <div class="caption"><span class="num">04</span><span class="name">Job detail · ask anything</span><span class="note">card + Q&amp;A inline</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/job/vercel-spd-platform</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="bubble me">why's this an 86 not a 92?</div>
+              <div class="bubble ai">Two reasons: <span class="ai-highlight">level is a stretch</span> (one notch up), and <span class="ai-highlight">you have less Series-D fintech</span>. Both fixable on the CV — want me to tailor?</div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Yes</span><span class="btn sm">Compare to Vercel</span></div>
+              <div class="bubble me">who do i know there</div>
+              <div class="bubble ai">Two strong: <b>Aisha P.</b> (PM, ex-Plaid) and <b>Carlos R.</b> (Design, your '21 cohort).</div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">ask…</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="row"><span class="avatar amber lg">RA</span><div class="grow"><div class="h-title">Ramp · Staff PD</div><div class="h-mini">NYC · Hybrid · $210–260k · ashby</div></div><div class="score hi">86</div></div>
+              <div class="row" style="gap:6px;"><span class="btn coral">Tailor &amp; apply</span><span class="btn">Add to tracker</span><span class="btn ghost">Skip</span></div>
+              <div class="card"><div class="label">role</div><div class="lt-stack"><span class="line-text full"></span><span class="line-text long"></span><span class="line-text med"></span><span class="line-text full"></span></div></div>
+              <div class="card"><div class="label">fit</div>
+                <div class="row"><span style="width:54px; font-size:11px;">skills</span><div class="prog grow"><div class="fill" style="width:88%;"></div></div></div>
+                <div class="row"><span style="width:54px; font-size:11px;">level</span><div class="prog grow"><div class="fill amber" style="width:60%;"></div></div></div>
+                <div class="row"><span style="width:54px; font-size:11px;">domain</span><div class="prog grow"><div class="fill amber" style="width:55%;"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 5. Tracker -->
+      <div class="frame">
+        <div class="caption"><span class="num">05</span><span class="name">Tracker · drag-in from chat</span><span class="note">list, with a chat dock</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tracker</span></div>
+          <div class="screen">
+            <div class="content">
+              <div class="row"><div class="h-title">Pipeline · 9</div><span class="btn coral sm" style="margin-left:auto;">+ Add</span></div>
+              <div class="row" style="gap:6px;"><span class="pill solid">All</span><span class="pill muted">Drafting 2</span><span class="pill muted">Applied 3</span><span class="pill teal">Interview 2</span></div>
+              <div class="tracker-row head"><span>Company</span><span>Status</span><span>Score</span><span>Touch</span><span></span></div>
+              <div class="tracker-row"><span><b>Vercel</b> · Sr PD, Platform</span><span><span class="status-dot draft"></span>Drafting</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">92</span><span>—</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Lattice</b> · Lead D</span><span><span class="status-dot applied"></span>Applied · stale</span><span class="score mid" style="width:24px; height:24px; font-size:11px;">71</span><span>5d</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Ramp</b> · Staff PD</span><span><span class="status-dot interview"></span>Screen Thu</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">86</span><span>today</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Vercel-Edge</b> · Sr PD</span><span><span class="status-dot interview"></span>Onsite Fri</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">88</span><span>1d</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Notion</b> · PD Cal</span><span><span class="status-dot applied"></span>Applied</span><span class="score hi" style="width:24px; height:24px; font-size:11px;">81</span><span>4d</span><span>⋯</span></div>
+              <div class="card amber" style="margin-top:auto;">
+                <div class="row"><span class="ai-tag">talk to the tracker</span><span class="label" style="margin-left:auto;">try: "mark Notion as ghosted"</span></div>
+                <div class="row"><div class="card grow" style="border-style:dashed; padding:4px 8px;">ask the tracker…</div><span class="btn coral sm">↑</span></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 6. Tailoring -->
+      <div class="frame">
+        <div class="caption"><span class="num">06</span><span class="name">Tailor · diff with reasoning</span><span class="note">chat owns the why, canvas owns the what</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tailor/vercel</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="bubble ai">I made <span class="ai-highlight">12 edits</span>. Big moves:</div>
+              <div class="bubble ai">• Platform work → top<br/>• Cut B2C section<br/>• Reframed "design systems lead" as <span class="ai-highlight">"design system + infra UX"</span></div>
+              <div class="bubble me">don't cut the b2c — keep one line</div>
+              <div class="bubble ai">Done. Kept the Drift line as a one-liner under "selected work".</div>
+              <div class="row" style="gap:6px;"><span class="btn sm">Reset</span><span class="btn coral sm">Accept all</span></div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">ask for an edit…</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="row" style="gap:6px;"><span class="pill solid">CV</span><span class="pill muted">Cover</span><span class="pill muted">DM</span></div>
+              <div class="card muted">
+                <div class="lt-stack" style="gap:4px;">
+                  <span class="line-text full dark"></span>
+                  <span class="line-text long teal"></span>
+                  <span class="line-text med coral" style="text-decoration:line-through;"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long teal"></span>
+                  <span class="line-text med"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text short"></span>
+                </div>
+              </div>
+              <div class="row" style="margin-top:auto;"><span class="label">12 edits · 8 accepted · 4 pending</span><span class="btn coral sm" style="margin-left:auto;">Export</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 7. Interview prep -->
+      <div class="frame">
+        <div class="caption"><span class="num">07</span><span class="name">Interview prep · mock with the AI</span><span class="note">chat is the practice partner</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/prep/ramp</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="bubble ai"><b style="font-family:'Caveat'; font-size:18px;">Mock — Round 1</b><br/>Walk me through a project where you partnered with eng on a thorny UX problem.</div>
+              <div class="bubble me">[recording 0:42]</div>
+              <div class="bubble ai"><span class="ai-highlight">Good story — strong setup.</span> One nit: you said "we just figured it out" — name the actual decision. Try again, or push on?</div>
+              <div class="row" style="gap:6px;"><span class="btn sm">Try again</span><span class="btn sm">Push on</span><span class="btn coral sm">Score me so far</span></div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">type or hold space to talk</div><span class="btn coral">●</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="h-mini">Ramp · Staff PD · phone screen Thu 2pm</div>
+              <div class="card"><div class="label">round 1 of 3</div><div class="prog"><div class="fill" style="width:33%;"></div></div></div>
+              <div class="card"><div class="label">scores so far</div>
+                <div class="row"><span style="width:64px; font-size:11px;">clarity</span><div class="prog grow"><div class="fill" style="width:78%;"></div></div></div>
+                <div class="row"><span style="width:64px; font-size:11px;">specifics</span><div class="prog grow"><div class="fill amber" style="width:60%;"></div></div></div>
+                <div class="row"><span style="width:64px; font-size:11px;">structure</span><div class="prog grow"><div class="fill" style="width:85%;"></div></div></div>
+              </div>
+              <div class="sticky" style="margin-top:auto;">Tip: when they ask "tell me about" — pick a decision, not a project.</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 8. Networking -->
+      <div class="frame">
+        <div class="caption"><span class="num">08</span><span class="name">Networking · who, why, how</span><span class="note">AI brokers the intro</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/network</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="bubble ai">For <b>Vercel</b>, I see <span class="ai-highlight">3 warm paths</span>. Strongest is <b>Elena M.</b> — you overlapped at Stripe Atlas in '22.</div>
+              <div class="bubble ai">I drafted a 78-word DM in your voice. Read it?</div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Show me</span><span class="btn sm">Try a colder tone</span></div>
+              <div class="bubble me">also — anyone at ramp i should ping</div>
+              <div class="bubble ai"><b>Aisha P.</b> — PM there, ex-Plaid, you have 3 mutuals. Want a draft for her too?</div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">ask…</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="h-title">Drafts ready</div>
+              <div class="card teal"><div class="row"><span class="avatar teal">EM</span><b style="font-family:'Kalam'">Elena M.</b><span class="pill teal" style="margin-left:auto;">warm</span></div><div class="lt-stack"><span class="line-text full"></span><span class="line-text long"></span><span class="line-text med"></span></div><div class="row"><span class="btn ghost sm">Edit</span><span class="btn coral sm" style="margin-left:auto;">Open in LinkedIn ↗</span></div></div>
+              <div class="card"><div class="row"><span class="avatar amber">JS</span><b style="font-family:'Kalam'">Juno S.</b><span class="pill amber" style="margin-left:auto;">via Ana</span></div><div class="h-mini">awaiting Ana's intro</div></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 9. Settings -->
+      <div class="frame">
+        <div class="caption"><span class="num">09</span><span class="name">Settings · talk to set up</span><span class="note">chat-as-config</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/settings</span></div>
+          <div class="screen">
+            <div class="chat-pane">
+              <div class="bubble me">stop showing me junior roles</div>
+              <div class="bubble ai">Got it — <span class="ai-highlight">min level = Senior IC</span>. Applied to all future scans.</div>
+              <div class="bubble me">also mute meta</div>
+              <div class="bubble ai">Muted Meta + subsidiaries (Reality Labs, WhatsApp). <span class="ai-highlight">Sound right?</span></div>
+              <div class="row" style="gap:6px;"><span class="btn sm">Yes</span><span class="btn sm">Just Meta core</span></div>
+              <div class="row" style="gap:6px; margin-top:auto;"><div class="card grow" style="border-style:dashed; padding:6px 8px;">say anything…</div><span class="btn coral">↑</span></div>
+            </div>
+            <div class="content" style="padding:12px; background:white;">
+              <div class="h-mini">current preferences</div>
+              <div class="card"><div class="row"><span class="label">situation</span><span class="pill solid" style="margin-left:auto;">looking</span></div></div>
+              <div class="card"><div class="row"><span class="label">levels</span><span class="pill teal" style="margin-left:auto;">Sr IC, Staff, Mgr</span></div></div>
+              <div class="card"><div class="row"><span class="label">locations</span><span class="pill" style="margin-left:auto;">Remote · Mexico City</span></div></div>
+              <div class="card"><div class="row"><span class="label">muted cos</span><span class="pill muted" style="margin-left:auto;">Meta + 4 subs</span></div></div>
+              <div class="card teal"><div class="row"><span class="label">linkedin</span><span class="pill teal" style="margin-left:auto;">connected · 412</span></div></div>
+              <div class="card"><div class="row"><span class="label">cv</span><span class="pill" style="margin-left:auto;">6d old · edit ↗</span></div></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- DIRECTION 4 — ATLAS                                                -->
+  <!-- ================================================================== -->
+  <section class="tabpanel" id="t4">
+    <div class="dir-head" style="background:#f3efe4;">
+      <div>
+        <h2>04 · Atlas</h2>
+        <div class="tagline">Opportunities as a map, not a list. You zoom out to see your whole landscape; zoom in to one role. Ambient agent paints the territory; you decide what's worth visiting.</div>
+      </div>
+      <div class="pillars">
+        <span class="pillar">visual</span>
+        <span class="pillar teal">ambient agent</span>
+        <span class="pillar coral">exploratory</span>
+      </div>
+    </div>
+
+    <div class="frames">
+
+      <!-- 1. Onboarding -->
+      <div class="frame">
+        <div class="caption"><span class="num">01</span><span class="name">Onboarding · plot your start</span><span class="note">map yourself first</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/welcome</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:18px 22px;">
+              <div class="label">step 02 / 03 · plot yourself on the map</div>
+              <div class="h-title" style="font-size:28px;">Where are you starting from?</div>
+              <div class="card" style="background:white; min-height:200px; position:relative;">
+                <!-- mini map -->
+                <div style="position:absolute; left:40%; top:50%; width:48px; height:48px; border-radius:50%; border:2px dashed var(--ink); display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700; transform:translate(-50%,-50%); background:white;">you</div>
+                <div class="dot-node" style="left:20%; top:30%; width:30px; height:30px; font-size:12px;">PD</div>
+                <div class="dot-node" style="left:65%; top:25%; width:30px; height:30px; font-size:12px;">DE</div>
+                <div class="dot-node" style="left:75%; top:60%; width:30px; height:30px; font-size:12px;">UX</div>
+                <div class="dot-node" style="left:25%; top:72%; width:30px; height:30px; font-size:12px;">PM</div>
+                <svg style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;">
+                  <line x1="40%" y1="50%" x2="20%" y2="30%" stroke="#1a1817" stroke-dasharray="2 3"/>
+                  <line x1="40%" y1="50%" x2="65%" y2="25%" stroke="#1a1817" stroke-dasharray="2 3"/>
+                  <line x1="40%" y1="50%" x2="75%" y2="60%" stroke="#1a1817" stroke-dasharray="2 3"/>
+                  <line x1="40%" y1="50%" x2="25%" y2="72%" stroke="#1a1817" stroke-dasharray="2 3"/>
+                </svg>
+                <div class="h-mini" style="position:absolute; bottom:8px; left:8px;">pick where you sit · drag to refine</div>
+              </div>
+              <div class="row"><span class="label">connect LinkedIn to auto-plot →</span><span class="btn coral sm" style="margin-left:auto;">Connect LinkedIn</span><span class="btn sm">Upload CV</span></div>
+              <div style="margin-top:auto; display:flex; justify-content:space-between;">
+                <span class="btn ghost sm">back</span>
+                <span class="btn coral">Continue →</span>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 2. Dashboard / Home -->
+      <div class="frame">
+        <div class="caption"><span class="num">02</span><span class="name">Home · the territory</span><span class="note">opportunities as stars</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row"><div class="h-title">Your atlas</div><span class="label" style="margin-left:auto;">last refreshed 2h · 14 new</span></div>
+              <div style="position:relative; flex:1; border:1.5px solid var(--ink); background:rgba(255,255,255,.5); min-height:280px;">
+                <!-- you -->
+                <div style="position:absolute; left:50%; top:55%; transform:translate(-50%,-50%); width:48px; height:48px; border-radius:50%; border:2.5px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700;">you</div>
+                <!-- rings -->
+                <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                  <circle cx="50%" cy="55%" r="80" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                  <circle cx="50%" cy="55%" r="130" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                </svg>
+                <!-- nodes -->
+                <div class="dot-node" style="left:30%; top:35%; width:42px; height:42px; background:var(--teal); color:white; font-size:13px;">VC<br/>92</div>
+                <div class="dot-node" style="left:70%; top:30%; width:38px; height:38px; background:var(--teal); color:white; font-size:12px;">RA<br/>86</div>
+                <div class="dot-node" style="left:78%; top:55%; width:34px; height:34px; font-size:11px;">NT<br/>81</div>
+                <div class="dot-node" style="left:25%; top:70%; width:30px; height:30px; font-size:10px;">FN<br/>74</div>
+                <div class="dot-node" style="left:55%; top:18%; width:28px; height:28px; font-size:10px;">AC<br/>68</div>
+                <div class="dot-node" style="left:62%; top:78%; width:26px; height:26px; font-size:10px; opacity:.6;">LI<br/>52</div>
+                <div class="dot-node" style="left:18%; top:50%; width:24px; height:24px; font-size:9px; opacity:.5;">DD<br/>51</div>
+                <div style="position:absolute; left:8px; top:8px;" class="row"><span class="pill amber">14 new</span><span class="pill teal">3 strong</span></div>
+                <div style="position:absolute; right:8px; bottom:8px;" class="row"><span class="pill muted">close = better fit</span><span class="pill muted">size = score</span></div>
+              </div>
+              <div class="row" style="margin-top:6px;"><div class="mode-toggle"><span class="seg amber">Need</span><span class="seg on">Looking</span><span class="seg teal">Pivot</span></div><span class="btn coral sm" style="margin-left:auto;">Open the strongest →</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 3. Discover · zoomed map -->
+      <div class="frame span-2">
+        <div class="caption"><span class="num">03</span><span class="name">Discover · the map view</span><span class="note">pan, zoom, lasso · or flip to list</span></div>
+        <div class="body"><div class="mock full-screen">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/discover</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:0; gap:0;">
+              <div class="topbar" style="background:rgba(255,255,255,.7);">
+                <div class="h-title">⌖ Atlas</div>
+                <div class="mode-toggle"><span class="seg amber">Need</span><span class="seg on">Looking</span><span class="seg teal">Pivot</span></div>
+                <span class="pill muted">Map ✓</span><span class="pill muted">List</span>
+                <span style="margin-left:auto;" class="row"><span class="label">2h ago · scanning…</span><div class="prog" style="width:80px;"><div class="fill teal" style="width:62%;"></div></div><span class="btn coral sm">Scan ▾</span></div>
+              </div>
+              <div style="display:flex; flex:1; min-height:0;">
+                <!-- legend / filters -->
+                <div style="width:160px; padding:10px; background:rgba(255,255,255,.6); border-right:1px dashed var(--line);">
+                  <div class="label">axes</div>
+                  <div class="card" style="background:white; padding:6px 8px;"><div class="label">↕ vertical</div><div class="h-mini" style="font-size:12px;">domain ↔ adjacent</div></div>
+                  <div class="card" style="background:white; padding:6px 8px;"><div class="label">↔ horizontal</div><div class="h-mini" style="font-size:12px;">scope (IC → leadership)</div></div>
+                  <div class="card" style="background:white; padding:6px 8px;"><div class="label">size</div><div class="h-mini" style="font-size:12px;">fit score</div></div>
+                  <div class="card" style="background:white; padding:6px 8px;"><div class="label">color</div><div class="row"><span class="status-dot interview"></span><span class="h-mini">strong</span></div><div class="row"><span class="status-dot applied"></span><span class="h-mini">stretch</span></div><div class="row"><span class="status-dot draft"></span><span class="h-mini">new</span></div></div>
+                  <div class="label" style="margin-top:8px;">filters</div>
+                  <div class="row" style="flex-wrap:wrap; gap:4px;"><span class="pill teal" style="font-size:11px;">Remote</span><span class="pill teal" style="font-size:11px;">≥ $160k</span><span class="pill muted" style="font-size:11px;">+ filter</span></div>
+                </div>
+                <!-- map -->
+                <div style="position:relative; flex:1; min-height:340px;">
+                  <div style="position:absolute; left:50%; top:60%; transform:translate(-50%,-50%); width:60px; height:60px; border-radius:50%; border:2.5px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700;">you</div>
+                  <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                    <circle cx="50%" cy="60%" r="80" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                    <circle cx="50%" cy="60%" r="140" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                    <circle cx="50%" cy="60%" r="200" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                    <!-- selection lasso -->
+                    <path d="M 28% 24% Q 50% 14% 70% 22% Q 78% 38% 68% 50% Q 50% 48% 30% 46% Z" fill="rgba(232,193,74,0.18)" stroke="#1a1817" stroke-dasharray="4 3" />
+                  </svg>
+                  <div class="dot-node" style="left:30%; top:30%; width:54px; height:54px; background:var(--teal); color:white; font-size:13px;">Vercel<br/>92</div>
+                  <div class="dot-node" style="left:62%; top:25%; width:50px; height:50px; background:var(--teal); color:white; font-size:12px;">Ramp<br/>86</div>
+                  <div class="dot-node" style="left:80%; top:50%; width:44px; height:44px; font-size:11px;">Notion<br/>81</div>
+                  <div class="dot-node" style="left:48%; top:38%; width:38px; height:38px; font-size:10px;">Figma<br/>74</div>
+                  <div class="dot-node" style="left:22%; top:80%; width:32px; height:32px; font-size:10px;">Lattice<br/>71</div>
+                  <div class="dot-node" style="left:78%; top:82%; width:34px; height:34px; font-size:10px;">Anthr<br/>68</div>
+                  <div class="dot-node" style="left:18%; top:50%; width:28px; height:28px; font-size:9px; opacity:.6;">DD<br/>52</div>
+                  <div class="dot-node" style="left:88%; top:30%; width:24px; height:24px; font-size:9px; opacity:.5;">+5</div>
+                  <div style="position:absolute; left:30%; top:18%;" class="sticky" >Lasso · 5 selected — <a href="#" style="color:var(--coral);">tailor all?</a></div>
+                </div>
+                <!-- inspect panel -->
+                <div style="width:230px; padding:10px; background:rgba(255,255,255,.85); border-left:1px dashed var(--line); display:flex; flex-direction:column; gap:6px;">
+                  <div class="label">selection · 5 roles</div>
+                  <div class="card teal"><b style="font-family:'Kalam'">Vercel</b> · Sr PD, Platform<div class="h-mini">$180–220k · remote</div></div>
+                  <div class="card teal"><b style="font-family:'Kalam'">Ramp</b> · Staff PD<div class="h-mini">$210–260k · NYC</div></div>
+                  <div class="card"><b style="font-family:'Kalam'">Notion</b> · PD Calendar</div>
+                  <div class="card"><b style="font-family:'Kalam'">Figma</b> · Sr Designer, AI</div>
+                  <div class="card"><b style="font-family:'Kalam'">Lattice</b> · Lead D</div>
+                  <div class="row"><span class="btn coral sm">Tailor 5 →</span><span class="btn ghost sm">Compare</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4. Job detail -->
+      <div class="frame">
+        <div class="caption"><span class="num">04</span><span class="name">Job detail · zoomed-in node</span><span class="note">map context preserved</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/job/vercel-spd-platform</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row" style="gap:10px;">
+                <span class="avatar coral lg">VC</span>
+                <div class="grow"><div class="h-title">Vercel · Sr PD, Platform</div><div class="h-mini">Remote · $180–220k · greenhouse · 3d</div></div>
+                <div class="score hi" style="width:54px; height:54px; font-size:22px;">92</div>
+              </div>
+              <div class="row"><span class="btn coral">Tailor &amp; apply</span><span class="btn">Add</span><span class="btn ghost">Discard</span><span class="h-mini" style="margin-left:auto;">↗ greenhouse</span></div>
+              <div class="row" style="gap:10px; align-items:flex-start;">
+                <div class="col grow card" style="background:white;">
+                  <div class="label">your distance to this node</div>
+                  <div style="position:relative; height:120px;">
+                    <div style="position:absolute; left:10%; top:60%; width:34px; height:34px; border-radius:50%; border:2.5px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat';">you</div>
+                    <div style="position:absolute; right:10%; top:20%; width:46px; height:46px; border-radius:50%; background:var(--teal); color:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700;">VC</div>
+                    <svg style="position:absolute; inset:0; width:100%; height:100%;"><line x1="14%" y1="70%" x2="86%" y2="35%" stroke="#1a1817" stroke-dasharray="4 4"/></svg>
+                    <div style="position:absolute; left:45%; top:46%; transform:rotate(-12deg);" class="pill teal">→ short jump</div>
+                  </div>
+                  <div class="lt-stack"><span class="line-text full"></span><span class="line-text long"></span><span class="line-text med"></span></div>
+                </div>
+                <div class="col" style="width:130px; gap:6px;">
+                  <div class="label">paths in</div>
+                  <div class="row" style="gap:-4px;"><span class="avatar teal" style="margin-right:-6px;">EM</span><span class="avatar coral" style="margin-right:-6px;">JS</span><span class="avatar amber">+3</span></div>
+                  <div class="label">salary band</div>
+                  <div class="row"><span class="pill teal">$180–220k</span></div>
+                  <div class="label">your band</div>
+                  <div class="row"><span class="pill teal">overlaps fully</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 5. Tracker -->
+      <div class="frame">
+        <div class="caption"><span class="num">05</span><span class="name">Tracker · journey lines</span><span class="note">list w/ progress as a route</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tracker</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row"><div class="h-title">Pipeline · 9 active</div><span class="pill muted" style="margin-left:auto;">List</span><span class="pill solid">Journey</span></div>
+              <div class="col" style="gap:14px; background:white; border:1.2px solid var(--ink); padding:10px 14px; flex:1;">
+                <!-- stages header -->
+                <div class="row" style="font-family:'Special Elite'; font-size:10px; letter-spacing:1px; color:var(--ink-3);"><span style="width:120px;"></span><span style="width:18%;">SAVED</span><span style="width:18%;">DRAFT</span><span style="width:18%;">APPLIED</span><span style="width:18%;">INTERVIEW</span><span style="width:18%;">OFFER</span></div>
+                <!-- row 1 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Vercel</b><br/><span class="h-mini">Sr PD, Plat</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:10%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:var(--coral); border:2px solid var(--ink);"></div>
+                    <div style="position:absolute; left:30%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:white; border:2px dashed var(--ink);"></div>
+                  </div>
+                </div>
+                <!-- row 2 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Lattice</b><br/><span class="h-mini">Lead D</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:var(--amber); border:2px solid var(--ink);"></div>
+                    <div style="position:absolute; left:50%; top:-6px; transform:translate(-50%,0);" class="pill amber" >stale 5d</div>
+                  </div>
+                </div>
+                <!-- row 3 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Ramp</b><br/><span class="h-mini">Staff PD</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; width:70%; top:50%; transform:translateY(-50%); border-top:2px solid var(--teal);"></div>
+                    <div style="position:absolute; left:70%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:70%; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:var(--teal); border:2px solid var(--ink);"></div>
+                    <div style="position:absolute; left:70%; top:-6px; transform:translate(-50%,0);" class="pill teal">screen Thu</div>
+                  </div>
+                </div>
+                <!-- row 4 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Vercel-Edge</b><br/><span class="h-mini">Sr PD</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; width:72%; top:50%; transform:translateY(-50%); border-top:2px solid var(--teal);"></div>
+                    <div style="position:absolute; left:72%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:72%; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:var(--teal); border:2px solid var(--ink);"></div>
+                  </div>
+                </div>
+                <!-- row 5 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Notion</b><br/><span class="h-mini">PD Cal</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; width:50%; top:50%; transform:translateY(-50%); border-top:2px solid var(--ink);"></div>
+                    <div style="position:absolute; left:50%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:white; border:2px solid var(--ink);"></div>
+                  </div>
+                </div>
+                <!-- row 6 -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:120px; font-family:'Kalam';"><b>Anthropic</b><br/><span class="h-mini">DE</span></span>
+                  <div style="position:relative; flex:1; height:18px;">
+                    <div style="position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                    <div style="position:absolute; left:10%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:white; border:2px solid var(--ink);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 6. Tailoring -->
+      <div class="frame">
+        <div class="caption"><span class="num">06</span><span class="name">Tailor · pin diff to the map</span><span class="note">what changed, why it matters</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tailor/vercel</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row"><div class="h-title">Tailor → Vercel (92)</div><span class="btn coral sm" style="margin-left:auto;">Export</span></div>
+              <div class="row" style="gap:10px; align-items:stretch;">
+                <div class="col grow card" style="background:white;">
+                  <div class="label">your CV · tuned</div>
+                  <div class="lt-stack" style="gap:4px;">
+                    <span class="line-text full"></span>
+                    <span class="line-text long teal"></span>
+                    <span class="line-text med coral"></span>
+                    <span class="line-text full"></span>
+                    <span class="line-text long"></span>
+                    <span class="line-text full teal"></span>
+                    <span class="line-text med"></span>
+                    <span class="line-text long"></span>
+                  </div>
+                </div>
+                <div class="col card" style="background:white; width:140px;">
+                  <div class="label">moves you closer</div>
+                  <div style="position:relative; flex:1;">
+                    <div style="position:absolute; left:10%; top:60%; width:24px; height:24px; border-radius:50%; border:2px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-size:10px;">you</div>
+                    <div style="position:absolute; right:10%; top:20%; width:30px; height:30px; border-radius:50%; background:var(--teal); color:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-size:11px; font-weight:700;">VC</div>
+                    <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                      <line x1="20%" y1="65%" x2="80%" y2="30%" stroke="#c8c1b4" stroke-dasharray="3 3"/>
+                      <line x1="40%" y1="55%" x2="80%" y2="30%" stroke="var(--teal)" stroke-width="2"/>
+                    </svg>
+                    <div style="position:absolute; left:40%; top:42%;" class="pill teal">+ infra UX</div>
+                    <div style="position:absolute; left:30%; top:75%;" class="pill coral">- B2C focus</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row" style="gap:6px;"><span class="pill solid">CV</span><span class="pill">Cover</span><span class="pill">DM</span><span class="h-mini" style="margin-left:auto;">12 edits · click any line for source</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 7. Interview prep -->
+      <div class="frame">
+        <div class="caption"><span class="num">07</span><span class="name">Interview prep · constellation</span><span class="note">stories → questions, mapped</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/prep/ramp</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row"><div class="h-title">Ramp prep · constellation</div><span class="pill teal" style="margin-left:auto;">Thu 2pm</span></div>
+              <div style="position:relative; flex:1; background:white; border:1.2px solid var(--ink);">
+                <!-- stories left, questions right, lines between -->
+                <div style="position:absolute; left:8%; top:18%; width:90px; padding:4px 6px; border:1.5px solid var(--ink); background:#f0f8f5; font-family:'Kalam'; font-size:12px;">Drift onboarding</div>
+                <div style="position:absolute; left:8%; top:46%; width:90px; padding:4px 6px; border:1.5px solid var(--ink); background:#f0f8f5; font-family:'Kalam'; font-size:12px;">Stripe Atlas</div>
+                <div style="position:absolute; left:8%; top:74%; width:90px; padding:4px 6px; border:1.5px dashed var(--ink); background:#fff8dc; font-family:'Kalam'; font-size:12px;">+ pick a 3rd</div>
+                <div style="position:absolute; right:8%; top:14%; width:130px; padding:4px 6px; border:1.5px solid var(--ink); background:white; font-family:'Kalam'; font-size:12px;">Q1 — eng × design partnership</div>
+                <div style="position:absolute; right:8%; top:42%; width:130px; padding:4px 6px; border:1.5px solid var(--ink); background:white; font-family:'Kalam'; font-size:12px;">Q2 — simplify bill-pay</div>
+                <div style="position:absolute; right:8%; top:70%; width:130px; padding:4px 6px; border:1.5px solid var(--ink); background:white; font-family:'Kalam'; font-size:12px;">Q3 — push back on PM</div>
+                <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                  <line x1="22%" y1="22%" x2="68%" y2="18%" stroke="var(--teal)" stroke-width="2"/>
+                  <line x1="22%" y1="50%" x2="68%" y2="22%" stroke="var(--teal)" stroke-width="2"/>
+                  <line x1="22%" y1="50%" x2="68%" y2="74%" stroke="var(--teal)" stroke-width="2"/>
+                  <line x1="22%" y1="78%" x2="68%" y2="74%" stroke="#c8c1b4" stroke-dasharray="3 3"/>
+                </svg>
+              </div>
+              <div class="row" style="margin-top:6px;"><span class="btn sm">Quiz me</span><span class="btn ghost sm">Print</span><span class="btn coral sm" style="margin-left:auto;">Mark ready</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 8. Networking -->
+      <div class="frame">
+        <div class="caption"><span class="num">08</span><span class="name">Networking · graph of paths</span><span class="note">2nd-degree visible</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/network</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row"><div class="h-title">Paths into Vercel</div><span class="pill muted" style="margin-left:auto;">412 conns</span></div>
+              <div style="position:relative; flex:1; background:white; border:1.2px solid var(--ink); min-height:220px;">
+                <!-- you -->
+                <div style="position:absolute; left:8%; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; border:2.5px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700;">you</div>
+                <!-- vercel -->
+                <div style="position:absolute; right:8%; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; background:var(--coral); color:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700;">VC</div>
+                <!-- nodes -->
+                <div class="dot-node" style="left:42%; top:25%; width:34px; height:34px; background:#dff0eb; font-size:11px;">EM</div>
+                <div class="dot-node" style="left:42%; top:60%; width:30px; height:30px; background:#fbeec8; font-size:11px;">Ana</div>
+                <div class="dot-node" style="left:65%; top:65%; width:28px; height:28px; font-size:10px;">JS</div>
+                <div class="dot-node" style="left:42%; top:85%; width:24px; height:24px; font-size:10px;">DL</div>
+                <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                  <line x1="13%" y1="50%" x2="44%" y2="29%" stroke="var(--teal)" stroke-width="2.5"/>
+                  <line x1="44%" y1="29%" x2="87%" y2="50%" stroke="var(--teal)" stroke-width="2.5"/>
+                  <line x1="13%" y1="50%" x2="42%" y2="62%" stroke="#1a1817" stroke-dasharray="3 3"/>
+                  <line x1="42%" y1="62%" x2="67%" y2="67%" stroke="#1a1817" stroke-dasharray="3 3"/>
+                  <line x1="67%" y1="67%" x2="87%" y2="50%" stroke="#1a1817" stroke-dasharray="3 3"/>
+                  <line x1="13%" y1="50%" x2="42%" y2="87%" stroke="#c8c1b4" stroke-dasharray="2 4"/>
+                  <line x1="42%" y1="87%" x2="87%" y2="50%" stroke="#c8c1b4" stroke-dasharray="2 4"/>
+                </svg>
+                <div style="position:absolute; left:38%; top:8%;" class="sticky teal">Elena — 1-hop, warm</div>
+                <div style="position:absolute; left:46%; top:60%;" class="sticky">Ana → Juno — 2-hop</div>
+              </div>
+              <div class="row" style="gap:6px;"><span class="btn coral sm">Draft to Elena</span><span class="btn sm">Ask Ana</span><span class="btn ghost sm">Try cold to Devi</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 9. Settings -->
+      <div class="frame">
+        <div class="caption"><span class="num">09</span><span class="name">Settings · shape the territory</span><span class="note">filters, axes, sources</span></div>
+        <div class="body"><div class="mock">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/settings</span></div>
+          <div class="screen atlas-bg">
+            <div class="content" style="padding:14px 18px;">
+              <div class="row" style="gap:6px;"><span class="pill muted">Profile</span><span class="pill muted">LinkedIn</span><span class="pill muted">CV</span><span class="pill solid">Sources</span><span class="pill muted">Axes</span><span class="pill muted">Notify</span></div>
+              <div class="h-title">Where I scout</div>
+              <div class="row" style="gap:8px; flex-wrap:wrap;">
+                <div class="card teal"><div class="row"><span class="pill teal">Greenhouse</span><span class="h-mini" style="margin-left:auto;">42 cos</span></div></div>
+                <div class="card teal"><div class="row"><span class="pill teal">Ashby</span><span class="h-mini" style="margin-left:auto;">18 cos</span></div></div>
+                <div class="card teal"><div class="row"><span class="pill teal">Lever</span><span class="h-mini" style="margin-left:auto;">11 cos</span></div></div>
+                <div class="card teal"><div class="row"><span class="pill teal">LinkedIn Jobs</span><span class="h-mini" style="margin-left:auto;">live</span></div></div>
+                <div class="card"><div class="row"><span class="pill muted">+ paste careers page</span></div></div>
+              </div>
+              <div class="h-title" style="margin-top:6px;">Companies I track</div>
+              <div class="row" style="gap:4px; flex-wrap:wrap;">
+                <span class="pill">Vercel</span><span class="pill">Ramp</span><span class="pill">Notion</span><span class="pill">Linear</span><span class="pill">Figma</span><span class="pill">Anthropic</span><span class="pill muted">+ 22 more</span><span class="pill muted">+ add</span>
+              </div>
+              <div class="sticky" style="margin-top:auto;">Tip: the more axes you set up, the better I can map roles that are "adjacent" to where you are now.</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>LeadMe · wireframes v0.1 · 4 directions × 9 screens · for review</span>
+    <span>next: pick a direction, deepen the leads screen first</span>
+  </footer>
+</div>
+
+<script>
+  // tab control
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.tabpanel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.tab;
+      tabs.forEach(t => t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
+      panels.forEach(p => p.classList.toggle('active', p.id === id));
+      // persist
+      try { localStorage.setItem('leadme:tab', id); } catch(e) {}
+      // scroll to top of panel
+      window.scrollTo({ top: document.querySelector('.tabs').offsetTop - 8, behavior: 'smooth' });
+    });
+  });
+  // restore tab
+  try {
+    const saved = localStorage.getItem('leadme:tab');
+    if (saved) {
+      const tab = document.querySelector('.tab[data-tab="' + saved + '"]');
+      if (tab) tab.click();
+    }
+  } catch(e) {}
+</script>
+</body>
+</html>

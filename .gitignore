@@ -44,3 +44,4 @@ web/node_modules/
 career-dashboard
 cv.md
 .vercel
+.env*.local

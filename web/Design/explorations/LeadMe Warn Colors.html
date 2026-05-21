@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Warning colors exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@0,400..600;1,400..600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #ebe9e3;
+    --doc-ink: #14140f;
+    --doc-ink-2: #4a4a44;
+    --doc-ink-3: #87867f;
+    --doc-line: #cfcdc4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--page-bg);
+    color: var(--doc-ink);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc-page { max-width: 1480px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  .doc-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;
+    padding-bottom: 24px; border-bottom: 1px solid var(--doc-ink);
+    margin-bottom: 18px;
+  }
+  .doc-head h1 {
+    font-family: "Geist", sans-serif; font-weight: 600;
+    font-size: 52px; line-height: 1; margin: 0; letter-spacing: -1.6px;
+  }
+  .doc-head .sub {
+    max-width: 600px; color: var(--doc-ink-2);
+    font-size: 14.5px; line-height: 1.55;
+  }
+  .doc-head .meta {
+    display: inline-flex; gap: 10px; align-items: center;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--doc-ink-3); letter-spacing: 0.4px;
+    text-transform: uppercase; margin-top: 4px;
+  }
+
+  .context {
+    display: grid; grid-template-columns: 200px 1fr; gap: 24px;
+    padding: 18px 0 24px; border-bottom: 1px dashed var(--doc-line);
+    margin-bottom: 36px;
+  }
+  .context .label {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--doc-ink-3); letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .context .body {
+    font-size: 14.5px; line-height: 1.6; color: var(--doc-ink-2); max-width: 900px;
+  }
+  .context .body b { color: var(--doc-ink); font-weight: 600; }
+  .context .body ul { margin: 8px 0 0; padding-left: 18px; }
+  .context .body li { margin-bottom: 4px; }
+
+  /* Option row */
+  .opt {
+    margin-bottom: 28px;
+    background: white;
+    border: 1px solid var(--doc-ink);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .opt-head {
+    display: flex; gap: 20px; align-items: center;
+    padding: 16px 22px; border-bottom: 1px solid var(--doc-line);
+  }
+  .opt-head .num {
+    font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: 1px;
+    color: var(--doc-ink-3); text-transform: uppercase;
+  }
+  .opt-head h2 {
+    font-family: "Geist", sans-serif; font-weight: 600;
+    font-size: 26px; line-height: 1; margin: 4px 0 0; letter-spacing: -0.7px;
+  }
+  .opt-head .tag {
+    font-size: 13.5px; color: var(--doc-ink-2); line-height: 1.5;
+    max-width: 480px; margin-top: 6px;
+  }
+  .opt-head .swatches {
+    margin-left: auto; display: flex; gap: 10px; align-items: center;
+  }
+  .opt-head .sw {
+    display: flex; flex-direction: column; gap: 4px; align-items: center;
+  }
+  .opt-head .sw .chip {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(0,0,0,.08);
+  }
+  .opt-head .sw .nm {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--doc-ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .opt-head .sw .hex {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--doc-ink-2);
+  }
+
+  .opt-body {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--doc-line);
+  }
+  .pane { padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .pane.light { background: #ffffff; color: #0a1f24; }
+  .pane.dark  { background: #0a0e14; color: #f0f3f7; }
+  .pane .pane-label {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .pane.light .pane-label { color: #889399; }
+  .pane.dark .pane-label  { color: #6b7382; }
+
+  /* Verdict mini */
+  .verdict {
+    border: 1px solid var(--p-line);
+    border-radius: 10px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--p-surface);
+  }
+  .pane.light { --p-line: #e2e7e8; --p-surface: #ffffff; --p-ink: #0a1f24; --p-ink-2: #455258; --p-ink-3: #889399; --p-track: #edf1f1; --p-accent: #0d7c89; --p-accent-soft: #d6eef0; --p-accent-on: white; }
+  .pane.dark  { --p-line: #1d2630; --p-surface: #121821; --p-ink: #f0f3f7; --p-ink-2: #aab2c0; --p-ink-3: #6b7382; --p-track: #1d2630; --p-accent: #4ca8ff; --p-accent-soft: #142235; --p-accent-on: #0a0e14; }
+
+  .row { display: flex; align-items: center; gap: 12px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .ui  { font-family: "Albert Sans", sans-serif; color: var(--p-ink); }
+  .mono { font-family: "Geist Mono", monospace; letter-spacing: 0.4px; }
+
+  .score {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--p-accent); color: var(--p-accent-on);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans", sans-serif; font-weight: 700; font-size: 17px;
+    flex-shrink: 0;
+  }
+  .editorial-h {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 22px; line-height: 1.1; letter-spacing: -0.3px;
+    color: var(--p-ink); margin: 0;
+  }
+
+  /* salary */
+  .salary {
+    border: 1px solid var(--p-line); border-radius: 8px;
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .meter {
+    position: relative; height: 10px; border-radius: 5px;
+    background: var(--p-track);
+  }
+  .meter .band {
+    position: absolute; top: 0; height: 100%; border-radius: 5px;
+    background: var(--p-accent); opacity: .35;
+  }
+  .meter .pin {
+    position: absolute; top: -3px; width: 2px; height: 16px;
+    background: var(--w-flag);
+  }
+  .meter .pin::after {
+    content: ''; position: absolute; top: -3px; left: -3px;
+    width: 8px; height: 8px; background: var(--w-flag); border-radius: 50%;
+  }
+
+  /* pills */
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 500; font-size: 12px;
+    border: 1px solid var(--p-line); background: var(--p-surface);
+    color: var(--p-ink-2);
+  }
+  .pill.accent { background: var(--p-accent-soft); color: var(--p-accent); border-color: transparent; }
+  .pill.flag {
+    color: var(--w-flag); border-color: var(--w-flag);
+    background: var(--w-flag-soft, transparent);
+  }
+  .pill.flag.fill { background: var(--w-flag); color: var(--w-flag-on, white); border-color: transparent; }
+  .pill.warn {
+    color: var(--w-warn); border-color: var(--w-warn);
+    background: var(--w-warn-soft, transparent);
+  }
+  .pill.warn.fill { background: var(--w-warn); color: var(--w-warn-on, white); border-color: transparent; }
+
+  /* fit bars */
+  .fit-bar { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .fit-bar .label-bar { width: 70px; color: var(--p-ink-2); }
+  .fit-bar .track {
+    flex: 1; height: 6px; border-radius: 3px; background: var(--p-track);
+    position: relative; overflow: hidden;
+  }
+  .fit-bar .fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--p-accent); border-radius: 3px;
+  }
+  .fit-bar .fill.warn { background: var(--w-warn); }
+  .fit-bar .fill.flag { background: var(--w-flag); }
+  .fit-bar .grade {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--p-ink); width: 22px; text-align: right;
+  }
+
+  .footnote {
+    font-size: 12.5px; line-height: 1.5; color: var(--p-ink-3);
+    border-top: 1px dashed var(--p-line); padding-top: 10px;
+  }
+  .pane.dark .footnote { color: #6b7382; border-color: #1d2630; }
+
+  /* recommendation card at bottom */
+  .reco {
+    margin-top: 28px; padding: 22px 26px;
+    background: #14140f; color: #f5f3eb; border-radius: 10px;
+  }
+  .reco .lbl {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: #aaa6a0; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .reco h4 {
+    font-family: "Geist", sans-serif; font-weight: 600;
+    font-size: 22px; margin: 6px 0 12px; letter-spacing: -0.4px;
+  }
+  .reco p {
+    margin: 0; font-size: 14.5px; line-height: 1.6; color: #d8d3c8; max-width: 900px;
+  }
+  .reco p b { color: #f5f3eb; }
+</style>
+</head>
+<body>
+<div class="doc-page">
+
+  <header class="doc-head">
+    <div>
+      <h1>Warning colors.</h1>
+      <div class="meta">look &amp; feel · palette exploration · warn × flag pairs</div>
+    </div>
+    <div class="sub">
+      Locked palette: <b>Petrol</b> light + <b>Midnight</b> dark (toggleable). Open question — what color flags <em>"under market"</em>, <em>"stale 5d"</em>, <em>"level mismatch"</em>? Six options below, each rendered on both modes against the same Evaluate verdict.
+    </div>
+  </header>
+
+  <div class="context">
+    <div class="label">where these colors live</div>
+    <div class="body">
+      <b>Two signal levels</b>, distinct from the petrol accent (which is positive / neutral). They appear in three spots only:
+      <ul>
+        <li><b>Salary band pin</b> — when an offer falls below or above the user's band</li>
+        <li><b>Pill / chip</b> — "≈ 16% under market" · "stale 5d" · "level mismatch"</li>
+        <li><b>Fit-bar fill</b> — for the comp / level / domain dimensions that score poorly (D/F)</li>
+      </ul>
+      We're <em>not</em> recoloring whole cards or backgrounds. These are surgical accents, used on &lt; 5% of pixels.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 01 · EARTH & RUST (current baseline)                           -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#b8743b; --w-flag:#b53d2e;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 01 · current</div>
+        <h2>Earth &amp; Rust</h2>
+        <div class="tag">Brown-leaning warn, oxblood flag. Pulled toward earth tones to avoid <em>orange</em>. Reads sophisticated but possibly muddy on the petrol palette.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#b8743b;"></span><span class="nm">warn</span><span class="hex">#B8743B</span></div>
+        <div class="sw"><span class="chip" style="background:#b53d2e;"></span><span class="nm">flag</span><span class="hex">#B53D2E</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#b53d2e; --w-warn:#b8743b;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Earth-brown warn + oxblood flag. Distinguishable but quiet — the flag pill almost recedes against the band's pin.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e26755; --w-warn:#d4a14b;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">On dark, the gold warn and coral flag read warmer than on light — more like alert tones, less like dirt.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- 02 · QUIET · GREY & RED                                        -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#8a8f95; --w-flag:#c0392b;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 02</div>
+        <h2>Quiet — Grey &amp; Red</h2>
+        <div class="tag">Warn becomes a <em>neutral grey</em> — "this is suboptimal, not alarming." Flag is the only color signal. Two-tier hierarchy is preserved, but tonal noise drops dramatically.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#8a8f95;"></span><span class="nm">warn</span><span class="hex">#8A8F95</span></div>
+        <div class="sw"><span class="chip" style="background:#c0392b;"></span><span class="nm">flag</span><span class="hex">#C0392B</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#c0392b; --w-warn:#8a8f95;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Reduces the visual budget dramatically. Red is louder by relative isolation, not absolute saturation.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e26755; --w-warn:#6b7382;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">On dark the grey warn nearly disappears — perhaps too quiet to be useful. The red pulls more red, less coral.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- 03 · SINGLE SIGNAL · RED ONLY                                  -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#c0392b; --w-flag:#c0392b;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 03</div>
+        <h2>Single signal — Red only</h2>
+        <div class="tag">No warn / flag distinction. <em>Either it's a problem or it isn't.</em> Maximum restraint. Differentiates by intensity (filled vs outlined pill) instead of hue. The most opinionated option.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#c0392b;"></span><span class="nm">flag</span><span class="hex">#C0392B</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#c0392b; --w-warn:#c0392b;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag fill" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill" style="width:60%; opacity:.5;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Level (C+) drops to a faded petrol — it's <em>not great</em> but not a flag. Comp (D) is the only red. Filled pill emphasizes the warning.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e26755; --w-warn:#e26755;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag fill" style="--w-flag-on:#0a0e14; margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill" style="width:60%; opacity:.5;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Hierarchy comes from intensity, not color count. On dark, the coral-red filled pill almost glows.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- 04 · COOL & SHARP · STEEL-BLUE & DEEP RED                      -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#5b7390; --w-flag:#b8332a;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 04</div>
+        <h2>Cool &amp; Sharp — Steel-blue &amp; Deep Red</h2>
+        <div class="tag">Warn moves to a <em>cool desaturated blue-grey</em>. Stays inside the cool family with the petrol accent — no warm contamination anywhere. Flag is a deep, slightly cool red.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#5b7390;"></span><span class="nm">warn</span><span class="hex">#5B7390</span></div>
+        <div class="sw"><span class="chip" style="background:#b8332a;"></span><span class="nm">flag</span><span class="hex">#B8332A</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#b8332a; --w-warn:#5b7390;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Every UI color sits in the cool half of the wheel — petrol, steel, red. Reads disciplined. Risk: warn-blue could be confused with the petrol accent at a glance.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e26755; --w-warn:#7a8aa0;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Cool warm-shifted slightly to read on dark. The pin still oxblood-red. Tonally coherent across modes.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- 05 · CONVENTIONAL · AMBER & RED                                -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#d68910; --w-flag:#c0392b;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 05 · the safe call</div>
+        <h2>Conventional — Amber &amp; Red</h2>
+        <div class="tag">Standard finance-dashboard pair. Universally legible. <em>Brings orange back</em> — explicitly inside the family you said no to. Included as the comparison baseline.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#d68910;"></span><span class="nm">warn</span><span class="hex">#D68910</span></div>
+        <div class="sw"><span class="chip" style="background:#c0392b;"></span><span class="nm">flag</span><span class="hex">#C0392B</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#c0392b; --w-warn:#d68910;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Most legible at a glance — pre-trained association. But amber/red is what literally every bank dashboard does.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e26755; --w-warn:#f0b84c;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">Sings on dark — very Bloomberg-terminal. But it's also the most "generic dashboard" the doc has.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- 06 · MAGENTA & PINK                                            -->
+  <!-- ============================================================ -->
+  <section class="opt" style="--w-warn:#a8447a; --w-flag:#d11a51;">
+    <div class="opt-head">
+      <div>
+        <div class="num">OPTION 06 · wildcard</div>
+        <h2>Berry &amp; Pink</h2>
+        <div class="tag">A weirder pair: <em>plum-magenta</em> warn, <em>fuchsia-red</em> flag. Sidesteps orange entirely, sits opposite petrol on the wheel, reads modern-fintech (Linear-ish). Strong personality.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw"><span class="chip" style="background:#a8447a;"></span><span class="nm">warn</span><span class="hex">#A8447A</span></div>
+        <div class="sw"><span class="chip" style="background:#d11a51;"></span><span class="nm">flag</span><span class="hex">#D11A51</span></div>
+      </div>
+    </div>
+    <div class="opt-body">
+
+      <div class="pane light" style="--w-flag:#d11a51; --w-warn:#a8447a;">
+        <div class="pane-label">light · petrol</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">High personality. Risk: borderline purple — would need a "no, this is magenta" call to avoid violating the no-purples rule. Worth seeing once.</div>
+        </div>
+      </div>
+
+      <div class="pane dark" style="--w-flag:#e94572; --w-warn:#c878a8;">
+        <div class="pane-label">dark · midnight</div>
+        <div class="verdict">
+          <div class="row"><div class="score">82</div><div class="col"><div class="editorial-h">Stori · Head of Ops</div><span class="ui" style="font-size:12.5px; color:var(--p-ink-2);">CDMX · Series C · fintech</span></div></div>
+          <div class="salary">
+            <div class="row" style="font-size:13.5px;"><span class="ui" style="font-weight:600;">MXN $1.6M</span><span class="mono" style="color:var(--p-ink-3); font-size:11.5px;">their offer</span><span class="pill flag" style="margin-left:auto;">≈ 16% under market</span></div>
+            <div class="meter"><div class="band" style="left:35%; width:35%;"></div><div class="pin" style="left:22%;"></div></div>
+          </div>
+          <div class="col" style="gap:5px;">
+            <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width:88%;"></span></span><span class="grade">A</span></div>
+            <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill warn" style="width:60%;"></span></span><span class="grade">C+</span></div>
+            <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill flag" style="width:40%;"></span></span><span class="grade">D</span></div>
+          </div>
+          <div class="footnote">On dark, fuchsia loses its "is this purple?" ambiguity and reads firmly pink-red. Most distinctive option here.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="reco">
+    <div class="lbl">My read</div>
+    <h4>Option 03 (Red only) or Option 04 (Cool &amp; Sharp).</h4>
+    <p>
+      <b>Option 03 · Red only</b> is the most restrained, most product-confident answer. The product is candid; let one color do the work. Two-tier hierarchy comes from filled vs outlined intensity. <em>Most "Linear" of the bunch.</em> <br/>
+      <b>Option 04 · Cool &amp; Sharp</b> wins if you want every color in the system to live in the cool half of the wheel — it's the most disciplined option and reads grown-up across both modes. <br/>
+      I'd skip 01 (muddy on petrol), 05 (too generic), and 06 (purple-adjacent). 02 is a strong sleeper — quiet enough to almost qualify as "single-signal with a hint of dimmer warn."
+    </p>
+  </section>
+
+</div>
+</body>
+</html>

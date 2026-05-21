@@ -1,0 +1,1934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Mobile mockups v0.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS (same system)                                           */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-on:   #ffffff;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-on:   #0a0e14;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: #e4e7e7;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s;
+  }
+  body.theme-dark { background: #0a0c10; }
+  body.theme-dark { color: var(--ink); }
+
+  /* ============================================================ */
+  /* PAGE CHROME                                                    */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(228, 231, 231, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #c8d0d2;
+    padding: 14px 28px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  body.theme-dark .top {
+    background: rgba(10, 12, 16, 0.92);
+    border-color: #1d2630;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 24px; line-height: 1; letter-spacing: -0.6px;
+    color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 10px; font-family: "Geist Mono", monospace;
+    font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .mode-toggle {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 5px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .mode-toggle button {
+    border: 0; background: transparent;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .mode-toggle button.on { background: var(--ink); color: var(--bg); }
+
+  .stage { padding: 36px 28px 80px; }
+
+  .hero {
+    max-width: 880px;
+    margin: 0 auto 40px;
+    color: var(--ink);
+  }
+  body.theme-dark .hero { color: var(--ink); }
+  .hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 56px; line-height: 1; margin: 0; letter-spacing: -1.6px;
+  }
+  .hero h1 em { font-style: italic; }
+  .hero p {
+    font-family: "Albert Sans"; font-size: 16px; line-height: 1.6;
+    color: var(--ink-2); margin: 14px 0 0; max-width: 720px;
+  }
+  .hero p b { color: var(--ink); font-weight: 600; }
+
+  /* Phones rail */
+  .rail {
+    display: flex; gap: 36px;
+    overflow-x: auto;
+    padding: 4px 4px 40px;
+    scroll-snap-type: x mandatory;
+  }
+  .phone-wrap {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    display: flex; flex-direction: column;
+    gap: 16px; align-items: flex-start;
+    width: 410px;
+  }
+  .phone-label {
+    display: flex; align-items: baseline; gap: 10px; padding: 0 6px;
+  }
+  .phone-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface);
+  }
+  .phone-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 22px; line-height: 1; margin: 0; letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .phone-label h2 em { font-style: italic; }
+  .phone-label .tag {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-3);
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 390px; height: 844px;
+    background: #1a1a1a;
+    border-radius: 56px;
+    padding: 16px;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.25), 0 4px 12px -4px rgba(0,0,0,.15);
+    position: relative;
+    flex-shrink: 0;
+  }
+  body.theme-dark .phone { background: #0a0d12; box-shadow: 0 24px 60px -20px rgba(0,0,0,.6), 0 4px 12px -4px rgba(0,0,0,.4); }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    border-radius: 42px;
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  /* iOS notch */
+  .phone-screen::before {
+    content: ''; position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 30px;
+    background: #0a0a0a;
+    border-radius: 18px;
+    z-index: 10;
+  }
+  /* status bar */
+  .status-bar {
+    padding: 18px 28px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: -apple-system, "Albert Sans"; font-weight: 600;
+    font-size: 14px; color: var(--ink);
+    flex-shrink: 0;
+  }
+  .status-bar .right { display: flex; gap: 6px; align-items: center; }
+  .status-bar .signal {
+    display: inline-flex; gap: 2px; align-items: flex-end;
+  }
+  .status-bar .signal .bar {
+    width: 3px; background: var(--ink); border-radius: 0.5px;
+  }
+  .status-bar .battery {
+    width: 24px; height: 12px; border: 1.2px solid var(--ink); border-radius: 3px;
+    position: relative;
+  }
+  .status-bar .battery::after {
+    content: ''; position: absolute; right: -3px; top: 3px;
+    width: 1.5px; height: 6px; background: var(--ink); border-radius: 0 1px 1px 0;
+  }
+  .status-bar .battery .fill {
+    background: var(--ink); margin: 1.5px; height: calc(100% - 3px); width: 75%; border-radius: 1px;
+  }
+
+  /* Mobile top bar */
+  .mobile-top {
+    padding: 8px 20px 12px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .mobile-top .back {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: var(--canvas);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; color: var(--ink);
+    font-size: 18px;
+  }
+  .mobile-top .title {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 18px; line-height: 1; color: var(--ink);
+  }
+  .mobile-top .actions { margin-left: auto; display: flex; gap: 6px; }
+  .mobile-top .iconbtn {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: var(--canvas);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink); font-size: 14px; font-weight: 500;
+    font-family: "Albert Sans";
+  }
+
+  /* Content area */
+  .mobile-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px 20px 100px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  /* Bottom tab bar */
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 10px 12px 24px;
+    display: flex; justify-content: space-around; align-items: stretch;
+    z-index: 5;
+  }
+  .tabbar .tab {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    padding: 4px 0;
+    color: var(--ink-3);
+    font-family: "Albert Sans"; font-size: 10.5px; font-weight: 500;
+  }
+  .tabbar .tab .icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: transparent; border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tabbar .tab.active { color: var(--ink); }
+  .tabbar .tab.active .icon { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .tabbar .tab.cta {
+    background: var(--accent); color: var(--accent-on);
+    border-radius: 14px; padding: 6px 4px;
+    margin: -4px 0;
+  }
+  .tabbar .tab.cta .icon { display: none; }
+  .tabbar .tab.cta .label-x {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 11px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .tabbar .tab.cta .label-x::before { content: '✦'; font-size: 10px; }
+
+  /* ============================================================ */
+  /* PRIMITIVES (mobile-scaled)                                     */
+  /* ============================================================ */
+  .row { display: flex; align-items: center; gap: 10px; }
+  .col { display: flex; flex-direction: column; gap: 4px; }
+  .grow { flex: 1; min-width: 0; }
+  .mono { font-family: "Geist Mono", monospace; letter-spacing: 0.4px; }
+  .kicker {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .h-editorial {
+    font-family: "Fraunces", serif; font-weight: 400;
+    line-height: 1.1; letter-spacing: -0.4px; color: var(--ink); margin: 0;
+  }
+  .h-editorial em { font-style: italic; }
+  body.theme-dark .h-editorial em { color: #c8cfd9; }
+  .body-copy {
+    font-family: "Albert Sans"; font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
+  }
+  body.theme-dark .body-copy { font-weight: 450; }
+  .body-copy b { color: var(--ink); font-weight: 600; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card.tight { padding: 12px 14px; gap: 8px; }
+  .card.canvas { background: var(--canvas); }
+  .card.accent { background: var(--accent-soft); border-color: transparent; }
+  .card.signal { background: var(--signal-soft); border-color: var(--signal); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2);
+  }
+  .pill.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .pill.signal { background: var(--signal); color: var(--signal-on); border-color: transparent; }
+  .pill.signal-soft { color: var(--signal); border-color: var(--signal); background: transparent; }
+  .pill.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 11px 18px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    cursor: pointer; width: 100%;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+  .btn.sm { padding: 7px 12px; font-size: 12px; width: auto; }
+  .btn.row-act { width: auto; padding: 9px 14px; font-size: 13px; }
+
+  .avatar-co {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 12px;
+    flex-shrink: 0;
+  }
+  .avatar-co.sm { width: 32px; height: 32px; font-size: 11px; border-radius: 9px; }
+  .score {
+    min-width: 48px; height: 48px; padding: 0 8px; border-radius: 12px;
+    background: var(--accent); color: var(--accent-on);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 700; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .score.sm { min-width: 36px; height: 36px; font-size: 14px; border-radius: 9px; }
+  .score.flag { background: var(--signal); color: var(--signal-on); }
+  .score.muted { background: var(--canvas); color: var(--ink-2); }
+
+  .salary {
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; background: var(--canvas);
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .meter {
+    position: relative; height: 8px; border-radius: 4px;
+    background: var(--track);
+  }
+  .meter .band {
+    position: absolute; top: 0; height: 100%; border-radius: 4px;
+    background: var(--accent); opacity: .35;
+  }
+  .meter .pin {
+    position: absolute; top: -2px; width: 2px; height: 12px;
+    background: var(--signal);
+  }
+  .meter .pin::after {
+    content: ''; position: absolute; top: -3px; left: -3px;
+    width: 8px; height: 8px; background: var(--signal); border-radius: 50%;
+  }
+
+  .fits { display: flex; flex-direction: column; gap: 6px; }
+  .fit-bar { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .fit-bar .label-bar {
+    width: 56px; font-family: "Geist Mono"; font-size: 9.5px;
+    color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .fit-bar .track {
+    flex: 1; height: 5px; border-radius: 3px; background: var(--track);
+    position: relative; overflow: hidden;
+  }
+  .fit-bar .fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--accent); border-radius: 3px;
+  }
+  .fit-bar .fill.soft { background: var(--accent); opacity: .55; }
+  .fit-bar .fill.signal { background: var(--signal); }
+  .fit-bar .grade {
+    font-family: "Geist Mono"; font-size: 10px;
+    color: var(--ink); width: 18px; text-align: right;
+  }
+
+  .editor-note {
+    background: var(--accent-soft); border-radius: 12px;
+    padding: 14px 16px; position: relative; margin-top: 8px;
+  }
+  body.theme-dark .editor-note { background: #16283a; }
+  .editor-note::before {
+    content: "Editor's note";
+    position: absolute; top: -8px; left: 14px;
+    font-family: "Geist Mono"; font-size: 9px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--accent);
+    background: var(--bg); padding: 2px 8px; border-radius: 999px;
+  }
+  .editor-note p {
+    font-family: "Fraunces", serif; font-size: 14px; line-height: 1.45;
+    color: var(--ink); margin: 0;
+  }
+  .editor-note p em { font-style: italic; }
+
+  .seg-toggle {
+    display: inline-flex; background: var(--canvas);
+    border-radius: 999px; padding: 3px; gap: 2px;
+    border: 1px solid var(--line);
+  }
+  .seg-toggle .seg {
+    padding: 5px 11px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+    color: var(--ink-3);
+  }
+  .seg-toggle .seg.on { background: var(--ink); color: var(--bg); }
+
+  /* Status dot */
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ink-3); display: inline-block;
+  }
+  .status-dot.applied { background: var(--signal); }
+  .status-dot.interview { background: var(--accent); }
+  .status-dot.offer { background: var(--ink); }
+  .status-dot.draft { background: var(--ink-3); }
+
+  /* Discover pick (mobile) */
+  .pick-mobile { padding: 16px; gap: 12px; }
+  .pick-mobile .head {
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .pick-mobile .head .meta { flex: 1; min-width: 0; }
+  .pick-mobile .title-row {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 20px; line-height: 1.15; letter-spacing: -0.3px;
+    color: var(--ink); margin-bottom: 4px;
+  }
+  .pick-mobile .title-row em { font-style: italic; }
+  .pick-mobile .role-row {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+    color: var(--ink); margin-bottom: 2px;
+  }
+  .pick-mobile .sub-row {
+    font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2);
+  }
+  .pick-mobile .actions { display: flex; gap: 8px; }
+
+  /* Home stats grid */
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-card.signal { background: var(--signal-soft); border-color: var(--signal); }
+  .stat-card .stat-label {
+    font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .stat-card .stat-num {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 26px; line-height: 1; color: var(--ink); letter-spacing: -0.4px;
+  }
+  .stat-card .stat-num em { font-style: italic; font-size: 22px; }
+  .stat-card .stat-sub {
+    font-family: "Albert Sans"; font-size: 11px; color: var(--ink-2);
+  }
+  .stat-card.signal .stat-num { color: var(--signal); }
+  .stat-card.signal .stat-label { color: var(--signal); }
+
+  /* Territory map mini */
+  .territory-mini {
+    position: relative; height: 220px;
+    background: var(--canvas); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .territory-mini svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .territory-mini .node {
+    position: absolute; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; line-height: 1;
+    background: var(--surface); border: 1px solid var(--line);
+    font-family: "Albert Sans"; font-weight: 600; font-size: 9.5px;
+    color: var(--ink); text-align: center;
+  }
+  .territory-mini .node.strong { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .territory-mini .node.you {
+    background: var(--ink); color: var(--bg); border: 2px solid var(--ink);
+    width: 48px; height: 48px; font-size: 11px;
+  }
+  .territory-mini .node-score { font-family: "Geist Mono"; font-size: 9px; opacity: .85; margin-top: 1px; }
+
+  /* Tracker rows (mobile = card list) */
+  .tracker-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .tracker-card .top-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tracker-card .role-text {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink);
+    line-height: 1.2; flex: 1; min-width: 0;
+  }
+  .tracker-card .role-text b { font-weight: 600; }
+  .tracker-card .role-text span { color: var(--ink-2); display: block; font-size: 12px; margin-top: 1px; }
+  .tracker-card .status {
+    display: flex; align-items: center; gap: 6px;
+    font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2);
+  }
+  .tracker-card .footer-row {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 6px; border-top: 1px dashed var(--line);
+    font-size: 11px;
+  }
+
+  /* Evaluate (interactive) mobile */
+  .ev-input {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ev-textarea {
+    border: 1px dashed var(--line); border-radius: 10px;
+    background: var(--canvas); padding: 12px 14px;
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.5;
+    color: var(--ink-2); resize: none;
+    width: 100%; min-height: 120px;
+    transition: border-color .2s;
+  }
+  .ev-textarea.filled { background: var(--surface); border-style: solid; color: var(--ink); border-color: var(--line); }
+  .ev-extract-pills { display: flex; gap: 6px; flex-wrap: wrap; min-height: 22px; }
+  .ev-extract-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 11px;
+    background: var(--accent-soft); color: var(--accent);
+    opacity: 0; transform: translateY(2px);
+    transition: all .25s ease;
+  }
+  .ev-extract-pill.show { opacity: 1; transform: translateY(0); }
+  .ev-extract-pill.signal { background: var(--signal-soft); color: var(--signal); }
+  .ev-extract-pill::before { content: '✓'; }
+
+  /* Auto-detect indicator */
+  .ev-detected {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 4px 11px 4px 9px; border-radius: 999px;
+    background: var(--canvas); border: 1px solid var(--line);
+    font-family: "Albert Sans", sans-serif; font-size: 11.5px;
+    color: var(--ink-3); font-weight: 500;
+    transition: background .2s, color .2s, border-color .2s;
+  }
+  .ev-detected .glyph-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-3);
+    transition: background .2s;
+  }
+  .ev-detected .label { color: var(--ink-3); }
+  .ev-detected b { color: var(--ink); font-weight: 600; }
+  .ev-detected.on {
+    background: var(--accent-soft); border-color: transparent; color: var(--accent);
+  }
+  .ev-detected.on .glyph-dot { background: var(--accent); }
+  .ev-detected.on .label { color: var(--accent); }
+  .ev-detected.on b { color: var(--accent); }
+
+  .ev-empty {
+    background: var(--canvas); border: 1px dashed var(--line);
+    border-radius: 14px; padding: 32px 20px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; text-align: center;
+  }
+  .ev-empty .glyph {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--surface); border: 1px dashed var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif; font-style: italic;
+    font-size: 22px; color: var(--ink-3);
+  }
+  .ev-empty p {
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.55;
+    color: var(--ink-3); margin: 0;
+  }
+  .ev-empty p b { color: var(--ink); font-weight: 600; }
+
+  .ev-processing {
+    display: none; flex-direction: column; gap: 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px;
+  }
+  .ev-processing.show { display: flex; }
+  .proc-row {
+    display: flex; gap: 8px; align-items: center;
+    opacity: 0; transform: translateX(-4px);
+    transition: all .3s ease;
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-2);
+  }
+  .proc-row.show { opacity: 1; transform: translateX(0); }
+  .proc-row .check {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-on);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; flex-shrink: 0;
+  }
+  .proc-row .spin {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    animation: spin .8s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ev-verdict { display: none; flex-direction: column; gap: 12px; }
+  .ev-verdict.show { display: flex; animation: fadein .35s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Onboarding mobile */
+  .ob-progress { display: flex; gap: 5px; }
+  .ob-progress .seg {
+    flex: 1; height: 3px; border-radius: 2px; background: var(--track);
+  }
+  .ob-progress .seg.done, .ob-progress .seg.now { background: var(--accent); }
+
+  /* Footer info */
+  .info-strip {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 32px 4px;
+    border-top: 1px solid #c8d0d2;
+    margin-top: 24px;
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    line-height: 1.55;
+  }
+  body.theme-dark .info-strip { border-color: #1d2630; }
+  .info-strip .label-x {
+    font-family: "Geist Mono"; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--ink-3);
+    flex-shrink: 0; width: 160px;
+  }
+  .info-strip .body-x { flex: 1; max-width: 720px; }
+  .info-strip .body-x b { color: var(--ink); font-weight: 600; }
+
+  /* Report-specific (mobile) */
+  .report-meta {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+    font-size: 11px;
+  }
+  .report-meta .k {
+    font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 2px;
+  }
+  .report-meta .v {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink); font-weight: 500;
+  }
+  .report-meta .v.mono { font-family: "Geist Mono"; font-size: 11.5px; letter-spacing: 0.3px; }
+
+  .report-header {
+    position: sticky; top: 0; z-index: 6;
+    background: var(--bg);
+    padding: 10px 20px 12px;
+    margin: -16px -20px 4px; /* eat the body padding */
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .report-header .meta-row {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;
+  }
+  .report-header .co {
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.1;
+  }
+  .report-header .meta-sub {
+    font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: 0.6px; color: var(--ink-3); text-transform: uppercase;
+  }
+
+  .toc-pill-row {
+    display: flex; gap: 6px; overflow-x: auto;
+    padding: 4px 0;
+    margin: 0 -20px 4px; padding-left: 20px; padding-right: 20px;
+  }
+  .toc-pill {
+    flex-shrink: 0;
+    padding: 5px 11px; border-radius: 999px;
+    font-family: "Geist Mono"; font-size: 9.5px; letter-spacing: 0.6px;
+    text-transform: uppercase;
+    background: var(--canvas); color: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+  .toc-pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .quote-pull {
+    border-left: 2px solid var(--accent);
+    padding: 6px 0 6px 14px;
+    font-family: "Fraunces", serif; font-style: italic;
+    font-size: 17px; line-height: 1.35; color: var(--ink);
+    letter-spacing: -0.2px;
+  }
+  body.theme-dark .quote-pull { border-left-color: var(--accent); }
+
+  .gap-list { display: flex; flex-direction: column; gap: 8px; }
+  .gap-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.45; color: var(--ink-2);
+  }
+  .gap-item .marker {
+    flex-shrink: 0; margin-top: 5px;
+    font-family: "Geist Mono"; font-size: 10px;
+    width: 24px; color: var(--ink-3);
+    letter-spacing: 0.4px;
+  }
+  .gap-item.plus .marker { color: var(--accent); }
+  .gap-item.minus .marker { color: var(--signal); }
+  .gap-item b { color: var(--ink); font-weight: 600; }
+
+  .disagree-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 12px;
+    background: var(--canvas); border: 1px dashed var(--line);
+    font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2);
+  }
+  .disagree-bar .lnk {
+    margin-left: auto; color: var(--accent); font-weight: 600;
+  }
+
+  /* Mode picker (onboarding) */
+  .mode-card {
+    background: var(--surface); border: 1.5px solid var(--line);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+    transition: border-color .15s, background .15s;
+  }
+  .mode-card.on {
+    border-color: var(--ink);
+    background: var(--surface);
+  }
+  .mode-card.on .glyph-mode {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .mode-card .glyph-mode {
+    width: 32px; height: 32px; border-radius: 10px;
+    border: 1.5px solid var(--ink-3); color: var(--ink-3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif; font-style: italic;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .mode-card .mode-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .mode-card .mode-head {
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .mode-card .mode-title {
+    font-family: "Fraunces", serif; font-weight: 500; font-size: 18px;
+    color: var(--ink); letter-spacing: -0.3px; line-height: 1;
+  }
+  .mode-card .mode-tag {
+    font-family: "Geist Mono"; font-size: 9px; letter-spacing: 0.8px;
+    color: var(--ink-3); text-transform: uppercase;
+  }
+  .mode-card .mode-copy {
+    font-family: "Albert Sans"; font-size: 12.5px; line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .mode-card .mode-copy b { color: var(--ink); font-weight: 600; }
+  .mode-card .checkmark {
+    width: 22px; height: 22px; border-radius: 999px;
+    border: 1.5px solid var(--line);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: transparent;
+  }
+  .mode-card.on .checkmark {
+    background: var(--ink); border-color: var(--ink); color: var(--bg); font-weight: 700;
+  }
+
+  /* scrollbar styling on rail */
+  .rail::-webkit-scrollbar { height: 8px; }
+  .rail::-webkit-scrollbar-thumb { background: #c8d0d2; border-radius: 4px; }
+  body.theme-dark .rail::-webkit-scrollbar-thumb { background: #2a3543; }
+</style>
+</head>
+<body class="theme-light">
+
+  <div class="top">
+    <div class="brand">leadme<span class="dot">.</span><span class="system">Mobile</span></div>
+    <div class="spacer"></div>
+    <div class="mode-toggle">
+      <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+      <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="hero">
+      <h1>Mobile, <em>same system</em>.</h1>
+      <p>Eight screens. iPhone-sized. The desktop hi-fi translated to a thumb-first surface. Sidebar becomes a bottom tab bar; tracker rows become card list; the read-heavy report gets a sticky header + TOC pills; the mode pick gets its own page; Spanish ships at parity. <b>The 10 rules don't change.</b></p>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- RAIL                                                           -->
+    <!-- ============================================================ -->
+    <div class="rail">
+
+      <!-- ============================================================ -->
+      <!-- 01 · DISCOVER                                                  -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">01 · core</span>
+          <h2>Discover</h2>
+          <span class="tag">— today's brief</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back" style="font-family: 'Fraunces'; font-style: italic; font-size: 18px;">L<span style="color: var(--accent);">.</span></div>
+              <div class="title">Discover</div>
+              <div class="actions">
+                <div class="iconbtn">⌕</div>
+                <div class="iconbtn">⋯</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <div class="kicker">Issue №14 · Thu May 14 · CDMX</div>
+              <h1 class="h-editorial" style="font-size: 32px; margin-top: -2px;">Today's <em>brief</em>.</h1>
+
+              <div class="seg-toggle" style="align-self: flex-start;">
+                <div class="seg">Need</div>
+                <div class="seg on">Leverage</div>
+                <div class="seg">Open</div>
+              </div>
+
+              <div class="editor-note">
+                <p>Tight slate today. <b style="font-weight: 500;">Kavak</b> just opened a Director of Ops seat that matches your Clip scope <em>line-for-line</em>. I quieted 18 listings.</p>
+              </div>
+
+              <!-- Pick 1 -->
+              <div class="card pick-mobile">
+                <div class="head">
+                  <div class="avatar-co">KV</div>
+                  <div class="meta">
+                    <div class="kicker">№ 1 · Strong fit · 2d</div>
+                    <div class="title-row">Kavak opened <em>your seat</em>.</div>
+                  </div>
+                  <div class="score">91</div>
+                </div>
+                <div class="role-row">Director of Operations</div>
+                <div class="sub-row">CDMX · Hybrid · Mobility / fintech</div>
+
+                <div class="salary">
+                  <div class="row" style="font-size: 12px;">
+                    <span style="font-weight: 600;">USD $115–145k</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 9.5px;">EST</span>
+                    <span class="pill accent" style="margin-left: auto;">in band</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 38%; width: 32%;"></div>
+                    <div class="pin" style="left: 52%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 10px;">
+                    <span class="mono" style="color: var(--ink-3);">FLOOR $95K</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH</span>
+                  </div>
+                </div>
+
+                <p class="body-copy" style="font-size: 13px; margin: 0;">Matches your Clip role line-for-line. <b>Susana M.</b> (ex-Cornershop, 4 mutuals) is hiring mgr.</p>
+
+                <div class="actions">
+                  <button class="btn primary">Tailor &amp; apply</button>
+                  <button class="btn row-act">Evaluate</button>
+                </div>
+              </div>
+
+              <!-- Pick 2 (compact) -->
+              <div class="card pick-mobile">
+                <div class="head">
+                  <div class="avatar-co">VT</div>
+                  <div class="meta">
+                    <div class="kicker">№ 2 · Regional play · 6h</div>
+                    <div class="role-row" style="font-family: 'Albert Sans'; font-size: 15px; font-weight: 600;">Head of LatAm Operations</div>
+                    <div class="sub-row">VTEX · SP or CDMX · Hybrid</div>
+                  </div>
+                  <div class="score">85</div>
+                </div>
+                <div class="salary">
+                  <div class="row" style="font-size: 12px;">
+                    <span style="font-weight: 600;">USD $130–170k</span>
+                    <span class="pill accent" style="margin-left: auto;">above floor</span>
+                  </div>
+                  <div class="meter"><div class="band" style="left: 45%; width: 30%;"></div></div>
+                </div>
+              </div>
+
+              <!-- Pick 3 (compact) -->
+              <div class="card pick-mobile">
+                <div class="head">
+                  <div class="avatar-co">PL</div>
+                  <div class="meta">
+                    <div class="kicker">№ 3 · Remote-first global · 3d</div>
+                    <div class="role-row" style="font-family: 'Albert Sans'; font-size: 15px; font-weight: 600;">Sr Director, LatAm Operations</div>
+                    <div class="sub-row">Plaid · Remote · Fintech infra</div>
+                  </div>
+                  <div class="score">87</div>
+                </div>
+                <div class="row" style="font-size: 12px; flex-wrap: wrap;">
+                  <span style="font-weight: 600;">USD $145–185k</span>
+                  <span class="pill signal-soft" style="margin-left: auto;">above your band</span>
+                </div>
+              </div>
+
+              <div class="row" style="justify-content: center; padding: 12px 0;">
+                <span class="kicker">2 more picks · 18 muted ↓</span>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab active"><div class="icon"></div>Discover</div>
+              <div class="tab"><div class="icon"></div>Home</div>
+              <div class="tab cta"><div class="label-x">Evaluate</div></div>
+              <div class="tab"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>More</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 02 · HOME                                                      -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">02 · home</span>
+          <h2>Home</h2>
+          <span class="tag">— stats + focus + territory</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back" style="font-family: 'Fraunces'; font-style: italic; font-size: 18px;">L<span style="color: var(--accent);">.</span></div>
+              <div class="title">Home</div>
+              <div class="actions">
+                <div class="iconbtn" style="background: var(--ink); color: var(--bg); font-weight: 600; font-family: 'Fraunces'; font-style: italic;">NL</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <div class="kicker">Tuesday May 14 · Issue №14</div>
+              <h1 class="h-editorial" style="font-size: 28px;">Good morning, <em>Nacho</em>.</h1>
+
+              <div class="stats-grid" style="margin-top: 4px;">
+                <div class="stat-card">
+                  <span class="stat-label">Today's brief</span>
+                  <span class="stat-num">7 <em>picks</em></span>
+                  <span class="stat-sub" style="color: var(--accent);">3 strong fit</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">In pipeline</span>
+                  <span class="stat-num">8</span>
+                  <span class="stat-sub">1 stale</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Interviews this wk</span>
+                  <span class="stat-num">2</span>
+                  <span class="stat-sub">Tue · Fri</span>
+                </div>
+                <div class="stat-card signal">
+                  <span class="stat-label">★ Inbound</span>
+                  <span class="stat-num" style="font-size: 18px;">Stori DM</span>
+                  <span class="stat-sub" style="color: var(--signal);">-16% market</span>
+                </div>
+              </div>
+
+              <div class="card accent" style="margin-top: 4px;">
+                <div class="kicker" style="color: var(--accent);">Today's focus · 12 min</div>
+                <div class="row" style="font-size: 13px;">
+                  <span class="score sm" style="background: var(--accent); color: var(--accent-on); width: 22px; height: 22px; min-width: 22px; font-size: 11px; border-radius: 999px;">1</span>
+                  <span style="flex: 1;">Reply to <b style="font-weight: 600;">Rita @ Stori</b></span>
+                  <button class="btn primary sm row-act" style="padding: 5px 12px;">Open</button>
+                </div>
+                <div class="row" style="font-size: 13px;">
+                  <span class="score sm" style="background: var(--accent); color: var(--accent-on); width: 22px; height: 22px; min-width: 22px; font-size: 11px; border-radius: 999px;">2</span>
+                  <span style="flex: 1;">Tailor CV for <b style="font-weight: 600;">Kavak</b></span>
+                  <button class="btn sm row-act" style="padding: 5px 12px;">Open</button>
+                </div>
+                <div class="row" style="font-size: 13px;">
+                  <span class="score sm" style="background: var(--accent); color: var(--accent-on); width: 22px; height: 22px; min-width: 22px; font-size: 11px; border-radius: 999px;">3</span>
+                  <span style="flex: 1;">Prep for <b style="font-weight: 600;">Plaid Tue 10am</b></span>
+                  <button class="btn sm row-act" style="padding: 5px 12px;">Open</button>
+                </div>
+              </div>
+
+              <div class="kicker" style="margin-top: 6px;">Your territory · MX fintech ops</div>
+              <div class="territory-mini">
+                <svg>
+                  <circle cx="50%" cy="50%" r="60" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>
+                  <circle cx="50%" cy="50%" r="95" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>
+                </svg>
+                <div class="node you" style="left: calc(50% - 24px); top: calc(50% - 24px);">you</div>
+                <div class="node strong" style="left: 22%; top: 18%; width: 44px; height: 44px;">Kavak<div class="node-score">91</div></div>
+                <div class="node strong" style="left: 64%; top: 14%; width: 40px; height: 40px;">Plaid<div class="node-score">87</div></div>
+                <div class="node" style="left: 76%; top: 50%; width: 38px; height: 38px;">VTEX<div class="node-score">85</div></div>
+                <div class="node" style="left: 18%; top: 68%; width: 34px; height: 34px;">Stori<div class="node-score">82</div></div>
+                <div class="node" style="left: 68%; top: 78%; width: 30px; height: 30px;">Bitso<div class="node-score">74</div></div>
+              </div>
+
+              <div class="card">
+                <div class="row" style="justify-content: space-between; align-items: baseline;">
+                  <span class="kicker">★ Your market</span>
+                  <span class="pill accent">Director · MX</span>
+                </div>
+                <div class="salary">
+                  <div class="row" style="font-size: 12.5px;">
+                    <span style="font-weight: 600;">MXN $1.9–2.4M</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 9.5px;">MEDIAN</span>
+                  </div>
+                  <div class="meter"><div class="band" style="left: 30%; width: 35%;"></div></div>
+                </div>
+                <div class="body-copy" style="font-size: 12px;">Bands moved <b>+6% YoY</b>.</div>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><div class="icon"></div>Discover</div>
+              <div class="tab active"><div class="icon"></div>Home</div>
+              <div class="tab cta"><div class="label-x">Evaluate</div></div>
+              <div class="tab"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>More</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 03 · TRACKER                                                   -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">03 · tracker</span>
+          <h2>Tracker</h2>
+          <span class="tag">— pipeline as card list</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back">←</div>
+              <div class="title">Tracker</div>
+              <div class="actions">
+                <div class="iconbtn">⌕</div>
+                <div class="iconbtn">+</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <h1 class="h-editorial" style="font-size: 26px;">Pipeline · <em>8 active</em>.</h1>
+
+              <div style="display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; margin: 0 -20px; padding-left: 20px; padding-right: 20px;">
+                <span class="pill solid" style="white-space: nowrap;">All · 8</span>
+                <span class="pill" style="white-space: nowrap;">Assessing · 2</span>
+                <span class="pill" style="white-space: nowrap;">Applied · 3</span>
+                <span class="pill" style="white-space: nowrap;">Interview · 2</span>
+                <span class="pill" style="white-space: nowrap;">Offer · 1</span>
+              </div>
+
+              <div class="tracker-card">
+                <div class="top-row">
+                  <div class="score sm">91</div>
+                  <div class="role-text"><b>Kavak</b><span>Director of Operations</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot draft"></span>Drafting CV</span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); margin-left: auto; text-transform: uppercase; letter-spacing: 0.5px;">$115–145K</span>
+                </div>
+              </div>
+
+              <div class="tracker-card">
+                <div class="top-row">
+                  <div class="score sm flag">82</div>
+                  <div class="role-text"><b>Stori</b><span>Head of Operations</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot draft"></span>Assessing · <span style="color: var(--signal); font-weight: 600;">reply drafted</span></span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); margin-left: auto;">$1.6M MXN</span>
+                </div>
+              </div>
+
+              <div class="tracker-card">
+                <div class="top-row">
+                  <div class="score sm">87</div>
+                  <div class="role-text"><b>Plaid</b><span>Sr Director, LatAm Ops</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot interview"></span>Call Tue 10am</span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); margin-left: auto;">$145–185K</span>
+                </div>
+              </div>
+
+              <div class="tracker-card">
+                <div class="top-row">
+                  <div class="score sm">85</div>
+                  <div class="role-text"><b>VTEX</b><span>Head of LatAm Ops</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot interview"></span>Onsite Fri (remote)</span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); margin-left: auto;">$130–170K</span>
+                </div>
+              </div>
+
+              <div class="tracker-card">
+                <div class="top-row">
+                  <div class="score sm muted">78</div>
+                  <div class="role-text"><b>Konfío</b><span>Head of Risk Ops</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot applied"></span>Applied · <span style="color: var(--signal);">stale 7d</span></span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); margin-left: auto;">$110–140K</span>
+                </div>
+              </div>
+
+              <div class="tracker-card" style="border-color: var(--ink);">
+                <div class="top-row">
+                  <div class="score sm muted">74</div>
+                  <div class="role-text"><b>Bitso</b><span>Director, Strategy &amp; Ops</span></div>
+                </div>
+                <div class="footer-row">
+                  <span class="status"><span class="status-dot offer"></span>Verbal offer</span>
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink); margin-left: auto; font-weight: 600;">$2.2M MXN</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><div class="icon"></div>Discover</div>
+              <div class="tab"><div class="icon"></div>Home</div>
+              <div class="tab cta"><div class="label-x">Evaluate</div></div>
+              <div class="tab active"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>More</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 04 · EVALUATE — INTERACTIVE                                    -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">04 · core · interactive</span>
+          <h2>Evaluate</h2>
+          <span class="tag">— paste sample DM, watch it work</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back">←</div>
+              <div class="title">Evaluate</div>
+              <div class="actions">
+                <div class="iconbtn">⋯</div>
+              </div>
+            </div>
+
+              <div class="mobile-body">
+                <div class="kicker">★ The aha moment</div>
+                <h1 class="h-editorial" style="font-size: 28px;">Got a lead? <em>Paste it.</em></h1>
+                <p class="body-copy" style="font-size: 13px; margin: -2px 0 0;">A DM, a URL, or the JD itself. <b>I'll figure out which.</b></p>
+
+              <div class="ev-input">
+                <div class="row" style="justify-content: space-between; align-items: center;">
+                  <span class="ev-detected" id="m-ev-detected">
+                    <span class="glyph-dot"></span>
+                    <span class="label">I'll detect what this is.</span>
+                  </span>
+                  <span class="mono" id="m-ev-charcount" style="font-size: 9.5px; color: var(--ink-3);">0 chars</span>
+                </div>
+                <textarea id="m-ev-input" class="ev-textarea" placeholder="Paste anything related to the role. I'll figure out what kind it is."></textarea>
+                <div class="ev-extract-pills">
+                  <span class="ev-extract-pill" id="m-ext-co">Stori</span>
+                  <span class="ev-extract-pill" id="m-ext-role">Head of Ops</span>
+                  <span class="ev-extract-pill" id="m-ext-loc">CDMX</span>
+                  <span class="ev-extract-pill signal" id="m-ext-comp">$1.6M MXN</span>
+                </div>
+                <button class="btn ghost sm row-act" onclick="m_pasteSample()" style="font-size: 12px;">↘ Paste sample DM</button>
+                <button class="btn primary" id="m-ev-go" onclick="m_runEvaluate()" disabled style="opacity: .5;">Evaluate →</button>
+              </div>
+
+              <!-- Empty state -->
+              <div class="ev-empty" id="m-ev-empty">
+                <div class="glyph">e</div>
+                <p><b>In about a minute</b><br/>you'll know if it's worth your time and what to say back.</p>
+              </div>
+
+              <!-- Processing -->
+              <div class="ev-processing" id="m-ev-processing">
+                <span class="kicker">Reading…</span>
+                <div class="proc-row" id="m-proc-1"><div class="check">✓</div><span>Parsed · <b>Stori · Head of Ops · MXN $1.6M</b></span></div>
+                <div class="proc-row" id="m-proc-2"><div class="check">✓</div><span>Pulled context · Series C · fintech / lending</span></div>
+                <div class="proc-row" id="m-proc-3"><div class="check">✓</div><span>Cross-referenced 4 LatAm comparables</span></div>
+                <div class="proc-row" id="m-proc-4"><div class="check">✓</div><span>Scored fit · 10 dimensions</span></div>
+                <div class="proc-row" id="m-proc-5"><div class="spin"></div><span>Drafting reply in your voice…</span></div>
+              </div>
+
+              <!-- Verdict -->
+              <div class="ev-verdict" id="m-ev-verdict">
+                <div class="card">
+                  <div class="row">
+                    <div class="score flag">82</div>
+                    <div class="col" style="flex: 1; gap: 2px;">
+                      <span class="kicker">Verdict</span>
+                      <span class="h-editorial" style="font-size: 18px;">Worth your time — <em>with caveats</em>.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card signal tight">
+                  <div class="row" style="justify-content: space-between;">
+                    <span class="kicker" style="color: var(--signal);">★ Salary check</span>
+                    <span class="pill signal">-16% market</span>
+                  </div>
+                  <div class="salary" style="background: var(--surface);">
+                    <div class="row" style="font-size: 12.5px;">
+                      <span style="font-weight: 600;">MXN $1.6M</span>
+                      <span class="mono" style="margin-left: auto; color: var(--ink-3); font-size: 9.5px;">MARKET $1.9–2.4M</span>
+                    </div>
+                    <div class="meter">
+                      <div class="band" style="left: 35%; width: 35%;"></div>
+                      <div class="pin" style="left: 22%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card tight">
+                  <span class="kicker">Fit · A–F</span>
+                  <div class="fits">
+                    <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width: 88%;"></span></span><span class="grade">A</span></div>
+                    <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width: 90%;"></span></span><span class="grade">A</span></div>
+                    <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width: 60%;"></span></span><span class="grade">C+</span></div>
+                    <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill signal" style="width: 40%;"></span></span><span class="grade">D</span></div>
+                  </div>
+                </div>
+
+                <div class="card accent tight">
+                  <span class="kicker" style="color: var(--accent);">✦ Draft reply</span>
+                  <div style="font-family: 'Albert Sans'; font-size: 12.5px; line-height: 1.55; color: var(--ink); background: var(--surface); padding: 10px 12px; border-radius: 8px;">
+                    Hi Rita — thanks for reaching out. Open to the right conversation, but could you share the <b style="color: var(--accent);">target base range</b> before a call? My scope at Clip is broader…
+                  </div>
+                  <button class="btn primary sm row-act" style="width: 100%; padding: 8px 14px;">Send via LinkedIn →</button>
+                </div>
+
+                <button class="btn ghost sm" onclick="m_resetEvaluate()" style="font-size: 12px;">↺ Try another</button>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><div class="icon"></div>Discover</div>
+              <div class="tab"><div class="icon"></div>Home</div>
+              <div class="tab cta" style="box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);"><div class="label-x">Evaluate</div></div>
+              <div class="tab"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>More</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 05 · ONBOARDING                                                -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">05 · critical</span>
+          <h2>Onboarding</h2>
+          <span class="tag">— step 02-B: extract review</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back">←</div>
+              <div class="title" style="font-family: 'Geist Mono'; font-size: 11px; color: var(--ink-3); letter-spacing: 1px;">02 / 05</div>
+              <div class="actions">
+                <div class="iconbtn" style="color: var(--ink-2);">skip</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <div class="ob-progress">
+                <div class="seg done"></div>
+                <div class="seg done"></div>
+                <div class="seg now"></div>
+                <div class="seg"></div>
+                <div class="seg"></div>
+              </div>
+
+              <h1 class="h-editorial" style="font-size: 26px; line-height: 1.15; margin-top: 4px;">Here's what I read.<br/><em>Correct anything wrong.</em></h1>
+
+              <div class="row" style="flex-wrap: wrap; gap: 6px;">
+                <span class="pill accent" style="font-size: 11px;">✓ cv-nacho-2026.pdf</span>
+                <span class="mono" style="font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.5px;">4 PAGES · 12 YRS · 6.3S</span>
+              </div>
+
+              <div class="card tight">
+                <span class="kicker">Selected work · I'll lead with these</span>
+                <div class="row" style="font-size: 12.5px; gap: 8px; align-items: flex-start;">
+                  <span class="status-dot interview" style="margin-top: 6px;"></span>
+                  <div style="flex: 1; line-height: 1.45;"><b style="color: var(--ink); font-weight: 600;">Clip</b> — scaled ops 12 → 40+ across MX/AR · <b style="color: var(--accent); font-weight: 600;">$3.4B MXN TPV</b></div>
+                </div>
+                <div class="row" style="font-size: 12.5px; gap: 8px; align-items: flex-start;">
+                  <span class="status-dot interview" style="margin-top: 6px;"></span>
+                  <div style="flex: 1; line-height: 1.45;"><b style="color: var(--ink); font-weight: 600;">Kueski</b> — Director Risk Ops · cut default 28% in 18 mo</div>
+                </div>
+                <div class="row" style="font-size: 12.5px; gap: 8px; align-items: flex-start; opacity: .7;">
+                  <span class="status-dot draft" style="margin-top: 6px;"></span>
+                  <div style="flex: 1; line-height: 1.45;"><b style="color: var(--ink); font-weight: 600;">Mastercard LAC</b> — early career <em style="color: var(--ink-3);">(deprioritized)</em></div>
+                </div>
+              </div>
+
+              <div class="card signal tight">
+                <div class="row" style="justify-content: space-between;">
+                  <span class="kicker" style="color: var(--signal);">★ Where I'm unsure</span>
+                  <span class="kicker" style="color: var(--signal);">tap to confirm</span>
+                </div>
+                <div class="card" style="padding: 10px 12px; gap: 8px;">
+                  <div style="font-family: 'Albert Sans'; font-size: 12.5px; line-height: 1.4;">Team size at Kueski — read <b style="font-weight: 600;">12</b>. Sound right?</div>
+                  <div class="row" style="gap: 6px;">
+                    <button class="btn sm row-act" style="background: var(--signal); color: var(--signal-on); border-color: var(--signal); padding: 6px 12px;">12 ✓</button>
+                    <button class="btn ghost sm row-act" style="padding: 6px 10px;">edit</button>
+                  </div>
+                </div>
+                <div class="card" style="padding: 10px 12px; gap: 8px;">
+                  <div style="font-family: 'Albert Sans'; font-size: 12.5px; line-height: 1.4;">Clip end date — <b style="font-weight: 600;">currently</b>? Or left 2025?</div>
+                  <div class="row" style="gap: 6px;">
+                    <button class="btn sm row-act" style="background: var(--signal); color: var(--signal-on); border-color: var(--signal); padding: 6px 12px;">currently ✓</button>
+                    <button class="btn ghost sm row-act" style="padding: 6px 10px;">left 2025</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card tight">
+                <span class="kicker">Signals derived</span>
+                <div class="row" style="flex-wrap: wrap; gap: 6px;">
+                  <span class="pill accent" style="font-size: 10.5px;">P&amp;L $3.4B MXN</span>
+                  <span class="pill accent" style="font-size: 10.5px;">Team 40+</span>
+                  <span class="pill accent" style="font-size: 10.5px;">Payments · Lending</span>
+                  <span class="pill signal-soft" style="font-size: 10.5px;">Multi-country MX + AR</span>
+                  <span class="pill" style="font-size: 10.5px;">IC → Director in 8 yrs</span>
+                  <span class="pill" style="font-size: 10.5px;">ES · EN</span>
+                </div>
+              </div>
+
+              <button class="btn primary" style="margin-top: 8px;">Looks right → intake</button>
+              <button class="btn ghost" style="font-size: 13px;">← change CV</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 06 · REPORT                                                    -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">06 · read-heavy</span>
+          <h2>Report</h2>
+          <span class="tag">— the long form, one role</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back">←</div>
+              <div class="title" style="font-size: 15px;">Stori</div>
+              <div class="actions">
+                <div class="iconbtn">↗</div>
+                <div class="iconbtn">⋯</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+
+              <!-- Anchored header (compact, sticky-ish) -->
+              <div class="report-header">
+                <div class="score flag" style="min-width: 44px; height: 44px; font-size: 16px;">82</div>
+                <div class="meta-row">
+                  <div class="co">Stori · Head of Operations</div>
+                  <div class="meta-sub">EVAL №017 · 14 MAY · 6.3S READ</div>
+                </div>
+              </div>
+
+              <!-- TOC pills -->
+              <div class="toc-pill-row">
+                <span class="toc-pill on">verdict</span>
+                <span class="toc-pill">role</span>
+                <span class="toc-pill">fit</span>
+                <span class="toc-pill">comp</span>
+                <span class="toc-pill">gaps</span>
+                <span class="toc-pill">reply</span>
+              </div>
+
+              <div class="kicker">★ Verdict</div>
+              <h1 class="h-editorial" style="font-size: 26px; line-height: 1.15;">Worth your time —<br/><em>with caveats</em>.</h1>
+
+              <p class="body-copy" style="font-size: 14px; line-height: 1.55;">Series C MX fintech, scope is real, hiring manager is the CEO. <b>Comp is 16% under market</b> for the level. You have leverage. Don't accept first number.</p>
+
+              <div class="quote-pull">
+                Most ops directors at this stage walk away from this offer. Your call.
+              </div>
+
+              <!-- Block A: role summary -->
+              <div class="card tight">
+                <span class="kicker">A · Role summary</span>
+                <div class="report-meta">
+                  <div><div class="k">Archetype</div><div class="v">Scaler · Series C</div></div>
+                  <div><div class="k">Domain</div><div class="v">Fintech · Lending</div></div>
+                  <div><div class="k">Seniority</div><div class="v">Director / Head</div></div>
+                  <div><div class="k">Team</div><div class="v mono">~50 IC + 4 leads</div></div>
+                  <div><div class="k">Remote</div><div class="v">Hybrid · CDMX</div></div>
+                  <div><div class="k">Reports to</div><div class="v">CEO</div></div>
+                </div>
+              </div>
+
+              <!-- Block B: fit -->
+              <div class="card tight">
+                <div class="row" style="justify-content: space-between;">
+                  <span class="kicker">B · Fit · 10 dimensions</span>
+                  <span class="mono" style="font-size: 9.5px; color: var(--ink-3);">3.2/5 WEIGHTED</span>
+                </div>
+                <div class="fits">
+                  <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width: 90%;"></span></span><span class="grade">A</span></div>
+                  <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width: 92%;"></span></span><span class="grade">A</span></div>
+                  <div class="fit-bar"><span class="label-bar">stage</span><span class="track"><span class="fill" style="width: 85%;"></span></span><span class="grade">A−</span></div>
+                  <div class="fit-bar"><span class="label-bar">team</span><span class="track"><span class="fill" style="width: 78%;"></span></span><span class="grade">B+</span></div>
+                  <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width: 62%;"></span></span><span class="grade">C+</span></div>
+                  <div class="fit-bar"><span class="label-bar">geo</span><span class="track"><span class="fill" style="width: 95%;"></span></span><span class="grade">A</span></div>
+                  <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill signal" style="width: 38%;"></span></span><span class="grade">D</span></div>
+                  <div class="fit-bar"><span class="label-bar">runway</span><span class="track"><span class="fill soft" style="width: 70%;"></span></span><span class="grade">B</span></div>
+                </div>
+              </div>
+
+              <!-- Block C: comp -->
+              <div class="card signal tight">
+                <div class="row" style="justify-content: space-between;">
+                  <span class="kicker" style="color: var(--signal);">C · Salary check</span>
+                  <span class="pill signal">-16% market</span>
+                </div>
+                <div class="salary" style="background: var(--surface);">
+                  <div class="row" style="font-size: 12.5px;">
+                    <span style="font-weight: 600;">Offer · MXN $1.6M</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3); font-size: 9.5px;">MARKET $1.9–2.4M</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 35%; width: 35%;"></div>
+                    <div class="pin" style="left: 22%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 10px;">
+                    <span class="mono" style="color: var(--ink-3);">FLOOR $95K USD</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH CONF · N=12</span>
+                  </div>
+                </div>
+                <p class="body-copy" style="font-size: 12.5px; margin: 0; color: var(--ink-2);">Comparable Series C MX fintech Director Ops roles cluster at <b>$1.95–2.3M MXN base</b>. Equity is usually <b>0.05–0.15%</b> at this stage; Rita didn't specify.</p>
+              </div>
+
+              <!-- Block D: gap analysis -->
+              <div class="card tight">
+                <span class="kicker">D · Gap analysis</span>
+                <div class="gap-list">
+                  <div class="gap-item plus"><span class="marker">over+</span><div>Lending risk ops — your <b>Kueski</b> work over-indexes here. Lead with the 28% default-cut number.</div></div>
+                  <div class="gap-item plus"><span class="marker">over+</span><div>Multi-country scale at <b>$3.4B MXN TPV</b> is a half-step above the Stori scope. They'll feel it.</div></div>
+                  <div class="gap-item minus"><span class="marker">light−</span><div>No direct collections experience. Stori leans heavy on collections — expect probing.</div></div>
+                  <div class="gap-item minus"><span class="marker">light−</span><div>Their stack is Python/dbt-heavy. Your last two roles were SQL/Looker. Closeable.</div></div>
+                </div>
+              </div>
+
+              <!-- Block E: draft reply -->
+              <div class="card accent tight">
+                <div class="row" style="justify-content: space-between;">
+                  <span class="kicker" style="color: var(--accent);">E · Draft reply · cool</span>
+                  <span class="mono" style="font-size: 9px; color: var(--accent);">3 TONES</span>
+                </div>
+                <div style="font-family: 'Albert Sans'; font-size: 12.5px; line-height: 1.55; color: var(--ink); background: var(--surface); padding: 11px 13px; border-radius: 10px;">
+                  Hi Rita — thanks for thinking of me.<br/><br/>Open to the right conversation. Before a call, could you share the <b style="color: var(--accent);">target base range</b> and equity at this stage? My scope at Clip is broader, and I'd want to be sure the level matches before we put time on calendars.<br/><br/>— Nacho
+                </div>
+                <div class="row" style="gap: 6px;">
+                  <button class="btn primary sm row-act" style="padding: 8px 12px;">Copy →</button>
+                  <button class="btn sm row-act" style="padding: 8px 12px;">Edit</button>
+                  <button class="btn ghost sm row-act" style="padding: 8px 10px; margin-left: auto;">warm · decline</button>
+                </div>
+              </div>
+
+              <!-- Disagree -->
+              <div class="disagree-bar">
+                <span>Disagree with anything here?</span>
+                <span class="lnk">Tell me →</span>
+              </div>
+
+              <!-- Footer actions -->
+              <div class="row" style="gap: 8px; margin-top: 4px;">
+                <button class="btn primary" style="flex: 1;">Save to pipeline</button>
+                <button class="btn row-act" style="padding: 10px 14px;">↗</button>
+              </div>
+              <button class="btn ghost" style="font-size: 12px;">Pass · don't follow up</button>
+
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><div class="icon"></div>Discover</div>
+              <div class="tab"><div class="icon"></div>Home</div>
+              <div class="tab cta"><div class="label-x">Evaluate</div></div>
+              <div class="tab active"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>More</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 07 · ONBOARDING · MODE PICKER                                  -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">07 · onboarding · mode</span>
+          <h2>Need / Leverage / Open</h2>
+          <span class="tag">— its own screen, per brief</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back">←</div>
+              <div class="title" style="font-family: 'Geist Mono'; font-size: 11px; color: var(--ink-3); letter-spacing: 1px;">03 / 05</div>
+              <div class="actions">
+                <div class="iconbtn" style="color: var(--ink-2);">skip</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <div class="ob-progress">
+                <div class="seg done"></div>
+                <div class="seg done"></div>
+                <div class="seg done"></div>
+                <div class="seg now"></div>
+                <div class="seg"></div>
+              </div>
+
+              <div class="kicker" style="margin-top: 4px;">The hinge question</div>
+              <h1 class="h-editorial" style="font-size: 26px; line-height: 1.15;">Where are you <em>right now</em>?</h1>
+              <p class="body-copy" style="font-size: 13.5px; margin: -4px 0 4px;">Pick one. Changes how I rank leads, how I draft replies, how I push back. <b>You can switch any time from Home.</b></p>
+
+              <div class="mode-card">
+                <div class="glyph-mode">N</div>
+                <div class="mode-meta">
+                  <div class="mode-head"><span class="mode-title">Need</span><span class="mode-tag">URGENCY · HIGH</span></div>
+                  <div class="mode-copy">Out of role, runway is the question. I rank for <b>speed</b> and surface anything that hits floor.</div>
+                </div>
+                <div class="checkmark">✓</div>
+              </div>
+
+              <div class="mode-card on">
+                <div class="glyph-mode">L</div>
+                <div class="mode-meta">
+                  <div class="mode-head"><span class="mode-title">Leverage</span><span class="mode-tag">★ MOST OPERATORS</span></div>
+                  <div class="mode-copy">Employed, passively open, comp leverage. I'll only nudge when a lead clears your floor <em>and</em> moves the trajectory. Recruiter spam gets quieted.</div>
+                </div>
+                <div class="checkmark">✓</div>
+              </div>
+
+              <div class="mode-card">
+                <div class="glyph-mode">O</div>
+                <div class="mode-meta">
+                  <div class="mode-head"><span class="mode-title">Open</span><span class="mode-tag">CURIOSITY MODE</span></div>
+                  <div class="mode-copy">Reading the market, not actively looking. I send <b>1 brief per week</b>, no inbound nudges, no follow-up engine.</div>
+                </div>
+                <div class="checkmark">✓</div>
+              </div>
+
+              <div class="card canvas tight" style="background: var(--canvas); border-style: dashed;">
+                <span class="kicker">Based on your CV</span>
+                <p class="body-copy" style="font-size: 12.5px; margin: 0;">14 yrs · currently Head of Ops at Galgo · floor MXN $95K USD eq. <b>Leverage</b> looks right. Override anytime.</p>
+              </div>
+
+              <button class="btn primary" style="margin-top: 4px;">Continue · Leverage →</button>
+              <button class="btn ghost" style="font-size: 13px;">← target geos</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================ -->
+      <!-- 08 · DISCOVER · ESPAÑOL                                        -->
+      <!-- ============================================================ -->
+      <div class="phone-wrap">
+        <div class="phone-label">
+          <span class="num">08 · bilingual</span>
+          <h2>Discover · <em>Español</em></h2>
+          <span class="tag">— same surface, +18% characters</span>
+        </div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="right">
+                <span class="signal"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+                <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+                <span class="battery"><span class="fill"></span></span>
+              </div>
+            </div>
+
+            <div class="mobile-top">
+              <div class="back" style="font-family: 'Fraunces'; font-style: italic; font-size: 18px;">L<span style="color: var(--accent);">.</span></div>
+              <div class="title">Hallazgos</div>
+              <div class="actions">
+                <div class="iconbtn" style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 0.6px;">ES</div>
+                <div class="iconbtn">⋯</div>
+              </div>
+            </div>
+
+            <div class="mobile-body">
+              <div class="kicker">Edición №14 · Jue 14 May · CDMX</div>
+              <h1 class="h-editorial" style="font-size: 30px; margin-top: -2px;">El brief de <em>hoy</em>.</h1>
+
+              <div class="seg-toggle" style="align-self: flex-start;">
+                <div class="seg">Necesidad</div>
+                <div class="seg on">Leverage</div>
+                <div class="seg">Abierto</div>
+              </div>
+
+              <div class="editor-note">
+                <p>Día corto. <b style="font-weight: 500;">Kavak</b> abrió un puesto de Director de Ops que coincide con tu alcance en Clip <em>línea por línea</em>. Silencié 18 listados que no movían la aguja.</p>
+              </div>
+
+              <!-- Pick 1 -->
+              <div class="card pick-mobile">
+                <div class="head">
+                  <div class="avatar-co">KV</div>
+                  <div class="meta">
+                    <div class="kicker">№ 1 · Encaje fuerte · 2d</div>
+                    <div class="title-row">Kavak abrió <em>tu silla</em>.</div>
+                  </div>
+                  <div class="score">91</div>
+                </div>
+                <div class="role-row">Director de Operaciones</div>
+                <div class="sub-row">CDMX · Híbrido · Movilidad / fintech</div>
+
+                <div class="salary">
+                  <div class="row" style="font-size: 12px;">
+                    <span style="font-weight: 600;">USD $115–145k</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 9.5px;">EST</span>
+                    <span class="pill accent" style="margin-left: auto;">en banda</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 38%; width: 32%;"></div>
+                    <div class="pin" style="left: 52%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 10px;">
+                    <span class="mono" style="color: var(--ink-3);">PISO $95K</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● ALTA</span>
+                  </div>
+                </div>
+
+                <p class="body-copy" style="font-size: 13px; margin: 0;">Coincide con tu rol en Clip línea por línea. <b>Susana M.</b> (ex-Cornershop, 4 conexiones en común) es la hiring manager.</p>
+
+                <div class="actions">
+                  <button class="btn primary">Ajustar CV y aplicar</button>
+                  <button class="btn row-act">Evaluar</button>
+                </div>
+              </div>
+
+              <!-- Tone callouts -->
+              <div class="card tight">
+                <span class="kicker">★ La voz · mismo registro</span>
+                <div class="gap-list">
+                  <div class="gap-item plus"><span class="marker">EN</span><div><em style="color: var(--ink-3);">"Worth your time. Caveats below."</em></div></div>
+                  <div class="gap-item plus"><span class="marker">ES</span><div><em style="color: var(--ink-3);">"Vale tu tiempo. Los detalles abajo."</em></div></div>
+                  <div class="gap-item minus"><span class="marker">EN</span><div><em style="color: var(--ink-3);">"Below your level. Here's what I saw."</em></div></div>
+                  <div class="gap-item minus"><span class="marker">ES</span><div><em style="color: var(--ink-3);">"Por debajo de tu nivel. Esto es lo que vi."</em></div></div>
+                </div>
+              </div>
+
+              <div class="row" style="justify-content: center; padding: 12px 0;">
+                <span class="kicker">2 picks más · 18 silenciados ↓</span>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab active"><div class="icon"></div>Hallazgos</div>
+              <div class="tab"><div class="icon"></div>Inicio</div>
+              <div class="tab cta"><div class="label-x">Evaluar</div></div>
+              <div class="tab"><div class="icon"></div>Tracker</div>
+              <div class="tab"><div class="icon"></div>Más</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ADAPTATIONS                                                   -->
+    <!-- ============================================================ -->
+    <div class="info-strip">
+      <span class="label-x">Adaptations</span>
+      <div class="body-x">
+        <b>Sidebar → bottom tab bar.</b> Five tabs: Discover · Home · ✦ Evaluate · Tracker · More. The center tab is the accent-filled CTA, slightly elevated. Always visible.<br/>
+        <b>Tracker table → card list.</b> One card per role, score chip + role title + status footer. Same data, no horizontal scroll.<br/>
+        <b>Pick rows → stacked cards.</b> Title first, salary band inline, actions full-width buttons.<br/>
+        <b>Filters → horizontal scroll pills.</b> Bleeds off the right edge to signal more.<br/>
+        <b>Tap targets ≥ 44px.</b> Buttons grow to 11px vertical padding, full-width by default on mobile.
+      </div>
+    </div>
+
+    <div class="info-strip">
+      <span class="label-x">Newly added · v0.2</span>
+      <div class="body-x">
+        <b>06 · Report.</b> The most read-heavy screen. Sticky compact header (score + company), TOC pills, blocks A–E (role / fit / comp / gaps / reply). Pull quote in Fraunces italic for the editorial moment. <b>Disagree row at the bottom</b> — one tap, opens an annotation flow (the brief's component-level transparency commitment).<br/>
+        <b>07 · Mode picker.</b> Pulled out of the multi-step form per the brief's note. Three full-tap cards, not radios. <b>Leverage is pre-selected</b> with a one-line rationale built from the CV — calm default, override anytime.<br/>
+        <b>08 · Spanish at parity.</b> Same Discover surface, ~18% longer. Albert Sans handles diacritics cleanly. Tab labels translate (<i>Hallazgos · Inicio · Evaluar · Tracker · Más</i>). The voice card shows EN/ES copy pairs side-by-side — Labra never code-switches mid-sentence.
+      </div>
+    </div>
+
+    <div class="info-strip">
+      <span class="label-x">What didn't change</span>
+      <div class="body-x">
+        <b>The 10 rules.</b> Two radii (10/999), one spacing scale, no shadows, no icons earned yet, score chips iconic, serif moments preserved (smaller sizes: 18–32px instead of 22–48px), all numerics in Geist Mono uppercase. <b>The signal color stays burnt amber.</b> Pin still off-band. Fit bars still A–F with signal-amber fill on D grades.
+      </div>
+    </div>
+
+  </div>
+
+
+<script>
+  function setMode(mode) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add('theme-' + mode);
+    document.getElementById('mode-light').classList.toggle('on', mode === 'light');
+    document.getElementById('mode-dark').classList.toggle('on', mode === 'dark');
+    try { localStorage.setItem('leadme-mob-mode', mode); } catch(e) {}
+  }
+  try {
+    const saved = localStorage.getItem('leadme-mob-mode');
+    if (saved) setMode(saved);
+  } catch(e) {}
+
+  // Evaluate interactive — mobile
+  const m_evInput = document.getElementById('m-ev-input');
+  const m_evCount = document.getElementById('m-ev-charcount');
+  const m_evGo = document.getElementById('m-ev-go');
+  const m_evEmpty = document.getElementById('m-ev-empty');
+  const m_evProcessing = document.getElementById('m-ev-processing');
+  const m_evVerdict = document.getElementById('m-ev-verdict');
+  const m_evDetected = document.getElementById('m-ev-detected');
+  const m_extractPills = ['m-ext-co', 'm-ext-role', 'm-ext-loc', 'm-ext-comp'].map(id => document.getElementById(id));
+  const m_procRows = [1,2,3,4,5].map(n => document.getElementById('m-proc-' + n));
+
+  const m_sample = "Hi Nacho! I'm Rita from Stori's talent team. Just opened a Head of Operations seat — Mexico City, hybrid. Just raised Series C. Compensation is competitive, base around MXN $1.6M + equity. 15 min this week?";
+
+  function m_detectKind(text) {
+    const t = text.trim();
+    if (!t) return null;
+    if (/^https?:\/\/\S+/i.test(t) || /^[a-z0-9.-]+\.(com|co|io|app|mx|ar|cl|br|me|ai|so)\b/i.test(t)) return 'Job URL';
+    const lc = t.toLowerCase();
+    const dmCues = ['hi ', 'hello ', 'hey ', 'reaching out', 'saw your profile', "i'm ", "i am "];
+    if (t.length < 700 && dmCues.some(c => lc.includes(c))) return 'Recruiter DM';
+    return 'Job description';
+  }
+
+  function m_setDetected(kind) {
+    if (!m_evDetected) return;
+    const labelEl = m_evDetected.querySelector('.label');
+    if (!kind) {
+      m_evDetected.classList.remove('on');
+      labelEl.innerHTML = "I'll detect what this is.";
+    } else {
+      m_evDetected.classList.add('on');
+      labelEl.innerHTML = "Detected · <b>" + kind + "</b>";
+    }
+  }
+
+  m_evInput.addEventListener('input', () => {
+    const len = m_evInput.value.length;
+    m_evCount.textContent = len + ' chars';
+    if (len > 20) {
+      m_evGo.disabled = false;
+      m_evGo.style.opacity = '1';
+      m_evInput.classList.add('filled');
+      m_setDetected(m_detectKind(m_evInput.value));
+    } else {
+      m_evGo.disabled = true;
+      m_evGo.style.opacity = '.5';
+      m_evInput.classList.remove('filled');
+      m_extractPills.forEach(p => p && p.classList.remove('show'));
+      m_setDetected(null);
+    }
+  });
+
+  function m_pasteSample() {
+    m_evInput.classList.add('filled');
+    m_evInput.value = '';
+    let i = 0;
+    const step = () => {
+      m_evInput.value = m_sample.slice(0, i);
+      m_evCount.textContent = i + ' chars';
+      if (i > 20) m_setDetected(m_detectKind(m_evInput.value));
+      i += 4;
+      if (i < m_sample.length) {
+        setTimeout(step, 8);
+      } else {
+        m_evInput.value = m_sample;
+        m_evCount.textContent = m_sample.length + ' chars';
+        m_extractPills.forEach((p, idx) => {
+          if (p) setTimeout(() => p.classList.add('show'), 200 + idx * 160);
+        });
+        m_evGo.disabled = false;
+        m_evGo.style.opacity = '1';
+      }
+    };
+    step();
+  }
+
+  function m_runEvaluate() {
+    m_evEmpty.style.display = 'none';
+    m_evVerdict.classList.remove('show');
+    m_evProcessing.classList.add('show');
+    m_procRows.forEach(r => r && r.classList.remove('show'));
+    const timings = [200, 700, 1300, 1900, 2500];
+    m_procRows.forEach((row, idx) => {
+      setTimeout(() => row && row.classList.add('show'), timings[idx]);
+    });
+    setTimeout(() => {
+      m_evProcessing.classList.remove('show');
+      m_evVerdict.classList.add('show');
+    }, 3400);
+  }
+
+  function m_resetEvaluate() {
+    m_evVerdict.classList.remove('show');
+    m_evProcessing.classList.remove('show');
+    m_evEmpty.style.display = 'flex';
+    m_evInput.value = '';
+    m_evInput.classList.remove('filled');
+    m_evCount.textContent = '0 chars';
+    m_evGo.disabled = true;
+    m_evGo.style.opacity = '.5';
+    m_extractPills.forEach(p => p && p.classList.remove('show'));
+    m_setDetected(null);
+  }
+</script>
+</body>
+</html>

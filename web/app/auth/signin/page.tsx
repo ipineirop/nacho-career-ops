@@ -1,6 +1,6 @@
 'use client';
 
-import { signIn, getProviders, useSession } from 'next-auth/react';
+import { signIn, signOut, getProviders, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -36,37 +36,27 @@ export default function SignInPage() {
     }
   }, [invitationCode]);
 
-  // If user is signed in and has an invitation code (from URL or localStorage), claim it
+  // If user is signed in AND has an invitation code, claim it and go home.
+  // Otherwise do NOT auto-redirect — that's what caused the signin↔dashboard loop
+  // when a stale session existed without a matching DB row. The user can click
+  // "Continue" below; the dashboard's self-heal will provision the row.
   useEffect(() => {
     if (!session || claimingCode) return;
-
     const codeToUse = invitationCode || localStorage.getItem('pendingInvitationCode');
-    if (!codeToUse) {
-      // No code, just redirect home
-      window.location.href = '/';
-      return;
-    }
+    if (!codeToUse) return;
 
     setClaimingCode(true);
     (async () => {
       try {
-        const res = await fetch('/api/auth/claim-invitation', {
+        await fetch('/api/auth/claim-invitation', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: codeToUse }),
         });
-        if (res.ok) {
-          localStorage.removeItem('pendingInvitationCode');
-          // Code claimed successfully, redirect home
-          window.location.href = '/';
-        } else {
-          // Even if claim fails, redirect home (user is authenticated)
-          localStorage.removeItem('pendingInvitationCode');
-          window.location.href = '/';
-        }
-      } catch (err) {
-        // Network error, still redirect home
+      } catch {
+        // ignore — user is authenticated regardless
+      } finally {
         localStorage.removeItem('pendingInvitationCode');
         window.location.href = '/';
       }
@@ -103,6 +93,37 @@ export default function SignInPage() {
     }
   }
 
+  // Already signed in — show a clear handoff instead of bouncing.
+  const hasPendingCode = typeof window !== 'undefined' && !!window.localStorage.getItem('pendingInvitationCode');
+  if (session && !invitationCode && !hasPendingCode) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: 'var(--lm-bg, #f6f8f8)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', padding: '24px', gap: 18,
+        fontFamily: 'var(--font-albert-sans, system-ui), sans-serif',
+      }}>
+        <div style={{ fontFamily: 'var(--font-fraunces, Georgia), serif', fontSize: 48, color: 'var(--lm-ink, #0a1f24)' }}>
+          labra<span style={{ color: 'var(--lm-accent, #0d7c89)', fontStyle: 'italic' }}>.</span>
+        </div>
+        <p style={{ fontSize: 15, color: 'var(--lm-ink-2, #455258)', margin: 0 }}>
+          You&rsquo;re signed in as <strong>{session.user?.email}</strong>.
+        </p>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <a href="/" style={{
+            padding: '10px 22px', borderRadius: 999, background: 'var(--lm-ink, #0a1f24)',
+            color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none',
+          }}>Continue →</a>
+          <button onClick={() => signOut({ callbackUrl: '/auth/signin' })} style={{
+            padding: '10px 22px', borderRadius: 999, background: 'transparent',
+            border: '1px solid var(--lm-line, #e2e7e8)', color: 'var(--lm-ink-2, #455258)',
+            fontSize: 14, fontWeight: 500, cursor: 'pointer',
+          }}>Sign out</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh', background: 'var(--lm-bg, #f6f8f8)',
@@ -113,11 +134,11 @@ export default function SignInPage() {
 
         {/* Brand */}
         <div>
-          <div style={{ fontFamily: 'var(--font-fraunces, Georgia), serif', fontWeight: 400, fontSize: 64, lineHeight: 1, letterSpacing: '-1.8px', color: 'var(--lm-ink, #0a1f24)' }}>
-            leadme<span style={{ color: 'var(--lm-accent, #0d7c89)' }}>.</span>
+          <div style={{ fontFamily: 'var(--font-fraunces, Georgia), serif', fontWeight: 500, fontSize: 64, lineHeight: 1, letterSpacing: '-1.8px', color: 'var(--lm-ink, #0a1f24)' }}>
+            labra<span style={{ color: 'var(--lm-accent, #0d7c89)', fontStyle: 'italic' }}>.</span>
           </div>
           <p style={{ fontFamily: 'var(--font-albert-sans, system-ui), sans-serif', fontSize: 17, lineHeight: 1.6, color: 'var(--lm-ink-2, #455258)', margin: '12px 0 0' }}>
-            Less noise. More signal.
+            Think before you apply.
           </p>
         </div>
 

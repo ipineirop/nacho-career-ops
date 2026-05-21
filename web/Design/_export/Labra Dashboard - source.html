@@ -1,0 +1,2632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Labra — Dashboard / Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS — Labra Design System v1.0                              */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-bg:   #FAEEDA;
+    --signal-ink:  #854F0B;
+    --signal-deep: #4A2A0C;
+    --signal-on:   #ffffff;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-bg:   #2a1f10;
+    --signal-ink:  #f2c987;
+    --signal-deep: #f8dfaf;
+    --signal-on:   #0a0e14;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+
+  /* i18n */
+  [data-lang="en"] .es { display: none; }
+  [data-lang="es"] .en { display: none; }
+
+  /* ============================================================ */
+  /* TOP CHROME (PAGE)                                              */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 10px; font-family: "Geist Mono", monospace;
+    font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .top .toggles { display: flex; gap: 8px; align-items: center; }
+  .seg {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 4px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .seg button {
+    border: 0; background: transparent;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .seg button.on { background: var(--ink); color: var(--bg); }
+  .version {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+
+  /* ============================================================ */
+  /* PAGE LAYOUT                                                    */
+  /* ============================================================ */
+  .stage { max-width: 1560px; margin: 0 auto; padding: 36px 32px 80px; }
+  .hero { margin: 0 0 40px; max-width: 1000px; }
+  .hero .kicker {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 60px; line-height: 1; margin: 0; letter-spacing: -1.6px; color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; }
+  .hero p {
+    font-family: "Albert Sans"; font-size: 16.5px; line-height: 1.6;
+    color: var(--ink-2); margin: 14px 0 0; max-width: 840px; text-wrap: pretty;
+  }
+  .hero p b { color: var(--ink); font-weight: 600; }
+
+  .principles {
+    margin-top: 28px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .principle {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .principle .pn {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .principle .pt {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 18px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .principle .pt em { font-style: italic; }
+  .principle .pd {
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.5; color: var(--ink-2);
+  }
+
+  /* ============================================================ */
+  /* SCREEN BLOCKS                                                  */
+  /* ============================================================ */
+  .screen { margin-bottom: 72px; scroll-margin-top: 80px; }
+  .screen-label {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 18px; padding: 0 4px;
+  }
+  .screen-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 10px; border-radius: 999px; background: var(--canvas);
+  }
+  .screen-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 30px; line-height: 1; margin: 0; letter-spacing: -0.8px; color: var(--ink);
+  }
+  .screen-label h2 em { font-style: italic; }
+  .screen-label .tag { font-family: "Albert Sans"; font-size: 13px; color: var(--ink-3); }
+
+  .frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+  }
+  .frame-bar {
+    height: 34px; background: var(--canvas);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  }
+  .frame-bar .fdot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .frame-bar .url {
+    margin-left: 12px; font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.3px;
+  }
+
+  /* ============================================================ */
+  /* DASHBOARD APP SHELL                                            */
+  /* ============================================================ */
+  .app {
+    background: var(--bg);
+    min-height: 880px;
+  }
+  .appbar {
+    border-bottom: 0.75px solid var(--line);
+    padding: 14px 36px;
+    display: flex; align-items: center; gap: 18px;
+    background: var(--bg);
+  }
+  .appbar .brand-small {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; color: var(--ink);
+  }
+  .appbar .brand-small .dot { color: var(--accent); font-style: italic; }
+  .appbar .nav { display: flex; gap: 2px; margin-left: 18px; }
+  .appbar .nav a {
+    text-decoration: none; padding: 6px 13px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    color: var(--ink-3);
+  }
+  .appbar .nav a.on { background: var(--ink); color: var(--bg); }
+  .appbar .nav a:hover:not(.on) { color: var(--ink); }
+  .appbar .spacer { flex: 1; }
+  .appbar .userline {
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-3);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .appbar .userline .dot-sep { color: var(--ink-3); opacity: .5; }
+  .appbar .userline .name { color: var(--ink-2); }
+
+  /* ============================================================ */
+  /* DASHBOARD GRID                                                 */
+  /* ============================================================ */
+  .dash {
+    max-width: 1320px; margin: 0 auto;
+    padding: 40px 48px 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* Editorial masthead inside the dashboard */
+  .masthead {
+    grid-column: 1 / -1;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 36px; flex-wrap: wrap;
+    border-bottom: 0.75px solid var(--line);
+    padding-bottom: 22px; margin-bottom: 14px;
+  }
+  .masthead .left { display: flex; flex-direction: column; gap: 8px; }
+  .masthead .date {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .masthead h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 64px; line-height: 0.95; margin: 0;
+    letter-spacing: -1.8px; color: var(--ink);
+  }
+  .masthead h1 em { font-style: italic; }
+  .masthead .strap {
+    font-family: "Albert Sans"; font-size: 15px; color: var(--ink-2);
+    margin-top: 10px; max-width: 540px;
+  }
+  .masthead .strap b { color: var(--ink); font-weight: 600; }
+
+  /* Mode chip (compact, dignified) */
+  .mode-chip {
+    display: inline-flex; flex-direction: column; gap: 6px;
+    background: var(--surface); border: 0.75px solid var(--line);
+    border-radius: 12px; padding: 12px 16px;
+    min-width: 200px;
+  }
+  .mode-chip .lbl {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .mode-chip .val {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  }
+  .mode-chip .val .name {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; letter-spacing: -0.4px; color: var(--ink);
+  }
+  .mode-chip .val .name em { font-style: italic; }
+  .mode-chip .val .change {
+    font-family: "Albert Sans"; font-size: 12px;
+    color: var(--accent); text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-color: var(--accent-soft);
+    cursor: pointer;
+  }
+  .mode-chip .gloss {
+    font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2);
+  }
+
+  /* ============================================================ */
+  /* MAIN COLUMN — sections                                         */
+  /* ============================================================ */
+  .col-main { display: flex; flex-direction: column; gap: 44px; min-width: 0; }
+  .col-side { display: flex; flex-direction: column; gap: 28px; }
+
+  .sec { display: flex; flex-direction: column; gap: 14px; }
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; padding-bottom: 6px;
+    border-bottom: 0.75px solid var(--line);
+  }
+  .sec-head .htitle {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 22px; line-height: 1; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .sec-head .htitle em { font-style: italic; }
+  .sec-head .meta {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .sec-head .meta b { color: var(--ink-2); font-weight: 500; }
+  .sec-head .meta .sep { color: var(--ink-3); opacity: .5; padding: 0 6px; }
+
+  /* ============================================================ */
+  /* TODAY'S BRIEF — lead list                                      */
+  /* ============================================================ */
+  .leads { display: flex; flex-direction: column; }
+  .lead {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto auto;
+    gap: 18px; align-items: center;
+    padding: 16px 4px;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .lead:last-child { border-bottom: none; }
+  .lead .logo {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 13px; color: var(--ink-3); letter-spacing: 0.5px;
+  }
+  .lead .body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .lead .role {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 15px;
+    color: var(--ink); line-height: 1.25;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .lead .meta-l {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px;
+    display: flex; flex-wrap: wrap; gap: 0;
+  }
+  .lead .meta-l b { color: var(--ink-2); font-weight: 500; }
+  .lead .meta-l .sep { color: var(--ink-3); opacity: .5; padding: 0 7px; }
+  .lead .score {
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 13px; color: var(--ink);
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .lead .score .num {
+    font-family: "Fraunces", serif; font-weight: 500; font-size: 22px;
+    line-height: 1; letter-spacing: -0.6px;
+  }
+  .lead .score .lbl {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .lead .score.strong .num { color: var(--accent); }
+  .lead .score.weak .num { color: var(--ink-3); }
+  .lead .open {
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--ink-2); text-decoration: none;
+    padding: 7px 12px; border-radius: 999px;
+    border: 0.75px solid var(--line);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+  .lead .open:hover { color: var(--ink); border-color: var(--ink-3); }
+  .lead .open.primary {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .lead .tag-new {
+    display: inline-block;
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--accent); margin-left: 8px;
+    padding: 1px 6px; border-radius: 4px; background: var(--accent-soft);
+    vertical-align: middle;
+  }
+
+  /* ============================================================ */
+  /* FOLLOW-UPS — softer treatment, italic editorial               */
+  /* ============================================================ */
+  .followups { display: flex; flex-direction: column; }
+  .fu {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px; align-items: center;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .fu:last-child { border-bottom: none; }
+  .fu .text {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 19px; line-height: 1.3; color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+  .fu .text em { font-style: italic; color: var(--signal-ink); }
+  .fu .text b { font-weight: 500; }
+  .fu .text .days {
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    letter-spacing: 0.4px; color: var(--signal-ink); font-weight: 500;
+  }
+  .fu .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .fu .act {
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500;
+    padding: 6px 12px; border-radius: 999px;
+    border: 0.75px solid var(--line); background: var(--surface);
+    color: var(--ink-2); white-space: nowrap; cursor: pointer;
+  }
+  .fu .act.primary {
+    background: var(--signal-bg); color: var(--signal-deep);
+    border-color: transparent;
+  }
+  .fu .act.ghost { background: transparent; border-color: transparent; color: var(--ink-3); }
+
+  /* ============================================================ */
+  /* RECENT — single-line entries                                   */
+  /* ============================================================ */
+  .recent { display: flex; flex-direction: column; }
+  .recent-row {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto auto;
+    gap: 14px; align-items: center;
+    padding: 11px 0;
+    border-bottom: 0.5px dashed var(--line-2);
+  }
+  .recent-row:last-child { border-bottom: none; }
+  .recent-row .lg {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 11px; color: var(--ink-3); letter-spacing: 0.4px;
+  }
+  .recent-row .rl {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .recent-row .rl b { font-weight: 500; }
+  .recent-row .rl .sep { color: var(--ink-3); padding: 0 6px; }
+  .recent-row .rl .co { color: var(--ink-2); }
+  .recent-row .sc {
+    font-family: "Geist Mono", monospace; font-size: 12px; color: var(--ink-2);
+    letter-spacing: 0.3px;
+  }
+  .recent-row .sc b { color: var(--ink); font-weight: 500; }
+  .recent-row .when {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* ============================================================ */
+  /* SIDEBAR CARDS                                                  */
+  /* ============================================================ */
+  .panel {
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .panel.flush { padding: 0; overflow: hidden; }
+  .panel .ptitle {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+
+  /* Evaluate panel — the persistent wedge */
+  .evaluate-panel {
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+  }
+  .evaluate-panel .ev-top {
+    padding: 18px 20px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .evaluate-panel .ev-kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .evaluate-panel .ev-title {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 24px; line-height: 1.1; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .evaluate-panel .ev-title em { font-style: italic; }
+  .evaluate-panel .ev-sub {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2); line-height: 1.5;
+  }
+  .evaluate-panel .ev-paste {
+    border-top: 0.75px solid var(--line);
+    background: var(--canvas);
+    padding: 14px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .evaluate-panel .ev-paste .field {
+    background: var(--surface); border: 0.75px dashed var(--line);
+    border-radius: 10px; padding: 14px 14px;
+    min-height: 76px;
+    display: flex; flex-direction: column; gap: 6px;
+    cursor: text;
+  }
+  .evaluate-panel .ev-paste .field .hint {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-3); line-height: 1.5;
+  }
+  .evaluate-panel .ev-paste .field .or {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .evaluate-panel .ev-row {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .evaluate-panel .btn-eval {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 14px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-on);
+    border: 0; font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .evaluate-panel .btn-eval:hover { background: var(--accent-h); }
+  .evaluate-panel .btn-paste {
+    padding: 11px 14px; border-radius: 999px;
+    background: var(--surface); color: var(--ink-2);
+    border: 0.75px solid var(--line);
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .evaluate-panel .ev-shortcut {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 0.8px; color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .evaluate-panel .ev-shortcut kbd {
+    font-family: "Geist Mono"; font-size: 9.5px;
+    padding: 1px 5px; border-radius: 4px;
+    background: var(--surface); border: 0.75px solid var(--line);
+    color: var(--ink-2);
+  }
+
+  /* Pipeline — a quiet glance, not stats */
+  .pipeline { display: flex; flex-direction: column; gap: 12px; }
+  .pipeline .lbl {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .pipeline .lbl a {
+    text-transform: none; letter-spacing: 0; font-family: "Albert Sans";
+    font-size: 12px; color: var(--accent); text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-color: var(--accent-soft);
+  }
+  .pipeline-stages { display: flex; flex-direction: column; gap: 2px; }
+  .pstage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .pstage:last-child { border-bottom: none; }
+  .pstage .nm {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pstage .nm .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3);
+  }
+  .pstage .nm .dot.evaluating { background: var(--ink-3); }
+  .pstage .nm .dot.applied { background: var(--signal); }
+  .pstage .nm .dot.interviewing { background: var(--accent); }
+  .pstage .nm .dot.offer { background: var(--ink); }
+  .pstage .ct {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .pstage .ct.zero { color: var(--ink-3); }
+
+  /* Market intel — the editorial brief, lightly accented */
+  .market {
+    background: var(--accent-soft);
+    border: 0.75px solid transparent;
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+    color: var(--ink);
+  }
+  .market .mkicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .market .mhead {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 18px; line-height: 1.3; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .market .mhead em { font-style: italic; }
+  .market .figure {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 30px; line-height: 1; letter-spacing: -0.8px; color: var(--ink);
+    margin: 4px 0 0;
+  }
+  .market .figure .unit { font-size: 16px; color: var(--ink-2); }
+  .market .gloss {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--accent); letter-spacing: 0.4px;
+  }
+  .market .gloss b { color: var(--ink); font-weight: 500; }
+  .market .more {
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500;
+    color: var(--accent); text-decoration: none;
+    margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .market .more svg { color: var(--accent); }
+
+  /* ============================================================ */
+  /* EMPTY STATE                                                    */
+  /* ============================================================ */
+  .empty-block {
+    border: 0.75px dashed var(--line);
+    background: var(--surface-2);
+    border-radius: 14px;
+    padding: 28px 30px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .empty-block .ekicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .empty-block .ehead {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.7px; color: var(--ink);
+    max-width: 540px;
+  }
+  .empty-block .ehead em { font-style: italic; }
+  .empty-block .ebody {
+    font-family: "Albert Sans"; font-size: 14.5px; line-height: 1.55;
+    color: var(--ink-2); max-width: 540px;
+  }
+  .empty-block .epaste {
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    margin-top: 6px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .empty-block .epaste .field {
+    background: var(--canvas); border: 0.75px dashed var(--line);
+    border-radius: 10px; padding: 18px;
+    min-height: 110px;
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink-3);
+    line-height: 1.5;
+    cursor: text;
+  }
+  .empty-block .epaste .field b { color: var(--ink-2); font-weight: 500; }
+  .empty-block .epaste .row { display: flex; gap: 8px; align-items: center; }
+  .empty-block .epaste .row .or {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+    padding: 0 4px;
+  }
+  .empty-block .btn-eval {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 18px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-on);
+    border: 0; font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .empty-block .btn-url {
+    padding: 11px 16px; border-radius: 999px;
+    background: var(--surface); color: var(--ink-2);
+    border: 0.75px solid var(--line);
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    cursor: pointer;
+  }
+
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .check {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px dashed var(--line-2);
+  }
+  .check:last-child { border-bottom: none; }
+  .check .mk {
+    flex-shrink: 0;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--ink-3);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-3);
+  }
+  .check.done .mk {
+    background: var(--accent); border-color: var(--accent); color: var(--accent-on);
+  }
+  .check .tx {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink-2);
+  }
+  .check.done .tx { color: var(--ink); text-decoration: line-through; text-decoration-color: var(--ink-3); }
+  .check .when {
+    margin-left: auto;
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--ink-3); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+
+  /* Quiet day — calm note */
+  .quiet-note {
+    border-top: 0.75px solid var(--line);
+    border-bottom: 0.75px solid var(--line);
+    padding: 28px 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .quiet-note .qhead {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.7px; color: var(--ink);
+    max-width: 540px;
+  }
+  .quiet-note .qhead em { font-style: italic; }
+  .quiet-note .qsub {
+    font-family: "Albert Sans"; font-size: 14.5px; line-height: 1.55;
+    color: var(--ink-2); max-width: 540px;
+  }
+
+  /* ============================================================ */
+  /* MOBILE                                                         */
+  /* ============================================================ */
+  .mobile-row {
+    display: flex; gap: 28px; flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .phone {
+    width: 380px; flex-shrink: 0;
+    background: #0a1f24;
+    border-radius: 38px;
+    padding: 10px;
+    box-shadow: 0 30px 60px -30px rgba(10,31,36,0.35),
+                0 8px 18px -10px rgba(10,31,36,0.15);
+  }
+  .phone .screenframe {
+    background: var(--bg);
+    border-radius: 30px;
+    overflow: hidden;
+    height: 780px;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .phone .notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 24px;
+    background: #0a1f24;
+    border-radius: 0 0 14px 14px;
+    z-index: 5;
+  }
+  .phone .statusbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 28px 6px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink); font-weight: 500;
+  }
+  .phone .statusbar .icons { display: flex; gap: 4px; color: var(--ink-2); }
+  .phone .mapp {
+    flex: 1; overflow-y: auto;
+    padding: 0 20px 110px;
+  }
+  .phone .mtopbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 4px 12px;
+  }
+  .phone .mtopbar .brand-m {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .phone .mtopbar .brand-m .dot { color: var(--accent); font-style: italic; }
+  .phone .mtopbar .menu {
+    width: 36px; height: 36px; border-radius: 999px;
+    border: 0.75px solid var(--line);
+    background: var(--surface);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-2);
+  }
+  .phone .mmasthead { padding: 8px 4px 6px; }
+  .phone .mmasthead .date {
+    font-family: "Geist Mono"; font-size: 10.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .phone .mmasthead h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 38px; line-height: 0.98; letter-spacing: -1.1px; color: var(--ink);
+    margin: 0;
+  }
+  .phone .mmasthead .strap {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    margin-top: 6px;
+  }
+  .phone .mmasthead .strap b { color: var(--ink); font-weight: 600; }
+  .phone .mmode {
+    margin: 14px 0 0;
+    background: var(--surface); border: 0.75px solid var(--line);
+    border-radius: 12px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .phone .mmode .lbl {
+    font-family: "Geist Mono"; font-size: 9.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .phone .mmode .name {
+    font-family: "Fraunces", serif; font-size: 17px; font-weight: 500;
+    color: var(--ink); margin-top: 1px; letter-spacing: -0.3px;
+  }
+  .phone .mmode .name em { font-style: italic; }
+  .phone .mmode .change {
+    font-family: "Albert Sans"; font-size: 12px; color: var(--accent);
+  }
+  .phone .msec { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
+  .phone .msec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 0.5px solid var(--line); padding-bottom: 6px;
+  }
+  .phone .msec-head .t {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 18px; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .phone .msec-head .t em { font-style: italic; }
+  .phone .msec-head .m {
+    font-family: "Geist Mono"; font-size: 9.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .phone .msec-head .m b { color: var(--ink-2); font-weight: 500; }
+  .phone .mlead {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 12px; align-items: center;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .phone .mlead:last-child { border-bottom: none; }
+  .phone .mlead .lg {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--surface); border: 0.75px solid var(--line);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 11px; color: var(--ink-3); letter-spacing: 0.4px;
+  }
+  .phone .mlead .b { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .phone .mlead .r {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 13.5px; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .phone .mlead .ml {
+    font-family: "Geist Mono"; font-size: 10.5px; color: var(--ink-3);
+    letter-spacing: 0.3px;
+  }
+  .phone .mlead .ml b { color: var(--ink-2); font-weight: 500; }
+  .phone .mlead .sc {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .phone .mlead .sc.strong { color: var(--accent); }
+  .phone .mlead .sc.weak { color: var(--ink-3); }
+
+  .phone .mfu {
+    background: var(--signal-bg); border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .phone .mfu .ft {
+    font-family: "Fraunces", serif; font-size: 17px; line-height: 1.3;
+    color: var(--signal-deep); letter-spacing: -0.2px;
+  }
+  .phone .mfu .ft em { font-style: italic; }
+  .phone .mfu .ft b { font-weight: 500; }
+  .phone .mfu .row { display: flex; gap: 8px; }
+  .phone .mfu .b1 {
+    flex: 1;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    padding: 8px 12px; border-radius: 999px;
+    background: var(--signal-deep); color: var(--signal-bg);
+    border: 0; text-align: center;
+  }
+  .phone .mfu .b2 {
+    flex: 1;
+    font-family: "Albert Sans"; font-size: 13px;
+    padding: 8px 12px; border-radius: 999px;
+    background: transparent; color: var(--signal-deep);
+    border: 0.75px solid var(--signal); text-align: center;
+  }
+
+  .phone .mpipe {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; margin-top: 4px;
+  }
+  .phone .mpipe .ps {
+    background: var(--surface); border: 0.75px solid var(--line);
+    border-radius: 10px; padding: 12px 10px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .phone .mpipe .ps .pn {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .phone .mpipe .ps .pn.zero { color: var(--ink-3); }
+  .phone .mpipe .ps .pl {
+    font-family: "Geist Mono"; font-size: 9px;
+    letter-spacing: 0.9px; text-transform: uppercase; color: var(--ink-3);
+  }
+
+  .phone .mmarket {
+    background: var(--accent-soft);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .phone .mmarket .k {
+    font-family: "Geist Mono"; font-size: 9.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--accent);
+  }
+  .phone .mmarket .h {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 16px; line-height: 1.3; color: var(--ink); letter-spacing: -0.2px;
+  }
+  .phone .mmarket .f {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 24px; line-height: 1; letter-spacing: -0.6px; color: var(--ink); margin-top: 2px;
+  }
+  .phone .mmarket .g {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 0.3px; color: var(--accent);
+  }
+  .phone .mmarket .g b { color: var(--ink); font-weight: 500; }
+
+  /* Sticky bottom evaluate bar on mobile */
+  .phone .mbottom {
+    position: absolute; left: 10px; right: 10px; bottom: 12px;
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 6px 6px 18px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 28px -12px rgba(10,31,36,0.18);
+    z-index: 8;
+  }
+  .phone .mbottom .ml {
+    flex: 1;
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-3);
+  }
+  .phone .mbottom .mb {
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600;
+    padding: 9px 16px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-on);
+    border: 0;
+  }
+
+  /* Phone column wrapper + label */
+  .phone-col {
+    width: 380px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .phone-col .plabel {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 0 4px;
+  }
+  .phone-col .plabel .pnum {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+    padding: 3px 9px; border-radius: 999px; background: var(--canvas);
+  }
+  .phone-col .plabel .pname {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 19px; line-height: 1; letter-spacing: -0.4px; color: var(--ink);
+  }
+  .phone-col .plabel .pname em { font-style: italic; }
+  .phone-col .pcaption {
+    font-family: "Albert Sans"; font-size: 12.5px; line-height: 1.5;
+    color: var(--ink-2); padding: 0 4px; max-width: 380px;
+  }
+  .phone-col .pcaption b { color: var(--ink); font-weight: 600; }
+
+  /* Empty-state mobile paste card */
+  .phone .mempty {
+    background: var(--surface); border: 0.75px dashed var(--line);
+    border-radius: 14px; padding: 16px;
+    margin-top: 14px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .phone .mempty .mek {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .phone .mempty .meh {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 19px; line-height: 1.25;
+    color: var(--ink); letter-spacing: -0.3px;
+  }
+  .phone .mempty .meh em { font-style: italic; }
+  .phone .mempty .meb {
+    font-family: "Albert Sans"; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+  }
+  .phone .mempty .mefield {
+    background: var(--canvas); border: 0.75px dashed var(--line);
+    border-radius: 10px; padding: 12px;
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-3); line-height: 1.5;
+    min-height: 86px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .phone .mempty .mefield b { color: var(--ink-2); font-weight: 500; }
+  .phone .mempty .mebtn {
+    padding: 11px 12px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-on); border: 0;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 13px;
+    text-align: center;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  /* Empty-state checklist */
+  .phone .mcheck {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 0.5px dashed var(--line-2);
+  }
+  .phone .mcheck:last-child { border-bottom: none; }
+  .phone .mcheck .mk {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid var(--ink-3);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--ink-3); flex-shrink: 0;
+  }
+  .phone .mcheck.done .mk {
+    background: var(--accent); border-color: var(--accent); color: var(--accent-on);
+  }
+  .phone .mcheck .mt {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-2);
+    flex: 1; min-width: 0;
+  }
+  .phone .mcheck.done .mt {
+    color: var(--ink); text-decoration: line-through; text-decoration-color: var(--ink-3);
+  }
+  .phone .mcheck .mw {
+    font-family: "Geist Mono"; font-size: 9px;
+    letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink-3);
+  }
+
+  /* Quiet-day calm note */
+  .phone .mquietnote {
+    border-top: 0.75px solid var(--line);
+    border-bottom: 0.75px solid var(--line);
+    padding: 18px 0;
+    margin-top: 6px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .phone .mquietnote .qh {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 20px; line-height: 1.25;
+    color: var(--ink); letter-spacing: -0.4px;
+  }
+  .phone .mquietnote .qh em { font-style: italic; }
+  .phone .mquietnote .qb {
+    font-family: "Albert Sans"; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+  }
+
+  /* ============================================================ */
+  /* ANNOTATIONS                                                    */
+  /* ============================================================ */
+  .annot {
+    margin-top: 20px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .annot .a {
+    background: var(--surface-2);
+    border: 0.75px dashed var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .annot .a .nk {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent);
+  }
+  .annot .a .ah {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 13.5px; color: var(--ink);
+  }
+  .annot .a .ab {
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.55; color: var(--ink-2);
+  }
+  .annot .a .ab b { color: var(--ink); font-weight: 600; }
+
+  /* Footer */
+  .pagefoot {
+    margin-top: 60px;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    font-family: "Geist Mono", monospace; font-size: 10.5px; color: var(--ink-3);
+    letter-spacing: 0.6px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+</style>
+</head>
+<body class="theme-light" data-lang="en">
+
+  <template id="__bundler_thumbnail" data-bg-color="#f6f8f8">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="800" fill="#f6f8f8"/>
+      <line x1="200" y1="280" x2="1000" y2="280" stroke="#e2e7e8" stroke-width="1"/>
+      <text x="600" y="460" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="220" font-weight="500" fill="#0a1f24" letter-spacing="-8">labra<tspan fill="#0d7c89" font-style="italic">.</tspan></text>
+      <text x="600" y="540" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="22" fill="#889399" letter-spacing="4">DASHBOARD · HOME</text>
+      <line x1="200" y1="600" x2="1000" y2="600" stroke="#e2e7e8" stroke-width="1"/>
+    </svg>
+  </template>
+
+  <!-- ============================================================ -->
+  <!-- TOP CHROME                                                    -->
+  <!-- ============================================================ -->
+  <div class="top">
+    <div class="brand">labra<span class="dot">.</span><span class="system"><span class="en">Dashboard / Home</span><span class="es">Dashboard / Inicio</span></span></div>
+    <div class="spacer"></div>
+    <span class="version">v0.1 · May 2026</span>
+    <div class="toggles">
+      <div class="seg" role="group" aria-label="language">
+        <button id="lang-en" class="on" onclick="setLang('en')">EN</button>
+        <button id="lang-es" onclick="setLang('es')">ES</button>
+      </div>
+      <div class="seg" role="group" aria-label="theme">
+        <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+        <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+
+    <!-- ============================================================ -->
+    <!-- HERO + DIRECTION                                              -->
+    <!-- ============================================================ -->
+    <div class="hero">
+      <div class="kicker">
+        <span class="en">Dashboard / Home · One direction · Three states · Desktop + Mobile</span>
+        <span class="es">Dashboard / Inicio · Una dirección · Tres estados · Escritorio + Móvil</span>
+      </div>
+      <h1>
+        <span class="en">A briefing, not a <em>dashboard</em>.</span>
+        <span class="es">Un <em>resumen</em>, no un dashboard.</span>
+      </h1>
+      <p>
+        <span class="en">The post-signin surface reads like opening The Economist on a Sunday morning: a dated masthead, a short list of items that earned the user's attention today, and one quiet data point about their market. The action is paste a recruiter DM — persistent in the right rail, never shouting. No metric strip, no charts, no streaks.</span>
+        <span class="es">La superficie post-login se lee como abrir The Economist un domingo: una cabecera con fecha, una lista breve de lo que merece la atención del usuario hoy, y un dato sobrio sobre su mercado. La acción es pegar un DM de reclutador — persistente en la columna derecha, nunca gritando. Sin tira de métricas, sin gráficas, sin rachas.</span>
+      </p>
+      <div class="principles">
+        <div class="principle">
+          <span class="pn">01</span>
+          <span class="pt"><span class="en">Three answers in <em>10 seconds</em>.</span><span class="es">Tres respuestas en <em>10 segundos</em>.</span></span>
+          <span class="pd"><span class="en">Anything to do? What's in pipeline? What's the market saying? Each lives in one named section.</span><span class="es">¿Algo que hacer? ¿Qué hay en pipeline? ¿Qué dice el mercado? Cada uno vive en una sección con nombre.</span></span>
+        </div>
+        <div class="principle">
+          <span class="pn">02</span>
+          <span class="pt"><span class="en">Reading column, <em>not</em> a grid.</span><span class="es">Columna de lectura, <em>no</em> una cuadrícula.</span></span>
+          <span class="pd"><span class="en">Editorial serif headings, one-line lead entries. Numbers in Fraunces; metadata in Geist Mono. No cards-on-cards.</span><span class="es">Encabezados en serif editorial, entradas de una línea. Números en Fraunces; metadata en Geist Mono. Sin tarjetas dentro de tarjetas.</span></span>
+        </div>
+        <div class="principle">
+          <span class="pn">03</span>
+          <span class="pt"><span class="en">Evaluate is <em>always</em> one click.</span><span class="es">Evaluar está siempre <em>a un clic</em>.</span></span>
+          <span class="pd"><span class="en">A persistent paste field anchors the right rail. The wedge moment is available even on the quietest day.</span><span class="es">Un campo para pegar permanente ancla la columna derecha. El momento clave está disponible incluso en el día más tranquilo.</span></span>
+        </div>
+        <div class="principle">
+          <span class="pn">04</span>
+          <span class="pt"><span class="en">Honest <em>distribution</em> of scores.</span><span class="es">Distribución <em>honesta</em> de puntajes.</span></span>
+          <span class="pd"><span class="en">Real scores cluster 50–85, average ~64. A dashboard of 90+ would lie. Strong fits are colored — weak fits are not hidden.</span><span class="es">Puntajes reales se agrupan entre 50–85, promedio ~64. Un dashboard de 90+ mentiría. Los fits fuertes se colorean — los débiles no se esconden.</span></span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- SCREEN 1 — ACTIVE USER (LOADED)                              -->
+    <!-- ============================================================ -->
+    <div class="screen" data-screen-label="01 Active user — loaded dashboard">
+      <div class="screen-label">
+        <span class="num">01 · Desktop</span>
+        <h2><span class="en">Active user, <em>loaded</em></span><span class="es">Usuario activo, <em>cargado</em></span></h2>
+        <span class="tag"><span class="en">Nacho · Tue 19 May · Leverage mode · 20 evaluations in history</span><span class="es">Nacho · Mar 19 may · modo Leverage · 20 evaluaciones en historia</span></span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app/home</span>
+        </div>
+
+        <div class="app">
+          <!-- App bar -->
+          <div class="appbar">
+            <span class="brand-small">labra<span class="dot">.</span></span>
+            <nav class="nav">
+              <a class="on"><span class="en">Home</span><span class="es">Inicio</span></a>
+              <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a><span class="en">Market</span><span class="es">Mercado</span></a>
+              <a><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <span class="name">Nacho Reyes</span>
+              <span class="dot-sep">·</span>
+              <span>nacho@galgo.com</span>
+            </div>
+          </div>
+
+          <div class="dash">
+            <!-- Masthead -->
+            <div class="masthead">
+              <div class="left">
+                <div class="date">
+                  <span class="en">Tuesday · 19 May 2026 · Mexico City</span>
+                  <span class="es">Martes · 19 mayo 2026 · Ciudad de México</span>
+                </div>
+                <h1>
+                  <span class="en">Today's <em>brief</em>.</span>
+                  <span class="es">Tu <em>resumen</em> de hoy.</span>
+                </h1>
+                <div class="strap">
+                  <span class="en"><b>3 new leads</b> · 1 strong fit · 1 follow-up due · market quiet.</span>
+                  <span class="es"><b>3 vacantes nuevas</b> · 1 fit fuerte · 1 seguimiento pendiente · mercado tranquilo.</span>
+                </div>
+              </div>
+              <div class="mode-chip">
+                <span class="lbl"><span class="en">Your mode</span><span class="es">Tu modo</span></span>
+                <div class="val">
+                  <span class="name"><span class="en"><em>Leverage</em></span><span class="es"><em>Leverage</em></span></span>
+                  <span class="change"><span class="en">Change</span><span class="es">Cambiar</span></span>
+                </div>
+                <span class="gloss">
+                  <span class="en">Open to the right opportunity. Comp floor MXN 1.6M.</span>
+                  <span class="es">Abierto a la oportunidad correcta. Piso MXN 1.6M.</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- MAIN COLUMN -->
+            <div class="col-main">
+
+              <!-- Today's brief: leads -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">New <em>this week</em></span><span class="es">Nuevas <em>esta semana</em></span></span>
+                  <span class="meta">
+                    <span class="en"><b>3</b> leads <span class="sep">·</span> 1 strong fit <span class="sep">·</span> 2 from target companies</span>
+                    <span class="es"><b>3</b> vacantes <span class="sep">·</span> 1 fit fuerte <span class="sep">·</span> 2 de empresas objetivo</span>
+                  </span>
+                </div>
+                <div class="leads">
+                  <div class="lead">
+                    <div class="logo">01</div>
+                    <div class="body">
+                      <span class="role">Head of Operations <span class="tag-new">NEW</span></span>
+                      <span class="meta-l">
+                        <span class="en"><b>Stori</b><span class="sep">·</span>MX <span class="sep">·</span> Series C · Lending<span class="sep">·</span>recruiter DM</span>
+                        <span class="es"><b>Stori</b><span class="sep">·</span>MX <span class="sep">·</span> Serie C · Lending<span class="sep">·</span>DM de reclutador</span>
+                      </span>
+                    </div>
+                    <span class="score strong">
+                      <span class="num">81</span>
+                      <span class="lbl"><span class="en">/100</span><span class="es">/100</span></span>
+                    </span>
+                    <a class="open primary"><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  </div>
+
+                  <div class="lead">
+                    <div class="logo">02</div>
+                    <div class="body">
+                      <span class="role">Director of Operations, LatAm</span>
+                      <span class="meta-l">
+                        <span class="en"><b>Clara</b><span class="sep">·</span>MX <span class="sep">·</span> Series C · Fintech<span class="sep">·</span>scanned · 6h ago</span>
+                        <span class="es"><b>Clara</b><span class="sep">·</span>MX <span class="sep">·</span> Serie C · Fintech<span class="sep">·</span>escaneado · hace 6h</span>
+                      </span>
+                    </div>
+                    <span class="score">
+                      <span class="num">72</span>
+                      <span class="lbl">/100</span>
+                    </span>
+                    <a class="open"><span class="en">Open</span><span class="es">Abrir</span></a>
+                  </div>
+
+                  <div class="lead">
+                    <div class="logo">03</div>
+                    <div class="body">
+                      <span class="role">Country Manager · Mexico</span>
+                      <span class="meta-l">
+                        <span class="en"><b>Jeeves</b><span class="sep">·</span>MX <span class="sep">·</span> Series D · Fintech<span class="sep">·</span>recruiter DM</span>
+                        <span class="es"><b>Jeeves</b><span class="sep">·</span>MX <span class="sep">·</span> Serie D · Fintech<span class="sep">·</span>DM de reclutador</span>
+                      </span>
+                    </div>
+                    <span class="score weak">
+                      <span class="num">58</span>
+                      <span class="lbl">/100</span>
+                    </span>
+                    <a class="open"><span class="en">Open</span><span class="es">Abrir</span></a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Follow-ups -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">Follow-ups <em>due</em></span><span class="es">Seguimientos <em>pendientes</em></span></span>
+                  <span class="meta">
+                    <span class="en"><b>1</b> waiting <span class="sep">·</span> 7+ days since contact</span>
+                    <span class="es"><b>1</b> en espera <span class="sep">·</span> 7+ días sin contacto</span>
+                  </span>
+                </div>
+                <div class="followups">
+                  <div class="fu">
+                    <span class="text">
+                      <span class="en">You applied to <b>Clara</b> for <em>Director of Operations</em> <span class="days">9 days ago</span>. Time to follow up.</span>
+                      <span class="es">Aplicaste a <b>Clara</b> para <em>Director de Operaciones</em> <span class="days">hace 9 días</span>. Hora de hacer seguimiento.</span>
+                    </span>
+                    <div class="actions">
+                      <button class="act primary"><span class="en">Draft follow-up</span><span class="es">Redactar seguimiento</span></button>
+                      <button class="act"><span class="en">Open thread</span><span class="es">Ver hilo</span></button>
+                      <button class="act ghost"><span class="en">Snooze</span><span class="es">Posponer</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent activity -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">Recent <em>evaluations</em></span><span class="es">Evaluaciones <em>recientes</em></span></span>
+                  <span class="meta">
+                    <span class="en">Last 4 <span class="sep">·</span> <b>see all</b> →</span>
+                    <span class="es">Últimas 4 <span class="sep">·</span> <b>ver todas</b> →</span>
+                  </span>
+                </div>
+                <div class="recent">
+                  <div class="recent-row">
+                    <span class="lg">01</span>
+                    <span class="rl">
+                      <span class="en">Country Manager <span class="sep">·</span> <span class="co">Kavak</span></span>
+                      <span class="es">Country Manager <span class="sep">·</span> <span class="co">Kavak</span></span>
+                    </span>
+                    <span class="sc"><b>70</b>/100</span>
+                    <span class="when"><span class="en">Yesterday</span><span class="es">Ayer</span></span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">02</span>
+                    <span class="rl">
+                      <span class="en">Director of Operations, LatAm <span class="sep">·</span> <span class="co">EBANX</span></span>
+                      <span class="es">Director de Operaciones, LatAm <span class="sep">·</span> <span class="co">EBANX</span></span>
+                    </span>
+                    <span class="sc"><b>78</b>/100</span>
+                    <span class="when">Mon</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">03</span>
+                    <span class="rl">
+                      <span class="en">VP Operations · Fintech <span class="sep">·</span> <span class="co">dLocal</span></span>
+                      <span class="es">VP Operaciones · Fintech <span class="sep">·</span> <span class="co">dLocal</span></span>
+                    </span>
+                    <span class="sc"><b>63</b>/100</span>
+                    <span class="when">Mon</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">04</span>
+                    <span class="rl">
+                      <span class="en">Head of Operations <span class="sep">·</span> <span class="co">Bitso</span></span>
+                      <span class="es">Head de Operaciones <span class="sep">·</span> <span class="co">Bitso</span></span>
+                    </span>
+                    <span class="sc"><b>54</b>/100</span>
+                    <span class="when">Fri</span>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /.col-main -->
+
+            <!-- SIDEBAR -->
+            <div class="col-side">
+
+              <!-- Evaluate panel -->
+              <div class="evaluate-panel">
+                <div class="ev-top">
+                  <span class="ev-kicker"><span class="en">Quick action</span><span class="es">Acción rápida</span></span>
+                  <span class="ev-title">
+                    <span class="en"><em>Evaluate</em> something.</span>
+                    <span class="es"><em>Evalúa</em> algo.</span>
+                  </span>
+                  <span class="ev-sub">
+                    <span class="en">Paste a recruiter DM, a job URL, or a paste of the role description.</span>
+                    <span class="es">Pega un DM, una URL de vacante, o el texto de la descripción.</span>
+                  </span>
+                </div>
+                <div class="ev-paste">
+                  <div class="field">
+                    <span class="hint">
+                      <span class="en">Paste anything — DM, posting, or URL. Labra figures out what it is.</span>
+                      <span class="es">Pega lo que sea — DM, vacante, o URL. Labra identifica qué es.</span>
+                    </span>
+                  </div>
+                  <div class="ev-row">
+                    <button class="btn-eval" style="flex: 1;">
+                      <span class="en">Evaluate</span>
+                      <span class="es">Evaluar</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                  <span class="ev-shortcut">
+                    <span class="en"><kbd>⌘</kbd> + <kbd>V</kbd> anywhere on this page</span>
+                    <span class="es"><kbd>⌘</kbd> + <kbd>V</kbd> en cualquier parte de esta página</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Pipeline -->
+              <div class="panel">
+                <div class="pipeline">
+                  <span class="lbl">
+                    <span><span class="en">In your pipeline</span><span class="es">En tu pipeline</span></span>
+                    <a><span class="en">Open tracker →</span><span class="es">Abrir tracker →</span></a>
+                  </span>
+                  <div class="pipeline-stages">
+                    <div class="pstage">
+                      <span class="nm"><span class="dot evaluating"></span><span class="en">Evaluating</span><span class="es">Evaluando</span></span>
+                      <span class="ct">5</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot applied"></span><span class="en">Applied</span><span class="es">Aplicadas</span></span>
+                      <span class="ct">3</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot interviewing"></span><span class="en">Interviewing</span><span class="es">Entrevistando</span></span>
+                      <span class="ct">1</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot offer"></span><span class="en">Offer</span><span class="es">Oferta</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Market intel -->
+              <div class="market">
+                <span class="mkicker">
+                  <span class="en">This week's market</span>
+                  <span class="es">El mercado esta semana</span>
+                </span>
+                <span class="mhead">
+                  <span class="en">Median base for <em>Director of Ops</em>, MX fintech</span>
+                  <span class="es">Base mediana para <em>Director de Ops</em>, fintech MX</span>
+                </span>
+                <span class="figure">MXN $1.9M<span class="unit"> – $2.4M</span></span>
+                <span class="gloss">
+                  <span class="en">SAMPLE <b>n = 18</b> <span class="sep">·</span> trailing 90 days <span class="sep">·</span> base only, ex-equity</span>
+                  <span class="es">MUESTRA <b>n = 18</b> <span class="sep">·</span> últimos 90 días <span class="sep">·</span> base, sin equity</span>
+                </span>
+                <a class="more">
+                  <span class="en">See full distribution →</span>
+                  <span class="es">Ver distribución completa →</span>
+                </a>
+              </div>
+
+            </div><!-- /.col-side -->
+          </div><!-- /.dash -->
+        </div>
+      </div>
+
+      <!-- Annotations -->
+      <div class="annot">
+        <div class="a">
+          <span class="nk">A · Masthead</span>
+          <span class="ah"><span class="en">Date, title, summary line — read as one</span><span class="es">Fecha, título y resumen — se leen como uno</span></span>
+          <span class="ab">
+            <span class="en">Mode chip sits beside the headline, not above the page. It's contextual to today, not chrome.</span>
+            <span class="es">El chip de modo va junto al titular, no encima de la página. Es contexto del día, no chrome.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">B · Reading column</span>
+          <span class="ah"><span class="en">Three sections, top to bottom</span><span class="es">Tres secciones, de arriba a abajo</span></span>
+          <span class="ab">
+            <span class="en">New leads → Follow-ups → Recent. Order = urgency. Each section is its own row, divided by a hairline, not boxed.</span>
+            <span class="es">Vacantes nuevas → Seguimientos → Recientes. Orden = urgencia. Cada sección es su propia fila, dividida por una línea, no encajonada.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">C · Persistent Evaluate</span>
+          <span class="ah"><span class="en">The wedge moment lives in the rail</span><span class="es">El momento clave vive en la columna</span></span>
+          <span class="ab">
+            <span class="en">A real paste field, not a button to another page. ⌘V works anywhere. Visible on every state, including quiet days.</span>
+            <span class="es">Un campo real para pegar, no un botón a otra página. ⌘V funciona en toda la página. Visible en cada estado.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">D · Pipeline as glance</span>
+          <span class="ah"><span class="en">Counts, not cards</span><span class="es">Conteos, no tarjetas</span></span>
+          <span class="ab">
+            <span class="en">Four stages, hairline rows. The number is the answer; the dot tracks the Tracker page's colors. Zero is muted, not punitive.</span>
+            <span class="es">Cuatro etapas, filas con línea fina. El número es la respuesta; el punto sigue los colores del Tracker. Cero va silenciado, no punitivo.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">E · Market intelligence</span>
+          <span class="ah"><span class="en">One data point, sourced</span><span class="es">Un dato, con fuente</span></span>
+          <span class="ab">
+            <span class="en">Soft mint card — the moat showing up quietly. Sample size is shown. "n=18" matters — it's honest.</span>
+            <span class="es">Tarjeta menta suave — el moat presentándose sin gritar. Se muestra el tamaño de muestra. "n=18" importa — es honesto.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">F · Score honesty</span>
+          <span class="ah"><span class="en">Distribution shown, not just hits</span><span class="es">Se muestra la distribución, no solo aciertos</span></span>
+          <span class="ab">
+            <span class="en">81 (strong) sits next to 58 (weak). Teal accent only for strong fits; weak fits go grey. We don't pretend everything is a match.</span>
+            <span class="es">81 (fuerte) junto a 58 (débil). El acento teal solo para fits fuertes; los débiles van en gris. No fingimos que todo encaja.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- SCREEN 2 — NEW USER (EMPTY)                                  -->
+    <!-- ============================================================ -->
+    <div class="screen" data-screen-label="02 New user — empty dashboard">
+      <div class="screen-label">
+        <span class="num">02 · Desktop</span>
+        <h2><span class="en">New user, <em>empty</em></span><span class="es">Usuario nuevo, <em>vacío</em></span></h2>
+        <span class="tag"><span class="en">Just finished onboarding. CV uploaded. Zero evaluations.</span><span class="es">Acaba de terminar onboarding. CV subido. Cero evaluaciones.</span></span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app/home</span>
+        </div>
+
+        <div class="app">
+          <div class="appbar">
+            <span class="brand-small">labra<span class="dot">.</span></span>
+            <nav class="nav">
+              <a class="on"><span class="en">Home</span><span class="es">Inicio</span></a>
+              <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a><span class="en">Market</span><span class="es">Mercado</span></a>
+              <a><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <span class="name">Nacho Reyes</span>
+              <span class="dot-sep">·</span>
+              <span>nacho@galgo.com</span>
+            </div>
+          </div>
+
+          <div class="dash">
+            <!-- Masthead — same shape, different message -->
+            <div class="masthead">
+              <div class="left">
+                <div class="date">
+                  <span class="en">Tuesday · 19 May 2026 · Day one</span>
+                  <span class="es">Martes · 19 mayo 2026 · Día uno</span>
+                </div>
+                <h1>
+                  <span class="en">A clean <em>slate</em>.</span>
+                  <span class="es">Página en <em>blanco</em>.</span>
+                </h1>
+                <div class="strap">
+                  <span class="en">Your CV is in, your mode is set. The dashboard is empty by design — it fills as you evaluate.</span>
+                  <span class="es">Tu CV está cargado, tu modo está fijado. El dashboard está vacío por diseño — se llena conforme evalúas.</span>
+                </div>
+              </div>
+              <div class="mode-chip">
+                <span class="lbl"><span class="en">Your mode</span><span class="es">Tu modo</span></span>
+                <div class="val">
+                  <span class="name"><em>Leverage</em></span>
+                  <span class="change"><span class="en">Change</span><span class="es">Cambiar</span></span>
+                </div>
+                <span class="gloss">
+                  <span class="en">Open to the right opportunity. Comp floor MXN 1.6M.</span>
+                  <span class="es">Abierto a la oportunidad correcta. Piso MXN 1.6M.</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- MAIN COLUMN — empty state focus -->
+            <div class="col-main">
+
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">Your <em>first move</em></span><span class="es">Tu <em>primer paso</em></span></span>
+                  <span class="meta">
+                    <span class="en"><b>1</b> of 1</span>
+                    <span class="es"><b>1</b> de 1</span>
+                  </span>
+                </div>
+
+                <div class="empty-block">
+                  <span class="ekicker">
+                    <span class="en">Empty state · No leads yet</span>
+                    <span class="es">Estado vacío · Sin vacantes aún</span>
+                  </span>
+                  <span class="ehead">
+                    <span class="en">Nothing to evaluate yet. Paste a recruiter DM or a job URL to <em>start</em>.</span>
+                    <span class="es">Aún no hay nada que evaluar. Pega un DM de un reclutador o el URL de una vacante para <em>empezar</em>.</span>
+                  </span>
+                  <span class="ebody">
+                    <span class="en">Most users start with a real recruiter message they received this month — even one they've already declined. The first evaluation tells you how much the rest are worth.</span>
+                    <span class="es">La mayoría empieza con un mensaje real que recibió este mes — incluso uno que ya declinaron. La primera evaluación te dice cuánto valen las demás.</span>
+                  </span>
+
+                  <div class="epaste">
+                    <div class="field">
+                      <span><b><span class="en">Paste here.</span><span class="es">Pega aquí.</span></b></span>
+                      <span>
+                        <span class="en">A LinkedIn DM, a WhatsApp screenshot, a job URL — Labra reads whatever you paste. No need to tag it first.</span>
+                        <span class="es">Un DM de LinkedIn, un screenshot de WhatsApp, una URL — Labra lee lo que pegues. No hace falta etiquetarlo.</span>
+                      </span>
+                    </div>
+                    <div class="row">
+                      <button class="btn-eval">
+                        <span class="en">Evaluate first lead</span>
+                        <span class="es">Evaluar primera vacante</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiet checklist of what's set up -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">What's <em>already set</em></span><span class="es">Lo que ya está <em>listo</em></span></span>
+                  <span class="meta">
+                    <span class="en"><b>3 of 4</b> ready</span>
+                    <span class="es"><b>3 de 4</b> listas</span>
+                  </span>
+                </div>
+                <div class="checklist">
+                  <div class="check done">
+                    <span class="mk">✓</span>
+                    <span class="tx"><span class="en">CV uploaded · <b>nacho-reyes-cv.pdf</b></span><span class="es">CV subido · <b>nacho-reyes-cv.pdf</b></span></span>
+                    <span class="when"><span class="en">Today, 09:42</span><span class="es">Hoy, 09:42</span></span>
+                  </div>
+                  <div class="check done">
+                    <span class="mk">✓</span>
+                    <span class="tx"><span class="en">Mode set · <b>Leverage</b></span><span class="es">Modo fijado · <b>Leverage</b></span></span>
+                    <span class="when"><span class="en">Today, 09:48</span><span class="es">Hoy, 09:48</span></span>
+                  </div>
+                  <div class="check done">
+                    <span class="mk">✓</span>
+                    <span class="tx"><span class="en">Target band · <b>Director / Head of, MX fintech</b></span><span class="es">Banda objetivo · <b>Director / Head of, fintech MX</b></span></span>
+                    <span class="when"><span class="en">Today, 09:50</span><span class="es">Hoy, 09:50</span></span>
+                  </div>
+                  <div class="check">
+                    <span class="mk">·</span>
+                    <span class="tx"><span class="en">Run your first evaluation</span><span class="es">Realiza tu primera evaluación</span></span>
+                    <span class="when"><span class="en">Up next</span><span class="es">Lo siguiente</span></span>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /.col-main -->
+
+            <!-- SIDEBAR — same anchors, sketched -->
+            <div class="col-side">
+
+              <!-- Pipeline, empty -->
+              <div class="panel">
+                <div class="pipeline">
+                  <span class="lbl">
+                    <span><span class="en">In your pipeline</span><span class="es">En tu pipeline</span></span>
+                  </span>
+                  <div class="pipeline-stages">
+                    <div class="pstage">
+                      <span class="nm"><span class="dot evaluating"></span><span class="en">Evaluating</span><span class="es">Evaluando</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot applied"></span><span class="en">Applied</span><span class="es">Aplicadas</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot interviewing"></span><span class="en">Interviewing</span><span class="es">Entrevistando</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot offer"></span><span class="en">Offer</span><span class="es">Oferta</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Market intel — works even for new users -->
+              <div class="market">
+                <span class="mkicker">
+                  <span class="en">This week's market</span>
+                  <span class="es">El mercado esta semana</span>
+                </span>
+                <span class="mhead">
+                  <span class="en">Median base for your <em>target band</em></span>
+                  <span class="es">Base mediana para tu <em>banda objetivo</em></span>
+                </span>
+                <span class="figure">MXN $1.9M<span class="unit"> – $2.4M</span></span>
+                <span class="gloss">
+                  <span class="en">DIRECTOR / HEAD OF · MX FINTECH <span class="sep">·</span> <b>n = 18</b> · trailing 90 days</span>
+                  <span class="es">DIRECTOR / HEAD OF · FINTECH MX <span class="sep">·</span> <b>n = 18</b> · últimos 90 días</span>
+                </span>
+                <a class="more">
+                  <span class="en">See full distribution →</span>
+                  <span class="es">Ver distribución completa →</span>
+                </a>
+              </div>
+
+              <!-- Light promise card — the covenant -->
+              <div class="panel">
+                <span class="ptitle"><span class="en">The covenant</span><span class="es">El pacto</span></span>
+                <span style="font-family: Fraunces, serif; font-weight: 400; font-size: 17px; line-height: 1.4; color: var(--ink); letter-spacing: -0.2px;">
+                  <span class="en">Your data, your control. One-click <em>export</em> and one-click <em>delete</em> live in Settings.</span>
+                  <span class="es">Tus datos, tu control. <em>Exportar</em> con un clic y <em>borrar</em> con un clic, en Ajustes.</span>
+                </span>
+                <a style="font-family: 'Albert Sans'; font-size: 12.5px; font-weight: 500; color: var(--accent); text-decoration: none;">
+                  <span class="en">Read the full covenant →</span>
+                  <span class="es">Leer el pacto completo →</span>
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annot">
+        <div class="a">
+          <span class="nk">A · Headline reframed</span>
+          <span class="ah"><span class="en">Not "Welcome, Nacho!"</span><span class="es">No "¡Bienvenido, Nacho!"</span></span>
+          <span class="ab">
+            <span class="en"><b>"A clean slate"</b> states the situation in both languages without being chummy. The strap explains <em>why</em> the screen is empty — by design, not by accident.</span>
+            <span class="es"><b>"Página en blanco"</b> nombra la situación en ambos idiomas sin palmaditas. El sub-título explica <em>por qué</em> está vacío — por diseño, no por accidente.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">B · Paste is the screen</span>
+          <span class="ah"><span class="en">One field, one button</span><span class="es">Un campo, un botón</span></span>
+          <span class="ab">
+            <span class="en">The empty state isn't an error — it's the wedge moment, given room. Identification (DM vs URL vs posting) runs silently on the backend, so the user never has to label what they're pasting.</span>
+            <span class="es">El estado vacío no es un error — es el momento clave, con espacio. La identificación (DM vs URL vs vacante) ocurre en silencio en el backend, así el usuario nunca etiqueta lo que pega.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">C · What's already set</span>
+          <span class="ah"><span class="en">Acknowledge the onboarding work</span><span class="es">Reconoce el trabajo de onboarding</span></span>
+          <span class="ab">
+            <span class="en">A small "you've already done this" list. Concrete (filenames, times). Last unchecked item points back at the paste field above.</span>
+            <span class="es">Una pequeña lista de "ya hiciste esto". Concreta (nombres de archivo, horas). El último item apunta de vuelta al campo arriba.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">D · Pipeline placeholders</span>
+          <span class="ah"><span class="en">Show the shape, not fake data</span><span class="es">Muestra la forma, no datos falsos</span></span>
+          <span class="ab">
+            <span class="en">All zeros, all muted. The structure teaches the user what's coming without manufacturing it.</span>
+            <span class="es">Todo ceros, todo silenciado. La estructura enseña al usuario lo que viene sin fabricarlo.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">E · Market still earns its place</span>
+          <span class="ah"><span class="en">Value before first action</span><span class="es">Valor antes de la primera acción</span></span>
+          <span class="ab">
+            <span class="en">Even with zero evaluations, the user sees one real data point about their target band. The product is already working for them.</span>
+            <span class="es">Incluso con cero evaluaciones, el usuario ve un dato real de su banda objetivo. El producto ya está trabajando para ellos.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">F · The covenant, surfaced</span>
+          <span class="ah"><span class="en">Trust shown, not promised</span><span class="es">Confianza mostrada, no prometida</span></span>
+          <span class="ab">
+            <span class="en">A small panel reminding the new user that export + delete are one click. Honors the second product commitment.</span>
+            <span class="es">Un panel pequeño que recuerda al usuario nuevo que exportar + borrar están a un clic. Honra el segundo compromiso.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- SCREEN 3 — QUIET DAY                                          -->
+    <!-- ============================================================ -->
+    <div class="screen" data-screen-label="03 Quiet day — returning user, nothing pressing">
+      <div class="screen-label">
+        <span class="num">03 · Desktop</span>
+        <h2><span class="en">Quiet <em>day</em></span><span class="es">Día <em>tranquilo</em></span></h2>
+        <span class="tag"><span class="en">No new leads, no follow-ups due. Most days look like this.</span><span class="es">Sin vacantes nuevas, sin seguimientos pendientes. La mayoría de los días son así.</span></span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app/home</span>
+        </div>
+
+        <div class="app">
+          <div class="appbar">
+            <span class="brand-small">labra<span class="dot">.</span></span>
+            <nav class="nav">
+              <a class="on"><span class="en">Home</span><span class="es">Inicio</span></a>
+              <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a><span class="en">Market</span><span class="es">Mercado</span></a>
+              <a><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline">
+              <span class="name">Nacho Reyes</span>
+              <span class="dot-sep">·</span>
+              <span>nacho@galgo.com</span>
+            </div>
+          </div>
+
+          <div class="dash">
+            <div class="masthead">
+              <div class="left">
+                <div class="date">
+                  <span class="en">Thursday · 21 May 2026 · Mexico City</span>
+                  <span class="es">Jueves · 21 mayo 2026 · Ciudad de México</span>
+                </div>
+                <h1>
+                  <span class="en">A <em>quiet</em> day.</span>
+                  <span class="es">Un día <em>tranquilo</em>.</span>
+                </h1>
+                <div class="strap">
+                  <span class="en">No new leads today. No follow-ups due. Quiet days are normal — the market doesn't move on a schedule.</span>
+                  <span class="es">Sin vacantes nuevas hoy. Sin seguimientos pendientes. Los días tranquilos son normales — el mercado no se mueve en horario.</span>
+                </div>
+              </div>
+              <div class="mode-chip">
+                <span class="lbl"><span class="en">Your mode</span><span class="es">Tu modo</span></span>
+                <div class="val">
+                  <span class="name"><em>Leverage</em></span>
+                  <span class="change"><span class="en">Change</span><span class="es">Cambiar</span></span>
+                </div>
+                <span class="gloss">
+                  <span class="en">Open to the right opportunity. Comp floor MXN 1.6M.</span>
+                  <span class="es">Abierto a la oportunidad correcta. Piso MXN 1.6M.</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="col-main">
+
+              <!-- Quiet acknowledgment, no manufactured urgency -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">New <em>this week</em></span><span class="es">Nuevas <em>esta semana</em></span></span>
+                  <span class="meta">
+                    <span class="en"><b>0</b> leads <span class="sep">·</span> 3 scanned, none matched your floor</span>
+                    <span class="es"><b>0</b> vacantes <span class="sep">·</span> 3 escaneadas, ninguna pasó tu piso</span>
+                  </span>
+                </div>
+                <div class="quiet-note">
+                  <span class="qhead">
+                    <span class="en">No new leads matched your <em>filters</em>.</span>
+                    <span class="es">Ninguna vacante nueva pasó tus <em>filtros</em>.</span>
+                  </span>
+                  <span class="qsub">
+                    <span class="en">We scanned your 8 target companies and reviewed 3 incoming postings. None reached your comp floor or matched your target band. We'll keep looking.</span>
+                    <span class="es">Escaneamos tus 8 empresas objetivo y revisamos 3 publicaciones nuevas. Ninguna alcanzó tu piso de compensación o tu banda objetivo. Seguiremos buscando.</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Recent activity gets the spotlight on a quiet day -->
+              <div class="sec">
+                <div class="sec-head">
+                  <span class="htitle"><span class="en">Recent <em>evaluations</em></span><span class="es">Evaluaciones <em>recientes</em></span></span>
+                  <span class="meta">
+                    <span class="en">Last 5 <span class="sep">·</span> avg score <b>67</b></span>
+                    <span class="es">Últimas 5 <span class="sep">·</span> promedio <b>67</b></span>
+                  </span>
+                </div>
+                <div class="recent">
+                  <div class="recent-row">
+                    <span class="lg">01</span>
+                    <span class="rl"><span class="en">Country Manager <span class="sep">·</span> <span class="co">Kavak</span></span><span class="es">Country Manager <span class="sep">·</span> <span class="co">Kavak</span></span></span>
+                    <span class="sc"><b>70</b>/100</span>
+                    <span class="when">Tue</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">02</span>
+                    <span class="rl"><span class="en">Director of Operations, LatAm <span class="sep">·</span> <span class="co">EBANX</span></span><span class="es">Director de Operaciones, LatAm <span class="sep">·</span> <span class="co">EBANX</span></span></span>
+                    <span class="sc"><b>78</b>/100</span>
+                    <span class="when">Mon</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">03</span>
+                    <span class="rl"><span class="en">VP Operations · Fintech <span class="sep">·</span> <span class="co">dLocal</span></span><span class="es">VP Operaciones · Fintech <span class="sep">·</span> <span class="co">dLocal</span></span></span>
+                    <span class="sc"><b>63</b>/100</span>
+                    <span class="when">Mon</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">04</span>
+                    <span class="rl"><span class="en">Head of Operations <span class="sep">·</span> <span class="co">Bitso</span></span><span class="es">Head de Operaciones <span class="sep">·</span> <span class="co">Bitso</span></span></span>
+                    <span class="sc"><b>54</b>/100</span>
+                    <span class="when">Fri</span>
+                  </div>
+                  <div class="recent-row">
+                    <span class="lg">05</span>
+                    <span class="rl"><span class="en">Senior Director, Marketplace Partnerships <span class="sep">·</span> <span class="co">Nowports</span></span><span class="es">Senior Director, Marketplace Partnerships <span class="sep">·</span> <span class="co">Nowports</span></span></span>
+                    <span class="sc"><b>69</b>/100</span>
+                    <span class="when"><span class="en">Last wk</span><span class="es">Sem. pas.</span></span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Sidebar — Evaluate still anchors -->
+            <div class="col-side">
+              <div class="evaluate-panel">
+                <div class="ev-top">
+                  <span class="ev-kicker"><span class="en">Quick action</span><span class="es">Acción rápida</span></span>
+                  <span class="ev-title">
+                    <span class="en"><em>Evaluate</em> something.</span>
+                    <span class="es"><em>Evalúa</em> algo.</span>
+                  </span>
+                  <span class="ev-sub">
+                    <span class="en">Quiet day? Drop a recruiter DM you got last month. Worth a re-read with fresh data.</span>
+                    <span class="es">¿Día tranquilo? Pega un DM que recibiste el mes pasado. Vale la re-lectura con datos frescos.</span>
+                  </span>
+                </div>
+                <div class="ev-paste">
+                  <div class="field">
+                    <span class="hint">
+                      <span class="en">Paste anything — DM, posting, or URL. Labra figures out what it is.</span>
+                      <span class="es">Pega lo que sea — DM, vacante, o URL. Labra identifica qué es.</span>
+                    </span>
+                  </div>
+                  <div class="ev-row">
+                    <button class="btn-eval" style="flex: 1;">
+                      <span class="en">Evaluate</span>
+                      <span class="es">Evaluar</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="pipeline">
+                  <span class="lbl">
+                    <span><span class="en">In your pipeline</span><span class="es">En tu pipeline</span></span>
+                    <a><span class="en">Open tracker →</span><span class="es">Abrir tracker →</span></a>
+                  </span>
+                  <div class="pipeline-stages">
+                    <div class="pstage">
+                      <span class="nm"><span class="dot evaluating"></span><span class="en">Evaluating</span><span class="es">Evaluando</span></span>
+                      <span class="ct">5</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot applied"></span><span class="en">Applied</span><span class="es">Aplicadas</span></span>
+                      <span class="ct">3</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot interviewing"></span><span class="en">Interviewing</span><span class="es">Entrevistando</span></span>
+                      <span class="ct">1</span>
+                    </div>
+                    <div class="pstage">
+                      <span class="nm"><span class="dot offer"></span><span class="en">Offer</span><span class="es">Oferta</span></span>
+                      <span class="ct zero">0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Market gets a heavier weight on quiet days — a real read -->
+              <div class="market">
+                <span class="mkicker">
+                  <span class="en">This week's market · Worth a read</span>
+                  <span class="es">El mercado esta semana · Vale la pena</span>
+                </span>
+                <span class="mhead">
+                  <span class="en">Series C fintechs are paying <em>15% above</em> Series B in your segment.</span>
+                  <span class="es">Las fintechs Serie C pagan <em>15% por encima</em> de Serie B en tu segmento.</span>
+                </span>
+                <span class="figure">+15<span class="unit">% base</span></span>
+                <span class="gloss">
+                  <span class="en">SEGMENT <b>Director / Head of, MX</b> <span class="sep">·</span> n = 41 <span class="sep">·</span> 12 Series C, 29 Series B</span>
+                  <span class="es">SEGMENTO <b>Director / Head of, MX</b> <span class="sep">·</span> n = 41 <span class="sep">·</span> 12 Serie C, 29 Serie B</span>
+                </span>
+                <a class="more">
+                  <span class="en">Why this matters for your search →</span>
+                  <span class="es">Por qué importa para tu búsqueda →</span>
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annot">
+        <div class="a">
+          <span class="nk">A · The point of a quiet day</span>
+          <span class="ah"><span class="en">Calm, not empty</span><span class="es">Calma, no vacío</span></span>
+          <span class="ab">
+            <span class="en">"Quiet days are normal — the market doesn't move on a schedule." This is the explicit anti-pattern to streaks and urgency theatre.</span>
+            <span class="es">"Los días tranquilos son normales — el mercado no se mueve en horario." Es el anti-patrón explícito a las rachas y al teatro de la urgencia.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">B · Show the scan</span>
+          <span class="ah"><span class="en">"3 scanned, none matched your floor"</span><span class="es">"3 escaneadas, ninguna pasó tu piso"</span></span>
+          <span class="ab">
+            <span class="en">The product is working even when nothing surfaces. Tell the user what was scanned and why it was filtered out.</span>
+            <span class="es">El producto trabaja incluso cuando no aparece nada. Dile al usuario qué se escaneó y por qué se filtró.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">C · Recent gets the room</span>
+          <span class="ah"><span class="en">Same component, more entries</span><span class="es">Mismo componente, más entradas</span></span>
+          <span class="ab">
+            <span class="en">5 instead of 4. Avg score shown. Invites the user to re-read a recent decision instead of forcing new action.</span>
+            <span class="es">5 en lugar de 4. Se muestra el promedio. Invita al usuario a re-leer una decisión reciente en vez de forzar acción nueva.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">D · Evaluate panel adapts</span>
+          <span class="ah"><span class="en">Different copy, same shape</span><span class="es">Copy distinto, misma forma</span></span>
+          <span class="ab">
+            <span class="en">"Quiet day? Drop a DM you got last month." The CTA acknowledges the state without manufacturing leads.</span>
+            <span class="es">"¿Día tranquilo? Pega un DM del mes pasado." El CTA reconoce el estado sin fabricar vacantes.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">E · Market becomes the lead</span>
+          <span class="ah"><span class="en">Heavier intel, fuller note</span><span class="es">Intel más pesado, nota más completa</span></span>
+          <span class="ab">
+            <span class="en">On quiet days, the market panel takes a richer story: a comparative figure (+15%), bigger sample (n=41), and a "why this matters" link.</span>
+            <span class="es">En días tranquilos, el panel de mercado toma una historia más rica: una cifra comparativa (+15%), muestra mayor (n=41), y un enlace de "por qué importa".</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">F · Pipeline unchanged</span>
+          <span class="ah"><span class="en">Same numbers, no badge</span><span class="es">Mismos números, sin badge</span></span>
+          <span class="ab">
+            <span class="en">5 / 3 / 1 / 0. No red dot, no "review now". The user knows the state of their pipeline; Labra doesn't re-perform it as urgent.</span>
+            <span class="es">5 / 3 / 1 / 0. Sin punto rojo, sin "revisa ahora". El usuario conoce su pipeline; Labra no lo re-actúa como urgente.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- SCREEN 4 — MOBILE                                             -->
+    <!-- ============================================================ -->
+    <div class="screen" data-screen-label="04 Mobile — three states">
+      <div class="screen-label">
+        <span class="num">04 · Mobile</span>
+        <h2><span class="en">Mobile, <em>three states</em></span><span class="es">Móvil, <em>tres estados</em></span></h2>
+        <span class="tag"><span class="en">Same three answers, a fraction of the visual space. Glance-time between meetings.</span><span class="es">Las mismas tres respuestas, una fracción del espacio. Tiempo de vistazo entre juntas.</span></span>
+      </div>
+
+      <div class="mobile-row">
+
+        <!-- ============ MOBILE · NEW USER ============ -->
+        <div class="phone-col">
+          <div class="plabel">
+            <span class="pnum">M-01</span>
+            <span class="pname"><span class="en">New user, <em>empty</em></span><span class="es">Usuario nuevo, <em>vacío</em></span></span>
+          </div>
+          <div class="phone">
+            <div class="screenframe">
+              <span class="notch"></span>
+              <div class="statusbar">
+                <span>9:41</span>
+                <span class="icons">●●●● 5G ▮</span>
+              </div>
+              <div class="mapp" style="padding-bottom: 28px;">
+                <div class="mtopbar">
+                  <span class="brand-m">labra<span class="dot">.</span></span>
+                  <span class="menu">≡</span>
+                </div>
+
+                <div class="mmasthead">
+                  <div class="date">
+                    <span class="en">Tue · 19 May · Day one</span>
+                    <span class="es">Mar · 19 may · Día uno</span>
+                  </div>
+                  <h1>
+                    <span class="en">A clean <em>slate</em>.</span>
+                    <span class="es">Página en <em>blanco</em>.</span>
+                  </h1>
+                  <div class="strap">
+                    <span class="en">Your CV is in. The dashboard fills as you evaluate.</span>
+                    <span class="es">Tu CV está cargado. El dashboard se llena conforme evalúas.</span>
+                  </div>
+                </div>
+
+                <div class="mmode">
+                  <div>
+                    <div class="lbl"><span class="en">Mode</span><span class="es">Modo</span></div>
+                    <div class="name"><em>Leverage</em></div>
+                  </div>
+                  <div class="change"><span class="en">Change</span><span class="es">Cambiar</span></div>
+                </div>
+
+                <div class="mempty">
+                  <span class="mek">
+                    <span class="en">Your first move · 1 of 1</span>
+                    <span class="es">Tu primer paso · 1 de 1</span>
+                  </span>
+                  <span class="meh">
+                    <span class="en">Paste a recruiter DM or a job URL to <em>start</em>.</span>
+                    <span class="es">Pega un DM o una URL para <em>empezar</em>.</span>
+                  </span>
+                  <span class="meb">
+                    <span class="en">Labra identifies what you pasted. No tagging required.</span>
+                    <span class="es">Labra identifica lo que pegas. Sin etiquetar.</span>
+                  </span>
+                  <div class="mefield">
+                    <span><b><span class="en">Paste here.</span><span class="es">Pega aquí.</span></b></span>
+                    <span>
+                      <span class="en">A LinkedIn DM, a screenshot, a job URL — whatever you have.</span>
+                      <span class="es">Un DM, un screenshot, una URL — lo que tengas.</span>
+                    </span>
+                  </div>
+                  <button class="mebtn">
+                    <span class="en">Evaluate first lead</span>
+                    <span class="es">Evaluar primera vacante</span>
+                    <span>→</span>
+                  </button>
+                </div>
+
+                <!-- What's already set -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en">Already <em>set</em></span><span class="es">Ya <em>listo</em></span></span>
+                    <span class="m"><b>3</b> / 4</span>
+                  </div>
+                  <div class="mcheck done">
+                    <span class="mk">✓</span>
+                    <span class="mt"><span class="en">CV · <b>nacho-reyes-cv.pdf</b></span><span class="es">CV · <b>nacho-reyes-cv.pdf</b></span></span>
+                    <span class="mw">09:42</span>
+                  </div>
+                  <div class="mcheck done">
+                    <span class="mk">✓</span>
+                    <span class="mt"><span class="en">Mode · <b>Leverage</b></span><span class="es">Modo · <b>Leverage</b></span></span>
+                    <span class="mw">09:48</span>
+                  </div>
+                  <div class="mcheck done">
+                    <span class="mk">✓</span>
+                    <span class="mt"><span class="en">Target band · <b>Director / Head of, MX</b></span><span class="es">Banda · <b>Director / Head of, MX</b></span></span>
+                    <span class="mw">09:50</span>
+                  </div>
+                  <div class="mcheck">
+                    <span class="mk">·</span>
+                    <span class="mt"><span class="en">Run your first evaluation</span><span class="es">Realiza tu primera evaluación</span></span>
+                    <span class="mw"><span class="en">UP NEXT</span><span class="es">SIGUE</span></span>
+                  </div>
+                </div>
+
+                <!-- Pipeline placeholders -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en"><em>Pipeline</em></span><span class="es"><em>Pipeline</em></span></span>
+                    <span class="m"><span class="en">empty</span><span class="es">vacío</span></span>
+                  </div>
+                  <div class="mpipe">
+                    <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Evaluating</span><span class="es">Evaluando</span></span></div>
+                    <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Applied</span><span class="es">Aplicadas</span></span></div>
+                    <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Interv.</span><span class="es">Entrev.</span></span></div>
+                    <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Offer</span><span class="es">Oferta</span></span></div>
+                  </div>
+                </div>
+
+                <!-- Market still earns its place -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en"><em>Market</em> this week</span><span class="es"><em>Mercado</em> esta semana</span></span>
+                    <span class="m">n = 18</span>
+                  </div>
+                  <div class="mmarket">
+                    <span class="k">
+                      <span class="en">Median base · your target band</span>
+                      <span class="es">Base mediana · banda objetivo</span>
+                    </span>
+                    <span class="h">
+                      <span class="en">Director / Head of, MX fintech</span>
+                      <span class="es">Director / Head of, fintech MX</span>
+                    </span>
+                    <span class="f">MXN $1.9M – $2.4M</span>
+                    <span class="g">
+                      <span class="en">TRAILING 90 DAYS · <b>see distribution →</b></span>
+                      <span class="es">ÚLTIMOS 90 DÍAS · <b>ver distribución →</b></span>
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="pcaption">
+            <span class="en">No sticky bar. The paste card <b>is</b> the screen. Once the first evaluation runs, it folds into the same shell as M-02.</span>
+            <span class="es">Sin barra inferior. La tarjeta de pegar <b>es</b> la pantalla. Al correr la primera evaluación, se pliega al mismo shell de M-02.</span>
+          </div>
+        </div>
+
+        <!-- ============ MOBILE · ACTIVE USER ============ -->
+        <div class="phone-col">
+          <div class="plabel">
+            <span class="pnum">M-02</span>
+            <span class="pname"><span class="en">Active user, <em>loaded</em></span><span class="es">Activo, <em>cargado</em></span></span>
+          </div>
+          <div class="phone">
+          <div class="screenframe">
+            <span class="notch"></span>
+            <div class="statusbar">
+              <span>9:41</span>
+              <span class="icons">●●●● 5G ▮</span>
+            </div>
+            <div class="mapp">
+              <div class="mtopbar">
+                <span class="brand-m">labra<span class="dot">.</span></span>
+                <span class="menu">≡</span>
+              </div>
+
+              <div class="mmasthead">
+                <div class="date">
+                  <span class="en">Tue · 19 May · MX-CDMX</span>
+                  <span class="es">Mar · 19 may · MX-CDMX</span>
+                </div>
+                <h1>
+                  <span class="en">Today's <em>brief</em>.</span>
+                  <span class="es">Tu <em>resumen</em>.</span>
+                </h1>
+                <div class="strap">
+                  <span class="en"><b>3 new</b> · 1 strong fit · 1 follow-up</span>
+                  <span class="es"><b>3 nuevas</b> · 1 fit fuerte · 1 seguimiento</span>
+                </div>
+              </div>
+
+              <div class="mmode">
+                <div>
+                  <div class="lbl"><span class="en">Mode</span><span class="es">Modo</span></div>
+                  <div class="name"><em>Leverage</em></div>
+                </div>
+                <div class="change"><span class="en">Change</span><span class="es">Cambiar</span></div>
+              </div>
+
+              <!-- Today -->
+              <div class="msec">
+                <div class="msec-head">
+                  <span class="t"><span class="en">New <em>this week</em></span><span class="es">Nuevas <em>esta semana</em></span></span>
+                  <span class="m"><b>3</b> · 1 strong</span>
+                </div>
+                <div class="mlead">
+                  <span class="lg">01</span>
+                  <span class="b">
+                    <span class="r">Head of Operations</span>
+                    <span class="ml"><b>Stori</b> · MX · <span class="en">Series C</span><span class="es">Serie C</span></span>
+                  </span>
+                  <span class="sc strong">81</span>
+                </div>
+                <div class="mlead">
+                  <span class="lg">02</span>
+                  <span class="b">
+                    <span class="r">Director of Ops, LatAm</span>
+                    <span class="ml"><b>Clara</b> · MX · <span class="en">Series C</span><span class="es">Serie C</span></span>
+                  </span>
+                  <span class="sc">72</span>
+                </div>
+                <div class="mlead">
+                  <span class="lg">03</span>
+                  <span class="b">
+                    <span class="r">Country Manager · MX</span>
+                    <span class="ml"><b>Jeeves</b> · <span class="en">Series D</span><span class="es">Serie D</span></span>
+                  </span>
+                  <span class="sc weak">58</span>
+                </div>
+              </div>
+
+              <!-- Follow-up -->
+              <div class="msec">
+                <div class="msec-head">
+                  <span class="t"><span class="en">Follow-up <em>due</em></span><span class="es">Seguimiento <em>pendiente</em></span></span>
+                  <span class="m"><b>1</b></span>
+                </div>
+                <div class="mfu">
+                  <span class="ft">
+                    <span class="en">You applied to <b>Clara</b> <em>9 days ago</em>. Time to follow up.</span>
+                    <span class="es">Aplicaste a <b>Clara</b> <em>hace 9 días</em>. Hora de seguir.</span>
+                  </span>
+                  <div class="row">
+                    <button class="b1"><span class="en">Draft follow-up</span><span class="es">Redactar</span></button>
+                    <button class="b2"><span class="en">Snooze</span><span class="es">Posponer</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pipeline -->
+              <div class="msec">
+                <div class="msec-head">
+                  <span class="t"><span class="en"><em>Pipeline</em></span><span class="es"><em>Pipeline</em></span></span>
+                  <span class="m"><span class="en">Open tracker →</span><span class="es">Tracker →</span></span>
+                </div>
+                <div class="mpipe">
+                  <div class="ps"><span class="pn">5</span><span class="pl"><span class="en">Evaluating</span><span class="es">Evaluando</span></span></div>
+                  <div class="ps"><span class="pn">3</span><span class="pl"><span class="en">Applied</span><span class="es">Aplicadas</span></span></div>
+                  <div class="ps"><span class="pn">1</span><span class="pl"><span class="en">Interv.</span><span class="es">Entrev.</span></span></div>
+                  <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Offer</span><span class="es">Oferta</span></span></div>
+                </div>
+              </div>
+
+              <!-- Market -->
+              <div class="msec">
+                <div class="msec-head">
+                  <span class="t"><span class="en"><em>Market</em> this week</span><span class="es"><em>Mercado</em> esta semana</span></span>
+                  <span class="m">n = 18</span>
+                </div>
+                <div class="mmarket">
+                  <span class="k">
+                    <span class="en">Median base · Dir of Ops, MX fintech</span>
+                    <span class="es">Base mediana · Dir Ops, fintech MX</span>
+                  </span>
+                  <span class="h">
+                    <span class="en">Your <em>target band</em></span>
+                    <span class="es">Tu <em>banda objetivo</em></span>
+                  </span>
+                  <span class="f">MXN $1.9M – $2.4M</span>
+                  <span class="g">
+                    <span class="en">TRAILING 90 DAYS · <b>see distribution →</b></span>
+                    <span class="es">ÚLTIMOS 90 DÍAS · <b>ver distribución →</b></span>
+                  </span>
+                </div>
+              </div>
+
+            </div><!-- /.mapp -->
+
+            <!-- Sticky bottom action -->
+            <div class="mbottom">
+              <span class="ml">
+                <span class="en">Paste a DM or URL…</span>
+                <span class="es">Pega un DM o URL…</span>
+              </span>
+              <button class="mb">
+                <span class="en">Evaluate</span>
+                <span class="es">Evaluar</span>
+              </button>
+            </div>
+
+          </div>
+          </div>
+          <div class="pcaption">
+            <span class="en">The default. <b>Three sections</b> resolve the three questions; the bottom pill keeps Evaluate one tap away.</span>
+            <span class="es">El estado por defecto. <b>Tres secciones</b> resuelven las tres preguntas; la píldora inferior mantiene Evaluar a un tap.</span>
+          </div>
+        </div>
+
+        <!-- ============ MOBILE · QUIET DAY ============ -->
+        <div class="phone-col">
+          <div class="plabel">
+            <span class="pnum">M-03</span>
+            <span class="pname"><span class="en">Quiet <em>day</em></span><span class="es">Día <em>tranquilo</em></span></span>
+          </div>
+          <div class="phone">
+            <div class="screenframe">
+              <span class="notch"></span>
+              <div class="statusbar">
+                <span>9:41</span>
+                <span class="icons">●●●● 5G ▮</span>
+              </div>
+              <div class="mapp">
+                <div class="mtopbar">
+                  <span class="brand-m">labra<span class="dot">.</span></span>
+                  <span class="menu">≡</span>
+                </div>
+
+                <div class="mmasthead">
+                  <div class="date">
+                    <span class="en">Thu · 21 May · MX-CDMX</span>
+                    <span class="es">Jue · 21 may · MX-CDMX</span>
+                  </div>
+                  <h1>
+                    <span class="en">A <em>quiet</em> day.</span>
+                    <span class="es">Un día <em>tranquilo</em>.</span>
+                  </h1>
+                  <div class="strap">
+                    <span class="en"><b>0 new</b> · 0 follow-ups · market moves</span>
+                    <span class="es"><b>0 nuevas</b> · 0 seguimientos · mercado se mueve</span>
+                  </div>
+                </div>
+
+                <div class="mmode">
+                  <div>
+                    <div class="lbl"><span class="en">Mode</span><span class="es">Modo</span></div>
+                    <div class="name"><em>Leverage</em></div>
+                  </div>
+                  <div class="change"><span class="en">Change</span><span class="es">Cambiar</span></div>
+                </div>
+
+                <!-- Calm acknowledgement -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en">New <em>this week</em></span><span class="es">Nuevas <em>esta semana</em></span></span>
+                    <span class="m"><b>0</b> · 3 scanned</span>
+                  </div>
+                  <div class="mquietnote">
+                    <span class="qh">
+                      <span class="en">Nothing matched your <em>filters</em>.</span>
+                      <span class="es">Nada pasó tus <em>filtros</em>.</span>
+                    </span>
+                    <span class="qb">
+                      <span class="en">8 target companies scanned. 3 postings reviewed; none reached your comp floor.</span>
+                      <span class="es">8 empresas objetivo escaneadas. 3 vacantes revisadas; ninguna pasó tu piso.</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Recent gets the spotlight on a quiet day -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en">Recent <em>evaluations</em></span><span class="es">Recientes</span></span>
+                    <span class="m"><span class="en">avg <b>67</b></span><span class="es">prom <b>67</b></span></span>
+                  </div>
+                  <div class="mlead">
+                    <span class="lg">01</span>
+                    <span class="b">
+                      <span class="r">Country Manager</span>
+                      <span class="ml"><b>Kavak</b> · <span class="en">Tue</span><span class="es">Mar</span></span>
+                    </span>
+                    <span class="sc">70</span>
+                  </div>
+                  <div class="mlead">
+                    <span class="lg">02</span>
+                    <span class="b">
+                      <span class="r">Director of Ops, LatAm</span>
+                      <span class="ml"><b>EBANX</b> · Mon</span>
+                    </span>
+                    <span class="sc strong">78</span>
+                  </div>
+                  <div class="mlead">
+                    <span class="lg">03</span>
+                    <span class="b">
+                      <span class="r">VP Operations · Fintech</span>
+                      <span class="ml"><b>dLocal</b> · Mon</span>
+                    </span>
+                    <span class="sc">63</span>
+                  </div>
+                  <div class="mlead">
+                    <span class="lg">04</span>
+                    <span class="b">
+                      <span class="r">Head of Operations</span>
+                      <span class="ml"><b>Bitso</b> · Fri</span>
+                    </span>
+                    <span class="sc weak">54</span>
+                  </div>
+                </div>
+
+                <!-- Pipeline unchanged -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en"><em>Pipeline</em></span><span class="es"><em>Pipeline</em></span></span>
+                    <span class="m"><span class="en">Open tracker →</span><span class="es">Tracker →</span></span>
+                  </div>
+                  <div class="mpipe">
+                    <div class="ps"><span class="pn">5</span><span class="pl"><span class="en">Evaluating</span><span class="es">Evaluando</span></span></div>
+                    <div class="ps"><span class="pn">3</span><span class="pl"><span class="en">Applied</span><span class="es">Aplicadas</span></span></div>
+                    <div class="ps"><span class="pn">1</span><span class="pl"><span class="en">Interv.</span><span class="es">Entrev.</span></span></div>
+                    <div class="ps"><span class="pn zero">0</span><span class="pl"><span class="en">Offer</span><span class="es">Oferta</span></span></div>
+                  </div>
+                </div>
+
+                <!-- Market gets a heavier weight -->
+                <div class="msec">
+                  <div class="msec-head">
+                    <span class="t"><span class="en"><em>Market</em> · Worth a read</span><span class="es"><em>Mercado</em> · Vale la pena</span></span>
+                    <span class="m">n = 41</span>
+                  </div>
+                  <div class="mmarket">
+                    <span class="k">
+                      <span class="en">Series C vs Series B · Your segment</span>
+                      <span class="es">Serie C vs Serie B · Tu segmento</span>
+                    </span>
+                    <span class="h">
+                      <span class="en">Series C pays <em>15% above</em> Series B</span>
+                      <span class="es">Serie C paga <em>15% más</em> que Serie B</span>
+                    </span>
+                    <span class="f">+15% <span style="font-size: 14px; color: var(--ink-2);">base</span></span>
+                    <span class="g">
+                      <span class="en">DIR / HEAD OF, MX · <b>why this matters →</b></span>
+                      <span class="es">DIR / HEAD OF, MX · <b>por qué importa →</b></span>
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="mbottom">
+                <span class="ml">
+                  <span class="en">Drop an old DM…</span>
+                  <span class="es">Pega un DM antiguo…</span>
+                </span>
+                <button class="mb">
+                  <span class="en">Evaluate</span>
+                  <span class="es">Evaluar</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+          <div class="pcaption">
+            <span class="en">Calm, not empty. The recent list expands; the market panel takes a fuller story. The sticky pill copy adapts to the day.</span>
+            <span class="es">Calma, no vacío. Recientes se expande; el panel de mercado toma una historia más completa. La píldora inferior adapta su copy al día.</span>
+          </div>
+        </div>
+
+      </div><!-- /.mobile-row -->
+
+      <!-- Annotations sit below all three phones -->
+      <div class="annot" style="margin-top: 32px;">
+        <div class="a">
+          <span class="nk">M-A · Masthead compressed</span>
+          <span class="ah"><span class="en">Same headline shape, smaller scale</span><span class="es">Mismo titular, menor escala</span></span>
+          <span class="ab">
+            <span class="en">38px Fraunces holds the editorial register. The mode chip becomes a one-row strip below.</span>
+            <span class="es">Fraunces 38px sostiene el registro editorial. El chip de modo se convierte en una franja debajo.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-B · Empty paste card</span>
+          <span class="ah"><span class="en">Bigger than a button, smaller than a screen</span><span class="es">Más que un botón, menos que una pantalla</span></span>
+          <span class="ab">
+            <span class="en">The new-user paste prompt holds the headline, the field, and the CTA in one card — no sticky bar competing below.</span>
+            <span class="es">El prompt del usuario nuevo guarda titular, campo y CTA en una sola tarjeta — sin barra inferior compitiendo.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-C · Lead rows</span>
+          <span class="ah"><span class="en">Logo · role · score</span><span class="es">Logo · rol · puntaje</span></span>
+          <span class="ab">
+            <span class="en">Tap-area = full row. Score is the right anchor — strong fits teal, weak fits grey. Score range stays honest at small size.</span>
+            <span class="es">Área tap = fila completa. El puntaje ancla a la derecha — fuertes en teal, débiles en gris. El rango se mantiene honesto en pequeño.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-D · Follow-up as note</span>
+          <span class="ah"><span class="en">Amber, conversational</span><span class="es">Ámbar, conversacional</span></span>
+          <span class="ab">
+            <span class="en">An italic sentence with 9 days highlighted. Two buttons fill the row: act or snooze.</span>
+            <span class="es">Una frase en itálicas con 9 días resaltados. Dos botones llenan la fila: actuar o posponer.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-E · Pipeline 4-up</span>
+          <span class="ah"><span class="en">Four small cards, one row</span><span class="es">Cuatro tarjetas pequeñas, una fila</span></span>
+          <span class="ab">
+            <span class="en">The only place we let pipeline use boxed cards — the screen is too narrow for a hairline list to read.</span>
+            <span class="es">El único sitio donde permitimos tarjetas — la pantalla es demasiado angosta para una lista con línea fina.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-F · Quiet day reframe</span>
+          <span class="ah"><span class="en">Same shell, different weight</span><span class="es">Mismo shell, distinto peso</span></span>
+          <span class="ab">
+            <span class="en">"Nothing matched your filters" replaces lead rows. Recent gets 4 rows instead of 3. Market is bumped from MXN figure to comparative (+15%).</span>
+            <span class="es">"Nada pasó tus filtros" reemplaza las vacantes. Recientes muestra 4 filas. El mercado pasa de la cifra MXN a una comparativa (+15%).</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-G · Market preserved</span>
+          <span class="ah"><span class="en">Soft mint, same n</span><span class="es">Menta suave, misma n</span></span>
+          <span class="ab">
+            <span class="en">The market card holds its meaning at small size — single figure, single source line, sample size visible.</span>
+            <span class="es">La tarjeta de mercado mantiene su sentido a tamaño pequeño — una cifra, una línea de fuente, n visible.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-H · Sticky Evaluate</span>
+          <span class="ah"><span class="en">Pill at the thumb</span><span class="es">Píldora a la altura del pulgar</span></span>
+          <span class="ab">
+            <span class="en">Persistent on loaded + quiet states. The hint copy adapts ("Drop an old DM…" on a quiet day). Tap-to-paste replaces ⌘V on mobile.</span>
+            <span class="es">Persistente en estados cargado y tranquilo. El hint adapta su copy ("Pega un DM antiguo…" en día tranquilo). Tap-para-pegar reemplaza ⌘V.</span>
+          </span>
+        </div>
+        <div class="a">
+          <span class="nk">M-I · No bottom bar on empty</span>
+          <span class="ah"><span class="en">Don't compete with the main move</span><span class="es">No competir con el movimiento principal</span></span>
+          <span class="ab">
+            <span class="en">On the empty state, the paste card <b>is</b> the screen. A sticky pill below would just echo the same CTA twice. Skip it.</span>
+            <span class="es">En el estado vacío, la tarjeta <b>es</b> la pantalla. Una píldora inferior solo duplicaría el CTA. Se omite.</span>
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- FOOTER                                                        -->
+    <!-- ============================================================ -->
+    <div class="pagefoot">
+      <span>
+        <span class="en">Labra · Dashboard / Home · v0.1 · Mayo 19 2026</span>
+        <span class="es">Labra · Dashboard / Inicio · v0.1 · 19 mayo 2026</span>
+      </span>
+      <span>
+        <span class="en">Tokens: see Design System v1.0 · Albert Sans + Fraunces + Geist Mono</span>
+        <span class="es">Tokens: ver Design System v1.0 · Albert Sans + Fraunces + Geist Mono</span>
+      </span>
+    </div>
+
+  </div><!-- /.stage -->
+
+<script>
+  function setMode(m) {
+    document.body.classList.toggle('theme-light', m === 'light');
+    document.body.classList.toggle('theme-dark', m === 'dark');
+    document.getElementById('mode-light').classList.toggle('on', m === 'light');
+    document.getElementById('mode-dark').classList.toggle('on', m === 'dark');
+  }
+  function setLang(l) {
+    document.body.setAttribute('data-lang', l);
+    document.getElementById('lang-en').classList.toggle('on', l === 'en');
+    document.getElementById('lang-es').classList.toggle('on', l === 'es');
+  }
+</script>
+</body>
+</html>

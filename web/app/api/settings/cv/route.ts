@@ -76,6 +76,12 @@ export async function POST(req: NextRequest) {
     try { signals = JSON.parse(jsonMatch[1]); } catch { /* keep defaults */ }
   }
 
+  // Dev bypass: no DB available locally — return parsed signals without persisting.
+  const dbConfigured = !!(process.env.SUPABASE_POSTGRES_URL || process.env.DATABASE_URL);
+  if (!dbConfigured) {
+    return NextResponse.json({ ok: true, signals, preview: markdownCv.slice(0, 800) });
+  }
+
   // Save to DB (no GitHub commit — avoids spurious Vercel deploys)
   const { getDb, userProfiles } = await import('@/lib/db');
   const { eq } = await import('drizzle-orm');

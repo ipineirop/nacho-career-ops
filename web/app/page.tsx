@@ -25,7 +25,7 @@ function statusToType(status: string): 'draft' | 'applied' | 'interview' | 'offe
 export default async function DashboardPage() {
   // Get authenticated user
   const authUser = await getAuthUserId();
-  if (!authUser) redirect('/auth/signin');
+  if (!authUser) redirect('/onboarding');
 
   // Query evaluations and roles for this user
   const db = getDb();

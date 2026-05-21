@@ -1,0 +1,2519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Labra — Settings · desktop + mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS — Labra Design System v1.0 (shared with Tracker/Verdict) */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-bg:   #FAEEDA;
+    --signal-ink:  #854F0B;
+    --signal-deep: #4A2A0C;
+    --signal-on:   #ffffff;
+    --danger:      #a23b2c;
+    --danger-soft: #f6e0dc;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-bg:   #2a1f10;
+    --signal-ink:  #f2c987;
+    --signal-deep: #f8dfaf;
+    --signal-on:   #0a0e14;
+    --danger:      #e57c6a;
+    --danger-soft: #2a1815;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+
+  /* i18n */
+  [data-lang="en"] .es { display: none; }
+  [data-lang="es"] .en { display: none; }
+
+  /* ============================================================ */
+  /* TOP CHROME                                                     */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 12px; font-family: "Geist Mono", monospace;
+    font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .top .toggles { display: flex; gap: 8px; align-items: center; }
+  .seg {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 4px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .seg button {
+    border: 0; background: transparent;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .seg button.on { background: var(--ink); color: var(--bg); }
+  .version {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+
+  /* ============================================================ */
+  /* PAGE                                                           */
+  /* ============================================================ */
+  .stage { max-width: 1640px; margin: 0 auto; padding: 36px 32px 40px; }
+
+  .hero { margin: 0 0 36px; max-width: 1040px; }
+  .hero .kicker {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 60px; line-height: 1; margin: 0; letter-spacing: -1.6px; color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; }
+  .hero p {
+    font-family: "Albert Sans"; font-size: 16.5px; line-height: 1.6;
+    color: var(--ink-2); margin: 14px 0 0; max-width: 880px; text-wrap: pretty;
+  }
+  .hero p b { color: var(--ink); font-weight: 600; }
+
+  /* design decisions panel */
+  .decisions {
+    margin-top: 28px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  .decision {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .decision .pn {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .decision .pt {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 17px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .decision .pt em { font-style: italic; }
+  .decision .pd {
+    font-family: "Albert Sans"; font-size: 13px; line-height: 1.5; color: var(--ink-2);
+  }
+
+  /* ============================================================ */
+  /* SCREEN BLOCKS                                                  */
+  /* ============================================================ */
+  .screen { margin-bottom: 72px; scroll-margin-top: 80px; }
+  .screen-label {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 16px; padding: 0 4px; flex-wrap: wrap;
+  }
+  .screen-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 10px; border-radius: 999px; background: var(--canvas);
+  }
+  .screen-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 30px; line-height: 1; margin: 0; letter-spacing: -0.8px; color: var(--ink);
+  }
+  .screen-label h2 em { font-style: italic; }
+  .screen-note {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink-2);
+    max-width: 760px; margin: -4px 0 22px 4px; line-height: 1.55; text-wrap: pretty;
+  }
+  .screen-note b { color: var(--ink); font-weight: 600; }
+
+  .frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+  }
+  .frame-bar {
+    height: 34px; background: var(--canvas);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  }
+  .frame-bar .fdot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .frame-bar .url {
+    margin-left: 12px; font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.3px;
+  }
+
+  /* ============================================================ */
+  /* APP SHELL                                                     */
+  /* ============================================================ */
+  .app { background: var(--bg); min-height: 720px; position: relative; }
+  .appbar {
+    border-bottom: 0.75px solid var(--line);
+    padding: 14px 28px;
+    display: flex; align-items: center; gap: 18px;
+    background: var(--bg);
+  }
+  .appbar .brand-small {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; color: var(--ink);
+  }
+  .appbar .brand-small .dot { color: var(--accent); font-style: italic; }
+  .appbar .nav { display: flex; gap: 2px; margin-left: 14px; }
+  .appbar .nav a {
+    text-decoration: none; padding: 6px 13px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .appbar .nav a.on { background: var(--ink); color: var(--bg); }
+  .appbar .nav a:hover:not(.on) { color: var(--ink); }
+  .appbar .spacer { flex: 1; }
+  .appbar .userline {
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-3);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .appbar .userline .sign-out {
+    color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px;
+    text-decoration-color: var(--line); cursor: pointer;
+  }
+  .appbar .userline .sign-out:hover { color: var(--ink); }
+  .appbar .userline .dot-sep { color: var(--ink-3); opacity: .5; }
+
+  /* ============================================================ */
+  /* SETTINGS PAGE                                                  */
+  /* ============================================================ */
+  .settings {
+    max-width: 760px;
+    padding: 40px 36px 80px;
+  }
+  .settings-head { margin-bottom: 40px; }
+  .settings-head .kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 10px;
+  }
+  .settings-head h1 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 32px; line-height: 1.05; margin: 0;
+    letter-spacing: -0.6px; color: var(--ink);
+  }
+  .settings-head .sub {
+    font-family: "Albert Sans"; font-size: 14px;
+    color: var(--ink-2); margin-top: 10px; line-height: 1.5;
+  }
+
+  /* zone */
+  .zone {
+    padding: 32px 0;
+    border-top: 0.5px solid var(--line);
+  }
+  .zone:first-of-type { border-top: 0; padding-top: 4px; }
+  .zone-head {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 16px;
+  }
+  .zone-head .ln {
+    flex: 1; height: 1px; background: var(--line-2);
+  }
+
+  /* profile field (label + value + dividers between) */
+  .pfield {
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .pfield:last-child { border-bottom: 0; }
+  .pfield .lab-row {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .pfield .lab {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .pfield .edited-tag {
+    margin-left: auto;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--accent); letter-spacing: 0.6px;
+  }
+  .pfield .val-row {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .pfield .val {
+    font-family: "Albert Sans"; font-size: 15px; font-weight: 500;
+    color: var(--ink); letter-spacing: -0.1px;
+  }
+  .pfield .val.mono { font-family: "Geist Mono", monospace; font-weight: 400; font-size: 14px; }
+  .pfield .val .sep { color: var(--ink-3); opacity: .55; padding: 0 6px; font-weight: 400; }
+  .pfield .val .secondary { color: var(--ink-2); font-weight: 400; }
+  .pfield .val .arrow { color: var(--ink-3); padding: 0 8px; font-weight: 400; }
+  .pfield .edited .val { color: var(--accent); }
+  .pfield .aff {
+    margin-left: auto;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--accent); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .pfield .aff:hover { color: var(--accent-h); }
+  .pfield .aff .chev { font-family: "Geist Mono", monospace; font-size: 11px; opacity: .7; }
+  .pfield .edit-aff {
+    margin-left: auto;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .pfield .edit-aff:hover { color: var(--ink); }
+
+  /* preferences row — label + segmented control on one line */
+  .pref-row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 0;
+  }
+  .pref-row .lab {
+    font-family: "Albert Sans"; font-size: 14.5px; font-weight: 500; color: var(--ink);
+    flex: 1;
+  }
+  .pref-row .lab .helper {
+    display: block;
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 400; color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .ctrl-seg {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 3px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .ctrl-seg button {
+    border: 0; background: transparent;
+    padding: 6px 14px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    min-width: 56px; justify-content: center;
+  }
+  .ctrl-seg button.on { background: var(--ink); color: var(--bg); }
+  .ctrl-seg button .mono { font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: 0.4px; }
+
+  /* account zone — three rows with dividers */
+  .acct-row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 16px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .acct-row:last-child { border-bottom: 0; }
+  .acct-row .lab {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    width: 130px; flex-shrink: 0;
+  }
+  .acct-row .val {
+    font-family: "Geist Mono", monospace; font-size: 13px;
+    color: var(--ink-2); letter-spacing: 0.2px;
+    flex: 1;
+  }
+  .acct-row .ghost-btn {
+    padding: 9px 18px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    background: transparent; border: 1px solid var(--line); color: var(--ink);
+    cursor: pointer;
+  }
+  .acct-row .ghost-btn:hover { border-color: var(--ink); }
+  .acct-row .danger-btn {
+    padding: 9px 4px; background: transparent; border: 0;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--danger); cursor: pointer;
+    text-align: left;
+  }
+  .acct-row .danger-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .acct-row .helper {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-3); flex: 1;
+    line-height: 1.45;
+  }
+
+  /* ============================================================ */
+  /* PERSISTENT DRAFT FOOTER                                       */
+  /* ============================================================ */
+  .draft-footer {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 64px;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 28px;
+    z-index: 5;
+  }
+  .draft-footer .l {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .draft-footer .lab {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink);
+  }
+  .draft-footer .count {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.4px;
+  }
+  .draft-footer .spacer { flex: 1; }
+  .draft-footer .discard {
+    padding: 9px 16px; border-radius: 999px; border: 0; background: transparent;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--ink-2); cursor: pointer;
+  }
+  .draft-footer .discard:hover { color: var(--ink); }
+  .draft-footer .primary {
+    padding: 9px 20px; border-radius: 999px; border: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* inline discard confirmation (replaces the discard button area) */
+  .draft-footer .discard-inline {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 8px 6px 14px; border-radius: 999px;
+    background: var(--canvas); border: 1px solid var(--line);
+  }
+  .draft-footer .discard-inline .q {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink);
+  }
+  .draft-footer .discard-inline .yes {
+    padding: 6px 12px; border-radius: 999px; border: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .draft-footer .discard-inline .no {
+    padding: 6px 10px; border-radius: 999px; border: 0; background: transparent;
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500; color: var(--ink-3); cursor: pointer;
+  }
+
+  /* ============================================================ */
+  /* MODAL                                                         */
+  /* ============================================================ */
+  .modal-veil {
+    position: absolute; inset: 0;
+    background: color-mix(in oklab, var(--ink) 32%, transparent);
+    backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    padding: 40px;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    width: 540px; max-width: 100%;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+  }
+  .modal .m-head { padding: 24px 26px 4px; }
+  .modal .m-head .kicker {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .modal .m-head h3 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 24px; line-height: 1.1; letter-spacing: -0.4px;
+    color: var(--ink); margin: 0;
+  }
+  .modal .m-head h3 em { font-style: italic; }
+  .modal .m-body { padding: 16px 26px 4px; }
+  .modal .m-foot {
+    display: flex; align-items: center; gap: 10px;
+    padding: 20px 26px 22px;
+  }
+  .modal .m-foot .spacer { flex: 1; }
+  .modal .m-foot .ghost {
+    padding: 9px 16px; border-radius: 999px; border: 0; background: transparent;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500;
+    color: var(--ink-2); cursor: pointer;
+  }
+  .modal .m-foot .ghost:hover { color: var(--ink); }
+  .modal .m-foot .primary {
+    padding: 9px 20px; border-radius: 999px; border: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .modal .m-foot .danger {
+    padding: 9px 20px; border-radius: 999px; border: 0;
+    background: var(--danger); color: #fff;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* changes list inside commit modal */
+  .changelist {
+    border-top: 0.5px solid var(--line-2);
+    margin: 8px 0 14px;
+  }
+  .changelist .row {
+    display: grid; grid-template-columns: 130px 1fr;
+    gap: 12px; padding: 11px 0;
+    border-bottom: 0.5px solid var(--line-2);
+    align-items: baseline;
+  }
+  .changelist .row:last-child { border-bottom: 0; }
+  .changelist .lab {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .changelist .delta {
+    font-family: "Geist Mono", monospace; font-size: 12.5px; color: var(--ink);
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .changelist .delta .old { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--ink-3); }
+  .changelist .delta .arr { color: var(--ink-3); }
+  .changelist .delta .new { color: var(--accent); }
+
+  .blast {
+    margin-top: 8px;
+    padding: 14px 16px;
+    background: var(--signal-bg);
+    border-radius: 10px;
+  }
+  .blast .lab {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--signal-ink);
+    margin-bottom: 4px;
+  }
+  .blast .msg {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--signal-deep);
+    line-height: 1.45;
+  }
+  .blast .msg b { font-weight: 600; }
+  .blast.calm {
+    background: var(--canvas);
+  }
+  .blast.calm .lab { color: var(--ink-3); }
+  .blast.calm .msg { color: var(--ink-2); }
+
+  /* answers modal — read-only Q/A list */
+  .qa-list {
+    margin: 4px 0 8px;
+    max-height: 360px; overflow-y: auto;
+    padding-right: 4px;
+  }
+  .qa-list .qa {
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  .qa-list .qa:last-child { border-bottom: 0; }
+  .qa-list .q {
+    font-family: "Fraunces", serif; font-style: italic; font-weight: 400;
+    font-size: 14px; color: var(--ink-2); line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .qa-list .a {
+    font-family: "Albert Sans"; font-size: 14px; line-height: 1.5;
+    color: var(--ink); text-wrap: pretty;
+  }
+  .qa-list .a.short {
+    font-family: "Geist Mono", monospace; font-size: 12.5px;
+    color: var(--ink); letter-spacing: 0.2px;
+  }
+  .qa-list .meta {
+    margin-top: 8px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+
+  /* delete account: typed confirmation */
+  .delete-warn {
+    margin: 0 0 14px;
+    padding: 14px 16px;
+    background: var(--danger-soft);
+    border-radius: 10px;
+    color: var(--danger);
+    font-family: "Albert Sans"; font-size: 13.5px; line-height: 1.45;
+  }
+  .delete-warn b { font-weight: 700; }
+  .delete-warn ul {
+    margin: 8px 0 0; padding: 0; list-style: none;
+  }
+  .delete-warn li {
+    padding: 3px 0 3px 16px;
+    position: relative;
+    color: var(--danger);
+  }
+  .delete-warn li::before {
+    content: '—'; position: absolute; left: 0; opacity: .55;
+  }
+  .delete-confirm {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .delete-confirm .help {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .delete-confirm .input {
+    border: 1px solid var(--line); background: var(--bg);
+    border-radius: 8px; padding: 10px 12px;
+    font-family: "Geist Mono", monospace; font-size: 13px; color: var(--ink);
+  }
+  .delete-confirm .input.typed { color: var(--ink); border-color: var(--ink-2); }
+  .delete-confirm .input .caret { display: inline-block; width: 7px; height: 14px; background: var(--ink); vertical-align: middle; margin-left: 1px; opacity: .65; }
+  .delete-confirm .ok-hint {
+    font-family: "Albert Sans"; font-size: 12px; color: var(--accent); margin-top: 2px;
+  }
+
+  /* edit popover for profile inline editing (illustrative, beside field) */
+  .editpop {
+    margin-top: 10px;
+    background: var(--canvas);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .editpop .selectrow {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .editpop .opt {
+    padding: 6px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2); cursor: pointer;
+  }
+  .editpop .opt.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .editpop .input-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .editpop .input-row .input {
+    flex: 1;
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 8px; padding: 9px 12px;
+    font-family: "Geist Mono", monospace; font-size: 13.5px; color: var(--ink);
+    letter-spacing: 0.3px;
+  }
+  .editpop .input-row .cur {
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-3);
+    letter-spacing: 0.5px;
+  }
+  .editpop .desc {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-3);
+    line-height: 1.45;
+  }
+
+  /* ============================================================ */
+  /* ANNOTATION COLUMN                                             */
+  /* ============================================================ */
+  .pair {
+    display: grid; grid-template-columns: 1fr 280px; gap: 28px;
+    align-items: start;
+  }
+  .pair.full-width { grid-template-columns: 1fr; }
+  .annot {
+    display: flex; flex-direction: column; gap: 10px;
+    position: sticky; top: 96px;
+  }
+  .annot .a {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .annot .a.accent { background: var(--accent-soft); border-color: transparent; }
+  .annot .a.signal { background: var(--signal-bg); border-color: transparent; }
+  .annot .a .nk {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .annot .a.accent .nk { color: var(--accent); }
+  .annot .a.signal .nk { color: var(--signal-ink); }
+  .annot .a .ah {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 16px; line-height: 1.2; letter-spacing: -0.3px; color: var(--ink);
+  }
+  .annot .a .ah em { font-style: italic; }
+  .annot .a .ab {
+    font-family: "Albert Sans"; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+  }
+  .annot .a .ab b { color: var(--ink); font-weight: 600; }
+  .annot .a .ab code {
+    font-family: "Geist Mono"; font-size: 11.5px;
+    background: var(--canvas); padding: 1px 5px; border-radius: 4px;
+  }
+
+  /* ============================================================ */
+  /* SEQUENCE FRAMES                                               */
+  /* ============================================================ */
+  .sequence {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px;
+  }
+  .sequence.two { grid-template-columns: 1fr 1fr; }
+  .seq-frame {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .seq-frame .seq-head {
+    padding: 12px 18px 10px;
+    border-bottom: 1px solid var(--line-2);
+    background: var(--canvas);
+  }
+  .seq-frame .seq-head .seq-step {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 3px;
+  }
+  .seq-frame .seq-head .seq-step b { color: var(--ink); }
+  .seq-frame .seq-head .seq-title {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 14.5px; color: var(--ink);
+    letter-spacing: -0.15px;
+  }
+  .seq-frame .seq-body { position: relative; }
+
+  /* compact app body in sequence frames */
+  .compact-app { background: var(--bg); min-height: 540px; position: relative; }
+  .compact-app .appbar { padding: 10px 18px; }
+  .compact-app .appbar .brand-small { font-size: 18px; }
+  .compact-app .appbar .nav a { padding: 4px 10px; font-size: 12px; }
+  .compact-app .appbar .userline { font-size: 10px; }
+  .compact-app .settings { padding: 24px 24px 24px; }
+  .compact-app .settings-head { margin-bottom: 22px; }
+  .compact-app .settings-head h1 { font-size: 22px; }
+  .compact-app .settings-head .sub { font-size: 12.5px; }
+  .compact-app .zone { padding: 18px 0; }
+  .compact-app .zone-head { font-size: 9.5px; margin-bottom: 8px; }
+  .compact-app .pfield { padding: 9px 0; }
+  .compact-app .pfield .lab { font-size: 9.5px; }
+  .compact-app .pfield .val { font-size: 13px; }
+  .compact-app .pfield .edited-tag { font-size: 9px; }
+  .compact-app .pfield .aff { font-size: 11.5px; }
+  .compact-app .pref-row { padding: 9px 0; }
+  .compact-app .pref-row .lab { font-size: 13px; }
+  .compact-app .pref-row .lab .helper { font-size: 11px; }
+  .compact-app .ctrl-seg button { padding: 4px 10px; font-size: 11px; min-width: 44px; }
+  .compact-app .acct-row { padding: 11px 0; }
+  .compact-app .acct-row .lab { font-size: 9.5px; width: 100px; }
+  .compact-app .acct-row .val { font-size: 11.5px; }
+  .compact-app .acct-row .ghost-btn { padding: 7px 14px; font-size: 12px; }
+  .compact-app .acct-row .danger-btn { font-size: 12px; }
+  .compact-app .draft-footer { height: 52px; padding: 0 20px; }
+  .compact-app .draft-footer .lab { font-size: 9.5px; }
+  .compact-app .draft-footer .count { font-size: 10px; }
+  .compact-app .draft-footer .discard,
+  .compact-app .draft-footer .primary { padding: 7px 14px; font-size: 12px; }
+  .compact-app .modal { width: 420px; }
+  .compact-app .modal .m-head { padding: 18px 20px 4px; }
+  .compact-app .modal .m-head h3 { font-size: 19px; }
+  .compact-app .modal .m-body { padding: 12px 20px 4px; }
+  .compact-app .modal .m-foot { padding: 14px 20px 16px; }
+
+  /* ============================================================ */
+  /* DOWNSTREAM PRIOR-PROFILE — Tracker row + Report line          */
+  /* ============================================================ */
+  .demo-tracker-row {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1.5fr) 70px 130px 100px 70px;
+    gap: 14px; align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .demo-tracker-row .sdot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3);
+    justify-self: center;
+  }
+  .demo-tracker-row .sdot.interviewing { background: var(--accent); }
+  .demo-tracker-row .sdot.applied { background: var(--signal); }
+  .demo-tracker-row .who { display: flex; flex-direction: column; min-width: 0; }
+  .demo-tracker-row .who .co {
+    font-family: "Albert Sans"; font-weight: 600; font-size: 14.5px; color: var(--ink);
+    letter-spacing: -0.15px;
+  }
+  .demo-tracker-row .who .role {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2); margin-top: 1px;
+  }
+  .demo-tracker-row.prior .who .co { color: var(--ink-2); }
+  .demo-tracker-row .scorechip {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 50px; height: 30px; border-radius: 8px;
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 500;
+    color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  }
+  .demo-tracker-row .scorechip.strong { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+  .demo-tracker-row .statuspill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 11px 4px 8px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-2); background: var(--canvas); border: 1px solid transparent;
+    width: fit-content;
+  }
+  .demo-tracker-row .statuspill .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  }
+  .demo-tracker-row .statuspill.applied .dot { background: var(--signal); }
+  .demo-tracker-row .followup-cell { font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-3); }
+  .demo-tracker-row .days {
+    font-family: "Geist Mono", monospace; font-size: 11.5px; color: var(--ink-3);
+    text-align: right;
+  }
+  .demo-tracker-row .days b { color: var(--ink-2); font-weight: 500; }
+
+  .demo-report {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+    padding: 28px 34px 30px;
+  }
+  .demo-report .kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .demo-report .vh {
+    display: flex; align-items: baseline; gap: 14px; margin-bottom: 2px;
+  }
+  .demo-report .vh .co {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 30px; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .demo-report .vh .ro {
+    font-family: "Albert Sans"; font-size: 14px; color: var(--ink-2);
+  }
+  .demo-report .timestamp {
+    font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.4px;
+    margin-top: 12px;
+  }
+  .demo-report .prior-line {
+    font-family: "Albert Sans"; font-size: 13px; font-style: italic;
+    color: var(--ink-3); margin-top: 4px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    border-bottom: 0.5px dashed var(--line);
+    padding-bottom: 1px;
+  }
+  .demo-report .prior-line:hover { color: var(--ink-2); border-bottom-color: var(--ink-3); }
+
+  /* ============================================================ */
+  /* MOBILE PHONE FRAME                                            */
+  /* ============================================================ */
+  .phone {
+    width: 380px; border-radius: 36px;
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 10px; flex-shrink: 0;
+  }
+  .phone .screen-m {
+    background: var(--bg); border-radius: 28px;
+    height: 760px; overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .phone .status-m {
+    height: 22px; display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 22px 0;
+    font-family: "Geist Mono"; font-size: 10.5px; color: var(--ink);
+    letter-spacing: 0.4px;
+  }
+  .phone .nav-m {
+    padding: 12px 18px 8px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .phone .nav-m .brand-small {
+    font-family: "Fraunces", serif; font-weight: 500; font-size: 22px; color: var(--ink);
+  }
+  .phone .nav-m .brand-small .dot { color: var(--accent); font-style: italic; }
+  .phone .nav-m .pgtitle {
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-3);
+    margin-left: auto;
+  }
+  .phone .body-m { flex: 1; overflow-y: hidden; padding: 18px 18px 0; }
+  .phone .body-m .m-head h1 {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 24px; line-height: 1.05; letter-spacing: -0.4px; margin: 0; color: var(--ink);
+  }
+  .phone .body-m .m-head .kicker {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1.3px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .phone .body-m .m-head .sub {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-2);
+    margin-top: 6px;
+  }
+  .phone .body-m .zone { padding: 18px 0; }
+  .phone .body-m .zone-head { font-size: 9.5px; margin-bottom: 8px; }
+  .phone .body-m .pfield { padding: 10px 0; }
+  .phone .body-m .pfield .lab { font-size: 9.5px; }
+  .phone .body-m .pfield .val { font-size: 14px; }
+  .phone .body-m .pfield .edited-tag { font-size: 9px; }
+  .phone .body-m .pfield .aff { font-size: 12px; }
+  .phone .body-m .pref-row { padding: 11px 0; }
+  .phone .body-m .pref-row .lab { font-size: 13px; }
+  .phone .body-m .ctrl-seg button { padding: 5px 12px; font-size: 11.5px; min-width: 44px; }
+  .phone .body-m .acct-row { padding: 12px 0; }
+  .phone .body-m .acct-row .lab { width: 88px; font-size: 9.5px; }
+  .phone .body-m .acct-row .val { font-size: 11.5px; }
+  .phone .body-m .acct-row .ghost-btn { padding: 7px 14px; font-size: 12px; }
+  .phone .body-m .acct-row .danger-btn { font-size: 12px; }
+
+  .phone .m-footer {
+    position: absolute; left: 10px; right: 10px; bottom: 10px;
+    background: var(--surface); border-top: 1px solid var(--line);
+    border-radius: 0 0 26px 26px;
+    height: 64px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+  }
+  .phone .m-footer .l { display: flex; flex-direction: column; gap: 1px; }
+  .phone .m-footer .lab {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink);
+  }
+  .phone .m-footer .count {
+    font-family: "Geist Mono", monospace; font-size: 10px; color: var(--ink-3);
+  }
+  .phone .m-footer .spacer { flex: 1; }
+  .phone .m-footer .discard {
+    padding: 7px 12px; border-radius: 999px; border: 0; background: transparent;
+    font-family: "Albert Sans"; font-size: 12px; color: var(--ink-2); font-weight: 500;
+  }
+  .phone .m-footer .primary {
+    padding: 8px 14px; border-radius: 999px; border: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 600;
+  }
+
+  /* mobile bottom-sheet for confirm */
+  .sheet-m {
+    position: absolute; left: 10px; right: 10px; bottom: 10px;
+    background: var(--surface);
+    border-radius: 18px 18px 26px 26px;
+    padding: 14px 18px 22px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.12);
+    z-index: 5;
+  }
+  .sheet-m .handle {
+    width: 36px; height: 4px; border-radius: 2px; background: var(--line);
+    margin: 0 auto 12px;
+  }
+  .sheet-m .h3 {
+    font-family: "Fraunces", serif; font-weight: 500; font-size: 20px;
+    letter-spacing: -0.4px; color: var(--ink); margin: 0 0 4px;
+  }
+  .sheet-m .h3 em { font-style: italic; }
+  .sheet-m .kicker {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .sheet-m .changelist { margin: 8px 0 10px; }
+  .sheet-m .changelist .row { padding: 8px 0; grid-template-columns: 88px 1fr; }
+  .sheet-m .changelist .lab { font-size: 9.5px; }
+  .sheet-m .changelist .delta { font-size: 11.5px; }
+  .sheet-m .blast { padding: 10px 12px; margin-top: 6px; }
+  .sheet-m .blast .lab { font-size: 9.5px; }
+  .sheet-m .blast .msg { font-size: 12.5px; line-height: 1.4; }
+  .sheet-m .ctas {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .sheet-m .ctas .ghost {
+    flex: 1;
+    padding: 11px; border-radius: 999px; border: 1px solid var(--line); background: transparent;
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 500; color: var(--ink);
+  }
+  .sheet-m .ctas .primary {
+    flex: 1;
+    padding: 11px; border-radius: 999px; border: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: "Albert Sans"; font-size: 13px; font-weight: 600;
+  }
+
+  /* ============================================================ */
+  /* COPY TABLE                                                    */
+  /* ============================================================ */
+  .copy-table {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .copy-table .row-c {
+    display: grid; grid-template-columns: 240px 1fr 1fr;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .copy-table .row-c:last-child { border-bottom: none; }
+  .copy-table .row-c.head {
+    background: var(--canvas);
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .copy-table .row-c.section {
+    background: var(--canvas);
+  }
+  .copy-table .cell-c {
+    padding: 14px 18px;
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink);
+    border-right: 1px solid var(--line-2);
+    line-height: 1.45;
+  }
+  .copy-table .cell-c:last-child { border-right: none; }
+  .copy-table .cell-c.surface {
+    font-family: "Geist Mono"; font-size: 11px; color: var(--ink-2);
+    letter-spacing: 0.4px;
+  }
+  .copy-table .cell-c em { font-style: italic; color: var(--ink-2); }
+  .copy-table .cell-c.section-h {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    grid-column: 1 / -1; padding: 10px 18px; background: var(--canvas);
+  }
+
+  /* footer */
+  .footer {
+    margin-top: 40px; padding: 24px 0;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-family: "Geist Mono"; font-size: 10.5px; color: var(--ink-3);
+    letter-spacing: 0.8px; text-transform: uppercase;
+  }
+
+  /* responsive */
+  @media (max-width: 1240px) {
+    .pair { grid-template-columns: 1fr; }
+    .annot { position: static; }
+    .decisions { grid-template-columns: 1fr 1fr; }
+    .sequence { grid-template-columns: 1fr; }
+    .sequence.two { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="theme-light" data-lang="en">
+
+  <!-- TOP CHROME -->
+  <div class="top">
+    <div class="brand">labra<span class="dot">.</span><span class="system">Settings · Screen 04</span></div>
+    <div class="spacer"></div>
+    <div class="toggles">
+      <span class="version">v0.1 · May 2026</span>
+      <div class="seg" role="group" aria-label="language">
+        <button id="lang-en" class="on" onclick="setLang('en')">EN</button>
+        <button id="lang-es" onclick="setLang('es')">ES</button>
+      </div>
+      <div class="seg" role="group" aria-label="mode">
+        <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+        <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- HERO + DESIGN DECISIONS                                       -->
+  <!-- ============================================================ -->
+  <div class="stage">
+
+    <div class="hero">
+      <div class="kicker">
+        <span class="en">Screen 04 · Settings · The edit surface</span>
+        <span class="es">Pantalla 04 · Ajustes · La superficie de edición</span>
+      </div>
+      <h1>
+        <span class="en"><em>What we know</em>, and how to change it.</span>
+        <span class="es"><em>Lo que sabemos</em>, y cómo cambiarlo.</span>
+      </h1>
+      <p>
+        <span class="en">
+          Onboarding captures. Evaluate produces. Tracker tracks. <b>Settings is the one v1 surface whose job is editing things the user already committed to</b> — saying "that's not me anymore," or "raise my floor by twenty thousand." Which means it has to solve a problem no other screen does: <b>historical integrity</b>. Edit the profile that produced past verdicts, and those verdicts have to stay honest about the profile they were judged under.
+        </span>
+        <span class="es">
+          Onboarding captura. Evaluar produce. Tracker registra. <b>Ajustes es la única superficie de v1 cuyo trabajo es editar lo que el usuario ya dejó firme</b> — decir "ya no soy así", o "súbeme el piso veinte mil". Lo cual le toca resolver un problema que ninguna otra pantalla tiene: <b>la integridad histórica</b>. Si editas el perfil que produjo veredictos pasados, esos veredictos tienen que seguir siendo honestos sobre el perfil bajo el cual fueron juzgados.
+        </span>
+      </p>
+    </div>
+
+    <!-- design decisions -->
+    <div class="decisions">
+      <div class="decision">
+        <span class="pn">decision · 01</span>
+        <span class="pt">
+          <span class="en">Two commit models, <em>one page</em></span>
+          <span class="es">Dos modelos de commit, <em>una sola página</em></span>
+        </span>
+        <span class="pd">
+          <span class="en">Profile drafts and confirms; Preferences saves on tap. Same screen, different rules — because the cost of a wrong edit is different. Theme change is cheap. Comp floor change rewrites how the system reads you.</span>
+          <span class="es">Perfil borrador-y-confirma; Preferencias guarda al tap. Misma pantalla, distintas reglas — porque el costo de una edición equivocada no es el mismo. Cambiar tema es barato. Cambiar el piso de comp reescribe cómo el sistema te lee.</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">decision · 02</span>
+        <span class="pt">
+          <span class="en">Stale-and-flag, <em>not auto re-evaluate</em></span>
+          <span class="es">Marca y avisa, <em>no re-evaluar solo</em></span>
+        </span>
+        <span class="pd">
+          <span class="en">Old evaluations keep their verdict and reasoning. They gain a "evaluated under prior profile" mark. The user re-evaluates manually if they want a new read. We don't rewrite history; we annotate it.</span>
+          <span class="es">Las evaluaciones viejas conservan su veredicto y su razonamiento. Ganan una marca de "evaluado bajo perfil anterior". El usuario re-evalúa a mano si quiere otra lectura. No reescribimos la historia; la anotamos.</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">decision · 03</span>
+        <span class="pt">
+          <span class="en">Blast radius <em>on commit</em>, not on edit</span>
+          <span class="es">Impacto <em>al confirmar</em>, no al editar</span>
+        </span>
+        <span class="pd">
+          <span class="en">"This will mark 7 active evaluations as prior profile." Shown in the commit modal, not inline as you type. Editing should feel like editing; the consequence shows up at the moment the user is asked to confirm it.</span>
+          <span class="es">"Esto marcará 7 evaluaciones activas como perfil anterior." Aparece en el modal de confirmación, no en línea mientras tecleas. Editar debe sentirse como editar; la consecuencia aparece en el momento en que se le pide confirmar.</span>
+        </span>
+      </div>
+      <div class="decision">
+        <span class="pn">decision · 04</span>
+        <span class="pt">
+          <span class="en">Sign-out <em>doesn't live here</em></span>
+          <span class="es">Cerrar sesión <em>no vive aquí</em></span>
+        </span>
+        <span class="pd">
+          <span class="en">Settings is low-frequency, account state. Sign-out is high-frequency, every-surface, and already lives in the app bar. Don't make the user dig through Settings to leave. Account zone holds email (read-only), re-do onboarding, and delete.</span>
+          <span class="es">Ajustes es baja frecuencia, estado de cuenta. Cerrar sesión es alta frecuencia, de cada pantalla, y ya vive en la barra superior. No hagas al usuario excavar Ajustes para salir. La zona de cuenta tiene correo (solo lectura), rehacer onboarding y eliminar.</span>
+        </span>
+      </div>
+    </div>
+
+    <p style="font-family:'Albert Sans'; font-size: 13px; color: var(--ink-3); margin: 28px 0 0; max-width: 880px; line-height: 1.6;">
+      <span class="en">
+        <b style="color:var(--ink-2)">Toggle EN / ES</b> and <b style="color:var(--ink-2)">light / dark</b> top-right · all states translate and re-skin together · sample user is <b style="color:var(--ink-2)">Nacho Reyes, Head of Operations at Galgo, Mexico City</b>, mid-edit, three fields dirty.
+      </span>
+      <span class="es">
+        <b style="color:var(--ink-2)">Cambia EN / ES</b> y <b style="color:var(--ink-2)">claro / oscuro</b> arriba a la derecha · todos los estados se traducen y se reskinean juntos · el usuario de muestra es <b style="color:var(--ink-2)">Nacho Reyes, Head of Operations en Galgo, CDMX</b>, a mitad de edición, con tres campos sucios.
+      </span>
+    </p>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line);">
+      <span style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3); padding: 6px 10px 6px 0;">
+        <span class="en">Jump to</span><span class="es">Saltar a</span>
+      </span>
+      <a href="#default" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">A · Default</span><span class="es">A · Por defecto</span></a>
+      <a href="#commit" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;background:var(--ink);color:var(--bg);border:1px solid var(--ink);"><span class="en">B · Commit flow</span><span class="es">B · Flujo de commit</span></a>
+      <a href="#discard" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">C · Discard</span><span class="es">C · Descartar</span></a>
+      <a href="#answers" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">D · View answers</span><span class="es">D · Ver respuestas</span></a>
+      <a href="#account" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">E · Re-do &amp; delete</span><span class="es">E · Rehacer y eliminar</span></a>
+      <a href="#mobile" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">F · Mobile</span><span class="es">F · Móvil</span></a>
+      <a href="#downstream" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">G · Prior-profile marker</span><span class="es">G · Marca de perfil anterior</span></a>
+      <a href="#copy" class="chip" style="text-decoration:none;padding:5px 12px;border-radius:999px;font-family:'Albert Sans';font-size:12.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);"><span class="en">H · Copy EN / ES</span><span class="es">H · Copy EN / ES</span></a>
+    </div>
+  </div><!-- /stage -->
+
+  <!-- ============================================================ -->
+  <!-- SCREEN A · DEFAULT · DESKTOP                                  -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="default">
+      <div class="screen-label">
+        <span class="num">A · Default · Desktop</span>
+        <h2>
+          <span class="en"><em>What we know.</em> No draft, no fanfare.</span>
+          <span class="es"><em>Lo que sabemos.</em> Sin borrador, sin fanfarrias.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          The saved state. Three zones stacked top-down — <b>Profile, Preferences, Account</b> — separated by hairline dividers and ~32 px gaps. <b>No tabs, no accordion, no save button</b>. The page <i>is</i> the form. Profile fields display the values that produced past verdicts. Preferences read as segmented controls because every option is one tap. Account is two CTAs and an email.
+        </span>
+        <span class="es">
+          El estado guardado. Tres zonas apiladas — <b>Perfil, Preferencias, Cuenta</b> — separadas por líneas finas y ~32 px de aire. <b>Sin pestañas, sin acordeón, sin botón de guardar</b>. La página <i>es</i> el formulario. Los campos de Perfil muestran los valores que produjeron los veredictos anteriores. Preferencias son controles segmentados porque cada opción es un tap. Cuenta son dos CTAs y un correo.
+        </span>
+      </p>
+
+      <div class="pair">
+        <div class="frame">
+          <div class="frame-bar">
+            <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+            <span class="url">labra.app/settings</span>
+          </div>
+
+          <div class="app">
+            <!-- App bar -->
+            <div class="appbar">
+              <span class="brand-small">labra<span class="dot">.</span></span>
+              <nav class="nav">
+                <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+              </nav>
+              <div class="spacer"></div>
+              <div class="userline">
+                <span>nacho@galgo.mx</span>
+                <span class="dot-sep">·</span>
+                <span class="sign-out"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></span>
+              </div>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div class="settings">
+              <div class="settings-head">
+                <div class="kicker">
+                  <span class="en">Settings</span><span class="es">Ajustes</span>
+                </div>
+                <h1>
+                  <span class="en">What we know.</span>
+                  <span class="es">Lo que sabemos.</span>
+                </h1>
+                <div class="sub">
+                  <span class="en">Edit how the system reads you. Profile changes ask for confirmation; preferences save as you tap.</span>
+                  <span class="es">Edita cómo el sistema te lee. Los cambios de perfil piden confirmación; las preferencias se guardan al tap.</span>
+                </div>
+              </div>
+
+              <!-- ============ ZONE 1 · PROFILE ============ -->
+              <div class="zone">
+                <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+
+                <div class="pfield">
+                  <div class="lab-row"><span class="lab"><span class="en">Archetype</span><span class="es">Arquetipo</span></span></div>
+                  <div class="val-row">
+                    <span class="val">operator-builder</span>
+                    <span class="aff"><span class="en">View the answers that produced this</span><span class="es">Ver las respuestas que produjeron esto</span><span class="chev">→</span></span>
+                  </div>
+                </div>
+
+                <div class="pfield">
+                  <div class="lab-row"><span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span></div>
+                  <div class="val-row">
+                    <span class="val">
+                      <span class="en">Mexico City</span><span class="es">Ciudad de México</span>
+                      <span class="sep">·</span>
+                      <span class="secondary"><span class="en">Regional relocation</span><span class="es">Reubicación regional</span></span>
+                      <span class="sep">·</span>
+                      <span class="secondary"><span class="en">Hybrid OK</span><span class="es">Híbrido OK</span></span>
+                    </span>
+                    <span class="edit-aff"><span class="en">Edit</span><span class="es">Editar</span></span>
+                  </div>
+                </div>
+
+                <div class="pfield">
+                  <div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div>
+                  <div class="val-row">
+                    <span class="val">
+                      <span class="en">L5 · Senior Manager</span><span class="es">L5 · Senior Manager</span>
+                      <span class="arrow">→</span>
+                      <span class="secondary"><span class="en">L6 · Director (target)</span><span class="es">L6 · Director (objetivo)</span></span>
+                    </span>
+                    <span class="edit-aff"><span class="en">Edit</span><span class="es">Editar</span></span>
+                  </div>
+                </div>
+
+                <div class="pfield">
+                  <div class="lab-row"><span class="lab"><span class="en">Comp floor</span><span class="es">Piso de comp</span></span></div>
+                  <div class="val-row">
+                    <span class="val mono">2,400,000 MXN <span class="secondary" style="font-size:12px"> / yr</span></span>
+                    <span class="edit-aff"><span class="en">Edit</span><span class="es">Editar</span></span>
+                  </div>
+                </div>
+
+                <div class="pfield">
+                  <div class="lab-row"><span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span></div>
+                  <div class="val-row">
+                    <span class="val">
+                      <span class="en">Leverage</span><span class="es">Palanca</span>
+                      <span class="secondary" style="margin-left: 10px; font-size: 12.5px;"><span class="en">tighter, comp-anchored verdicts</span><span class="es">veredictos más estrictos, anclados a comp</span></span>
+                    </span>
+                    <span class="edit-aff"><span class="en">Edit</span><span class="es">Editar</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ ZONE 2 · PREFERENCES ============ -->
+              <div class="zone">
+                <div class="zone-head"><span class="en">Preferences</span><span class="es">Preferencias</span><span class="ln"></span></div>
+
+                <div class="pref-row">
+                  <span class="lab">
+                    <span class="en">Language</span><span class="es">Idioma</span>
+                    <span class="helper"><span class="en">All copy across the product.</span><span class="es">Todo el copy del producto.</span></span>
+                  </span>
+                  <div class="ctrl-seg">
+                    <button class="on">EN</button>
+                    <button>ES</button>
+                  </div>
+                </div>
+
+                <div class="pref-row">
+                  <span class="lab">
+                    <span class="en">Theme</span><span class="es">Tema</span>
+                    <span class="helper"><span class="en">Defaults to your system at signup.</span><span class="es">Toma el predeterminado del sistema al registrarse.</span></span>
+                  </span>
+                  <div class="ctrl-seg">
+                    <button class="on"><span class="en">Light</span><span class="es">Claro</span></button>
+                    <button><span class="en">Dark</span><span class="es">Oscuro</span></button>
+                  </div>
+                </div>
+
+                <div class="pref-row">
+                  <span class="lab">
+                    <span class="en">Currency display</span><span class="es">Moneda</span>
+                    <span class="helper"><span class="en">How comp values render. Stored value doesn't change.</span><span class="es">Cómo se muestran las comps. El valor guardado no cambia.</span></span>
+                  </span>
+                  <div class="ctrl-seg">
+                    <button class="on">MXN</button>
+                    <button>USD</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ ZONE 3 · ACCOUNT ============ -->
+              <div class="zone">
+                <div class="zone-head"><span class="en">Account</span><span class="es">Cuenta</span><span class="ln"></span></div>
+
+                <div class="acct-row">
+                  <span class="lab"><span class="en">Email</span><span class="es">Correo</span></span>
+                  <span class="val">nacho@galgo.mx</span>
+                </div>
+                <div class="acct-row">
+                  <span class="lab"><span class="en">Re-do onboarding</span><span class="es">Rehacer onboarding</span></span>
+                  <span class="helper"><span class="en">Re-tell the story. Structured fields prefill; narrative prompts start empty.</span><span class="es">Vuelve a contar la historia. Los campos estructurados se rellenan; los prompts narrativos empiezan vacíos.</span></span>
+                  <button class="ghost-btn"><span class="en">Start over</span><span class="es">Volver a empezar</span></button>
+                </div>
+                <div class="acct-row">
+                  <span class="lab"><span class="en">Delete account</span><span class="es">Eliminar cuenta</span></span>
+                  <span class="helper"><span class="en">Removes evaluations, profile, and onboarding answers. Irreversible.</span><span class="es">Elimina evaluaciones, perfil y respuestas de onboarding. Irreversible.</span></span>
+                  <button class="danger-btn"><span class="en">Delete account</span><span class="es">Eliminar cuenta</span></button>
+                </div>
+              </div>
+
+            </div><!-- /settings -->
+          </div><!-- /app -->
+        </div><!-- /frame -->
+
+        <div class="annot">
+          <div class="a">
+            <span class="nk"><span class="en">Three zones, one column</span><span class="es">Tres zonas, una columna</span></span>
+            <span class="ab"><span class="en">No tabs. No accordion. The page reads top-down: <b>identity, preferences, account</b>. Zone gap is 32 px and a hairline.</span><span class="es">Sin pestañas ni acordeón. La página se lee de arriba abajo: <b>identidad, preferencias, cuenta</b>. La separación es 32 px más una línea fina.</span></span>
+          </div>
+          <div class="a accent">
+            <span class="nk"><span class="en">Edit affordance · subtle</span><span class="es">Affordance de editar · sutil</span></span>
+            <span class="ab"><span class="en">Each Profile row reveals an <code>Edit</code> link on hover. Tapping opens an inline popover beside the value — no modal, no separate screen.</span><span class="es">Cada fila de Perfil revela un <code>Editar</code> al hover. El tap abre un popover en línea junto al valor — sin modal, sin pantalla aparte.</span></span>
+          </div>
+          <div class="a">
+            <span class="nk"><span class="en">Archetype · special</span><span class="es">Arquetipo · especial</span></span>
+            <span class="ab"><span class="en">The only field with a "view the answers" affordance — the prompts and prose are <b>read-only history</b>. Re-tell them through Re-do onboarding, not by editing here.</span><span class="es">El único campo con "ver las respuestas" — los prompts y la prosa son <b>historia de solo lectura</b>. Para volver a contarlos, usa Rehacer onboarding.</span></span>
+          </div>
+          <div class="a">
+            <span class="nk"><span class="en">Sign-out · not here</span><span class="es">Cerrar sesión · no aquí</span></span>
+            <span class="ab"><span class="en">Sign-out is high-frequency, every-surface — it lives in the app bar across all v1 screens. Account zone holds low-frequency state only.</span><span class="es">Cerrar sesión es alta frecuencia, omnipresente — vive en la barra superior de todas las pantallas de v1. La zona de Cuenta solo guarda estado de baja frecuencia.</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN B · COMMIT FLOW · 3 frames                             -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="commit">
+      <div class="screen-label">
+        <span class="num">B · Commit flow · the strategic core</span>
+        <h2>
+          <span class="en"><em>Edit. Confirm. Done.</em> Three frames, one footer, no toast.</span>
+          <span class="es"><em>Edita. Confirma. Listo.</em> Tres frames, un pie, sin toast.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          The user edits three Profile fields. A <b>persistent footer surfaces</b> at the bottom of the viewport — "3 unsaved changes" plus Discard / Review. On Review, a modal lists the deltas and states the <b>blast radius</b>: "this will mark 7 active evaluations as evaluated under prior profile." On commit, the footer slides down, the edited tags disappear, the saved values are the new values. <b>No success toast.</b> The footer disappearing is the confirmation.
+        </span>
+        <span class="es">
+          El usuario edita tres campos del Perfil. <b>Un pie persistente aparece</b> al fondo del viewport — "3 cambios sin guardar" más Descartar / Revisar. Al Revisar, un modal lista los deltas y declara el <b>radio de impacto</b>: "esto marcará 7 evaluaciones activas como evaluadas bajo perfil anterior". Al confirmar, el pie se desliza hacia abajo, los marcadores "editado" desaparecen, los valores guardados son los nuevos valores. <b>Sin toast de éxito.</b> El pie desapareciendo es la confirmación.
+        </span>
+      </p>
+
+      <div class="sequence">
+
+        <!-- Frame 1: Dirty draft + footer + inline edit popover -->
+        <div class="seq-frame">
+          <div class="seq-head">
+            <div class="seq-step"><b>01</b> · <span class="en">Editing in progress</span><span class="es">Edición en curso</span></div>
+            <div class="seq-title"><span class="en">Three fields dirty. Footer pinned.</span><span class="es">Tres campos sucios. Pie anclado.</span></div>
+          </div>
+          <div class="seq-body">
+            <div class="compact-app">
+              <div class="appbar">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <nav class="nav">
+                  <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                  <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+                </nav>
+                <div class="spacer"></div>
+                <div class="userline"><span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out"><span class="en">Sign out</span><span class="es">Salir</span></span></div>
+              </div>
+
+              <div class="settings" style="padding-bottom: 80px;">
+                <div class="settings-head">
+                  <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Archetype</span><span class="es">Arquetipo</span></span></div>
+                    <div class="val-row">
+                      <span class="val">operator-builder</span>
+                      <span class="aff"><span class="en">View answers</span><span class="es">Ver respuestas</span><span class="chev">→</span></span>
+                    </div>
+                  </div>
+
+                  <div class="pfield edited">
+                    <div class="lab-row">
+                      <span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span>
+                      <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                    </div>
+                    <div class="val-row">
+                      <span class="val">
+                        <span class="en">Mexico City</span><span class="es">Ciudad de México</span>
+                        <span class="sep">·</span>
+                        <span class="secondary"><span class="en">Regional relocation</span><span class="es">Reubicación regional</span></span>
+                        <span class="sep">·</span>
+                        <span style="color: var(--accent); font-weight: 600;"><span class="en">Remote only</span><span class="es">Solo remoto</span></span>
+                      </span>
+                    </div>
+                    <!-- inline edit popover -->
+                    <div class="editpop">
+                      <span style="font-family: 'Geist Mono'; font-size: 9.5px; letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);">
+                        <span class="en">Remote stance</span><span class="es">Postura sobre remoto</span>
+                      </span>
+                      <div class="selectrow">
+                        <span class="opt"><span class="en">Remote only</span><span class="es">Solo remoto</span></span>
+                        <span class="opt on" style="background: var(--accent); border-color: var(--accent);"><span class="en">Remote only</span><span class="es">Solo remoto</span></span>
+                        <span class="opt"><span class="en">Hybrid OK</span><span class="es">Híbrido OK</span></span>
+                        <span class="opt"><span class="en">On-site OK</span><span class="es">Presencial OK</span></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div>
+                    <div class="val-row">
+                      <span class="val"><span class="en">L5 · Senior Manager</span><span class="es">L5 · Senior Manager</span> <span class="arrow">→</span> <span class="secondary"><span class="en">L6 · Director</span><span class="es">L6 · Director</span></span></span>
+                    </div>
+                  </div>
+
+                  <div class="pfield edited">
+                    <div class="lab-row">
+                      <span class="lab"><span class="en">Comp floor</span><span class="es">Piso de comp</span></span>
+                      <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                    </div>
+                    <div class="val-row">
+                      <span class="val mono" style="color: var(--accent);">2,800,000 MXN <span style="font-size:12px; color: var(--ink-3); font-weight: 400;"> / yr</span></span>
+                    </div>
+                  </div>
+
+                  <div class="pfield edited">
+                    <div class="lab-row">
+                      <span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span>
+                      <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                    </div>
+                    <div class="val-row">
+                      <span class="val" style="color: var(--accent);">
+                        <span class="en">Reposition</span><span class="es">Reposicionamiento</span>
+                        <span class="secondary" style="margin-left: 10px; font-size: 12.5px; color: var(--ink-3);"><span class="en">verdicts oriented toward narrative shift</span><span class="es">veredictos hacia un cambio narrativo</span></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Preferences</span><span class="es">Preferencias</span><span class="ln"></span></div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Language</span><span class="es">Idioma</span></span>
+                    <div class="ctrl-seg"><button class="on">EN</button><button>ES</button></div>
+                  </div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Theme</span><span class="es">Tema</span></span>
+                    <div class="ctrl-seg"><button class="on"><span class="en">Light</span><span class="es">Claro</span></button><button><span class="en">Dark</span><span class="es">Oscuro</span></button></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Persistent draft footer -->
+              <div class="draft-footer">
+                <div class="l">
+                  <span class="lab"><span class="en">Unsaved changes</span><span class="es">Cambios sin guardar</span></span>
+                  <span class="count"><span class="en">· 3 edits</span><span class="es">· 3 ediciones</span></span>
+                </div>
+                <span class="spacer"></span>
+                <button class="discard"><span class="en">Discard</span><span class="es">Descartar</span></button>
+                <button class="primary"><span class="en">Review &amp; confirm</span><span class="es">Revisar y confirmar</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frame 2: Confirm modal with blast radius -->
+        <div class="seq-frame">
+          <div class="seq-head">
+            <div class="seq-step"><b>02</b> · <span class="en">Review &amp; confirm</span><span class="es">Revisar y confirmar</span></div>
+            <div class="seq-title"><span class="en">Deltas + blast radius. Numbers, no qualifiers.</span><span class="es">Deltas + radio de impacto. Números, sin matices.</span></div>
+          </div>
+          <div class="seq-body">
+            <div class="compact-app">
+              <div class="appbar">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <nav class="nav">
+                  <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                  <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+                </nav>
+                <div class="spacer"></div>
+                <div class="userline"><span>nacho@galgo.mx</span></div>
+              </div>
+
+              <div class="settings" style="padding-bottom: 80px; opacity: .25; pointer-events: none;">
+                <div class="settings-head">
+                  <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+                  <div class="pfield"><div class="lab-row"><span class="lab">Archetype</span></div><div class="val-row"><span class="val">operator-builder</span></div></div>
+                  <div class="pfield"><div class="lab-row"><span class="lab">Geo</span></div><div class="val-row"><span class="val">Mexico City · Remote only</span></div></div>
+                  <div class="pfield"><div class="lab-row"><span class="lab">Level</span></div><div class="val-row"><span class="val">L5 → L6</span></div></div>
+                  <div class="pfield"><div class="lab-row"><span class="lab">Comp floor</span></div><div class="val-row"><span class="val mono">2,800,000 MXN</span></div></div>
+                </div>
+              </div>
+
+              <!-- Modal -->
+              <div class="modal-veil">
+                <div class="modal">
+                  <div class="m-head">
+                    <div class="kicker"><span class="en">Profile changes</span><span class="es">Cambios de perfil</span></div>
+                    <h3><span class="en">Confirm changes.</span><span class="es">Confirmar cambios.</span></h3>
+                  </div>
+                  <div class="m-body">
+                    <div class="changelist">
+                      <div class="row">
+                        <span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span>
+                        <span class="delta">
+                          <span class="old"><span class="en">Hybrid OK</span><span class="es">Híbrido OK</span></span>
+                          <span class="arr">→</span>
+                          <span class="new"><span class="en">Remote only</span><span class="es">Solo remoto</span></span>
+                        </span>
+                      </div>
+                      <div class="row">
+                        <span class="lab"><span class="en">Comp floor</span><span class="es">Piso de comp</span></span>
+                        <span class="delta">
+                          <span class="old">2,400,000 MXN</span>
+                          <span class="arr">→</span>
+                          <span class="new">2,800,000 MXN</span>
+                        </span>
+                      </div>
+                      <div class="row">
+                        <span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span>
+                        <span class="delta">
+                          <span class="old"><span class="en">Leverage</span><span class="es">Palanca</span></span>
+                          <span class="arr">→</span>
+                          <span class="new"><span class="en">Reposition</span><span class="es">Reposicionamiento</span></span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="blast">
+                      <div class="lab"><span class="en">Blast radius</span><span class="es">Radio de impacto</span></div>
+                      <div class="msg">
+                        <span class="en">This will mark <b>7 active evaluations</b> as evaluated under prior profile. Verdicts and reasoning stay; they gain a marker.</span>
+                        <span class="es">Esto marcará <b>7 evaluaciones activas</b> como evaluadas bajo perfil anterior. Los veredictos y razonamientos se quedan; ganan una marca.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="m-foot">
+                    <span class="spacer"></span>
+                    <button class="ghost"><span class="en">Cancel</span><span class="es">Cancelar</span></button>
+                    <button class="primary"><span class="en">Commit</span><span class="es">Confirmar</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frame 3: Committed (saved, footer gone) -->
+        <div class="seq-frame">
+          <div class="seq-head">
+            <div class="seq-step"><b>03</b> · <span class="en">Committed</span><span class="es">Confirmado</span></div>
+            <div class="seq-title"><span class="en">Footer down. Tags gone. New values saved.</span><span class="es">Pie abajo. Marcas fuera. Valores nuevos guardados.</span></div>
+          </div>
+          <div class="seq-body">
+            <div class="compact-app">
+              <div class="appbar">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <nav class="nav">
+                  <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                  <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+                </nav>
+                <div class="spacer"></div>
+                <div class="userline"><span>nacho@galgo.mx</span></div>
+              </div>
+
+              <div class="settings">
+                <div class="settings-head">
+                  <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Archetype</span><span class="es">Arquetipo</span></span></div>
+                    <div class="val-row"><span class="val">operator-builder</span></div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span></div>
+                    <div class="val-row">
+                      <span class="val">
+                        <span class="en">Mexico City</span><span class="es">Ciudad de México</span>
+                        <span class="sep">·</span>
+                        <span class="secondary"><span class="en">Regional</span><span class="es">Regional</span></span>
+                        <span class="sep">·</span>
+                        <span class="secondary"><span class="en">Remote only</span><span class="es">Solo remoto</span></span>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div>
+                    <div class="val-row">
+                      <span class="val"><span class="en">L5 · Senior Manager</span><span class="es">L5 · Senior Manager</span> <span class="arrow">→</span> <span class="secondary"><span class="en">L6 · Director</span><span class="es">L6 · Director</span></span></span>
+                    </div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Comp floor</span><span class="es">Piso de comp</span></span></div>
+                    <div class="val-row"><span class="val mono">2,800,000 MXN <span class="secondary" style="font-size:12px"> / yr</span></span></div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span></div>
+                    <div class="val-row">
+                      <span class="val">
+                        <span class="en">Reposition</span><span class="es">Reposicionamiento</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Preferences</span><span class="es">Preferencias</span><span class="ln"></span></div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Language</span><span class="es">Idioma</span></span>
+                    <div class="ctrl-seg"><button class="on">EN</button><button>ES</button></div>
+                  </div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Theme</span><span class="es">Tema</span></span>
+                    <div class="ctrl-seg"><button class="on"><span class="en">Light</span><span class="es">Claro</span></button><button><span class="en">Dark</span><span class="es">Oscuro</span></button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sequence -->
+
+      <div style="margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;">
+        <div class="annot"><div class="a accent">
+          <span class="nk"><span class="en">Edited tag</span><span class="es">Marca de editado</span></span>
+          <span class="ab"><span class="en">Mono, lowercase, right-aligned in the label row. <b>No background highlight, no border change.</b> The new value gains the accent color until commit.</span><span class="es">Mono, minúsculas, alineada a la derecha en la fila del label. <b>Sin fondo, sin cambio de borde.</b> El valor nuevo toma el color de acento hasta confirmar.</span></span>
+        </div></div>
+        <div class="annot"><div class="a signal">
+          <span class="nk"><span class="en">Blast radius copy</span><span class="es">Copy del impacto</span></span>
+          <span class="ab"><span class="en">Factual. "<b>7 active evaluations.</b>" Not "may affect some." Not "we'll let you know." The number is server-side, generated from the actual deltas.</span><span class="es">Factual. "<b>7 evaluaciones activas.</b>" Sin "puede que afecte algunas". Sin "te avisaremos". El número es del servidor, generado a partir de los deltas reales.</span></span>
+        </div></div>
+        <div class="annot"><div class="a">
+          <span class="nk"><span class="en">No success toast</span><span class="es">Sin toast de éxito</span></span>
+          <span class="ab"><span class="en">The footer sliding down <b>is</b> the confirmation. No "Saved!", no "Changes committed." The page returns to its default state — that's enough.</span><span class="es">El pie deslizándose hacia abajo <b>es</b> la confirmación. Sin "¡Guardado!", sin "Cambios confirmados". La página vuelve a su estado por defecto — con eso basta.</span></span>
+        </div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN C · DISCARD                                            -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="discard">
+      <div class="screen-label">
+        <span class="num">C · Discard · in-place</span>
+        <h2>
+          <span class="en">No modal for <em>no</em>.</span>
+          <span class="es">Ningún modal para decir <em>no</em>.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          Discard is a confirmation, not a journey. Tap on Discard in the footer; the button becomes an inline pill — "Discard 3 edits?" with Yes / Cancel. <b>No modal, no veil.</b> On Yes, edited fields revert to saved values, edited tags disappear, the footer slides down. On Cancel, the pill collapses back to the Discard button.
+        </span>
+        <span class="es">
+          Descartar es una confirmación, no un viaje. Tap a Descartar en el pie; el botón se convierte en una píldora en línea — "¿Descartar 3 ediciones?" con Sí / Cancelar. <b>Sin modal, sin velo.</b> Al Sí, los campos vuelven a sus valores guardados, las marcas desaparecen, el pie se desliza hacia abajo. Al Cancelar, la píldora colapsa de vuelta al botón de Descartar.
+        </span>
+      </p>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app/settings · <span class="en">discarding</span><span class="es">descartando</span></span>
+        </div>
+        <div class="app" style="min-height: 480px;">
+          <div class="appbar">
+            <span class="brand-small">labra<span class="dot">.</span></span>
+            <nav class="nav">
+              <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+              <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+              <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+            </nav>
+            <div class="spacer"></div>
+            <div class="userline"><span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out"><span class="en">Sign out</span><span class="es">Cerrar sesión</span></span></div>
+          </div>
+
+          <div class="settings" style="padding-bottom: 100px;">
+            <div class="settings-head">
+              <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+              <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+            </div>
+
+            <div class="zone">
+              <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+
+              <div class="pfield"><div class="lab-row"><span class="lab">Archetype</span></div><div class="val-row"><span class="val">operator-builder</span></div></div>
+
+              <div class="pfield edited">
+                <div class="lab-row">
+                  <span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span>
+                  <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                </div>
+                <div class="val-row">
+                  <span class="val"><span class="en">Mexico City</span><span class="es">Ciudad de México</span> <span class="sep">·</span> <span class="secondary"><span class="en">Regional</span><span class="es">Regional</span></span> <span class="sep">·</span> <span style="color: var(--accent); font-weight: 600;"><span class="en">Remote only</span><span class="es">Solo remoto</span></span></span>
+                </div>
+              </div>
+
+              <div class="pfield"><div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div><div class="val-row"><span class="val"><span class="en">L5 · Senior Manager</span><span class="es">L5 · Senior Manager</span> <span class="arrow">→</span> <span class="secondary"><span class="en">L6 · Director</span><span class="es">L6 · Director</span></span></span></div></div>
+
+              <div class="pfield edited">
+                <div class="lab-row">
+                  <span class="lab"><span class="en">Comp floor</span><span class="es">Piso de comp</span></span>
+                  <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                </div>
+                <div class="val-row"><span class="val mono" style="color: var(--accent);">2,800,000 MXN <span style="font-size:12px; color: var(--ink-3); font-weight: 400;"> / yr</span></span></div>
+              </div>
+
+              <div class="pfield edited">
+                <div class="lab-row">
+                  <span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span>
+                  <span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span>
+                </div>
+                <div class="val-row"><span class="val" style="color: var(--accent);"><span class="en">Reposition</span><span class="es">Reposicionamiento</span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer with inline discard confirmation -->
+          <div class="draft-footer">
+            <div class="l">
+              <span class="lab"><span class="en">Unsaved changes</span><span class="es">Cambios sin guardar</span></span>
+              <span class="count"><span class="en">· 3 edits</span><span class="es">· 3 ediciones</span></span>
+            </div>
+            <span class="spacer"></span>
+            <span class="discard-inline">
+              <span class="q"><span class="en">Discard 3 edits?</span><span class="es">¿Descartar 3 ediciones?</span></span>
+              <button class="yes"><span class="en">Yes, discard</span><span class="es">Sí, descartar</span></button>
+              <button class="no"><span class="en">Cancel</span><span class="es">Cancelar</span></button>
+            </span>
+            <button class="primary"><span class="en">Review &amp; confirm</span><span class="es">Revisar y confirmar</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN D · VIEW ANSWERS MODAL                                 -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="answers">
+      <div class="screen-label">
+        <span class="num">D · View answers · read-only</span>
+        <h2>
+          <span class="en"><em>Your answers.</em> The prose that became the label.</span>
+          <span class="es"><em>Tus respuestas.</em> La prosa que se volvió la etiqueta.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          Archetype is the only derived Profile field — the label "operator-builder" is downstream of a dozen narrative prompts. The user can <b>see</b> the source, but not edit it in place. To rewrite the story, use Re-do onboarding. The modal is informational: prompts in Fraunces italic, answers in Albert Sans. Single Close button. <b>No edit affordance inside.</b>
+        </span>
+        <span class="es">
+          Arquetipo es el único campo derivado del Perfil — la etiqueta "operator-builder" es aguas abajo de una docena de prompts narrativos. El usuario puede <b>verlo</b>, pero no editarlo en sitio. Para reescribir la historia: Rehacer onboarding. El modal es informativo: prompts en Fraunces cursiva, respuestas en Albert Sans. Un solo botón Cerrar. <b>Sin affordance de edición adentro.</b>
+        </span>
+      </p>
+
+      <div class="pair">
+        <div class="frame">
+          <div class="frame-bar">
+            <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+            <span class="url">labra.app/settings · <span class="en">view answers</span><span class="es">ver respuestas</span></span>
+          </div>
+          <div class="app" style="min-height: 600px;">
+            <div class="appbar">
+              <span class="brand-small">labra<span class="dot">.</span></span>
+              <nav class="nav">
+                <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+              </nav>
+              <div class="spacer"></div>
+              <div class="userline"><span>nacho@galgo.mx</span></div>
+            </div>
+
+            <div class="settings" style="opacity: .25; pointer-events: none;">
+              <div class="settings-head">
+                <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+              </div>
+              <div class="zone">
+                <div class="zone-head">Profile</div>
+                <div class="pfield"><div class="lab-row"><span class="lab">Archetype</span></div><div class="val-row"><span class="val">operator-builder</span><span class="aff"><span class="en">View answers</span><span class="es">Ver respuestas</span><span class="chev">→</span></span></div></div>
+                <div class="pfield"><div class="lab-row"><span class="lab">Geo</span></div><div class="val-row"><span class="val">Mexico City · Regional · Hybrid OK</span></div></div>
+                <div class="pfield"><div class="lab-row"><span class="lab">Level</span></div><div class="val-row"><span class="val">L5 → L6</span></div></div>
+              </div>
+            </div>
+
+            <!-- Modal: View answers -->
+            <div class="modal-veil">
+              <div class="modal" style="width: 580px;">
+                <div class="m-head">
+                  <div class="kicker"><span class="en">Archetype · operator-builder</span><span class="es">Arquetipo · operator-builder</span></div>
+                  <h3><span class="en">Your answers.</span><span class="es">Tus respuestas.</span></h3>
+                </div>
+                <div class="m-body">
+                  <div class="qa-list">
+                    <div class="qa">
+                      <div class="q"><span class="en">When you're at your best at work, what are you actually doing?</span><span class="es">Cuando estás en tu mejor versión en el trabajo, ¿qué estás haciendo de hecho?</span></div>
+                      <div class="a">
+                        <span class="en">Building the system that lets a 10-person team operate like 40. Writing the playbook, then handing it to someone who can run it without me.</span>
+                        <span class="es">Construyendo el sistema que deja a un equipo de 10 operar como uno de 40. Escribiendo el manual y entregándoselo a alguien que lo corre sin mí.</span>
+                      </div>
+                    </div>
+                    <div class="qa">
+                      <div class="q"><span class="en">What kind of role would you walk away from a great offer to keep?</span><span class="es">¿Qué tipo de rol te haría rechazar una buena oferta para conservarlo?</span></div>
+                      <div class="a">
+                        <span class="en">One where I have actual authority to fix the broken thing — not consult on it, not propose it. Build, ship, own the metric.</span>
+                        <span class="es">Uno donde tengo autoridad real para arreglar lo roto — no consultarlo, no proponerlo. Construir, embarcar, ser dueño del KPI.</span>
+                      </div>
+                    </div>
+                    <div class="qa">
+                      <div class="q"><span class="en">Pick a stage range that feels honest right now.</span><span class="es">Elige un rango de etapa que se sienta honesto ahora.</span></div>
+                      <div class="a short"><span class="en">Series B → Series D</span><span class="es">Serie B → Serie D</span></div>
+                    </div>
+                    <div class="qa">
+                      <div class="q"><span class="en">What would a verdict need to mention for you to take it seriously?</span><span class="es">¿Qué tendría que mencionar un veredicto para que lo tomes en serio?</span></div>
+                      <div class="a">
+                        <span class="en">Whether the role has the ops scope I'm claiming or whether it's a glorified PM seat. Comp ladder. Whether the founder respects ops or sees it as overhead.</span>
+                        <span class="es">Si el rol tiene el scope de ops que afirmo o es un asiento de PM con disfraz. Banda de comp. Si el fundador respeta ops o lo ve como overhead.</span>
+                      </div>
+                    </div>
+                    <div class="qa">
+                      <div class="q"><span class="en">A role you'd quietly skip without telling anyone.</span><span class="es">Un rol que pasarías de largo en silencio.</span></div>
+                      <div class="a">
+                        <span class="en">"Chief of Staff" titles that are really executive assistant work. Or "Head of Strategy" with no team, no budget, no plate to break.</span>
+                        <span class="es">Títulos de "Chief of Staff" que en realidad son trabajo de asistente ejecutivo. O "Head of Strategy" sin equipo, sin presupuesto, sin nada que romper.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="qa-list" style="border-top: 0.5px solid var(--line-2); padding-top: 6px;">
+                    <div style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);">
+                      <span class="en">Recorded · 12 March 2026 · 8 prompts shown of 14</span>
+                      <span class="es">Registrado · 12 marzo 2026 · 8 prompts mostrados de 14</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="m-foot">
+                  <span class="spacer"></span>
+                  <button class="primary"><span class="en">Close</span><span class="es">Cerrar</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="annot">
+          <div class="a">
+            <span class="nk"><span class="en">Read-only by design</span><span class="es">Solo lectura por diseño</span></span>
+            <span class="ab"><span class="en">The user can't edit prose here. <b>Why:</b> re-reading prior-self's writing then poking at it bakes in anchor bias. Re-do onboarding starts narrative prompts <b>empty</b>, on purpose.</span><span class="es">El usuario no puede editar prosa aquí. <b>Por qué:</b> releer la prosa de un yo previo y picotearla mete sesgo de anclaje. Rehacer onboarding empieza los prompts narrativos <b>vacíos</b>, a propósito.</span></span>
+          </div>
+          <div class="a accent">
+            <span class="nk"><span class="en">Type pairing</span><span class="es">Pareja tipográfica</span></span>
+            <span class="ab"><span class="en">Prompts in <b>Fraunces italic</b> — the editorial voice of the system asking. Answers in <b>Albert Sans</b> — the user's voice. The contrast matters; the format teaches reading.</span><span class="es">Prompts en <b>Fraunces cursiva</b> — la voz editorial del sistema preguntando. Respuestas en <b>Albert Sans</b> — la voz del usuario. El contraste importa; el formato enseña a leer.</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN E · RE-DO + DELETE MODALS                              -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="account">
+      <div class="screen-label">
+        <span class="num">E · Account · two destructive paths</span>
+        <h2>
+          <span class="en"><em>Re-do</em>, and <em>delete</em>. Same shape, different stakes.</span>
+          <span class="es"><em>Rehacer</em>, y <em>eliminar</em>. Misma forma, distinto peso.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          Two CTAs in the Account zone open two confirmation modals. <b>Re-do onboarding</b> is non-destructive — your current profile stays in effect until you finish the new one. <b>Delete account</b> is irreversible and requires the user to type their email to confirm. Both modals use the same chrome; only the body and the primary button color change.
+        </span>
+        <span class="es">
+          Dos CTAs en la zona de Cuenta abren dos modales de confirmación. <b>Rehacer onboarding</b> no es destructivo — tu perfil actual sigue en vigor hasta terminar el nuevo. <b>Eliminar cuenta</b> es irreversible y requiere que el usuario teclee su correo para confirmar. Ambos modales usan el mismo chrome; solo cambian el cuerpo y el color del botón primario.
+        </span>
+      </p>
+
+      <div class="sequence two">
+
+        <!-- Re-do onboarding modal -->
+        <div class="seq-frame">
+          <div class="seq-head">
+            <div class="seq-step"><b>01</b> · <span class="en">Re-do onboarding</span><span class="es">Rehacer onboarding</span></div>
+            <div class="seq-title"><span class="en">Story rewrite. Structured fields carry over.</span><span class="es">Reescritura de historia. Lo estructurado pasa.</span></div>
+          </div>
+          <div class="seq-body">
+            <div class="compact-app">
+              <div class="appbar">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <nav class="nav">
+                  <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                  <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+                </nav>
+                <div class="spacer"></div>
+                <div class="userline"><span>nacho@galgo.mx</span></div>
+              </div>
+
+              <div class="settings" style="opacity: .25; pointer-events: none;">
+                <div class="settings-head">
+                  <div class="kicker">Settings</div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+                <div class="zone"><div class="zone-head"><span class="en">Account</span><span class="es">Cuenta</span><span class="ln"></span></div>
+                  <div class="acct-row"><span class="lab">Email</span><span class="val">nacho@galgo.mx</span></div>
+                  <div class="acct-row"><span class="lab"><span class="en">Re-do onboarding</span><span class="es">Rehacer onboarding</span></span><span class="helper">…</span></div>
+                </div>
+              </div>
+
+              <div class="modal-veil">
+                <div class="modal">
+                  <div class="m-head">
+                    <div class="kicker"><span class="en">Account · onboarding</span><span class="es">Cuenta · onboarding</span></div>
+                    <h3><span class="en">Re-do onboarding?</span><span class="es">¿Rehacer onboarding?</span></h3>
+                  </div>
+                  <div class="m-body">
+                    <p style="font-family:'Albert Sans'; font-size: 14px; color: var(--ink-2); line-height: 1.55; margin: 0 0 12px; text-wrap: pretty;">
+                      <span class="en">Your current profile stays in effect until you finish. Existing evaluations will be marked as <b>evaluated under prior profile</b> once you commit the new answers.</span>
+                      <span class="es">Tu perfil actual sigue en vigor hasta que termines. Las evaluaciones existentes serán marcadas como <b>evaluadas bajo perfil anterior</b> una vez que confirmes las nuevas respuestas.</span>
+                    </p>
+                    <div class="blast calm" style="margin-top: 4px;">
+                      <div class="lab"><span class="en">What carries over</span><span class="es">Qué se transfiere</span></div>
+                      <div class="msg" style="margin-top: 4px;">
+                        <span class="en"><b>Structured fields prefill</b> — level, geo, comp floor, currency, mode. <b>Narrative prompts start empty</b> — you re-tell the story without re-reading prior-self.</span>
+                        <span class="es"><b>Campos estructurados prellenados</b> — nivel, ubicación, piso de comp, moneda, modo. <b>Prompts narrativos vacíos</b> — vuelves a contar la historia sin releer al yo previo.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="m-foot">
+                    <span class="spacer"></span>
+                    <button class="ghost"><span class="en">Cancel</span><span class="es">Cancelar</span></button>
+                    <button class="primary"><span class="en">Start over</span><span class="es">Volver a empezar</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete account modal -->
+        <div class="seq-frame">
+          <div class="seq-head">
+            <div class="seq-step"><b>02</b> · <span class="en">Delete account</span><span class="es">Eliminar cuenta</span></div>
+            <div class="seq-title"><span class="en">Type-to-confirm. Visual draft — spec deferred.</span><span class="es">Confirma tecleando. Borrador visual — spec diferida.</span></div>
+          </div>
+          <div class="seq-body">
+            <div class="compact-app">
+              <div class="appbar">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <nav class="nav">
+                  <a><span class="en">Evaluate</span><span class="es">Evaluar</span></a>
+                  <a><span class="en">Tracker</span><span class="es">Tracker</span></a>
+                  <a class="on"><span class="en">Settings</span><span class="es">Ajustes</span></a>
+                </nav>
+                <div class="spacer"></div>
+                <div class="userline"><span>nacho@galgo.mx</span></div>
+              </div>
+
+              <div class="settings" style="opacity: .25; pointer-events: none;">
+                <div class="settings-head">
+                  <div class="kicker">Settings</div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+                <div class="zone"><div class="zone-head"><span class="en">Account</span><span class="es">Cuenta</span><span class="ln"></span></div>
+                  <div class="acct-row"><span class="lab">Email</span><span class="val">nacho@galgo.mx</span></div>
+                  <div class="acct-row"><span class="lab"><span class="en">Delete account</span><span class="es">Eliminar cuenta</span></span><span class="helper">…</span></div>
+                </div>
+              </div>
+
+              <div class="modal-veil">
+                <div class="modal">
+                  <div class="m-head">
+                    <div class="kicker" style="color: var(--danger);"><span class="en">Account · destructive</span><span class="es">Cuenta · destructivo</span></div>
+                    <h3><span class="en">Delete this account?</span><span class="es">¿Eliminar esta cuenta?</span></h3>
+                  </div>
+                  <div class="m-body">
+                    <div class="delete-warn">
+                      <b><span class="en">This is irreversible.</span><span class="es">Esto es irreversible.</span></b>
+                      <ul>
+                        <li><span class="en">23 evaluations, with verdicts and reasoning</span><span class="es">23 evaluaciones, con veredictos y razonamientos</span></li>
+                        <li><span class="en">Your profile, archetype, and onboarding answers</span><span class="es">Tu perfil, arquetipo y respuestas de onboarding</span></li>
+                        <li><span class="en">All outcome capture data (offers, comp, rejections)</span><span class="es">Todos los datos de resultados (ofertas, comp, rechazos)</span></li>
+                        <li><span class="en">Active evaluations in your pipeline</span><span class="es">Evaluaciones activas en tu pipeline</span></li>
+                      </ul>
+                    </div>
+                    <div class="delete-confirm">
+                      <span class="help"><span class="en">Type your email to confirm</span><span class="es">Teclea tu correo para confirmar</span></span>
+                      <div class="input typed">nacho@galgo.mx<span class="caret"></span></div>
+                      <span class="ok-hint"><span class="en">Match. Ready to delete.</span><span class="es">Coincide. Listo para eliminar.</span></span>
+                    </div>
+                  </div>
+                  <div class="m-foot">
+                    <span class="spacer"></span>
+                    <button class="ghost"><span class="en">Cancel</span><span class="es">Cancelar</span></button>
+                    <button class="danger"><span class="en">Delete account</span><span class="es">Eliminar cuenta</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sequence -->
+
+      <div style="margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+        <div class="annot" style="position: static;"><div class="a">
+          <span class="nk"><span class="en">Non-destructive language</span><span class="es">Lenguaje no destructivo</span></span>
+          <span class="ab"><span class="en">"<b>Start over.</b>" Not "retake," not "refresh." Re-do feels like a deliberate act, not a reset. The verb stays consistent across the surface and the body copy.</span><span class="es">"<b>Volver a empezar.</b>" Sin "retomar", sin "refrescar". Rehacer se siente como un acto deliberado, no un reset. El verbo es consistente en la superficie y el copy.</span></span>
+        </div></div>
+        <div class="annot" style="position: static;"><div class="a signal">
+          <span class="nk"><span class="en">Delete · scope deferred</span><span class="es">Eliminar · scope diferido</span></span>
+          <span class="ab"><span class="en">Visual treatment shown is a <b>draft</b>. Spec calls out the modal as out of v1 visual scope — needs its own interaction pass for typo-tolerance, error states, and undo window.</span><span class="es">El tratamiento visual mostrado es un <b>borrador</b>. La spec deja el modal fuera del visual scope de v1 — necesita pase propio para tolerancia tipográfica, estados de error y ventana de undo.</span></span>
+        </div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN F · MOBILE                                             -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="mobile">
+      <div class="screen-label">
+        <span class="num">F · Mobile · 390px</span>
+        <h2>
+          <span class="en">Same model, <em>narrower column</em>.</span>
+          <span class="es">Mismo modelo, <em>columna más angosta</em>.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          Settings is low-frequency on mobile but not zero — language and theme switches happen on the road. <b>Three zones still stack top-down</b>; preferences become full-width segmented controls; the persistent footer collapses to a slim pinned strip. Confirmation moves from centered modal to <b>bottom sheet</b>. Three frames: default, dirty + footer, confirm sheet.
+        </span>
+        <span class="es">
+          Ajustes es de baja frecuencia en móvil pero no cero — los cambios de idioma y tema pasan en el camino. <b>Las tres zonas siguen apiladas</b>; las preferencias se vuelven controles segmentados de ancho completo; el pie persistente colapsa en una franja delgada anclada. La confirmación pasa de modal centrado a <b>bottom sheet</b>. Tres frames: por defecto, sucio + pie, sheet de confirmación.
+        </span>
+      </p>
+
+      <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
+
+        <!-- Phone 1: Default -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div class="phone">
+            <div class="screen-m">
+              <div class="status-m"><span>9:41</span><span>●●● ▮</span></div>
+              <div class="nav-m">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <span class="pgtitle"><span class="en">Settings</span><span class="es">Ajustes</span></span>
+              </div>
+              <div class="body-m">
+                <div class="m-head">
+                  <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                  <div class="sub"><span class="en">Edit how the system reads you.</span><span class="es">Edita cómo el sistema te lee.</span></div>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Archetype</span><span class="es">Arquetipo</span></span></div>
+                    <div class="val-row" style="flex-wrap: wrap;">
+                      <span class="val">operator-builder</span>
+                      <span class="aff" style="margin-left: 0; width: 100%; padding-top: 2px;"><span class="en">View answers</span><span class="es">Ver respuestas</span><span class="chev">→</span></span>
+                    </div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span></div>
+                    <div class="val-row"><span class="val" style="line-height: 1.4;"><span class="en">Mexico City</span><span class="es">CDMX</span> <span class="sep">·</span> <span class="secondary"><span class="en">Regional</span><span class="es">Regional</span></span> <span class="sep">·</span> <span class="secondary"><span class="en">Hybrid</span><span class="es">Híbrido</span></span></span></div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div>
+                    <div class="val-row"><span class="val">L5 <span class="arrow">→</span> <span class="secondary">L6</span></span></div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Comp floor</span><span class="es">Piso comp</span></span></div>
+                    <div class="val-row"><span class="val mono">2,400,000 MXN</span></div>
+                  </div>
+                  <div class="pfield">
+                    <div class="lab-row"><span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span></div>
+                    <div class="val-row"><span class="val"><span class="en">Leverage</span><span class="es">Palanca</span></span></div>
+                  </div>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Preferences</span><span class="es">Preferencias</span><span class="ln"></span></div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Language</span><span class="es">Idioma</span></span>
+                    <div class="ctrl-seg"><button class="on">EN</button><button>ES</button></div>
+                  </div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Theme</span><span class="es">Tema</span></span>
+                    <div class="ctrl-seg"><button class="on"><span class="en">Light</span><span class="es">Claro</span></button><button><span class="en">Dark</span><span class="es">Osc</span></button></div>
+                  </div>
+                  <div class="pref-row">
+                    <span class="lab"><span class="en">Currency</span><span class="es">Moneda</span></span>
+                    <div class="ctrl-seg"><button class="on">MXN</button><button>USD</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);">
+            <b style="color: var(--ink);">01</b> · <span class="en">Default</span><span class="es">Por defecto</span>
+          </span>
+        </div>
+
+        <!-- Phone 2: Dirty + footer -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div class="phone">
+            <div class="screen-m">
+              <div class="status-m"><span>9:42</span><span>●●● ▮</span></div>
+              <div class="nav-m">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <span class="pgtitle"><span class="en">Settings</span><span class="es">Ajustes</span></span>
+              </div>
+              <div class="body-m" style="padding-bottom: 80px;">
+                <div class="m-head">
+                  <div class="kicker"><span class="en">Settings</span><span class="es">Ajustes</span></div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+
+                <div class="zone">
+                  <div class="zone-head"><span class="en">Profile</span><span class="es">Perfil</span><span class="ln"></span></div>
+                  <div class="pfield"><div class="lab-row"><span class="lab"><span class="en">Archetype</span><span class="es">Arquetipo</span></span></div><div class="val-row"><span class="val">operator-builder</span></div></div>
+                  <div class="pfield edited">
+                    <div class="lab-row"><span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span><span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span></div>
+                    <div class="val-row"><span class="val"><span class="en">CDMX</span><span class="es">CDMX</span> <span class="sep">·</span> <span style="color: var(--accent); font-weight: 600;"><span class="en">Remote only</span><span class="es">Solo remoto</span></span></span></div>
+                  </div>
+                  <div class="pfield"><div class="lab-row"><span class="lab"><span class="en">Level</span><span class="es">Nivel</span></span></div><div class="val-row"><span class="val">L5 <span class="arrow">→</span> <span class="secondary">L6</span></span></div></div>
+                  <div class="pfield edited">
+                    <div class="lab-row"><span class="lab"><span class="en">Comp floor</span><span class="es">Piso comp</span></span><span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span></div>
+                    <div class="val-row"><span class="val mono" style="color: var(--accent);">2,800,000 MXN</span></div>
+                  </div>
+                  <div class="pfield edited">
+                    <div class="lab-row"><span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span><span class="edited-tag"><span class="en">edited</span><span class="es">editado</span></span></div>
+                    <div class="val-row"><span class="val" style="color: var(--accent);"><span class="en">Reposition</span><span class="es">Reposicionamiento</span></span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mobile pinned footer -->
+              <div class="m-footer">
+                <div class="l">
+                  <span class="lab"><span class="en">Unsaved</span><span class="es">Sin guardar</span></span>
+                  <span class="count"><span class="en">3 edits</span><span class="es">3 ediciones</span></span>
+                </div>
+                <span class="spacer"></span>
+                <button class="discard"><span class="en">Discard</span><span class="es">Descartar</span></button>
+                <button class="primary"><span class="en">Review</span><span class="es">Revisar</span></button>
+              </div>
+            </div>
+          </div>
+          <span style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);">
+            <b style="color: var(--ink);">02</b> · <span class="en">Dirty · 3 edits</span><span class="es">Sucio · 3 ediciones</span>
+          </span>
+        </div>
+
+        <!-- Phone 3: Confirm bottom sheet -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div class="phone">
+            <div class="screen-m">
+              <div class="status-m"><span>9:42</span><span>●●● ▮</span></div>
+              <div class="nav-m">
+                <span class="brand-small">labra<span class="dot">.</span></span>
+                <span class="pgtitle"><span class="en">Settings</span><span class="es">Ajustes</span></span>
+              </div>
+              <div class="body-m" style="opacity: .2; pointer-events: none;">
+                <div class="m-head">
+                  <div class="kicker">Settings</div>
+                  <h1><span class="en">What we know.</span><span class="es">Lo que sabemos.</span></h1>
+                </div>
+                <div class="zone"><div class="zone-head">Profile</div></div>
+              </div>
+
+              <div class="sheet-m">
+                <div class="handle"></div>
+                <div class="kicker"><span class="en">Profile changes</span><span class="es">Cambios de perfil</span></div>
+                <div class="h3"><span class="en">Confirm changes.</span><span class="es">Confirmar cambios.</span></div>
+
+                <div class="changelist">
+                  <div class="row">
+                    <span class="lab"><span class="en">Geo</span><span class="es">Ubicación</span></span>
+                    <span class="delta"><span class="old"><span class="en">Hybrid</span><span class="es">Híbrido</span></span> <span class="arr">→</span> <span class="new"><span class="en">Remote only</span><span class="es">Solo remoto</span></span></span>
+                  </div>
+                  <div class="row">
+                    <span class="lab"><span class="en">Comp floor</span><span class="es">Piso comp</span></span>
+                    <span class="delta"><span class="old">2,400,000</span> <span class="arr">→</span> <span class="new">2,800,000 MXN</span></span>
+                  </div>
+                  <div class="row">
+                    <span class="lab"><span class="en">Mode</span><span class="es">Modo</span></span>
+                    <span class="delta"><span class="old"><span class="en">Leverage</span><span class="es">Palanca</span></span> <span class="arr">→</span> <span class="new"><span class="en">Reposition</span><span class="es">Reposicionamiento</span></span></span>
+                  </div>
+                </div>
+
+                <div class="blast">
+                  <div class="lab"><span class="en">Blast radius</span><span class="es">Radio de impacto</span></div>
+                  <div class="msg">
+                    <span class="en">Marks <b>7 active evaluations</b> as evaluated under prior profile.</span>
+                    <span class="es">Marca <b>7 evaluaciones activas</b> como evaluadas bajo perfil anterior.</span>
+                  </div>
+                </div>
+
+                <div class="ctas">
+                  <button class="ghost"><span class="en">Cancel</span><span class="es">Cancelar</span></button>
+                  <button class="primary"><span class="en">Commit</span><span class="es">Confirmar</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span style="font-family: 'Geist Mono'; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);">
+            <b style="color: var(--ink);">03</b> · <span class="en">Confirm sheet</span><span class="es">Sheet de confirmar</span>
+          </span>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;">
+        <div class="annot" style="position: static;"><div class="a">
+          <span class="nk"><span class="en">Stacked column</span><span class="es">Columna apilada</span></span>
+          <span class="ab"><span class="en">No collapse, no accordion. The whole page scrolls. Zones keep their 32 px gaps and hairline dividers — the structure is the navigation.</span><span class="es">Sin colapsos, sin acordeón. Toda la página hace scroll. Las zonas mantienen 32 px y línea fina — la estructura es la navegación.</span></span>
+        </div></div>
+        <div class="annot" style="position: static;"><div class="a accent">
+          <span class="nk"><span class="en">Footer pinned, never floats</span><span class="es">Pie anclado, no flota</span></span>
+          <span class="ab"><span class="en">On mobile the persistent footer is 64 px high and pinned to the bottom of the screen. It never overlaps content because the page reserves bottom padding when present.</span><span class="es">En móvil el pie persistente mide 64 px y se ancla abajo. Nunca sobrepone contenido porque la página reserva padding inferior cuando aparece.</span></span>
+        </div></div>
+        <div class="annot" style="position: static;"><div class="a">
+          <span class="nk"><span class="en">Bottom sheet, same content</span><span class="es">Bottom sheet, mismo contenido</span></span>
+          <span class="ab"><span class="en">Confirm becomes a sheet — handle, kicker, title, deltas, blast, CTAs. The exact same atoms as desktop, in a different container. <b>Same copy, same numbers.</b></span><span class="es">Confirmar se vuelve un sheet — handle, kicker, título, deltas, impacto, CTAs. Los mismos átomos que en desktop, en otro contenedor. <b>Mismo copy, mismos números.</b></span></span>
+        </div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN G · DOWNSTREAM PRIOR-PROFILE MARKER                    -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="downstream">
+      <div class="screen-label">
+        <span class="num">G · Downstream · prior-profile marker</span>
+        <h2>
+          <span class="en"><em>What it looks like</em> elsewhere, after you commit.</span>
+          <span class="es"><em>Cómo se ve</em> en otras pantallas, una vez confirmado.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          The commit isn't the end — it ripples. On <b>Tracker</b>, the rows for the 7 affected roles shift their company-name color one step grayer (<code>--ink</code> → <code>--ink-2</code>). No tag, no icon. On the <b>Report</b>, an italic line appears under the timestamp — "<i>Evaluated under prior profile.</i>" Tap to see what changed; re-evaluate if you want a fresh read.
+        </span>
+        <span class="es">
+          El commit no es el final — se propaga. En <b>Tracker</b>, las filas de los 7 roles afectados desplazan el color del nombre de empresa un paso al gris (<code>--ink</code> → <code>--ink-2</code>). Sin tag, sin ícono. En el <b>Informe</b>, aparece una línea cursiva bajo el timestamp — "<i>Evaluado bajo perfil anterior.</i>" Tap para ver qué cambió; re-evalúa si quieres una lectura fresca.
+        </span>
+      </p>
+
+      <!-- Tracker rows (mini) -->
+      <div class="frame" style="margin-bottom: 22px;">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app/tracker · <span class="en">three of seven prior-profile rows</span><span class="es">tres de siete filas con perfil anterior</span></span>
+        </div>
+        <div style="padding: 6px 0;">
+          <div class="demo-tracker-row prior">
+            <span class="sdot interviewing"></span>
+            <div class="who">
+              <span class="co">Stori</span>
+              <span class="role"><span class="en">Head of Operations · CDMX · Series C · Fintech</span><span class="es">Head of Operations · CDMX · Serie C · Fintech</span></span>
+            </div>
+            <span class="scorechip strong">84</span>
+            <span class="statuspill"><span class="dot"></span><span class="en">Interviewing</span><span class="es">En entrevista</span></span>
+            <span class="followup-cell">—</span>
+            <span class="days"><b>2d</b></span>
+          </div>
+          <div class="demo-tracker-row prior">
+            <span class="sdot applied"></span>
+            <div class="who">
+              <span class="co">Clara</span>
+              <span class="role"><span class="en">Head of Operations · CDMX · Series C · Fintech</span><span class="es">Head of Operations · CDMX · Serie C · Fintech</span></span>
+            </div>
+            <span class="scorechip strong">81</span>
+            <span class="statuspill applied"><span class="dot"></span><span class="en">Applied</span><span class="es">Aplicada</span></span>
+            <span class="followup-cell" style="color: var(--signal-ink);"><span class="en">9d since touch</span><span class="es">9d sin contacto</span></span>
+            <span class="days"><b>9d</b></span>
+          </div>
+          <div class="demo-tracker-row">
+            <span class="sdot interviewing"></span>
+            <div class="who">
+              <span class="co">Jeeves</span>
+              <span class="role"><span class="en">Head of Global RevOps · Remote LatAm · Series D</span><span class="es">Head of Global RevOps · Remoto LatAm · Serie D</span></span>
+            </div>
+            <span class="scorechip strong">82</span>
+            <span class="statuspill"><span class="dot"></span><span class="en">Interviewing</span><span class="es">En entrevista</span></span>
+            <span class="followup-cell">—</span>
+            <span class="days"><b>4d</b></span>
+          </div>
+          <div class="demo-tracker-row prior">
+            <span class="sdot interviewing"></span>
+            <div class="who">
+              <span class="co">Konfio</span>
+              <span class="role"><span class="en">VP Operations · CDMX · Series C · Fintech</span><span class="es">VP Operations · CDMX · Serie C · Fintech</span></span>
+            </div>
+            <span class="scorechip">71</span>
+            <span class="statuspill"><span class="dot"></span><span class="en">Interviewing</span><span class="es">En entrevista</span></span>
+            <span class="followup-cell">—</span>
+            <span class="days"><b>11d</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report fragment -->
+      <div class="pair">
+        <div class="demo-report">
+          <div class="kicker"><span class="en">Verdict · revisited</span><span class="es">Veredicto · revisitado</span></div>
+          <div class="vh">
+            <span class="co">Stori</span>
+            <span class="ro"><span class="en">Head of Operations · Series C · Fintech</span><span class="es">Head of Operations · Serie C · Fintech</span></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: 4px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 36px; border-radius: 10px; background: var(--ink); color: var(--bg); font-family: 'Geist Mono'; font-size: 16px; font-weight: 600; letter-spacing: 0.2px;">84</span>
+            <span style="font-family: 'Albert Sans'; font-size: 16px; color: var(--ink-2);"><span class="en">Worth the conversation.</span><span class="es">Vale la conversación.</span></span>
+          </div>
+          <div class="timestamp">
+            <span class="en">Evaluated 3d ago · 12 March 2026 · Leverage mode</span>
+            <span class="es">Evaluado hace 3d · 12 marzo 2026 · Modo Palanca</span>
+          </div>
+          <div class="prior-line">
+            <span class="en">Evaluated under prior profile.</span>
+            <span class="es">Evaluado bajo perfil anterior.</span>
+            <span style="font-family: 'Geist Mono'; font-size: 10px; opacity: .55;">→</span>
+          </div>
+        </div>
+
+        <div class="annot">
+          <div class="a">
+            <span class="nk"><span class="en">Tracker · the only surface change</span><span class="es">Tracker · el único cambio</span></span>
+            <span class="ab"><span class="en">Company name shifts from <code>--ink</code> to <code>--ink-2</code>. <b>No tag, no icon, no copy change.</b> The user discovers the prior-profile state by opening the Report — the color shift is just enough.</span><span class="es">El nombre de la empresa pasa de <code>--ink</code> a <code>--ink-2</code>. <b>Sin tag, sin ícono, sin cambio de copy.</b> El usuario descubre el estado al abrir el Informe — el cambio de color es lo justo.</span></span>
+          </div>
+          <div class="a accent">
+            <span class="nk"><span class="en">Report · italic line</span><span class="es">Informe · línea cursiva</span></span>
+            <span class="ab"><span class="en">A dashed underline says <b>"tap me"</b> without shouting. Tap opens a modal listing field deltas + a Re-evaluate CTA. The old verdict stays viewable forever — <b>verdict version history</b>.</span><span class="es">Un subrayado punteado dice <b>"tócame"</b> sin gritar. El tap abre un modal con los deltas + un CTA de Re-evaluar. El veredicto viejo queda visible para siempre — <b>historial de versiones del veredicto</b>.</span></span>
+          </div>
+          <div class="a">
+            <span class="nk"><span class="en">Out of scope</span><span class="es">Fuera de scope</span></span>
+            <span class="ab"><span class="en">Evaluate Recent doesn't get the marker in v1. Deferred — could inherit the Tracker color shift, or do nothing. Decision lives in the navigation review session.</span><span class="es">"Recientes" en Evaluar no tiene marca en v1. Diferido — podría heredar el cambio de color de Tracker o no hacer nada. Decisión va en la revisión de navegación.</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN H · COPY TABLE EN / ES                                 -->
+  <!-- ============================================================ -->
+  <div class="stage" style="padding-top: 8px;">
+
+    <section class="screen" id="copy">
+      <div class="screen-label">
+        <span class="num">H · Copy · EN / ES</span>
+        <h2>
+          <span class="en">Voice <em>across</em> both languages.</span>
+          <span class="es">Voz <em>en</em> los dos idiomas.</span>
+        </h2>
+      </div>
+      <p class="screen-note">
+        <span class="en">
+          <b>Spanish leads</b> in voice work for v1; English is the second pass. No exclamation points. No success toasts. The blast radius is factual and counts things. Marker copy is "<i>under prior profile</i>" / "<i>bajo perfil anterior</i>" — not "old," not "pre-update."
+        </span>
+        <span class="es">
+          <b>Español lleva</b> el trabajo de voz para v1; inglés es la segunda pasada. Sin signos de admiración. Sin toasts de éxito. El radio de impacto es factual y cuenta cosas. La marca dice "<i>bajo perfil anterior</i>" / "<i>under prior profile</i>" — no "viejo", no "pre-actualización".
+        </span>
+      </p>
+
+      <div class="copy-table">
+        <div class="row-c head">
+          <div class="cell-c"><span class="en">Surface</span><span class="es">Superficie</span></div>
+          <div class="cell-c"><span class="en">English</span><span class="es">Inglés</span></div>
+          <div class="cell-c"><span class="en">Spanish</span><span class="es">Español</span></div>
+        </div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Page header</span><span class="es">Encabezado de página</span></div></div>
+        <div class="row-c">
+          <div class="cell-c surface">page · kicker</div>
+          <div class="cell-c">Settings</div>
+          <div class="cell-c">Ajustes</div>
+        </div>
+        <div class="row-c">
+          <div class="cell-c surface">page · h1</div>
+          <div class="cell-c">What we know.</div>
+          <div class="cell-c">Lo que sabemos.</div>
+        </div>
+        <div class="row-c">
+          <div class="cell-c surface">page · sub</div>
+          <div class="cell-c">Edit how the system reads you.</div>
+          <div class="cell-c">Edita cómo el sistema te lee.</div>
+        </div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Zone labels</span><span class="es">Etiquetas de zona</span></div></div>
+        <div class="row-c"><div class="cell-c surface">zone · profile</div><div class="cell-c">Profile</div><div class="cell-c">Perfil</div></div>
+        <div class="row-c"><div class="cell-c surface">zone · preferences</div><div class="cell-c">Preferences</div><div class="cell-c">Preferencias</div></div>
+        <div class="row-c"><div class="cell-c surface">zone · account</div><div class="cell-c">Account</div><div class="cell-c">Cuenta</div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Profile fields</span><span class="es">Campos de perfil</span></div></div>
+        <div class="row-c"><div class="cell-c surface">field · archetype</div><div class="cell-c">Archetype</div><div class="cell-c">Arquetipo</div></div>
+        <div class="row-c"><div class="cell-c surface">archetype · aff</div><div class="cell-c">View the answers that produced this</div><div class="cell-c">Ver las respuestas que produjeron esto</div></div>
+        <div class="row-c"><div class="cell-c surface">field · geo</div><div class="cell-c">Geo</div><div class="cell-c">Ubicación</div></div>
+        <div class="row-c"><div class="cell-c surface">geo · relocation</div><div class="cell-c">No · Regional · Global</div><div class="cell-c">No · Regional · Global</div></div>
+        <div class="row-c"><div class="cell-c surface">geo · remote</div><div class="cell-c">Remote only · Hybrid OK · On-site OK</div><div class="cell-c">Solo remoto · Híbrido OK · Presencial OK</div></div>
+        <div class="row-c"><div class="cell-c surface">field · level</div><div class="cell-c">Level <em>· (current → target)</em></div><div class="cell-c">Nivel <em>· (actual → objetivo)</em></div></div>
+        <div class="row-c"><div class="cell-c surface">field · comp</div><div class="cell-c">Comp floor</div><div class="cell-c">Piso de comp</div></div>
+        <div class="row-c"><div class="cell-c surface">field · mode</div><div class="cell-c">Mode <em>· Need · Leverage · Reposition</em></div><div class="cell-c">Modo <em>· Necesidad · Palanca · Reposicionamiento</em></div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Draft footer + commit</span><span class="es">Pie de borrador + commit</span></div></div>
+        <div class="row-c"><div class="cell-c surface">footer · lab</div><div class="cell-c">Unsaved changes</div><div class="cell-c">Cambios sin guardar</div></div>
+        <div class="row-c"><div class="cell-c surface">footer · count</div><div class="cell-c">3 edits</div><div class="cell-c">3 ediciones</div></div>
+        <div class="row-c"><div class="cell-c surface">footer · primary</div><div class="cell-c">Review &amp; confirm</div><div class="cell-c">Revisar y confirmar</div></div>
+        <div class="row-c"><div class="cell-c surface">footer · ghost</div><div class="cell-c">Discard</div><div class="cell-c">Descartar</div></div>
+        <div class="row-c"><div class="cell-c surface">discard · inline</div><div class="cell-c">Discard 3 edits? · Yes, discard · Cancel</div><div class="cell-c">¿Descartar 3 ediciones? · Sí, descartar · Cancelar</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · h3</div><div class="cell-c">Confirm changes.</div><div class="cell-c">Confirmar cambios.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · blast</div><div class="cell-c">This will mark <b>7 active evaluations</b> as evaluated under prior profile. Verdicts and reasoning stay; they gain a marker.</div><div class="cell-c">Esto marcará <b>7 evaluaciones activas</b> como evaluadas bajo perfil anterior. Los veredictos y razonamientos se quedan; ganan una marca.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · no impact</div><div class="cell-c">No active evaluations are affected.</div><div class="cell-c">No hay evaluaciones activas afectadas.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · CTAs</div><div class="cell-c">Cancel · Commit</div><div class="cell-c">Cancelar · Confirmar</div></div>
+        <div class="row-c"><div class="cell-c surface">field · tag</div><div class="cell-c"><em>edited</em></div><div class="cell-c"><em>editado</em></div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">View answers</span><span class="es">Ver respuestas</span></div></div>
+        <div class="row-c"><div class="cell-c surface">modal · h3</div><div class="cell-c">Your answers.</div><div class="cell-c">Tus respuestas.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · CTA</div><div class="cell-c">Close</div><div class="cell-c">Cerrar</div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Re-do onboarding</span><span class="es">Rehacer onboarding</span></div></div>
+        <div class="row-c"><div class="cell-c surface">cta</div><div class="cell-c">Start over</div><div class="cell-c">Volver a empezar</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · h3</div><div class="cell-c">Re-do onboarding?</div><div class="cell-c">¿Rehacer onboarding?</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · body</div><div class="cell-c">Your current profile stays in effect until you finish. Existing evaluations will be marked as evaluated under prior profile once you commit the new answers.</div><div class="cell-c">Tu perfil actual sigue en vigor hasta que termines. Las evaluaciones existentes serán marcadas como evaluadas bajo perfil anterior una vez que confirmes las nuevas respuestas.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · CTAs</div><div class="cell-c">Cancel · Start over</div><div class="cell-c">Cancelar · Volver a empezar</div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Delete account</span><span class="es">Eliminar cuenta</span></div></div>
+        <div class="row-c"><div class="cell-c surface">cta</div><div class="cell-c">Delete account</div><div class="cell-c">Eliminar cuenta</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · h3</div><div class="cell-c">Delete this account?</div><div class="cell-c">¿Eliminar esta cuenta?</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · warn</div><div class="cell-c">This is irreversible.</div><div class="cell-c">Esto es irreversible.</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · type to confirm</div><div class="cell-c">Type your email to confirm</div><div class="cell-c">Teclea tu correo para confirmar</div></div>
+        <div class="row-c"><div class="cell-c surface">modal · CTAs</div><div class="cell-c">Cancel · Delete account</div><div class="cell-c">Cancelar · Eliminar cuenta</div></div>
+
+        <div class="row-c"><div class="cell-c section-h"><span class="en">Downstream · prior-profile marker</span><span class="es">Aguas abajo · marca de perfil anterior</span></div></div>
+        <div class="row-c"><div class="cell-c surface">report · italic line</div><div class="cell-c">Evaluated under prior profile.</div><div class="cell-c">Evaluado bajo perfil anterior.</div></div>
+        <div class="row-c"><div class="cell-c surface">explainer · h3</div><div class="cell-c">Your profile changed.</div><div class="cell-c">Tu perfil cambió.</div></div>
+        <div class="row-c"><div class="cell-c surface">explainer · CTAs</div><div class="cell-c">Re-evaluate · Close</div><div class="cell-c">Re-evaluar · Cerrar</div></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="stage">
+    <div class="footer">
+      <span class="en">Labra · Settings · v1 · 04 of 04 v1 surfaces · spanish leads</span>
+      <span class="es">Labra · Ajustes · v1 · 04 de 04 superficies v1 · español lidera</span>
+    </div>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.body.setAttribute('data-lang', lang);
+      document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+      document.getElementById('lang-es').classList.toggle('on', lang === 'es');
+    }
+    function setMode(mode) {
+      document.body.classList.remove('theme-light', 'theme-dark');
+      document.body.classList.add('theme-' + mode);
+      document.getElementById('mode-light').classList.toggle('on', mode === 'light');
+      document.getElementById('mode-dark').classList.toggle('on', mode === 'dark');
+    }
+  </script>
+
+</body>
+</html>

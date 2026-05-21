@@ -1,0 +1,1643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Wireframes v0.3 (LatAm · strategy-aligned)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;600;700&family=Patrick+Hand&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1817;
+    --ink-2: #4a4642;
+    --ink-3: #8b857d;
+    --paper: #f7f3eb;
+    --paper-2: #fefcf7;
+    --brief: #fbf5e6;
+    --line: #c8c1b4;
+    --line-2: #e3ddd0;
+    --coral: #e07a5f;
+    --teal: #3a9d8a;
+    --amber: #e8c14a;
+    --highlight: #fff3b0;
+    --muted-bg: #efe9dc;
+    --shadow: 0 1px 0 rgba(0,0,0,.04), 0 6px 18px -8px rgba(40,30,20,.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Patrick Hand", "Kalam", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.35;
+    background-image:
+      radial-gradient(rgba(0,0,0,.018) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,.012) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+  }
+  .page { max-width: 1480px; margin: 0 auto; padding: 32px 28px 80px; }
+
+  header.top {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+    border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 14px;
+  }
+  header.top h1 { font-family: "Caveat", cursive; font-weight: 700; font-size: 52px; margin: 0; line-height: .95; }
+  header.top h1 .stamp {
+    display: inline-block; transform: rotate(-3deg);
+    border: 2px solid var(--coral); color: var(--coral);
+    font-family: "Special Elite", monospace; font-size: 13px;
+    padding: 3px 9px 1px; margin-left: 12px; letter-spacing: 1px; vertical-align: middle;
+  }
+  header.top .sub { font-family: "Kalam", cursive; color: var(--ink-2); max-width: 580px; font-size: 16px; line-height: 1.45; }
+  header.top .sub b { color: var(--ink); font-weight: 700; }
+
+  /* Persona bar */
+  .persona {
+    display: flex; gap: 14px; align-items: center;
+    padding: 12px 16px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 4px 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .persona .ph {
+    width: 56px; height: 56px; border-radius: 12px;
+    background: var(--amber);
+    border: 1.5px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Caveat"; font-weight: 700; font-size: 28px;
+  }
+  .persona .name { font-family: "Caveat"; font-size: 24px; line-height: 1.05; }
+  .persona .who { font-family: "Kalam"; color: var(--ink-2); font-size: 13.5px; }
+  .persona .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .persona .tag {
+    font-family: "Kalam"; font-size: 12px;
+    border: 1.2px solid var(--ink); padding: 1px 8px 0; border-radius: 12px; background: var(--paper);
+  }
+  .persona .tag.coral { background: #fce4dc; }
+  .persona .tag.teal  { background: #dff0eb; }
+  .persona .tag.amber { background: #fbeec8; }
+  .persona .aha { margin-left: auto; max-width: 380px; }
+  .persona .aha .label { font-family: "Special Elite"; font-size: 10px; letter-spacing: 1px; color: var(--coral); }
+  .persona .aha .quote { font-family: "Caveat"; font-size: 17px; line-height: 1.2; color: var(--ink); }
+
+  /* Strategy bar */
+  .strategy {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin-bottom: 18px;
+  }
+  .strategy .pillar-card {
+    border: 1.5px solid var(--ink); border-radius: 6px;
+    padding: 10px 12px; background: var(--paper-2);
+    box-shadow: var(--shadow);
+  }
+  .strategy .pillar-card .label { font-family: "Special Elite"; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); }
+  .strategy .pillar-card .title { font-family: "Caveat"; font-size: 19px; line-height: 1.05; margin-top: 2px; }
+  .strategy .pillar-card .body { font-family: "Kalam"; color: var(--ink-2); font-size: 12.5px; margin-top: 4px; line-height: 1.35; }
+
+  /* Legend */
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; font-family: "Kalam"; font-size: 12.5px; color: var(--ink-2); }
+  .legend .lg { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 0; border: 1px dashed var(--line); border-radius: 12px; background: var(--paper-2); }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; border: 1px solid var(--ink); }
+  .swatch.coral { background: var(--coral); }
+  .swatch.teal { background: var(--teal); }
+  .swatch.amber { background: var(--amber); }
+  .swatch.hi { background: var(--highlight); }
+  .swatch.ink { background: var(--ink); }
+
+  /* Sticky chip nav */
+  .chipnav {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--paper);
+    padding: 10px 0;
+    border-bottom: 1.5px dashed var(--line);
+    margin-bottom: 22px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    align-items: center;
+  }
+  .chipnav a {
+    text-decoration: none; color: var(--ink);
+    border: 1.5px solid var(--ink);
+    padding: 4px 11px 2px; border-radius: 18px;
+    font-family: "Kalam"; font-weight: 700; font-size: 13px;
+    background: var(--paper-2);
+    transform: rotate(-.3deg);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .chipnav a:nth-child(even) { transform: rotate(.3deg); }
+  .chipnav a:hover { background: var(--muted-bg); }
+  .chipnav a .n { font-family: "Special Elite", monospace; font-size: 10px; color: var(--ink-3); }
+  .chipnav a.active { background: var(--ink); color: var(--paper-2); }
+  .chipnav a.active .n { color: rgba(255,255,255,.55); }
+  .chipnav a .tier {
+    font-family: "Special Elite", monospace; font-size: 9px;
+    border: 1px solid var(--ink); padding: 0 4px; border-radius: 6px; line-height: 1.4;
+  }
+  .chipnav a.active .tier { border-color: rgba(255,255,255,.5); }
+  .chipnav a.tier-critical .tier { background: var(--coral); color: white; border-color: var(--coral); }
+  .chipnav a.tier-core .tier { background: var(--teal); color: white; border-color: var(--teal); }
+  .chipnav a.tier-important .tier { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+  .chipnav a.tier-nice .tier { background: var(--paper); color: var(--ink-3); }
+  .chipnav a.tier-later .tier { background: var(--muted-bg); color: var(--ink-3); }
+  .chipnav a.tier-dropped { opacity: .55; }
+  .chipnav a.tier-dropped .tier { background: var(--line); color: var(--ink-3); border-color: var(--line); }
+
+  /* Section per screen */
+  .screen-row {
+    margin-bottom: 36px;
+    border: 2px solid var(--ink);
+    border-radius: 8px 12px 6px 10px;
+    background: var(--paper-2);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    scroll-margin-top: 70px;
+  }
+  .screen-row > .caption {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 12px 16px 8px;
+    border-bottom: 1.5px dashed var(--line);
+    flex-wrap: wrap;
+  }
+  .screen-row > .caption .num { font-family: "Special Elite"; font-size: 12px; color: var(--ink-3); }
+  .screen-row > .caption .name { font-family: "Caveat"; font-size: 30px; line-height: 1; }
+  .screen-row > .caption .tier-pill {
+    font-family: "Special Elite"; font-size: 10px; letter-spacing: 1px;
+    padding: 2px 8px 0; border-radius: 4px;
+    border: 1.5px solid var(--ink); margin-left: 4px;
+  }
+  .tier-pill.t-critical { background: var(--coral); color: white; border-color: var(--coral); }
+  .tier-pill.t-core { background: var(--teal); color: white; border-color: var(--teal); }
+  .tier-pill.t-important { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+  .tier-pill.t-nice { background: var(--paper); color: var(--ink-3); border-color: var(--line); }
+  .tier-pill.t-later { background: var(--muted-bg); color: var(--ink-3); border-color: var(--line); }
+  .tier-pill.t-dropped { background: var(--line); color: white; border-color: var(--line); }
+
+  .screen-row > .caption .blend {
+    display: inline-flex; gap: 6px; align-items: center;
+    font-family: "Kalam"; font-size: 12.5px; color: var(--ink-3);
+    margin-left: 6px;
+  }
+  .screen-row > .caption .blend .b-pill {
+    border: 1.2px solid var(--ink); padding: 0 7px;
+    border-radius: 10px; font-size: 11.5px;
+    font-family: "Kalam"; font-weight: 700; background: var(--paper);
+  }
+  .screen-row > .caption .blend .b-pill.b1 { background: #fce4dc; }
+  .screen-row > .caption .blend .b-pill.b2 { background: #fbeec8; }
+  .screen-row > .caption .blend .b-pill.b3 { background: #dff0eb; }
+  .screen-row > .caption .blend .b-pill.b4 { background: #e6dff2; }
+  .screen-row > .caption .note { margin-left: auto; font-family: "Kalam"; font-size: 13px; color: var(--ink-3); max-width: 480px; text-align: right; }
+  .screen-row > .body { padding: 14px; }
+
+  /* Mock window */
+  .mock {
+    border: 1.5px solid var(--ink); background: white;
+    border-radius: 4px 6px 4px 6px; overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 640px;
+  }
+  .mock.tall { min-height: 760px; }
+  .mock .chrome {
+    height: 26px; background: var(--paper);
+    border-bottom: 1.5px solid var(--ink);
+    display: flex; align-items: center; gap: 6px; padding: 0 10px; flex-shrink: 0;
+  }
+  .mock .chrome .dot { width: 9px; height: 9px; border: 1.2px solid var(--ink); border-radius: 50%; background: var(--paper-2); }
+  .mock .chrome .url {
+    margin-left: 8px; font-family: "Special Elite"; font-size: 11.5px; color: var(--ink-2);
+    background: var(--paper-2); border: 1px solid var(--line);
+    padding: 1px 10px 0; border-radius: 8px; flex: 1;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .mock .chrome .lang {
+    font-family: "Kalam"; font-size: 11px; color: var(--ink-3);
+    border: 1px solid var(--line); padding: 0 6px; border-radius: 8px; background: var(--paper-2);
+  }
+  .mock .chrome .lang b { color: var(--ink); }
+  .mock .screen { flex: 1; display: flex; min-height: 0; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 176px; background: #1c1a17; color: #d9d3c4;
+    padding: 14px 10px; display: flex; flex-direction: column; gap: 4px;
+    border-right: 1.5px solid var(--ink);
+    font-family: "Kalam"; font-size: 13.5px; flex-shrink: 0;
+  }
+  .sidebar .brand { font-family: "Caveat"; font-weight: 700; font-size: 26px; color: #fff; padding: 2px 4px 8px; border-bottom: 1px dashed #4a443a; margin-bottom: 4px; line-height: 1; }
+  .sidebar .brand .dot { color: var(--coral); }
+  .sidebar .nav-item { padding: 5px 8px 3px; border-radius: 4px; color: #d9d3c4; display: flex; align-items: center; gap: 7px; }
+  .sidebar .nav-item .ico { width: 12px; height: 12px; border: 1px solid #8b857d; border-radius: 2px; flex-shrink: 0; }
+  .sidebar .nav-item.active { background: #2d2a25; color: white; }
+  .sidebar .nav-item.active .ico { border-color: var(--coral); background: var(--coral); }
+  .sidebar .nav-item .badge { margin-left: auto; background: var(--coral); color: white; font-size: 10px; padding: 0 6px; border-radius: 8px; }
+  .sidebar .nav-item.phase3 { color: #6c6357; }
+  .sidebar .nav-item.phase3 .p3 { margin-left: auto; font-size: 9px; font-family: "Special Elite"; background: #3a352f; color: #8b857d; padding: 0 4px; border-radius: 3px; }
+  .sidebar .nav-cta { margin-top: auto; background: linear-gradient(135deg, var(--coral), #c8523a); color: white; border-radius: 4px; padding: 6px 8px 4px; text-align: center; font-family: "Caveat"; font-weight: 700; font-size: 19px; }
+  .sidebar .user { margin-top: 8px; border-top: 1px dashed #4a443a; padding-top: 8px; display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #8b857d; }
+  .sidebar .user .av { width: 20px; height: 20px; border-radius: 50%; background: var(--amber); border: 1px solid #4a443a; }
+
+  /* Generic */
+  .content { flex: 1; padding: 14px; min-width: 0; display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .grow { flex: 1; min-width: 0; }
+  .h-title { font-family: "Caveat"; font-size: 26px; line-height: 1; }
+  .h-mini { font-family: "Caveat"; font-size: 16px; color: var(--ink-2); }
+  .label { font-family: "Special Elite"; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); text-transform: uppercase; }
+  .pill {
+    border: 1.2px solid var(--ink); padding: 1px 9px 0; border-radius: 12px;
+    font-size: 12.5px; background: white; line-height: 1.4;
+    display: inline-flex; align-items: center; gap: 4px; font-family: "Kalam";
+  }
+  .pill.solid { background: var(--ink); color: white; }
+  .pill.coral { background: #fce4dc; }
+  .pill.teal { background: #dff0eb; }
+  .pill.amber { background: #fbeec8; }
+  .pill.muted { color: var(--ink-3); border-color: var(--line); background: var(--paper); }
+  .btn {
+    border: 1.5px solid var(--ink); background: white; padding: 3px 11px 1px;
+    border-radius: 4px; font-family: "Kalam"; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn.primary { background: var(--ink); color: white; }
+  .btn.coral { background: var(--coral); color: white; border-color: var(--coral); }
+  .btn.teal { background: var(--teal); color: white; border-color: var(--teal); }
+  .btn.ghost { background: transparent; }
+  .btn.sm { font-size: 12px; padding: 2px 8px 0; }
+  .line-text { height: 8px; background: var(--line-2); border-radius: 2px; display: block; }
+  .line-text.dark { background: var(--ink); opacity: .8; }
+  .line-text.coral { background: #f4baa6; }
+  .line-text.teal { background: #a6d4ca; }
+  .line-text.amber { background: #f0d680; }
+  .line-text.strike { text-decoration: line-through; opacity: .4; }
+  .line-text.short { width: 30%; } .line-text.med { width: 55%; }
+  .line-text.long { width: 80%; } .line-text.full { width: 100%; }
+  .lt-stack { display: flex; flex-direction: column; gap: 5px; }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--muted-bg); border: 1.2px solid var(--ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: "Caveat"; font-weight: 700; font-size: 14px; line-height: 1;
+  }
+  .avatar.lg { width: 40px; height: 40px; font-size: 18px; border-radius: 8px; }
+  .avatar.coral { background: #fce4dc; }
+  .avatar.teal { background: #dff0eb; }
+  .avatar.amber { background: #fbeec8; }
+  .avatar.purple { background: #e6dff2; }
+  .avatar.green { background: #ddebd5; }
+  .avatar.blue  { background: #d6e1ee; }
+  .card {
+    border: 1.2px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; background: white;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .card.dashed { border-style: dashed; }
+  .card.muted { background: var(--paper); }
+  .card.coral { background: #fff6f2; }
+  .card.teal { background: #f0f8f5; }
+  .card.amber { background: #fff8dc; }
+  .card.brief { background: var(--brief); }
+  .divider { border-top: 1px dashed var(--line); margin: 4px 0; }
+  .ai-highlight { background: linear-gradient(transparent 55%, var(--highlight) 55% 95%, transparent 95%); padding: 0 2px; }
+  .ai-tag { font-family: "Caveat"; color: var(--coral); font-size: 15px; display: inline-flex; align-items: center; gap: 3px; }
+  .ai-tag::before { content: "✦"; font-size: 12px; }
+
+  /* lead row */
+  .lead { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; padding: 8px 10px; border-bottom: 1px dashed var(--line); align-items: center; }
+  .lead .meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .lead .ttl { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+  .lead .ttl .co { font-weight: 700; font-family: "Kalam"; font-size: 15px; }
+  .lead .ttl .role { color: var(--ink-2); font-size: 13.5px; }
+  .lead .sub-meta { display: flex; gap: 9px; font-size: 12px; color: var(--ink-3); font-family: "Kalam"; flex-wrap: wrap; }
+  .lead .right { display: flex; align-items: center; gap: 7px; }
+  .score { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--ink); background: white; display: flex; align-items: center; justify-content: center; font-family: "Caveat"; font-weight: 700; font-size: 17px; line-height: 1; }
+  .score.sm { width: 26px; height: 26px; font-size: 12px; }
+  .score.hi { background: var(--teal); color: white; border-color: var(--teal); }
+  .score.mid { background: var(--amber); }
+  .score.lo { background: var(--muted-bg); color: var(--ink-3); }
+
+  /* Mode toggle */
+  .mode-toggle { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 18px; padding: 2px; background: var(--paper-2); gap: 2px; }
+  .mode-toggle .seg { padding: 2px 11px 0; border-radius: 14px; font-size: 12px; font-family: "Kalam"; }
+  .mode-toggle .seg.on { background: var(--ink); color: white; }
+  .mode-toggle .seg.amber { background: #f6d984; color: var(--ink); }
+  .mode-toggle .seg.teal { background: #a6d4ca; color: var(--ink); }
+
+  /* progress */
+  .prog { height: 9px; border: 1.2px solid var(--ink); border-radius: 4px; overflow: hidden; background: var(--paper); position: relative; }
+  .prog .fill { height: 100%; background: var(--teal); }
+  .prog .fill.coral { background: var(--coral); }
+  .prog .fill.amber { background: var(--amber); }
+
+  /* editorial */
+  .editorial-title { font-family: "Caveat"; font-size: 36px; line-height: 1; letter-spacing: .3px; }
+  .rule { height: 1px; background: var(--ink); width: 36px; }
+  .rule.long { width: 88px; }
+
+  /* chat */
+  .chat-pane {
+    background: #f8f3e8; border-left: 1.5px solid var(--ink);
+    padding: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+    position: relative;
+  }
+  .bubble { border: 1.2px solid var(--ink); border-radius: 10px 10px 10px 2px; padding: 7px 9px; background: white; font-size: 13px; line-height: 1.4; max-width: 92%; }
+  .bubble.me { border-radius: 10px 10px 2px 10px; background: #ecf3ff; align-self: flex-end; }
+  .bubble.ai { background: #fff8dc; }
+  .chat-input { display: flex; gap: 6px; margin-top: auto; }
+  .chat-input .input { flex: 1; border: 1.5px dashed var(--ink); border-radius: 4px; background: white; padding: 5px 8px; font-family: "Kalam"; font-size: 12.5px; color: var(--ink-3); }
+
+  /* atlas */
+  .atlas-bg {
+    background-color: #f3efe4;
+    background-image:
+      linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.05) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+  .dot-node {
+    position: absolute; border: 1.5px solid var(--ink); background: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: "Caveat"; font-weight: 700; line-height: 1; text-align: center;
+  }
+
+  /* sticky note */
+  .sticky { background: #fff3b0; border: 1px solid #d8be4a; padding: 7px 10px; font-family: "Kalam"; font-size: 12.5px; transform: rotate(-1.2deg); box-shadow: 1px 2px 0 rgba(0,0,0,.08); line-height: 1.35; }
+  .sticky.coral { background: #fce4dc; border-color: #d99b88; transform: rotate(.8deg); }
+  .sticky.teal { background: #dff0eb; border-color: #87bdb1; transform: rotate(-.6deg); }
+
+  /* tracker */
+  .tracker-row { display: grid; grid-template-columns: 1.4fr .9fr .6fr .6fr 30px; gap: 8px; padding: 8px 12px; border-bottom: 1px dashed var(--line); align-items: center; font-size: 13px; }
+  .tracker-row.head { background: var(--paper); font-family: "Special Elite"; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); text-transform: uppercase; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; border: 1px solid var(--ink); }
+  .status-dot.applied { background: var(--amber); }
+  .status-dot.interview { background: var(--teal); }
+  .status-dot.offer { background: var(--coral); }
+  .status-dot.passed { background: var(--line); }
+  .status-dot.draft { background: white; }
+
+  .topbar { display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-bottom: 1.5px solid var(--ink); background: var(--paper-2); flex-wrap: wrap; }
+
+  /* annotations */
+  .anno-tag {
+    position: absolute;
+    font-family: "Caveat"; font-size: 14px;
+    color: var(--coral); background: var(--paper-2);
+    border: 1.2px solid var(--coral); padding: 1px 7px 0;
+    border-radius: 10px;
+    transform: rotate(-1deg);
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  /* salary band */
+  .salband {
+    border: 1.2px solid var(--ink); border-radius: 4px;
+    background: white; padding: 6px 9px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .salband.coral { background: #fff6f2; }
+  .salband .row1 { display: flex; align-items: baseline; gap: 6px; font-family: "Kalam"; }
+  .salband .amount { font-family: "Caveat"; font-weight: 700; font-size: 19px; line-height: 1; }
+  .salband .ccy { font-family: "Special Elite"; font-size: 10px; color: var(--ink-3); letter-spacing: 1px; }
+  .salband .conf {
+    display: inline-flex; gap: 2px; margin-left: auto; align-items: center;
+    font-family: "Kalam"; font-size: 11.5px; color: var(--ink-2);
+  }
+  .salband .conf .blip { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); display: inline-block; }
+  .salband .conf .blip.off { background: var(--line); }
+  .salband .meter {
+    position: relative; height: 16px; border-radius: 4px;
+    background: linear-gradient(90deg, transparent 0%, var(--line-2) 18%, var(--line-2) 82%, transparent 100%);
+    border: 1px dashed var(--line);
+  }
+  .salband .meter .band {
+    position: absolute; top: 0; height: 100%;
+    background: rgba(58,157,138,.35);
+    border-left: 2px solid var(--teal);
+    border-right: 2px solid var(--teal);
+  }
+  .salband .meter .pin {
+    position: absolute; top: -3px; width: 2px; height: 22px;
+    background: var(--coral);
+  }
+  .salband .meter .pin::before {
+    content: ""; position: absolute; top: -4px; left: -3px;
+    width: 8px; height: 8px; background: var(--coral); border-radius: 50%;
+  }
+  .salband .meta { font-family: "Kalam"; font-size: 11.5px; color: var(--ink-3); display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* in-market check */
+  .market-flag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 1px 8px 0; border-radius: 12px;
+    border: 1.2px solid; font-family: "Kalam"; font-size: 12.5px;
+  }
+  .market-flag.under { color: #a3402a; background: #fce4dc; border-color: #a3402a; }
+  .market-flag.in    { color: #2d6e5e; background: #dff0eb; border-color: #2d6e5e; }
+  .market-flag.over  { color: #8a6e1a; background: #fbeec8; border-color: #8a6e1a; }
+
+  /* footer */
+  footer.foot { margin-top: 48px; padding-top: 16px; border-top: 2px dashed var(--line); font-family: "Kalam"; color: var(--ink-3); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; }
+
+  /* dropped screen card */
+  .dropped {
+    border: 2px dashed var(--line); background: var(--paper);
+    padding: 16px 20px; border-radius: 6px;
+    text-align: center; color: var(--ink-3);
+    font-family: "Kalam"; font-size: 14px;
+  }
+  .dropped b { color: var(--ink); font-family: "Caveat"; font-size: 22px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <div>
+      <h1>LeadMe <span class="stamp">v0.3 · LatAm · STRATEGY-ALIGNED</span></h1>
+      <div class="h-mini" style="color:var(--ink-2); margin-top:6px;">8 screens · re-tiered by priority · salary intel made first-class · Evaluate flow added · Network deferred to Phase 3</div>
+    </div>
+    <div class="sub">
+      Re-grounded against the strategy doc. Persona is now <b>Nacho</b> (Director of Ops, Mexico City). Companies are LatAm + remote-first globals. Salaries carry <b>uncertainty bands</b>. The <b style="color: var(--coral);">Evaluate</b> screen is new — paste a recruiter DM or job URL, get the aha-moment.
+    </div>
+  </header>
+
+  <!-- Persona bar -->
+  <div class="persona">
+    <div class="ph">NL</div>
+    <div>
+      <div class="name">Nacho L. · Director of Operations</div>
+      <div class="who">12 yrs · last 5 at Clip · based in Mexico City · open to LatAm-regional or remote-first global</div>
+      <div class="tags">
+        <span class="tag teal">looking, has leverage</span>
+        <span class="tag">bilingual ES/EN</span>
+        <span class="tag amber">director / VP scope</span>
+        <span class="tag">target band $95–140k USD</span>
+        <span class="tag coral">tired of bad recruiter DMs</span>
+      </div>
+    </div>
+    <div class="aha">
+      <div class="label">★ THE AHA MOMENT</div>
+      <div class="quote">"You got a recruiter message. In 5 min you know if it's worth your time, what they should be paying you, and what to say back."</div>
+    </div>
+  </div>
+
+  <!-- Strategy pillars -->
+  <div class="strategy">
+    <div class="pillar-card">
+      <div class="label">PILLAR 01 · CUT THE NOISE</div>
+      <div class="title">A curated brief, not a feed.</div>
+      <div class="body">Aggregates OCC, Bumeran, LinkedIn LatAm, Computrabajo + careers pages. Scores, mutes, surfaces only what matters.</div>
+    </div>
+    <div class="pillar-card">
+      <div class="label">PILLAR 02 · CLOSE THE GAP</div>
+      <div class="title">Honest fit + LatAm comp intel.</div>
+      <div class="body">A-F scoring (career-ops engine). Salary ranges calibrated by country, sector, seniority — with disclosed uncertainty.</div>
+    </div>
+    <div class="pillar-card">
+      <div class="label">PILLAR 03 · GUIDE ACTION</div>
+      <div class="title">Tailors, drafts, preps — with you.</div>
+      <div class="body">CV adaptation per role. Reply drafts to recruiters. Interview prep. The companion remembers.</div>
+    </div>
+    <div class="pillar-card" style="border-color: var(--coral); background: #fff6f2;">
+      <div class="label" style="color:var(--coral);">★ THE LATAM MOAT</div>
+      <div class="title">Calibrated for MX · CO · CL · AR.</div>
+      <div class="body">No serious tool understands LatAm tech/fintech comp + sources. This is the defensible advantage.</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="lg"><span class="swatch ink"></span> structure</div>
+    <div class="lg"><span class="swatch hi"></span> AI content</div>
+    <div class="lg"><span class="swatch coral"></span> primary action / annotation</div>
+    <div class="lg"><span class="swatch teal"></span> good fit / in-market</div>
+    <div class="lg"><span class="swatch amber"></span> attention / uncertainty</div>
+  </div>
+
+  <nav class="chipnav">
+    <a href="#s1" class="tier-critical"><span class="n">01</span>Onboarding<span class="tier">CRIT</span></a>
+    <a href="#s2" class="tier-core"><span class="n">02</span>Discover<span class="tier">CORE</span></a>
+    <a href="#s3" class="tier-core"><span class="n">03</span>Evaluate<span class="tier">CORE · NEW</span></a>
+    <a href="#s4" class="tier-important"><span class="n">04</span>Tracker<span class="tier">IMP</span></a>
+    <a href="#s5" class="tier-important"><span class="n">05</span>Tailor<span class="tier">IMP</span></a>
+    <a href="#s6" class="tier-nice"><span class="n">06</span>Home<span class="tier">NICE</span></a>
+    <a href="#s7" class="tier-later"><span class="n">07</span>Prep<span class="tier">LATER</span></a>
+    <a href="#s8" class="tier-later"><span class="n">08</span>Settings<span class="tier">AS-NEEDED</span></a>
+    <a href="#s9" class="tier-dropped"><span class="n">09</span>Network<span class="tier">PHASE 3</span></a>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- 01 — ONBOARDING                                  -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s1">
+    <div class="caption">
+      <span class="num">01</span><span class="name">Onboarding</span>
+      <span class="tier-pill t-critical">CRITICAL</span>
+      <span class="blend">blend · <span class="b-pill b1">Inbox</span><span class="b-pill b2">Brief</span></span>
+      <span class="note">where the companion learns who you are · LatAm context built in from the first question · everything downstream depends on this</span>
+    </div>
+    <div class="body">
+      <div class="mock">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/welcome · step 3 of 5</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen" style="background: var(--brief);">
+          <div class="content" style="padding: 24px 36px;">
+
+            <div class="row" style="gap: 14px;">
+              <span class="label">step 03 / 05 · intake</span>
+              <div class="prog grow" style="max-width: 320px;"><div class="fill" style="width: 60%;"></div></div>
+              <span class="h-mini" style="margin-left:auto;">~ 4 min total</span>
+            </div>
+
+            <div class="editorial-title" style="font-size: 42px; margin-top: 8px;">A few questions, Nacho —<br/>then I'll do the looking.</div>
+            <div class="rule long"></div>
+
+            <!-- Step recap -->
+            <div class="row" style="gap: 8px; flex-wrap: wrap;">
+              <span class="pill teal">✓ LinkedIn connected · 1,247 conns</span>
+              <span class="pill teal">✓ CV imported · 12 yrs of history read</span>
+              <span class="pill solid">3 · the intake →</span>
+              <span class="pill muted">4 · preferences</span>
+              <span class="pill muted">5 · preview your first brief</span>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="ai-tag">your situation</span><span class="label" style="margin-left:auto;">Q 1 / 5</span></div>
+              <div style="font-family:'Caveat'; font-size:22px; line-height:1.1;">What's the situation right now?</div>
+              <div class="row" style="gap: 8px; flex-wrap: wrap;">
+                <span class="pill amber">Need work — soon</span>
+                <span class="pill solid">Looking, but I have leverage</span>
+                <span class="pill teal">Open to the right thing</span>
+              </div>
+              <div class="h-mini" style="color:var(--ink-3); font-size:12.5px;">This sets cadence and tone. "Looking with leverage" = curated brief, no spam. You can change later.</div>
+            </div>
+
+            <!-- Question 2: Level & scope -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="ai-tag">scope</span><span class="label" style="margin-left:auto;">Q 2 / 5</span></div>
+              <div style="font-family:'Caveat'; font-size:22px; line-height:1.1;">What level &amp; scope are you targeting?</div>
+              <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                <span class="pill muted">Senior IC</span>
+                <span class="pill solid">Director</span>
+                <span class="pill solid">VP / Head of</span>
+                <span class="pill muted">C-level</span>
+              </div>
+              <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                <span class="pill solid">Operations</span>
+                <span class="pill solid">Growth Operations</span>
+                <span class="pill">Strategy &amp; Ops</span>
+                <span class="pill">Risk Ops</span>
+                <span class="pill muted">+ other</span>
+              </div>
+            </div>
+
+            <!-- Question 3: Geography -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="ai-tag">geography</span><span class="label" style="margin-left:auto;">Q 3 / 5</span></div>
+              <div style="font-family:'Caveat'; font-size:22px; line-height:1.1;">Where do you want to work — really?</div>
+              <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                <span class="pill solid">Mexico City (base)</span>
+                <span class="pill solid">Remote, LatAm-friendly TZ</span>
+                <span class="pill">Bogotá</span>
+                <span class="pill">Santiago</span>
+                <span class="pill muted">+ São Paulo</span>
+                <span class="pill muted">+ open to relocation</span>
+              </div>
+              <div class="h-mini" style="color:var(--ink-3); font-size:12.5px;">"Remote-friendly TZ" tells me to surface US/EU companies with real LatAm hires — not just companies that wrote "remote" once.</div>
+            </div>
+
+            <!-- Question 4: Total compensation -->
+            <div class="card" style="background:white; position: relative;">
+              <div class="row"><span class="ai-tag">total comp</span><span class="label" style="margin-left:auto;">Q 4 / 5</span></div>
+              <div style="font-family:'Caveat'; font-size:22px; line-height:1.1;">What does your total comp target look like?
+                <span style="font-size:14px; color:var(--ink-3); font-family:'Kalam';">(walk-away below base · the rest helps me read recruiter offers honestly)</span>
+              </div>
+
+              <!-- Base -->
+              <div class="card muted" style="padding: 8px 10px; background: var(--paper);">
+                <div class="row"><span class="label">base salary</span><span class="pill muted" style="font-size:11px; margin-left: auto;">USD</span><span class="pill solid" style="font-size:11px;">MXN</span></div>
+                <div class="row" style="gap: 10px; flex-wrap: wrap; align-items: stretch;">
+                  <div class="salband grow" style="max-width: 240px;">
+                    <div class="row1"><span class="amount">MXN $1.9–2.6M</span><span class="ccy">/ year</span></div>
+                    <div class="meter"><div class="band" style="left: 28%; width: 36%;"></div></div>
+                    <div class="meta"><span>floor $1.9M</span><span style="margin-left:auto;">stretch $2.6M</span></div>
+                  </div>
+                  <div class="salband grow" style="max-width: 240px;">
+                    <div class="row1"><span class="amount">USD $95–140k</span><span class="ccy">equiv.</span></div>
+                    <div class="meter"><div class="band" style="left: 30%; width: 32%;"></div></div>
+                    <div class="meta"><span>floor $95k</span><span style="margin-left:auto;">stretch $140k</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bonus -->
+              <div class="card muted" style="padding: 8px 10px; background: var(--paper);">
+                <div class="row"><span class="label">variable / bonus</span><span class="h-mini" style="font-size:12px; margin-left: auto; color: var(--ink-3);">realized at past 3 roles</span></div>
+                <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                  <span class="pill solid">10–20% of base · annual</span>
+                  <span class="pill">short-term incentive</span>
+                  <span class="pill muted">+ long-term LTI</span>
+                  <span class="pill muted">+ sign-on negotiable</span>
+                </div>
+              </div>
+
+              <!-- Equity -->
+              <div class="card muted" style="padding: 8px 10px; background: var(--paper);">
+                <div class="row"><span class="label">equity</span><span class="h-mini" style="font-size:12px; margin-left: auto; color: var(--ink-3);">expected at Series A–D</span></div>
+                <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                  <span class="pill solid">0.10–0.30% · Director scope</span>
+                  <span class="pill">~ $30–60k USD / yr value</span>
+                  <span class="pill muted">RSUs OK</span>
+                  <span class="pill muted">ISOs OK</span>
+                  <span class="pill muted">profit-sharing only? show me</span>
+                </div>
+              </div>
+
+              <!-- Benefits -->
+              <div class="card muted" style="padding: 8px 10px; background: var(--paper);">
+                <div class="row"><span class="label">benefits that matter</span><span class="h-mini" style="font-size:12px; margin-left: auto; color: var(--ink-3);">non-negotiables for you</span></div>
+                <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                  <span class="pill teal">★ aguinaldo &gt; 30 días</span>
+                  <span class="pill teal">★ seguro de gastos médicos mayores</span>
+                  <span class="pill teal">★ 25+ días PTO</span>
+                  <span class="pill">vales de despensa</span>
+                  <span class="pill">learning $2k+/yr</span>
+                  <span class="pill">hardware (Mac · monitor)</span>
+                  <span class="pill muted">+ remote stipend</span>
+                  <span class="pill muted">+ fondo de ahorro</span>
+                </div>
+              </div>
+
+              <!-- Total roll-up -->
+              <div class="card coral" style="padding: 8px 10px; background: #fff6f2; border-color: var(--coral);">
+                <div class="row" style="align-items: baseline;">
+                  <span class="label" style="color: var(--coral);">★ total comp target · annualized</span>
+                  <span class="h-mini" style="margin-left: auto; font-size: 12px;">base + bonus + equity value</span>
+                </div>
+                <div class="row" style="gap: 14px; align-items: baseline; flex-wrap: wrap;">
+                  <span style="font-family:'Caveat'; font-weight:700; font-size: 24px; line-height:1;">MXN $2.4–3.5M</span>
+                  <span class="h-mini" style="font-size: 14px;">≈ USD $120–185k</span>
+                  <span class="pill teal" style="margin-left: auto;">I'll flag offers below this</span>
+                </div>
+              </div>
+
+              <div class="anno-tag" style="top: 6px; right: 10px; transform: rotate(2deg);">★ total comp · 4 components</div>
+            </div>
+
+            <!-- Question 5: open-ended -->
+            <div class="card amber" style="background:#fff3b0;">
+              <div class="row"><span class="ai-tag">the human one</span><span class="label" style="margin-left:auto;">Q 5 / 5</span></div>
+              <div style="font-family:'Caveat'; font-size:22px; line-height:1.1;">In one sentence — what would make you say "yes" to a role tomorrow?</div>
+              <div class="card dashed" style="background:white; padding:6px 10px;">
+                <span class="line-text full"></span><span class="line-text long"></span><span class="line-text short"></span>
+              </div>
+              <div class="row" style="gap:6px; flex-wrap: wrap;">
+                <span class="pill muted">+ "real Director scope, not just title"</span>
+                <span class="pill muted">+ "regional, not just MX"</span>
+                <span class="pill muted">+ "founder I'd learn from"</span>
+              </div>
+            </div>
+
+            <div style="margin-top: auto; display:flex; justify-content:space-between; align-items:center; padding-top: 12px; border-top: 1px dashed var(--line);">
+              <span class="h-mini" style="color:var(--ink-3);">we don't spam · 1 brief / morning · everything editable later</span>
+              <div class="row"><span class="btn ghost sm">← back</span><span class="btn coral">Continue → preferences</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 02 — DISCOVER                                    -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s2">
+    <div class="caption">
+      <span class="num">02</span><span class="name">Discover — today's brief</span>
+      <span class="tier-pill t-core">CORE</span>
+      <span class="blend">blend · <span class="b-pill b2">Brief</span><span class="b-pill b3">Companion</span></span>
+      <span class="note">curated picks · LatAm sources · salary band first-class on each card · companion chat to dig in</span>
+    </div>
+    <div class="body">
+      <div class="mock tall">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/brief/2026-05-14</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item active"><span class="ico"></span>Discover <span class="badge">7</span></div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div><div style="font-size:10px;">leverage · MX</div></div></div>
+          </aside>
+
+          <div class="content" style="background: var(--brief); padding: 22px 28px; min-width: 0;">
+            <div class="row"><span class="label">Issue № 14 · Thu May 14 · CDMX</span><div class="mode-toggle" style="margin-left:auto;"><span class="seg amber">Need</span><span class="seg on">Leverage</span><span class="seg teal">Open</span></div></div>
+            <div class="editorial-title" style="font-size:44px;">Today's brief.</div>
+            <div class="rule long"></div>
+
+            <!-- Provenance / how this brief was built -->
+            <div class="card" style="background: white; padding: 9px 12px; position: relative;">
+              <div class="row" style="gap: 10px; flex-wrap: wrap;">
+                <span class="label">how this brief was built</span>
+                <span class="pill teal" style="font-size:11.5px;">✓ fresh · last scan 4h ago</span>
+                <span class="pill" style="font-size:11.5px;">cadence · every 6h · delivered 8am CST</span>
+                <span class="btn ghost sm" style="margin-left: auto;">edit cadence →</span>
+              </div>
+              <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                <span class="h-mini" style="font-size:12.5px; color: var(--ink-3);">sources scanned ·</span>
+                <span class="pill teal" style="font-size:11px;">★ OCC · 312 cos</span>
+                <span class="pill teal" style="font-size:11px;">★ Bumeran</span>
+                <span class="pill teal" style="font-size:11px;">★ LinkedIn LatAm</span>
+                <span class="pill teal" style="font-size:11px;">★ Computrabajo</span>
+                <span class="pill" style="font-size:11px;">Greenhouse · 42 cos</span>
+                <span class="pill" style="font-size:11px;">Ashby · 18</span>
+                <span class="pill" style="font-size:11px;">Lever · 11</span>
+                <span class="pill muted" style="font-size:11px;">+ 14 careers pages</span>
+              </div>
+              <div class="row" style="gap: 6px; flex-wrap: wrap; font-family: 'Kalam'; font-size: 12.5px; color: var(--ink-2);">
+                <span><b>1,247</b> listings scanned</span>
+                <span style="color: var(--line);">→</span>
+                <span><b>23</b> matched your axes</span>
+                <span style="color: var(--line);">→</span>
+                <span style="color: var(--teal);"><b>7 kept</b> for you</span>
+                <span style="color: var(--line);">·</span>
+                <span style="color: var(--ink-3);">18 muted</span>
+                <a href="#" style="color: var(--ink-3); font-size: 11.5px; margin-left: 4px;">why? ↓</a>
+              </div>
+              <div class="anno-tag" style="top: -10px; right: 14px;">proactive · transparent · editable</div>
+            </div>
+
+            <div class="card amber" style="background:#fff3b0;">
+              <div class="row"><span class="ai-tag">Editor's note</span><span class="label" style="margin-left:auto;">~ 50 sec read</span></div>
+              <div style="font-family:'Kalam'; font-size:14px; line-height:1.5;">
+                Tight slate today. <b>Kavak</b> just opened a Director of Operations seat that matches your scope at Clip almost line-for-line. <b>VTEX</b> is hiring a Head of LatAm Ops — regional, not just MX. I quieted 18 listings (mostly Sr IC and one shady recruiter for an SMB factoring co. with comp 40% below market).
+              </div>
+            </div>
+
+            <!-- Pick 1 -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="label">№1 · strong fit · estado vacante &lt;48h</span><span class="label" style="margin-left:auto;">2d · LinkedIn LatAm</span></div>
+              <div class="row" style="gap:10px;">
+                <span class="avatar coral lg">KV</span>
+                <div class="grow">
+                  <div class="editorial-title" style="font-size:22px;">Kavak · Director of Operations</div>
+                  <div class="h-mini">CDMX · Hybrid · Mobility / fintech</div>
+                </div>
+                <div class="score hi">91</div>
+              </div>
+              <div class="row" style="gap: 10px; align-items: stretch;">
+                <div class="salband grow" style="max-width: 320px;">
+                  <div class="row1"><span class="amount">USD $115–145k</span><span class="ccy">est · base</span>
+                    <span class="conf"><span class="blip"></span><span class="blip"></span><span class="blip"></span> high confidence</span></div>
+                  <div class="meter"><div class="band" style="left: 38%; width: 32%;"></div><div class="pin" style="left: 52%;"></div></div>
+                  <div class="meta"><span>your floor $95k</span><span class="market-flag in">in your band</span></div>
+                </div>
+                <div class="col grow" style="font-size:13px; line-height:1.45;">
+                  <span style="font-family:'Kalam';">Scope matches your Clip role <span class="ai-highlight">almost line-for-line</span> — ops org of 40+, fraud + risk + biz ops. <b>Susana M.</b> (ex-Cornershop, you have 4 mutuals) is hiring manager.</span>
+                </div>
+              </div>
+              <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn sm">Evaluate</span><span class="btn sm">Save</span><span class="btn ghost sm">Mute</span><span class="h-mini" style="margin-left:auto;">↗ careers.kavak.com</span></div>
+            </div>
+
+            <!-- Pick 2 -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="label">№2 · regional play</span><span class="label" style="margin-left:auto;">6h · careers page</span></div>
+              <div class="row" style="gap:10px;">
+                <span class="avatar teal lg">VT</span>
+                <div class="grow">
+                  <div class="editorial-title" style="font-size:22px;">VTEX · Head of LatAm Operations</div>
+                  <div class="h-mini">São Paulo or CDMX · Hybrid · e-comm SaaS</div>
+                </div>
+                <div class="score hi">85</div>
+              </div>
+              <div class="row" style="gap: 10px; align-items: stretch;">
+                <div class="salband grow" style="max-width: 320px;">
+                  <div class="row1"><span class="amount">USD $130–170k</span><span class="ccy">est · base + bonus</span>
+                    <span class="conf"><span class="blip"></span><span class="blip"></span><span class="blip off"></span> medium</span></div>
+                  <div class="meter"><div class="band" style="left: 45%; width: 30%;"></div></div>
+                  <div class="meta"><span>5 reports · MeLi + Kueski + VTEX</span><span class="market-flag in" style="margin-left:auto;">above your floor</span></div>
+                </div>
+                <div class="col grow" style="font-size:13px; line-height:1.45;">
+                  <span style="font-family:'Kalam';">Regional — covers MX + CO + AR. <span class="ai-highlight">A bigger surface than Clip</span>. Risk: lots of internal politics post-acquisition.</span>
+                </div>
+              </div>
+              <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn sm">Save</span><span class="btn ghost sm">Mute</span></div>
+            </div>
+
+            <!-- Pick 3 -->
+            <div class="card" style="background:white;">
+              <div class="row"><span class="label">№3 · remote-first global</span><span class="label" style="margin-left:auto;">3d · Greenhouse</span></div>
+              <div class="row" style="gap:10px;">
+                <span class="avatar amber lg">PL</span>
+                <div class="grow">
+                  <div class="editorial-title" style="font-size:22px;">Plaid · Sr. Director, LatAm Operations</div>
+                  <div class="h-mini">Remote · LatAm TZ · Fintech infra</div>
+                </div>
+                <div class="score hi">87</div>
+              </div>
+              <div class="row" style="gap: 10px; align-items: stretch;">
+                <div class="salband grow" style="max-width: 320px;">
+                  <div class="row1"><span class="amount">USD $145–185k</span><span class="ccy">+ equity</span>
+                    <span class="conf"><span class="blip"></span><span class="blip"></span><span class="blip"></span> high</span></div>
+                  <div class="meter"><div class="band" style="left: 55%; width: 32%;"></div></div>
+                  <div class="meta"><span class="market-flag over">above your band</span><span style="margin-left:auto;">US-comp with LatAm hire</span></div>
+                </div>
+                <div class="col grow" style="font-size:13px; line-height:1.45;">
+                  <span style="font-family:'Kalam';">US-base comp for LatAm role. Stretch on title — but you've been at Director scope 4 yrs. <span class="ai-highlight">Real remote, not theater.</span></span>
+                </div>
+              </div>
+              <div class="row"><span class="btn coral sm">Tailor &amp; apply →</span><span class="btn sm">Save</span></div>
+            </div>
+
+            <!-- compact picks -->
+            <div class="row" style="gap:10px;">
+              <div class="card grow" style="background:white;">
+                <div class="row" style="gap:8px;"><span class="avatar teal">KO</span><div class="grow"><b style="font-family:'Kalam'">Konfío · Head of Risk Ops</b><div class="h-mini">CDMX · Lending</div></div><div class="score mid">78</div></div>
+                <div class="row"><span class="pill muted" style="font-size:11px;">$110–140k est · medium conf</span><span class="market-flag in" style="margin-left:auto; font-size:11px;">in band</span></div>
+              </div>
+              <div class="card grow" style="background:white;">
+                <div class="row" style="gap:8px;"><span class="avatar purple">BT</span><div class="grow"><b style="font-family:'Kalam'">Bitso · Director, Strategy &amp; Ops</b><div class="h-mini">Remote · Crypto</div></div><div class="score mid">74</div></div>
+                <div class="row"><span class="pill muted" style="font-size:11px;">$120–155k est · low conf</span><span class="market-flag in" style="margin-left:auto; font-size:11px;">in band</span></div>
+              </div>
+            </div>
+
+            <div class="row">
+              <span class="h-mini" style="color:var(--ink-3);">2 more picks below · plus 18 muted ↓</span>
+              <span class="btn ghost sm" style="margin-left:auto;">Show muted</span>
+            </div>
+          </div>
+
+          <!-- Companion dock -->
+          <div class="chat-pane" style="width: 280px;">
+            <div class="row"><span class="avatar coral">✦</span><b style="font-family:'Caveat'; font-size:20px;">Ask the editor</b></div>
+            <div class="h-mini" style="color:var(--ink-3); font-size:13px;">about today's brief, or anything</div>
+            <div class="bubble ai">7 picked from 25 found. <span class="ai-highlight">Kavak is the closest match to Clip you'll get this quarter.</span></div>
+            <div class="row" style="gap:6px; flex-wrap:wrap;">
+              <span class="pill" style="font-size:11.5px;">why Kavak 91?</span>
+              <span class="pill" style="font-size:11.5px;">Plaid comp source?</span>
+              <span class="pill" style="font-size:11.5px;">show muted</span>
+            </div>
+            <div class="bubble me">where's the plaid $145–185k from?</div>
+            <div class="bubble ai">3 sources: <b>levels.fyi</b> Sr Director band US$160k mid · <b>2 LatAm Plaid hires</b> on LinkedIn (titles + tenure), <b>1 community-reported</b> on r/cscareerquestions. <span class="ai-highlight">High confidence.</span></div>
+            <div class="bubble me">does kavak negotiate?</div>
+            <div class="bubble ai">Yes — last 4 director hires came in <span class="ai-highlight">7–14% above mid</span>. Your Clip P&amp;L scope is a strong anchor.</div>
+            <div class="chat-input"><div class="input">ask anything…</div><span class="btn coral">↑</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 03 — EVALUATE (NEW)                              -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s3">
+    <div class="caption">
+      <span class="num">03</span><span class="name">Evaluate · paste &amp; assess</span>
+      <span class="tier-pill t-core">CORE · NEW</span>
+      <span class="blend">blend · <span class="b-pill b3">Companion</span><span class="b-pill b2">Brief</span><span class="b-pill b1">Inbox</span></span>
+      <span class="note">★ THE AHA MOMENT · paste a recruiter DM or a job URL → fit score · salary in-market check · gap analysis · suggested reply</span>
+    </div>
+    <div class="body">
+      <div class="mock tall">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/evaluate</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover</div>
+            <div class="nav-item active"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div></div></div>
+          </aside>
+
+          <div class="content">
+            <!-- Header -->
+            <div class="row" style="gap: 10px;">
+              <div>
+                <div class="h-title" style="font-size: 30px;">Got a lead? Paste it.</div>
+                <div class="h-mini" style="color: var(--ink-2);">URL, job description, or a recruiter's message. <span style="color: var(--coral);">In about a minute</span> you'll know.</div>
+              </div>
+              <div class="row" style="margin-left: auto;"><span class="pill solid">Recruiter DM</span><span class="pill muted">Job URL</span><span class="pill muted">Paste JD</span></div>
+            </div>
+
+            <!-- Input card -->
+            <div class="card dashed" style="background: var(--paper); padding: 12px 14px; position: relative;">
+              <div class="row"><span class="label">PASTED · recruiter LinkedIn message · Wed 14:22</span><span class="h-mini" style="margin-left:auto; color: var(--ink-3);">932 chars · auto-parsed</span></div>
+              <div class="row" style="gap: 10px; align-items: flex-start;">
+                <span class="avatar blue" style="margin-top: 2px;">RH</span>
+                <div class="grow" style="font-family: 'Kalam'; font-size: 13.5px; line-height: 1.5; color: var(--ink-2);">
+                  "Hi Nacho! I'm Rita from <b>Stori</b>'s talent team. We just opened a <b>Head of Operations</b> seat — Mexico City, hybrid. We're moving fast, just raised a Series C, and your background at Clip is exactly the profile we need.<br/>
+                  Compensation is competitive, base around <b>MXN $1.6M</b> + equity. Would you have 15 minutes this week for a quick intro call?"
+                </div>
+              </div>
+              <div class="row" style="gap: 6px;">
+                <span class="pill teal">✓ extracted: Stori</span>
+                <span class="pill teal">✓ role: Head of Ops</span>
+                <span class="pill teal">✓ location: CDMX</span>
+                <span class="pill amber">⚠ comp parsed: MXN $1.6M</span>
+              </div>
+              <div class="anno-tag" style="top: -10px; right: 12px;">paste anything → AI parses ↗</div>
+            </div>
+
+            <!-- Verdict header strip -->
+            <div class="card" style="background: white; border-width: 2px; padding: 12px 14px;">
+              <div class="row" style="gap: 14px;">
+                <div class="score hi" style="width: 60px; height: 60px; font-size: 24px;">82</div>
+                <div class="grow">
+                  <div class="row"><div class="h-title" style="font-size: 24px;">Stori · Head of Operations</div><span class="pill teal" style="margin-left: 8px;">strong fit</span></div>
+                  <div class="h-mini" style="color: var(--ink-2);">CDMX · Hybrid · Fintech / lending · Series C, ~600 ppl</div>
+                </div>
+                <div class="col" style="font-family: 'Caveat'; text-align: right;">
+                  <span style="color: var(--coral); font-size: 22px; line-height: 1;">worth your time</span>
+                  <span class="h-mini">3 questions to ask Rita ↓</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Four-pane analysis -->
+            <div class="row" style="gap: 12px; align-items: stretch; flex: 1;">
+
+              <!-- Fit -->
+              <div class="card grow" style="position: relative;">
+                <div class="label">fit · A-F across 10 dims</div>
+                <div class="row"><span style="width:90px; font-size:12px;">scope</span><div class="prog grow"><div class="fill" style="width:88%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">A</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">domain</span><div class="prog grow"><div class="fill" style="width:90%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">A</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">level</span><div class="prog grow"><div class="fill amber" style="width:60%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">C+</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">comp</span><div class="prog grow"><div class="fill coral" style="width:40%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">D</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">stage</span><div class="prog grow"><div class="fill" style="width:82%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">A-</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">location</span><div class="prog grow"><div class="fill" style="width:100%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">A+</span></div>
+                <div class="row"><span style="width:90px; font-size:12px;">trajectory</span><div class="prog grow"><div class="fill" style="width:78%;"></div></div><span class="h-mini" style="font-size:11px; width:18px; text-align:right;">B+</span></div>
+                <div class="anno-tag" style="top: -10px; right: 10px;">career-ops engine</div>
+              </div>
+
+              <!-- Salary in-market check -->
+              <div class="card coral grow" style="position: relative;">
+                <div class="label">★ salary in-market check</div>
+                <div class="salband coral" style="background: white; padding: 8px 10px;">
+                  <div class="row1"><span class="amount">MXN $1.6M</span><span class="ccy">their offer</span></div>
+                  <div class="meter"><div class="band" style="left: 35%; width: 35%;"></div><div class="pin" style="left: 22%;"></div></div>
+                  <div class="meta"><span>market: $1.9–2.4M MXN</span><span style="margin-left:auto;"><span class="market-flag under">≈ 16% under market</span></span></div>
+                </div>
+                <div style="font-family: 'Kalam'; font-size: 13px; line-height: 1.45; padding-top: 4px;">
+                  <span class="ai-highlight">"Competitive" is doing a lot of work in that DM.</span> For Head of Ops at a Series C MX fintech with your scope, market is $1.9–2.4M MXN base + 0.1–0.25% equity.
+                </div>
+                <div class="label">SOURCES</div>
+                <div class="h-mini" style="font-size: 12px;">levels.fyi (3 MX), levels.io (1 Stori datum), 4 LinkedIn comparables (Clip · Kueski · Kavak), 1 community-reported.</div>
+                <div class="anno-tag" style="bottom: -10px; left: 10px;">★ LatAm moat — pin-on-band</div>
+              </div>
+
+              <!-- Gap analysis -->
+              <div class="card grow">
+                <div class="label">gap analysis · what to close</div>
+                <div style="font-family: 'Kalam'; font-size: 13px;">
+                  <b>You're light on:</b>
+                </div>
+                <ul style="margin: 0; padding-left: 18px; font-family: 'Kalam'; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);">
+                  <li><span class="ai-highlight">Lending-specific risk ops</span> (Clip was payments, not credit)</li>
+                  <li>Series C stage scaling (you joined Clip at Series D)</li>
+                </ul>
+                <div style="font-family: 'Kalam'; font-size: 13px;"><b>You over-index on:</b></div>
+                <ul style="margin: 0; padding-left: 18px; font-family: 'Kalam'; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);">
+                  <li>P&amp;L size (Clip ~2× Stori)</li>
+                  <li>Multi-country ops (Stori is MX-only so far)</li>
+                </ul>
+                <div class="row" style="margin-top: auto;">
+                  <span class="btn coral sm">Tailor CV →</span>
+                  <span class="btn ghost sm">See full breakdown</span>
+                </div>
+              </div>
+
+              <!-- Suggested reply -->
+              <div class="card amber grow" style="position: relative; background: #fff8dc;">
+                <div class="row"><div class="label">draft reply to Rita</div><div class="row" style="margin-left: auto;"><span class="pill solid" style="font-size:11px;">warm</span><span class="pill muted" style="font-size:11px;">cool</span><span class="pill muted" style="font-size:11px;">decline</span></div></div>
+                <div style="font-family: 'Kalam'; font-size: 12.5px; line-height: 1.45; padding: 6px 8px; background: white; border: 1px dashed var(--line);">
+                  Hi Rita — thanks for reaching out, and Stori's on my radar (loved the Series C announcement).<br/><br/>
+                  I'm open to the right conversation. Before a call though — could you share the <span class="ai-highlight">target base range</span> and whether the role owns credit risk or sits adjacent to it? My current scope at Clip is broader, so I want to make sure we're aligned on level before either of us spends time…
+                </div>
+                <div class="row" style="gap: 6px;">
+                  <span class="btn sm">Edit</span>
+                  <span class="btn sm ghost">Regenerate</span>
+                  <span class="btn coral sm" style="margin-left:auto;">Copy → LinkedIn</span>
+                </div>
+                <div class="h-mini" style="color: var(--ink-3); font-size: 12px;">✦ asks for the band <em>before</em> the call · positions you as Director scope · leaves the door open</div>
+                <div class="anno-tag" style="top: -10px; right: 10px;">guide the action ↗</div>
+              </div>
+            </div>
+
+            <!-- Action footer -->
+            <div class="row" style="padding-top: 8px; border-top: 1px dashed var(--line);">
+              <span class="btn coral">Save to Tracker (status: assessing)</span>
+              <span class="btn">Tailor CV for this</span>
+              <span class="btn ghost">Discard — not worth pursuing</span>
+              <span class="h-mini" style="margin-left: auto; color: var(--ink-3);">eval took 42s · 4 sources cross-referenced</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 04 — TRACKER                                     -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s4">
+    <div class="caption">
+      <span class="num">04</span><span class="name">Tracker · pipeline</span>
+      <span class="tier-pill t-important">IMPORTANT</span>
+      <span class="blend">blend · <span class="b-pill b1">Inbox</span><span class="b-pill b4">Atlas</span></span>
+      <span class="note">simple table on top · journey strip underneath shows the same 9 as a route through stages</span>
+    </div>
+    <div class="body">
+      <div class="mock tall">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tracker</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover</div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item active"><span class="ico"></span>Tracker <span class="badge">8</span></div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div></div></div>
+          </aside>
+          <div class="content" style="padding: 0;">
+
+            <div class="topbar">
+              <div class="h-title">Pipeline · 8 active</div>
+              <div class="row" style="gap:6px;"><span class="pill solid">All</span><span class="pill muted">Assessing 2</span><span class="pill muted">Applied 3</span><span class="pill teal">Interview 2</span><span class="pill coral">Offer 1</span></div>
+              <span style="margin-left:auto;" class="row"><span class="pill muted">USD</span><span class="pill solid">MXN</span><span class="label" style="margin: 0 6px;">view:</span><span class="pill solid">List + Journey</span></span>
+            </div>
+
+            <!-- Calendar + scheduling band -->
+            <div style="padding: 12px 14px; border-bottom: 1.5px dashed var(--line); background: var(--paper); position: relative;">
+              <div class="row" style="gap: 12px; align-items: stretch; flex-wrap: wrap;">
+
+                <!-- Connected calendars -->
+                <div class="card grow" style="min-width: 220px; max-width: 280px; padding: 8px 10px;">
+                  <div class="row"><span class="label">your calendars</span><span class="pill teal" style="font-size:11px; margin-left:auto;">all synced · 2m ago</span></div>
+                  <div class="row"><span class="avatar blue" style="width:22px; height:22px; font-size:11px;">G</span><div class="grow" style="font-family:'Kalam'; font-size:13px;"><b>nacho@gmail</b> · personal<div class="h-mini" style="font-size:11px;">busy slots only · no titles shared</div></div></div>
+                  <div class="row"><span class="avatar green" style="width:22px; height:22px; font-size:11px;">C</span><div class="grow" style="font-family:'Kalam'; font-size:13px;"><b>nacho@clip</b> · work<div class="h-mini" style="font-size:11px;">busy slots only · stealth mode</div></div></div>
+                  <div class="row"><span class="btn ghost sm">+ add iCloud / Outlook</span></div>
+                </div>
+
+                <!-- Scheduling link -->
+                <div class="card grow amber" style="min-width: 260px; max-width: 340px; padding: 8px 10px; background:#fff8dc;">
+                  <div class="row"><span class="label">★ your booking link</span><span class="pill teal" style="font-size:11px; margin-left:auto;">live</span></div>
+                  <div class="row" style="background: white; border: 1.2px dashed var(--ink); padding: 5px 8px; border-radius: 4px;">
+                    <span style="font-family:'Special Elite'; font-size:12px; color: var(--ink-2);">leadme.app/meet/nacho-l</span>
+                    <span class="btn sm" style="margin-left: auto;">copy</span>
+                  </div>
+                  <div class="row" style="gap: 6px; flex-wrap: wrap;">
+                    <span class="pill" style="font-size:11px;">30 min</span>
+                    <span class="pill" style="font-size:11px;">Tue–Thu · 4–7pm CST</span>
+                    <span class="pill muted" style="font-size:11px;">+ buffer 15min</span>
+                  </div>
+                  <div class="h-mini" style="font-size: 12px; color: var(--ink-2);">attach to any draft reply → recruiter picks a slot · no DM ping-pong</div>
+                </div>
+
+                <!-- This week timeline -->
+                <div class="card grow" style="min-width: 280px; padding: 8px 10px;">
+                  <div class="row"><span class="label">this week · may 12–16</span><span class="h-mini" style="font-size:12px; margin-left:auto; color: var(--ink-3);">2 booked · 4 holds offered</span></div>
+                  <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
+                    <div class="col" style="gap:2px;"><span class="label" style="text-align:center; font-size:9px;">MON</span><div style="height: 36px; border: 1px solid var(--line); background: var(--paper-2); border-radius: 2px;"></div></div>
+                    <div class="col" style="gap:2px;"><span class="label" style="text-align:center; font-size:9px;">TUE</span><div style="height: 36px; border: 1.5px solid var(--teal); background: #dff0eb; border-radius: 2px; padding: 2px 4px; font-family:'Kalam'; font-size: 10px; line-height:1.1;"><b>Plaid</b><div style="font-size:9px;">10am</div></div></div>
+                    <div class="col" style="gap:2px;"><span class="label" style="text-align:center; font-size:9px;">WED</span><div style="height: 36px; border: 1px dashed var(--coral); background: #fff6f2; border-radius: 2px; padding: 2px 4px; font-family:'Kalam'; font-size: 10px; line-height:1.1; color: var(--coral);">offered<div style="font-size:9px;">to Rita</div></div></div>
+                    <div class="col" style="gap:2px;"><span class="label" style="text-align:center; font-size:9px;">THU</span><div style="height: 36px; border: 1px solid var(--line); background: var(--paper-2); border-radius: 2px;"></div></div>
+                    <div class="col" style="gap:2px;"><span class="label" style="text-align:center; font-size:9px;">FRI</span><div style="height: 36px; border: 1.5px solid var(--teal); background: #dff0eb; border-radius: 2px; padding: 2px 4px; font-family:'Kalam'; font-size: 10px; line-height:1.1;"><b>VTEX</b><div style="font-size:9px;">11am</div></div></div>
+                  </div>
+                  <div class="row"><span class="h-mini" style="font-size: 12px; color: var(--ink-3);">3 conflict-free windows offered to Stori · awaiting pick</span><span class="btn ghost sm" style="margin-left:auto;">open week</span></div>
+                </div>
+
+              </div>
+              <div class="anno-tag" style="top: -10px; right: 14px;">★ calendar + scheduling layer</div>
+            </div>
+
+            <div>
+              <div class="tracker-row head"><span>Company / role</span><span>Status</span><span>Score</span><span>Last touch</span><span></span></div>
+              <div class="tracker-row"><span><b>Kavak</b> · Director of Operations</span><span><span class="status-dot draft"></span>Drafting CV</span><span class="score sm hi">91</span><span>—</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Stori</b> · Head of Operations</span><span><span class="status-dot draft"></span>Assessing · <span style="color: var(--coral);">reply drafted</span></span><span class="score sm hi">82</span><span>today</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Plaid</b> · Sr Director, LatAm Ops</span><span><span class="status-dot interview"></span>Hiring mgr call Tue</span><span class="score sm hi">87</span><span>2d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>VTEX</b> · Head of LatAm Ops</span><span><span class="status-dot interview"></span>Onsite Fri (remote)</span><span class="score sm hi">85</span><span>1d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Konfío</b> · Head of Risk Ops</span><span><span class="status-dot applied"></span>Applied · <span style="color:var(--coral);">stale 7d</span></span><span class="score sm mid">78</span><span>7d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Rappi</b> · Director, Growth Ops</span><span><span class="status-dot applied"></span>Applied</span><span class="score sm mid">73</span><span>4d ago</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Bitso</b> · Director, Strategy &amp; Ops</span><span><span class="status-dot offer"></span>Verbal offer · $2.2M MXN</span><span class="score sm mid">74</span><span>yesterday</span><span>⋯</span></div>
+              <div class="tracker-row"><span><b>Mercado Libre</b> · Sr Director, Ops</span><span><span class="status-dot passed"></span>Passed (auto · level mismatch)</span><span class="score sm lo">58</span><span>2w ago</span><span>⋯</span></div>
+            </div>
+
+            <div class="card atlas-bg" style="margin: 14px; padding: 14px 16px; position: relative;">
+              <div class="row"><div class="h-title" style="font-size:20px;">Journey view</div><span class="h-mini" style="margin-left:auto;">same 8 · as a route</span></div>
+              <div class="row" style="font-family:'Special Elite'; font-size:10px; letter-spacing:1px; color:var(--ink-3); padding: 4px 0;">
+                <span style="width:160px;"></span>
+                <span style="width:18%;">ASSESSING</span>
+                <span style="width:18%;">DRAFTING</span>
+                <span style="width:18%;">APPLIED</span>
+                <span style="width:18%;">INTERVIEW</span>
+                <span style="width:18%;">OFFER</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+                <span style="width:160px; font-family:'Kalam'; font-size:13px;"><b>Kavak</b> · Dir Ops</span>
+                <div style="position:relative; flex:1; height:18px;">
+                  <div style="position:absolute; left:0; width:30%; top:50%; transform:translateY(-50%); border-top:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:30%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                  <div style="position:absolute; left:30%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:var(--coral); border:2px solid var(--ink);"></div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+                <span style="width:160px; font-family:'Kalam'; font-size:13px;"><b>Stori</b> · Head of Ops</span>
+                <div style="position:relative; flex:1; height:18px;">
+                  <div style="position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                  <div style="position:absolute; left:10%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:var(--amber); border:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:10%; top:-6px; transform:translate(-50%,0);" class="pill amber">today</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+                <span style="width:160px; font-family:'Kalam'; font-size:13px;"><b>Plaid</b> · Sr Dir LatAm</span>
+                <div style="position:relative; flex:1; height:18px;">
+                  <div style="position:absolute; left:0; width:70%; top:50%; transform:translateY(-50%); border-top:2px solid var(--teal);"></div>
+                  <div style="position:absolute; left:70%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                  <div style="position:absolute; left:70%; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:var(--teal); border:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:70%; top:-6px; transform:translate(-50%,0);" class="pill teal">Tue call</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+                <span style="width:160px; font-family:'Kalam'; font-size:13px;"><b>Konfío</b> · Head Risk</span>
+                <div style="position:relative; flex:1; height:18px;">
+                  <div style="position:absolute; left:0; width:50%; top:50%; transform:translateY(-50%); border-top:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:50%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                  <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:var(--amber); border:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:50%; top:-6px; transform:translate(-50%,0);" class="pill amber">stale 7d</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+                <span style="width:160px; font-family:'Kalam'; font-size:13px;"><b>Bitso</b> · Dir S&amp;O</span>
+                <div style="position:relative; flex:1; height:18px;">
+                  <div style="position:absolute; left:0; width:88%; top:50%; transform:translateY(-50%); border-top:2px solid var(--coral);"></div>
+                  <div style="position:absolute; left:88%; right:0; top:50%; transform:translateY(-50%); border-top:2px dashed var(--line);"></div>
+                  <div style="position:absolute; left:88%; top:50%; transform:translate(-50%,-50%); width:18px; height:18px; border-radius:50%; background:var(--coral); border:2px solid var(--ink);"></div>
+                  <div style="position:absolute; left:88%; top:-6px; transform:translate(-50%,0);" class="pill coral">$2.2M offer</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 05 — TAILOR                                      -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s5">
+    <div class="caption">
+      <span class="num">05</span><span class="name">Tailor · CV per role</span>
+      <span class="tier-pill t-important">IMPORTANT</span>
+      <span class="blend">blend · <span class="b-pill b1">Inbox</span></span>
+      <span class="note">side-by-side diff · "why these edits" panel · powered by career-ops PDF generation</span>
+    </div>
+    <div class="body">
+      <div class="mock">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/tailor/kavak-director-ops</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover</div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item active"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div></div></div>
+          </aside>
+          <div class="content">
+            <div class="row" style="justify-content:space-between;">
+              <div>
+                <div class="h-title">Tailor for Kavak · Director of Operations</div>
+                <div class="h-mini">14 edits suggested · click any line to see the source</div>
+              </div>
+              <div class="row"><span class="btn ghost sm">Reset</span><span class="btn sm">Export .pdf</span><span class="btn coral">Use this version</span></div>
+            </div>
+            <div class="row" style="gap: 6px;">
+              <span class="pill solid">CV</span>
+              <span class="pill muted">Cover letter</span>
+              <span class="pill muted">LinkedIn DM</span>
+              <span style="margin-left:auto;" class="ai-tag">10 accepted · 4 pending</span>
+            </div>
+
+            <div class="row" style="gap: 14px; align-items: flex-start; flex: 1;">
+              <div class="card grow muted">
+                <div class="label">your CV · before</div>
+                <div class="lt-stack">
+                  <span class="line-text full"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text med"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text short"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text med"></span>
+                  <span class="line-text long"></span>
+                </div>
+              </div>
+              <div class="card grow">
+                <div class="row"><span class="label">tailored · after</span><span class="ai-tag" style="margin-left:auto;">AI</span></div>
+                <div class="lt-stack">
+                  <span class="line-text full"></span>
+                  <span class="line-text long teal"></span>
+                  <span class="line-text med strike"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text long teal"></span>
+                  <span class="line-text short"></span>
+                  <span class="line-text full coral"></span>
+                  <span class="line-text long"></span>
+                  <span class="line-text full"></span>
+                  <span class="line-text med teal"></span>
+                  <span class="line-text long"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card amber">
+              <div class="row"><span class="ai-tag">why these edits</span><span class="label" style="margin-left:auto;">click any colored line to jump to source</span></div>
+              <div class="row" style="gap: 12px; align-items: flex-start;">
+                <div class="col grow" style="font-size:13px; line-height:1.5;">
+                  <div><span class="pill teal" style="font-size:11px;">moved</span> Clip P&amp;L scope to the top — Kavak Ops orgs are P&amp;L-led.</div>
+                  <div><span class="pill coral" style="font-size:11px;">cut</span> Early-career payment ops detail — they care about Director scope.</div>
+                  <div><span class="pill teal" style="font-size:11px;">rephrased</span> "operations leader" → <span class="ai-highlight">"Director of Operations · multi-country fintech"</span> to mirror the JD.</div>
+                  <div><span class="pill teal" style="font-size:11px;">added</span> Hard number: "MXN $3.4B annual transaction volume" — matches Kavak's scale signal.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 06 — HOME                                        -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s6">
+    <div class="caption">
+      <span class="num">06</span><span class="name">Home</span>
+      <span class="tier-pill t-nice">NICE-TO-HAVE</span>
+      <span class="blend">blend · <span class="b-pill b1">Inbox</span><span class="b-pill b4">Atlas</span></span>
+      <span class="note">stats + salary intel summary + today's focus · territory map below · build list view first, atlas when density justifies it</span>
+    </div>
+    <div class="body">
+      <div class="mock tall">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/home</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item active"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover <span class="badge">7</span></div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div><div style="font-size:10px;">leverage · MX</div></div></div>
+          </aside>
+
+          <div class="content">
+            <div class="row" style="justify-content:space-between; align-items:flex-end;">
+              <div>
+                <div class="label">tuesday · may 14 · issue №14</div>
+                <div class="editorial-title" style="font-size:30px;">Good morning, Nacho.</div>
+              </div>
+              <div class="mode-toggle"><span class="seg amber">Need</span><span class="seg on">Leverage</span><span class="seg teal">Open</span></div>
+            </div>
+
+            <div class="row" style="gap: 9px;">
+              <div class="card grow"><div class="label">today's brief</div><div style="font-family:'Caveat'; font-size:28px; line-height:1;">7 picks</div><div class="h-mini" style="color:var(--teal)">3 strong fit</div></div>
+              <div class="card grow"><div class="label">in pipeline</div><div style="font-family:'Caveat'; font-size:28px; line-height:1;">8</div><div class="h-mini">1 stale · 1 verbal offer</div></div>
+              <div class="card grow"><div class="label">interviews this wk</div><div style="font-family:'Caveat'; font-size:28px; line-height:1;">2</div><div class="h-mini">Plaid Tue · VTEX Fri</div></div>
+              <div class="card grow amber"><div class="label">★ inbound to assess</div><div style="font-family:'Caveat'; font-size:18px; line-height:1.1; padding-top:2px;">Stori DM · $1.6M MXN</div><div class="h-mini" style="color: var(--coral);">⚠ 16% under market</div></div>
+            </div>
+
+            <div class="row" style="gap: 10px;">
+              <!-- Salary intel summary -->
+              <div class="card coral grow" style="position: relative; max-width: 360px;">
+                <div class="label">★ your market this week</div>
+                <div class="row"><span class="h-title" style="font-size:20px;">Director of Ops · MX fintech</span></div>
+                <div class="salband" style="background: white; padding: 6px 8px;">
+                  <div class="row1"><span class="amount">MXN $1.9–2.4M</span><span class="ccy">median band · base</span>
+                    <span class="conf"><span class="blip"></span><span class="blip"></span><span class="blip"></span> high</span></div>
+                  <div class="meter"><div class="band" style="left: 30%; width: 35%;"></div></div>
+                  <div class="meta"><span>+ 0.1–0.25% equity (Series B+)</span></div>
+                </div>
+                <div class="h-mini" style="font-size: 12px;">Bands moved <span class="ai-highlight">+6% YoY</span>. Updated from 12 fresh data points this week.</div>
+                <div class="anno-tag" style="top: -10px; right: 10px;">★ LatAm moat</div>
+              </div>
+
+              <!-- Today's focus -->
+              <div class="card amber grow">
+                <div class="label">today's focus · 12 minutes</div>
+                <div class="row"><span class="pill solid" style="font-size:11px;">1</span><span style="font-size:13px;">Reply to <b>Rita @ Stori</b> · draft ready</span><span class="btn coral sm" style="margin-left:auto;">Open</span></div>
+                <div class="row"><span class="pill solid" style="font-size:11px;">2</span><span style="font-size:13px;">Tailor CV for <b>Kavak Director Ops</b></span><span class="btn sm" style="margin-left:auto;">Open</span></div>
+                <div class="row"><span class="pill solid" style="font-size:11px;">3</span><span style="font-size:13px;">Prep notes for <b>Plaid call Tue 10am</b></span><span class="btn sm" style="margin-left:auto;">Open</span></div>
+                <div class="row"><span class="pill muted" style="font-size:11px;">+</span><span style="font-size:12.5px; color:var(--ink-3);">Decide on <b>Bitso</b> verbal offer · 5 days left</span></div>
+              </div>
+            </div>
+
+            <!-- Atlas territory -->
+            <div class="card atlas-bg" style="padding: 0; position: relative; min-height: 320px; flex:1;">
+              <div style="position:absolute; top:10px; left:12px; z-index:2;" class="row">
+                <span class="label">YOUR TERRITORY · MX FINTECH OPS</span>
+                <span class="pill muted" style="font-size:11px;">close = better fit</span>
+                <span class="pill muted" style="font-size:11px;">size = score</span>
+              </div>
+              <div style="position:absolute; top:10px; right:12px; z-index:2;" class="row">
+                <span class="pill amber">7 new</span>
+                <span class="pill teal">3 strong</span>
+                <span class="pill muted">List view ⇄</span>
+              </div>
+
+              <div style="position:absolute; left:50%; top:55%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:50%; border:2.5px solid var(--ink); background:white; display:flex; align-items:center; justify-content:center; font-family:'Caveat'; font-weight:700; font-size: 17px; z-index:2;">you</div>
+
+              <svg style="position:absolute; inset:0; width:100%; height:100%;">
+                <circle cx="50%" cy="55%" r="90" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                <circle cx="50%" cy="55%" r="160" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+                <circle cx="50%" cy="55%" r="230" fill="none" stroke="#c8c1b4" stroke-dasharray="3 4"/>
+              </svg>
+
+              <div class="dot-node" style="left:32%; top:30%; width:60px; height:60px; background:var(--teal); color:white; font-size:13px;">Kavak<br/><span style="font-size:11px; opacity:.85;">91</span></div>
+              <div class="dot-node" style="left:66%; top:26%; width:54px; height:54px; background:var(--teal); color:white; font-size:12px;">Plaid<br/><span style="font-size:11px; opacity:.85;">87</span></div>
+              <div class="dot-node" style="left:78%; top:48%; width:48px; height:48px; font-size:11px;">VTEX<br/><span style="font-size:10px;">85</span></div>
+              <div class="dot-node" style="left:25%; top:70%; width:40px; height:40px; font-size:11px;">Stori<br/><span style="font-size:10px;">82</span></div>
+              <div class="dot-node" style="left:55%; top:18%; width:36px; height:36px; font-size:10px;">Konfío<br/><span style="font-size:9px;">78</span></div>
+              <div class="dot-node" style="left:62%; top:80%; width:32px; height:32px; font-size:10px; opacity:.7;">Bitso<br/><span style="font-size:9px;">74</span></div>
+              <div class="dot-node" style="left:18%; top:48%; width:30px; height:30px; font-size:9px; opacity:.6;">Rappi<br/>73</div>
+              <div class="dot-node" style="left:84%; top:72%; width:26px; height:26px; font-size:9px; opacity:.55;">MeLi<br/>58</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 07 — PREP                                        -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s7">
+    <div class="caption">
+      <span class="num">07</span><span class="name">Interview prep</span>
+      <span class="tier-pill t-later">LATER</span>
+      <span class="blend">blend · <span class="b-pill b2">Brief</span><span class="b-pill b1">Inbox</span><span class="b-pill b3">Companion</span></span>
+      <span class="note">solid concept · build after the core loop validates · light pass for now</span>
+    </div>
+    <div class="body">
+      <div class="mock">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/prep/plaid-sr-director-latam-ops</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover</div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item active"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div></div></div>
+          </aside>
+
+          <div class="content" style="background: var(--brief); padding: 20px 24px; min-width: 0; gap: 12px;">
+            <div class="row"><span class="label">DOSSIER · Plaid · Sr Director, LatAm Ops</span><span class="pill teal" style="margin-left:auto;">Hiring mgr call · Tue 10am</span></div>
+            <div class="editorial-title" style="font-size:36px;">Plaid · the dossier.</div>
+            <div class="rule long"></div>
+
+            <div class="row" style="gap:6px; flex-wrap:wrap;">
+              <span class="pill solid">Likely Qs</span>
+              <span class="pill muted">About Plaid LatAm</span>
+              <span class="pill muted">Who you'll meet</span>
+              <span class="pill muted">Your STAR stories</span>
+              <span class="pill muted">Compensation prep</span>
+            </div>
+
+            <div class="row" style="gap:14px; align-items: flex-start;">
+              <div class="col grow" style="gap: 8px;">
+                <div class="label">three almost-certain questions</div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label">Q1</span><span class="pill teal" style="margin-left:auto; font-size:11px;">95% likely</span></div>
+                  <div style="font-family:'Caveat'; font-size:19px;">"Walk me through scaling ops for a multi-country fintech."</div>
+                  <div class="row"><span class="h-mini" style="font-size:12px;">your move →</span><span class="pill teal" style="font-size:11px;">Clip MX → CO expansion</span></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label">Q2</span><span class="pill teal" style="margin-left:auto; font-size:11px;">90% likely</span></div>
+                  <div style="font-family:'Caveat'; font-size:19px;">"How do you stay aligned with a US HQ on LatAm-specific risk?"</div>
+                  <div class="row"><span class="h-mini" style="font-size:12px;">your move →</span><span class="pill teal" style="font-size:11px;">Clip × Mastercard escalation</span></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="label">Q3</span><span class="pill amber" style="margin-left:auto; font-size:11px;">70%</span></div>
+                  <div style="font-family:'Caveat'; font-size:19px;">"What's your bar for hiring a Director-level direct report?"</div>
+                  <div class="row"><span class="h-mini" style="font-size:12px;">your move →</span><span class="pill amber" style="font-size:11px;">+ pick a 3rd story</span></div>
+                </div>
+              </div>
+
+              <div class="col" style="width: 240px; gap: 8px;">
+                <div class="label">who you'll meet</div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="avatar coral">DA</span><div class="grow"><b style="font-family:'Kalam'">Diana A.</b><div class="h-mini">VP Ops, LatAm · ex-Stripe</div></div></div>
+                </div>
+                <div class="card" style="background:white;">
+                  <div class="row"><span class="avatar teal">CM</span><div class="grow"><b style="font-family:'Kalam'">Carlos M.</b><div class="h-mini">Recruiter · Bogotá</div></div></div>
+                </div>
+                <div class="label" style="margin-top:6px;">about Plaid LatAm</div>
+                <div class="card" style="background:white; font-size:12.5px;">
+                  Launched MX 2023 · CO 2024. 40+ LatAm hires. <span class="ai-highlight">Open banking play vs CNBV</span> is the strategic story.
+                </div>
+                <div class="label">comp prep</div>
+                <div class="card teal" style="font-size:12.5px;">
+                  Walk in knowing: <b>$145–185k USD base</b>. Their last 2 LatAm Sr Dir hires came in mid-band.
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="background: white;">
+              <div class="row"><span class="ai-tag">mock with me</span><span class="label" style="margin-left:auto;">voice or text · 15 min sessions</span></div>
+              <div class="row"><span class="btn coral sm">Start mock round 1</span><span class="btn sm">Quiz me on STAR stories</span><span class="btn ghost sm">Print dossier</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 08 — SETTINGS                                    -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s8">
+    <div class="caption">
+      <span class="num">08</span><span class="name">Settings</span>
+      <span class="tier-pill t-later">AS-NEEDED</span>
+      <span class="blend">blend · <span class="b-pill b1">Inbox</span><span class="b-pill b2">Brief</span><span class="b-pill b4">Atlas</span></span>
+      <span class="note">tabbed top nav · sources include OCC, Bumeran, Computrabajo · scoring axes are the power-user knob</span>
+    </div>
+    <div class="body">
+      <div class="mock">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadme.app/settings/sources</span><span class="lang">lang · <b>EN</b> · ES</span></div>
+        <div class="screen">
+          <aside class="sidebar">
+            <div class="brand">leadme<span class="dot">.</span></div>
+            <div class="nav-item"><span class="ico"></span>Home</div>
+            <div class="nav-item"><span class="ico"></span>Discover</div>
+            <div class="nav-item"><span class="ico"></span>Evaluate</div>
+            <div class="nav-item"><span class="ico"></span>Tracker</div>
+            <div class="nav-item"><span class="ico"></span>Tailor</div>
+            <div class="nav-item"><span class="ico"></span>Prep</div>
+            <div class="nav-item phase3"><span class="ico"></span>Network <span class="p3">P3</span></div>
+            <div class="nav-item active"><span class="ico"></span>Settings</div>
+            <div class="nav-cta">✦ Evaluate</div>
+            <div class="user"><span class="av"></span><div class="grow"><div>Nacho L.</div></div></div>
+          </aside>
+          <div class="content">
+
+            <div class="row" style="gap:6px;">
+              <span class="pill muted">Profile</span>
+              <span class="pill muted">LinkedIn</span>
+              <span class="pill muted">CV</span>
+              <span class="pill solid">Sources &amp; axes</span>
+              <span class="pill muted">Cadence</span>
+              <span class="pill muted">Notifications</span>
+              <span class="pill muted">Billing · API key</span>
+            </div>
+
+            <div class="card brief" style="position: relative;">
+              <div class="editorial-title" style="font-size: 26px;">Where I scout for you.</div>
+              <div class="rule"></div>
+              <div class="h-mini">LatAm sources are on by default. Add any careers page by URL.</div>
+              <div class="row" style="gap: 8px; flex-wrap: wrap;">
+                <div class="card teal" style="padding: 6px 10px;"><div class="row"><span class="pill teal">★ OCC</span><span class="h-mini" style="font-size:12px;">MX · 312 cos · on</span></div></div>
+                <div class="card teal" style="padding: 6px 10px;"><div class="row"><span class="pill teal">★ Bumeran</span><span class="h-mini" style="font-size:12px;">MX/AR/CO · on</span></div></div>
+                <div class="card teal" style="padding: 6px 10px;"><div class="row"><span class="pill teal">★ Computrabajo</span><span class="h-mini" style="font-size:12px;">MX/CO/CL · on</span></div></div>
+                <div class="card teal" style="padding: 6px 10px;"><div class="row"><span class="pill teal">★ LinkedIn Jobs LatAm</span><span class="h-mini" style="font-size:12px;">live · 4h ago</span></div></div>
+                <div class="card" style="padding: 6px 10px;"><div class="row"><span class="pill">Greenhouse</span><span class="h-mini" style="font-size:12px;">42 cos · on</span></div></div>
+                <div class="card" style="padding: 6px 10px;"><div class="row"><span class="pill">Ashby</span><span class="h-mini" style="font-size:12px;">18 cos</span></div></div>
+                <div class="card" style="padding: 6px 10px;"><div class="row"><span class="pill">Lever</span><span class="h-mini" style="font-size:12px;">11 cos</span></div></div>
+                <div class="card" style="padding: 6px 10px;"><div class="row"><span class="pill muted">Wellfound</span><span class="h-mini" style="font-size:12px;">off</span></div></div>
+                <div class="card" style="padding: 6px 10px; border-style: dashed;"><span class="pill muted">+ Paste careers page URL (Clip · Kavak · custom)</span></div>
+              </div>
+              <div class="anno-tag" style="top: -10px; left: 16px;">★ LatAm sources on by default</div>
+            </div>
+
+            <div class="card atlas-bg" style="position: relative;">
+              <div class="row"><div class="h-title" style="font-size:20px;">Score weights — your axes</div><span class="h-mini" style="margin-left:auto;">drag to re-weight · changes apply to next scan</span></div>
+              <div class="row" style="gap: 14px; align-items: stretch; flex-wrap: wrap;">
+                <div class="card grow" style="background: white; min-width: 200px;">
+                  <div class="label">your weights</div>
+                  <div class="row"><span style="width:80px; font-size:12px;">scope</span><div class="prog grow"><div class="fill" style="width:90%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">25%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">level</span><div class="prog grow"><div class="fill" style="width:80%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">20%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">domain</span><div class="prog grow"><div class="fill" style="width:70%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">15%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">comp</span><div class="prog grow"><div class="fill amber" style="width:60%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">15%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">stage</span><div class="prog grow"><div class="fill" style="width:45%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">10%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">location</span><div class="prog grow"><div class="fill" style="width:40%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">10%</span></div>
+                  <div class="row"><span style="width:80px; font-size:12px;">trajectory</span><div class="prog grow"><div class="fill" style="width:20%;"></div></div><span class="h-mini" style="font-size:11px; margin-left:6px;">5%</span></div>
+                </div>
+                <div class="card grow" style="background: white; min-width: 200px;">
+                  <div class="label">currency &amp; comp</div>
+                  <div class="row"><span class="h-mini">show salaries in</span><span class="pill muted" style="margin-left:auto;">USD</span><span class="pill solid">MXN</span></div>
+                  <div class="row"><span class="h-mini">floor (never show below)</span><span class="pill" style="margin-left:auto;">$1.9M MXN</span></div>
+                  <div class="row"><span class="h-mini">flag under-market by</span><span class="pill" style="margin-left:auto;">10%+</span></div>
+                </div>
+                <div class="card grow" style="background: white; min-width: 200px;">
+                  <div class="label">cadence</div>
+                  <div class="row"><span class="h-mini">brief delivery</span><span class="pill solid" style="margin-left:auto;">daily 8am CST</span></div>
+                  <div class="row"><span class="h-mini">max picks / brief</span><span class="pill solid" style="margin-left:auto;">7</span></div>
+                  <div class="row"><span class="h-mini">stale nudge</span><span class="pill" style="margin-left:auto;">after 5d</span></div>
+                </div>
+              </div>
+              <div class="row"><span class="btn ghost sm">Reset to defaults</span><span class="btn coral sm" style="margin-left:auto;">Save</span></div>
+              <div class="anno-tag" style="top: -10px; left: 16px;">★ Atlas axes (power-user knob)</div>
+            </div>
+
+            <div class="sticky teal" style="align-self: flex-start; max-width: 480px;">
+              <b>Tip:</b> bumping the <em>comp</em> weight up filters out fast — useful when you have leverage and don't want to see anything that won't move you. Drop it when you're earlier in a search.
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- 09 — NETWORK · dropped to phase 3                -->
+  <!-- ============================================== -->
+  <section class="screen-row" id="s9" style="opacity: .85;">
+    <div class="caption">
+      <span class="num">09</span><span class="name">Network · warm contact mapping</span>
+      <span class="tier-pill t-dropped">PHASE 3</span>
+      <span class="note">explicitly deferred per strategy doc · do not design further until Phase 2 ships</span>
+    </div>
+    <div class="body">
+      <div class="dropped" style="min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+        <b>Not building this yet.</b>
+        <div style="max-width: 540px; line-height: 1.5; font-size: 14px;">
+          Networking / warm contact mapping is <em>Phase 3</em> in the strategy doc. The MVP (Phase 1–2) is the engine + brief + evaluate + tracker + tailor — that's what proves the product loop with you and your first 3 friends.
+        </div>
+        <div style="max-width: 540px; line-height: 1.5; font-size: 13px; color: var(--ink-3);">
+          When it does come back: LinkedIn graph traversal · warm intro mapping · outreach drafting. It's a beautiful screen but it's the wrong battle to fight now — risks being clever before the core loop has earned the right to it.
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="pill muted">design notes parked in v0.2</span>
+          <span class="pill muted">revisit after Phase 2 exit criteria</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>LeadMe · v0.3 · strategy-aligned wireframes · 8 active screens + 1 deferred</span>
+    <span>next: pick a screen to push to hi-fi · Evaluate is the natural marquee</span>
+  </footer>
+</div>
+
+<script>
+  const chips = document.querySelectorAll('.chipnav a');
+  const sections = [...chips].map(c => document.querySelector(c.getAttribute('href')));
+  const setActive = (idx) => chips.forEach((c,i) => c.classList.toggle('active', i === idx));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = sections.indexOf(e.target);
+        if (idx >= 0) setActive(idx);
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+  sections.forEach(s => s && io.observe(s));
+</script>
+</body>
+</html>

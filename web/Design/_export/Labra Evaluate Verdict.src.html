@@ -1,0 +1,1953 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Labra — Evaluate Verdict + Report · desktop + mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS — same system as Labra Onboarding                      */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-bg:   #FAEEDA;
+    --signal-ink:  #854F0B;
+    --signal-deep: #4A2A0C;
+    --signal-on:   #ffffff;
+    --signal-track: rgba(201, 123, 14, 0.18);
+    --signal-divider: rgba(201, 123, 14, 0.3);
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-bg:   #2a1f10;
+    --signal-ink:  #f2c987;
+    --signal-deep: #f8dfaf;
+    --signal-on:   #0a0e14;
+    --signal-track: rgba(236, 174, 77, 0.22);
+    --signal-divider: rgba(236, 174, 77, 0.3);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+
+  /* ============================================================ */
+  /* TOP CHROME                                                    */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px; color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .brand .system {
+    margin-left: 12px; font-family: "Geist Mono", monospace;
+    font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .top .spacer { flex: 1; }
+  .mode-toggle {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 5px; border-radius: 999px; display: inline-flex; gap: 2px;
+  }
+  .mode-toggle button {
+    border: 0; background: transparent; padding: 5px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .mode-toggle button.on { background: var(--ink); color: var(--bg); }
+
+  .stage { max-width: 1560px; margin: 0 auto; padding: 36px 32px 80px; }
+  .hero { margin: 0 0 40px; max-width: 920px; }
+  .hero h1 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 56px; line-height: 1; margin: 0; letter-spacing: -1.6px; color: var(--ink);
+  }
+  .hero h1 em { font-style: italic; }
+  .hero p {
+    font-family: "Albert Sans"; font-size: 16px; line-height: 1.6;
+    color: var(--ink-2); margin: 14px 0 0; max-width: 800px;
+  }
+  .hero p b { color: var(--ink); font-weight: 600; }
+
+  /* ============================================================ */
+  /* SCREEN PAIR LAYOUT                                            */
+  /* ============================================================ */
+  .screen { margin-bottom: 64px; scroll-margin-top: 80px; }
+  .screen-label {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px; padding: 0 4px;
+  }
+  .screen-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 10px; border-radius: 999px; background: var(--canvas);
+  }
+  .screen-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 30px; line-height: 1; margin: 0; letter-spacing: -0.8px; color: var(--ink);
+  }
+  .screen-label h2 em { font-style: italic; }
+  .screen-label .tag { font-family: "Albert Sans"; font-size: 13px; color: var(--ink-3); }
+
+  .pair { display: flex; gap: 28px; align-items: flex-start; }
+  .pair .desktop-col { flex: 1; min-width: 0; }
+  .pair .mobile-col { flex-shrink: 0; width: 422px; position: sticky; top: 80px; }
+  .pair .platform-tag {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 0 10px;
+  }
+  .pair .platform-tag b { color: var(--ink); font-weight: 500; }
+
+  .frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+  }
+  .frame-bar {
+    height: 34px; background: var(--canvas);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  }
+  .frame-bar .fdot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .frame-bar .url {
+    margin-left: 12px; font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.3px;
+  }
+
+  /* ============================================================ */
+  /* EVALUATE APP SHELL (DESKTOP)                                  */
+  /* ============================================================ */
+  .ev-shell {
+    background: var(--bg);
+    min-height: 880px;
+    display: flex; flex-direction: column;
+  }
+  .ev-appbar {
+    border-bottom: 0.75px solid var(--line);
+    padding: 14px 36px;
+    display: flex; align-items: center; gap: 18px;
+    background: var(--bg);
+  }
+  .ev-appbar .brand-small {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; color: var(--ink);
+  }
+  .ev-appbar .brand-small .dot { color: var(--accent); font-style: italic; }
+  .ev-appbar .nav {
+    display: flex; gap: 4px; margin-left: 18px;
+  }
+  .ev-appbar .nav a {
+    text-decoration: none; padding: 6px 13px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13px;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .ev-appbar .nav a.on { background: var(--ink); color: var(--bg); }
+  .ev-appbar .nav a:hover:not(.on) { color: var(--ink); }
+  .ev-appbar .spacer { flex: 1; }
+  .ev-appbar .userline {
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-3);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .ev-appbar .userline .sign-out {
+    color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px;
+    text-decoration-color: var(--line);
+  }
+  .ev-appbar .userline .dot-sep { color: var(--ink-3); opacity: .5; }
+
+  /* The verdict reading column */
+  .ev-page {
+    max-width: 720px; width: 100%; margin: 36px auto 0;
+    padding: 0 24px 64px;
+    display: flex; flex-direction: column; gap: 32px;
+    flex: 1;
+  }
+
+  /* ============================================================ */
+  /* HEADER ROW — back-to-Tracker + save action                    */
+  /* ============================================================ */
+  .v-header {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .v-header .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: "Albert Sans"; font-size: 13px; color: var(--ink-2);
+    background: transparent; border: 0; padding: 0; cursor: pointer;
+  }
+  .v-header .back svg { color: var(--ink-3); }
+  .v-header .spacer { flex: 1; }
+  .v-header .age {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .v-header .save {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 12.5px;
+    border: 0.75px solid var(--line); background: var(--surface); color: var(--ink-2);
+    cursor: pointer;
+  }
+  .v-header .save:hover { color: var(--ink); border-color: var(--ink-3); }
+  .v-header .save.on {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .v-header .status-pill {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 0.9px; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 999px;
+    background: var(--ink); color: var(--bg);
+  }
+
+  /* ============================================================ */
+  /* SUMMARY HEADER — collapsed processing rows                    */
+  /* ============================================================ */
+  .v-summary {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-bottom: 0;
+  }
+  .v-summary .meta-line {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 0.9px; text-transform: uppercase; color: var(--ink-3);
+    display: flex; flex-wrap: wrap; gap: 0;
+  }
+  .v-summary .meta-line .sep { color: var(--ink-3); opacity: .45; padding: 0 8px; }
+  .v-summary .role {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 28px; line-height: 1.12; letter-spacing: -0.7px;
+    color: var(--ink); margin: 0;
+  }
+  .v-summary .role em { font-style: italic; }
+  .v-summary .role-sub {
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    letter-spacing: 0.3px; color: var(--ink-2);
+  }
+  .v-summary .role-sub .sep { color: var(--ink-3); opacity: .55; padding: 0 7px; }
+
+  /* ============================================================ */
+  /* VERDICT LABEL — the editorial moment                          */
+  /* ============================================================ */
+  .v-verdict {
+    display: flex; flex-direction: column; gap: 18px;
+    padding-top: 6px;
+  }
+  .v-verdict .kicker-label {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .v-verdict .label {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 96px; line-height: 0.92; letter-spacing: -3.2px;
+    color: var(--ink); margin: 0;
+  }
+  .v-verdict .label em { font-style: italic; }
+  .v-verdict .label.alt { color: var(--ink); }
+  .v-verdict .reasoning {
+    font-family: "Albert Sans"; font-size: 17px; line-height: 1.55;
+    color: var(--ink); margin: 0;
+    max-width: 620px;
+    text-wrap: pretty;
+  }
+  .v-verdict .reasoning .arch {
+    border-bottom: 0.75px dotted var(--ink-3); padding-bottom: 1px; cursor: help;
+    color: var(--ink); font-weight: 500;
+  }
+  .v-verdict .reasoning .lede {
+    color: var(--ink); font-weight: 500;
+  }
+
+  /* ============================================================ */
+  /* GAPS / SECTION KICKERS                                        */
+  /* ============================================================ */
+  .v-section { display: flex; flex-direction: column; gap: 12px; }
+  .v-section .skicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .v-section .skicker b { color: var(--ink); font-weight: 500; }
+
+  .gap-list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .gap-list li {
+    font-family: "Albert Sans"; font-size: 14.5px; line-height: 1.5;
+    color: var(--ink-2);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .gap-list li b { color: var(--ink); font-weight: 600; }
+  .gap-list li::before {
+    content: ''; flex-shrink: 0; margin-top: 9px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--ink-3);
+  }
+
+  /* ============================================================ */
+  /* COMP STRIP — compressed amber border-left                     */
+  /* Now: period + user-status explicit. See comp-track / comp-status */
+  /* ============================================================ */
+  .comp-row {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 16px 18px 16px 20px;
+    border-left: 5px solid var(--signal);
+    background: var(--signal-bg);
+    border-radius: 0 12px 12px 0;
+    position: relative;
+  }
+  .comp-row .comp-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .comp-row .comp-kicker {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--signal-ink);
+    display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; flex-wrap: wrap;
+  }
+  .comp-row .comp-kicker .sep { color: var(--signal-ink); opacity: .45; }
+  .comp-row .comp-kicker .grade-name {
+    border-bottom: 0.75px dotted var(--signal); padding-bottom: 1px;
+    cursor: help; color: var(--signal-deep);
+  }
+  .comp-row .comp-kicker .vintage {
+    color: var(--signal-ink);
+  }
+  .comp-row .grade-r {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--signal-ink); letter-spacing: 0.4px;
+    flex-shrink: 0;
+  }
+  .comp-row .grade-r .dots { color: var(--signal); letter-spacing: 1.5px; font-size: 12px; margin-right: 4px; }
+
+  /* Big evaluative word — the comp verdict at a glance */
+  .comp-row .comp-verdict {
+    display: flex; align-items: baseline; gap: 16px;
+    flex-wrap: wrap; margin: 4px 0 0;
+  }
+  .comp-row .comp-verdict .word {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 44px; line-height: 0.95;
+    letter-spacing: -1.4px;
+    color: var(--signal-deep);
+  }
+  .comp-row .comp-verdict .word em { font-style: italic; }
+  .comp-row .comp-verdict .gloss {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--signal-ink);
+    padding-bottom: 6px;
+  }
+  .comp-row .comp-verdict .gloss b {
+    color: var(--signal-deep); font-weight: 500;
+  }
+
+  .comp-row .comp-range {
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    font-size: 14px; color: var(--signal-deep); letter-spacing: 0.2px;
+    opacity: .85;
+  }
+
+  /* Range track with user marker */
+  .comp-row .comp-track {
+    position: relative;
+    margin: 18px 8px 28px 8px;
+  }
+  .comp-row .comp-track .track-bar {
+    position: relative; height: 6px;
+    background: var(--signal-track);
+    border-radius: 999px;
+    overflow: visible;
+  }
+  .comp-row .comp-track .track-fill {
+    position: absolute; inset: 0;
+    background: var(--signal); opacity: 0.42;
+    border-radius: 999px;
+  }
+  .comp-row .comp-track .track-axis {
+    position: absolute; top: 10px; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    color: var(--signal-ink); opacity: .7; letter-spacing: 0.3px;
+  }
+  .comp-row .comp-track .mark {
+    position: absolute; top: 50%; transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+  .comp-row .comp-track .mark .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--signal-deep);
+    box-shadow: 0 0 0 3px var(--signal-bg);
+  }
+  .comp-row .comp-track .mark.outline .dot {
+    background: var(--signal-bg);
+    border: 1.5px solid var(--signal-deep);
+  }
+  .comp-row .comp-track .mark .lbl {
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--signal-deep); white-space: nowrap;
+    background: var(--signal-bg);
+    padding: 0 4px;
+  }
+  .comp-row .comp-track .mark.below .lbl { top: 18px; bottom: auto; }
+
+  /* User-status sentence */
+  .comp-row .comp-status {
+    display: flex; gap: 8px; align-items: center;
+    padding-top: 8px;
+    border-top: 0.5px dashed var(--signal-divider);
+    flex-wrap: wrap;
+  }
+  .comp-row .comp-status .glyph {
+    flex-shrink: 0; font-family: "Geist Mono", monospace;
+    font-size: 9.5px; letter-spacing: 0.7px; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 4px;
+    background: var(--signal-deep); color: var(--signal-bg);
+    font-weight: 500;
+  }
+  .comp-row .comp-status .glyph.muted {
+    background: rgba(201, 123, 14, 0.15);
+    color: var(--signal-deep);
+  }
+  .comp-row .comp-status .txt {
+    font-family: "Albert Sans"; font-size: 13.5px; line-height: 1.4;
+    color: var(--signal-deep); flex: 1; min-width: 0;
+  }
+  .comp-row .comp-status .txt b { font-weight: 600; }
+
+  .comp-row .comp-source {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--signal-ink); letter-spacing: 0.4px;
+  }
+
+  /* Action line — concrete next move, given the comp position */
+  .comp-row .comp-action {
+    display: flex; gap: 8px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .comp-row .comp-action .glyph {
+    flex-shrink: 0; font-family: "Geist Mono", monospace;
+    font-size: 9.5px; letter-spacing: 0.7px; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 4px;
+    background: transparent; color: var(--signal-deep);
+    border: 0.75px solid var(--signal);
+    font-weight: 500;
+  }
+  .comp-row .comp-action .txt {
+    font-family: "Albert Sans"; font-size: 13.5px; line-height: 1.4;
+    color: var(--signal-deep); flex: 1; min-width: 0;
+  }
+  .comp-row .comp-action .txt b { font-weight: 600; }
+
+  /* ============================================================ */
+  /* COMP STRIP STATES — color carries meaning                     */
+  /* default = caution (amber, kept for below-floor / stale / undisclosed) */
+  /* state-ok = within-range, calm teal                            */
+  /* state-positive = quote lands well, affirmative teal           */
+  /* ============================================================ */
+  .comp-row.state-ok {
+    --signal:         #0d7c89;
+    --signal-soft:    #b8d8db;
+    --signal-bg:      #dceaec;
+    --signal-ink:     #3e6d75;
+    --signal-deep:    #0a4a52;
+    --signal-on:      #ffffff;
+    --signal-track:   rgba(13, 124, 137, 0.16);
+    --signal-divider: rgba(13, 124, 137, 0.28);
+  }
+  .theme-dark .comp-row.state-ok {
+    --signal:         #5cb1ff;
+    --signal-soft:    #1a3349;
+    --signal-bg:      #14283b;
+    --signal-ink:     #8ab0d0;
+    --signal-deep:    #d4e6f2;
+    --signal-on:      #06101c;
+    --signal-track:   rgba(92, 177, 255, 0.18);
+    --signal-divider: rgba(92, 177, 255, 0.3);
+  }
+  .comp-row.state-positive {
+    --signal:         #0a5c66;
+    --signal-soft:    #98c8cc;
+    --signal-bg:      #b9d9dc;
+    --signal-ink:     #1f4d54;
+    --signal-deep:    #052e34;
+    --signal-on:      #ffffff;
+    --signal-track:   rgba(10, 92, 102, 0.28);
+    --signal-divider: rgba(10, 92, 102, 0.4);
+  }
+  .theme-dark .comp-row.state-positive {
+    --signal:         #7ec0ff;
+    --signal-soft:    #1f3d57;
+    --signal-bg:      #1a3a55;
+    --signal-ink:     #a3c7e3;
+    --signal-deep:    #e6f0fa;
+    --signal-on:      #06101c;
+    --signal-track:   rgba(126, 192, 255, 0.22);
+    --signal-divider: rgba(126, 192, 255, 0.35);
+  }
+  /* status glyph treatment scales with state */
+  .comp-row.state-positive .comp-status .glyph {
+    background: var(--signal);
+    color: var(--signal-on);
+  }
+
+  /* ============================================================ */
+  /* DRAFT REPLY CARD                                              */
+  /* ============================================================ */
+  .draft-card {
+    background: var(--surface);
+    border: 0.75px solid var(--line);
+    border-radius: 13px;
+    display: flex; flex-direction: column; gap: 0;
+    overflow: hidden;
+  }
+  .draft-card .head {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--line);
+    background: var(--canvas);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .draft-card .head .skicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+    flex: 1;
+  }
+  .draft-card .head .skicker b { color: var(--ink); font-weight: 500; }
+  .draft-card .body {
+    padding: 16px 18px;
+    font-family: "Geist Mono", monospace;
+    font-size: 13px; line-height: 1.65;
+    color: var(--ink); letter-spacing: 0.1px;
+    white-space: pre-wrap;
+  }
+  .draft-card .foot {
+    padding: 10px 14px;
+    border-top: 0.5px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface-2);
+  }
+  .draft-card .foot .note {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 0.5px; color: var(--ink-3); flex: 1;
+  }
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 8px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 12.5px;
+    border: 0.75px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--ink-3); }
+  .copy-btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* Sent line (revisited Reply state) */
+  .sent-line {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px;
+    background: var(--canvas); border-radius: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11.5px;
+    color: var(--ink-2); letter-spacing: 0.3px;
+  }
+  .sent-line .check {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-on);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .sent-line .label { color: var(--ink); font-weight: 500; text-transform: uppercase; letter-spacing: 0.7px; }
+  .sent-line .view {
+    margin-left: auto;
+    color: var(--ink-2); text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-color: var(--line);
+    cursor: pointer; font-family: "Albert Sans"; font-size: 12px;
+  }
+
+  /* ============================================================ */
+  /* STATUS / OUTCOME CAPTURE (REPORT STATE)                       */
+  /* ============================================================ */
+  .status-block {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .status-prompt {
+    font-family: "Fraunces", serif; font-weight: 400; font-style: italic;
+    font-size: 19px; line-height: 1.3; color: var(--ink); margin: 0;
+  }
+  .status-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 12.5px;
+    border: 0.75px solid var(--line); background: var(--surface); color: var(--ink-2);
+    cursor: pointer;
+  }
+  .status-pill:hover { border-color: var(--ink-3); color: var(--ink); }
+  .status-pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .status-pill.amber { background: var(--signal-bg); color: var(--signal-ink); border-color: var(--signal); }
+  .status-pill .dotmark {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3);
+  }
+  .status-pill.on .dotmark { background: var(--bg); }
+  .status-pill.amber .dotmark { background: var(--signal); }
+
+  /* ============================================================ */
+  /* ACTION FOOTER ROW                                             */
+  /* ============================================================ */
+  .v-actions {
+    display: flex; align-items: center; gap: 12px;
+    padding-top: 8px;
+    border-top: 0.75px solid var(--line);
+    margin-top: 8px;
+  }
+  .v-actions .primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 12px 22px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 14px;
+    background: var(--ink); color: var(--bg); border: 1px solid var(--ink); cursor: pointer;
+  }
+  .v-actions .ghost {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 12px 16px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 13.5px;
+    color: var(--ink-3); background: transparent; border: 0; cursor: pointer;
+  }
+  .v-actions .ghost:hover { color: var(--ink-2); }
+  .v-actions .spacer { flex: 1; }
+
+  /* Skip-state re-evaluate toggle */
+  .reeval-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px;
+    background: var(--canvas); border-radius: 11px;
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink-2);
+  }
+  .reeval-row .toggle {
+    width: 36px; height: 22px; border-radius: 999px;
+    background: var(--ink); position: relative; flex-shrink: 0;
+  }
+  .reeval-row .toggle::after {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 16px; height: 16px; border-radius: 50%; background: var(--bg);
+  }
+  .reeval-row b { color: var(--ink); font-weight: 600; }
+
+  /* ============================================================ */
+  /* PHONE SHELL                                                   */
+  /* ============================================================ */
+  .phone {
+    width: 390px; height: 844px;
+    background: #1a1a1a; border-radius: 56px; padding: 16px;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.25), 0 4px 12px -4px rgba(0,0,0,.15);
+    position: relative;
+  }
+  .theme-dark .phone {
+    background: #2a3543;
+    border: 1px solid #3a4554;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    border-radius: 42px; overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .phone-screen::before {
+    content: ''; position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 30px; background: #0a0a0a; border-radius: 18px; z-index: 10;
+  }
+  .status-bar {
+    padding: 18px 28px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: -apple-system, "Albert Sans"; font-weight: 600;
+    font-size: 14px; color: var(--ink); flex-shrink: 0;
+  }
+  .status-bar .right { display: flex; gap: 6px; align-items: center; }
+  .status-bar .signal-bars { display: inline-flex; gap: 2px; align-items: flex-end; }
+  .status-bar .signal-bars .bar { width: 3px; background: var(--ink); border-radius: 0.5px; }
+  .status-bar .battery {
+    width: 24px; height: 12px; border: 1.2px solid var(--ink); border-radius: 3px; position: relative;
+  }
+  .status-bar .battery::after {
+    content: ''; position: absolute; right: -3px; top: 3px;
+    width: 1.5px; height: 6px; background: var(--ink); border-radius: 0 1px 1px 0;
+  }
+  .status-bar .battery .fill {
+    background: var(--ink); margin: 1.5px; height: calc(100% - 3px); width: 75%; border-radius: 1px;
+  }
+
+  /* Mobile app top (back + hamburger placeholder + save) */
+  .m-top {
+    padding: 8px 16px 6px;
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  }
+  .m-top .iconbtn {
+    width: 34px; height: 34px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-2); background: transparent; border: 0; cursor: pointer;
+  }
+  .m-top .iconbtn:hover { background: var(--canvas); color: var(--ink); }
+  .m-top .spacer { flex: 1; }
+  .m-top .age {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .m-top .save {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 12px;
+    border: 0.75px solid var(--line); background: var(--surface); color: var(--ink-2);
+    cursor: pointer;
+  }
+  .m-top .save.on {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .m-top .status-pill {
+    font-family: "Geist Mono", monospace; font-size: 9.5px;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px;
+    background: var(--ink); color: var(--bg);
+  }
+
+  .m-body {
+    flex: 1; overflow-y: auto;
+    padding: 8px 20px 28px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+
+  /* Phone-scoped scale-down */
+  .phone-screen .v-summary .meta-line { font-size: 9.5px; letter-spacing: 0.8px; }
+  .phone-screen .v-summary .role { font-size: 22px; letter-spacing: -0.5px; }
+  .phone-screen .v-summary .role-sub { font-size: 11px; }
+  .phone-screen .v-verdict { gap: 14px; padding-top: 2px; }
+  .phone-screen .v-verdict .kicker-label { font-size: 9.5px; }
+  .phone-screen .v-verdict .label { font-size: 60px; letter-spacing: -1.8px; line-height: 0.94; }
+  .phone-screen .v-verdict .reasoning { font-size: 15px; line-height: 1.5; }
+  .phone-screen .v-section .skicker { font-size: 9.5px; }
+  .phone-screen .gap-list li { font-size: 13px; }
+  .phone-screen .comp-row { padding: 14px 16px 14px 16px; gap: 8px; border-left-width: 4px; }
+  .phone-screen .comp-row .comp-kicker { font-size: 9.5px; }
+  .phone-screen .comp-row .comp-verdict { gap: 10px; }
+  .phone-screen .comp-row .comp-verdict .word { font-size: 30px; letter-spacing: -0.9px; }
+  .phone-screen .comp-row .comp-verdict .gloss { font-size: 9.5px; padding-bottom: 4px; }
+  .phone-screen .comp-row .comp-range { font-size: 12px; }
+  .phone-screen .comp-row .comp-source { font-size: 9.5px; }
+  .phone-screen .comp-row .grade-r { font-size: 10px; }
+  .phone-screen .comp-row .comp-track { margin: 16px 6px 24px 6px; }
+  .phone-screen .comp-row .comp-track .mark .lbl { font-size: 9px; }
+  .phone-screen .comp-row .comp-track .track-axis { font-size: 9px; }
+  .phone-screen .comp-row .comp-status .glyph { font-size: 9px; padding: 2px 6px; }
+  .phone-screen .comp-row .comp-status .txt { font-size: 12.5px; }
+  .phone-screen .comp-row .comp-action .glyph { font-size: 9px; padding: 2px 6px; }
+  .phone-screen .comp-row .comp-action .txt { font-size: 12.5px; }
+  .phone-screen .draft-card .head .skicker { font-size: 9.5px; }
+  .phone-screen .draft-card .body { font-size: 12px; padding: 14px 14px; }
+  .phone-screen .draft-card .foot { padding: 9px 12px; }
+  .phone-screen .draft-card .foot .note { font-size: 9.5px; }
+  .phone-screen .copy-btn { padding: 6px 11px; font-size: 12px; }
+  .phone-screen .sent-line { padding: 11px 13px; font-size: 11px; }
+  .phone-screen .status-prompt { font-size: 16px; }
+  .phone-screen .status-pill { padding: 6px 11px; font-size: 11.5px; }
+  .phone-screen .v-actions { padding-top: 6px; gap: 8px; flex-wrap: wrap; }
+  .phone-screen .v-actions .primary { padding: 11px 18px; font-size: 13.5px; }
+  .phone-screen .v-actions .ghost { padding: 11px 12px; font-size: 12.5px; }
+  .phone-screen .reeval-row { padding: 11px 13px; font-size: 12.5px; }
+
+  /* Info strip */
+  .info-strip {
+    display: flex; gap: 18px; align-items: flex-start;
+    padding: 32px 4px; border-top: 1px solid var(--line); margin-top: 24px;
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink-2); line-height: 1.55;
+  }
+  .info-strip .label-x {
+    font-family: "Geist Mono", monospace; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--ink-3); flex-shrink: 0; width: 200px;
+  }
+  .info-strip .body-x { flex: 1; max-width: 820px; }
+  .info-strip .body-x b { color: var(--ink); font-weight: 600; }
+  .info-strip + .info-strip { margin-top: 0; }
+</style>
+</head>
+<body class="theme-light">
+
+<template id="__bundler_thumbnail" data-bg-color="#f6f8f8">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#f6f8f8"/>
+    <text x="600" y="470" font-family="Fraunces, Georgia, serif" font-weight="500" font-size="320" letter-spacing="-10" text-anchor="middle" fill="#0a1f24">labra<tspan fill="#0d7c89" font-style="italic">.</tspan></text>
+    <text x="600" y="570" font-family="Geist Mono, ui-monospace, monospace" font-size="34" letter-spacing="6" text-anchor="middle" fill="#889399">EVALUATE · VERDICT</text>
+  </svg>
+</template>
+
+  <div class="top">
+    <div class="brand">labra<span class="dot">.</span><span class="system">Evaluate · Verdict + Report</span></div>
+    <div class="spacer"></div>
+    <div class="mode-toggle">
+      <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+      <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="hero">
+      <h1>The verdict, <em>four shapes, two states</em>.</h1>
+      <p>The wedge resolves here. <b>Reply / Pursue / Watch / Skip</b> — each at desktop and mobile — plus the same component re-rendered as Report after the eval has aged. Same route, same shell; the only true difference is the action footer and an animation state the static frame can't show. <b>Above the fold on 390px: verdict label + first 1–2 lines of reasoning. Everything else scrolls.</b></p>
+    </div>
+
+<!-- ============================================================================== -->
+<!-- 01 · REPLY (DM PATH, LIVE)                                                     -->
+<!-- ============================================================================== -->
+<section class="screen" data-screen-label="01 Reply (live)">
+  <div class="screen-label">
+    <span class="num">01 · reply</span>
+    <h2><em>Reply.</em></h2>
+    <span class="tag">— DM path, live verdict, draft included</span>
+  </div>
+
+  <div class="pair">
+    <div class="desktop-col">
+      <div class="platform-tag"><b>Desktop</b> · labra.app / evaluate / ev_a8j2k1 — live verdict</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app / evaluate / ev_a8j2k1</span>
+        </div>
+        <div class="ev-shell">
+          <div class="ev-appbar">
+            <div class="brand-small">labra<span class="dot">.</span></div>
+            <div class="nav">
+              <a class="on">Evaluate</a>
+              <a>Tracker</a>
+              <a>Settings</a>
+            </div>
+            <div class="spacer"></div>
+            <div class="userline">
+              <span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out">Sign out</span>
+            </div>
+          </div>
+          <div class="ev-page">
+
+            <div class="v-header">
+              <button class="back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Tracker
+              </button>
+              <div class="spacer"></div>
+              <button class="save">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Save to Tracker
+              </button>
+            </div>
+
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Stripe</span><span class="sep">·</span><span>Mexico City</span><span class="sep">·</span><span>Remote-LatAm</span><span class="sep">·</span><span>recruiter DM</span>
+              </div>
+              <h2 class="role">Staff Product Engineer.</h2>
+              <div class="role-sub">Staff IC <span class="sep">·</span> Series H+ <span class="sep">·</span> $280k–$340k referential <span class="sep">·</span> posted today</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Reply.</h1>
+              <p class="reasoning">
+                <span class="lede">This is a tight archetype match.</span> Staff IC at late-stage fintech with a remote-LatAm policy — the same lane you've prioritized for the last twelve months, mapped to <span class="arch" title="From your profile · Edit in Settings">Archetype 02 · stretch up</span>. Staff at Stripe aligns with the Director-level scope you operate at Galgo, with an IC re-entry the role tree allows. The recruiter is asking the right opening questions and named a real hub.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Gaps</b> — what to surface in the reply</div>
+              <ul class="gap-list">
+                <li><b>Total comp range</b> not disclosed — ask for the band, not just base.</li>
+                <li>Equity refresh policy unaddressed — material at Series H+.</li>
+                <li>Visa / relocation expectations unclear — confirm Mexico City remote is fine.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b> — reference, not anchor</div>
+              <div class="comp-row state-ok">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name" title="Orientation: public sources + segment context. Not yet calibrated against peer outcomes.">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Data Aug 2025 · 9 mo old</span>
+                  </div>
+                  <div class="grade-r"><span class="dots">○○○</span>Orientation</div>
+                </div>
+                <div class="comp-range">$280k – $340k total · referential</div>
+                <div class="comp-verdict">
+                  <span class="word">Fits<em>.</em></span>
+                  <span class="gloss">Your floor <b>clears</b> the band by $10k · $50k headroom</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark" style="left: 17%;">
+                    <span class="lbl">your floor · $290k</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis"><span>$280k floor</span><span>$340k ceiling</span></div>
+                </div>
+                <div class="comp-status">
+                  <span class="glyph">✓ Within range</span>
+                  <span class="txt"><b>Sits at the low end.</b> Equity not in the band — Levels.fyi numbers are total comp where equity is the bulk at Stripe.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next move</span>
+                  <span class="txt">In your reply, <b>ask for total comp + equity refresh policy</b>. Don't anchor on base alone at Series H+.</span>
+                </div>
+                <div class="comp-source">Source · Levels.fyi · Stripe Staff IC · n=247 offers · 2024–25</div>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Draft reply</b> — your tone, your call</div>
+              <div class="draft-card">
+                <div class="head">
+                  <div class="skicker"><b>Draft reply</b> · English · ~52 words</div>
+                  <button class="copy-btn">EN / ES</button>
+                </div>
+                <div class="body">Thanks for reaching out. Open to learning more — happy to do a 20-min call this week or next.
+
+My remote setup is fixed in Mexico City, and I'd want to understand the level band and total comp expectation for this seat before going further. What does the equity package look like at this stage?</div>
+                <div class="foot">
+                  <div class="note">Read-only · refine in your messaging surface</div>
+                  <button class="copy-btn solid">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+                    Copy reply
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Mark as replied
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <div class="spacer"></div>
+              <button class="ghost">Override: Skip</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-col">
+      <div class="platform-tag"><b>Mobile</b> · iPhone 14 Pro</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="right">
+              <span class="signal-bars"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+              <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+              <span class="battery"><span class="fill"></span></span>
+            </div>
+          </div>
+
+          <div class="m-top">
+            <button class="iconbtn" aria-label="Tracker">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="spacer"></div>
+            <button class="save">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              Save
+            </button>
+          </div>
+
+          <div class="m-body">
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Stripe</span><span class="sep">·</span><span>Mexico City</span><span class="sep">·</span><span>recruiter DM</span>
+              </div>
+              <h2 class="role">Staff Product Engineer.</h2>
+              <div class="role-sub">Staff IC <span class="sep">·</span> Series H+ <span class="sep">·</span> Remote-LatAm</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Reply.</h1>
+              <p class="reasoning">
+                <span class="lede">Tight archetype match.</span> Staff IC at late-stage fintech with remote-LatAm — your <span class="arch">Archetype 02 · stretch up</span>. The recruiter named a real hub and is asking the right opening questions.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Gaps</b></div>
+              <ul class="gap-list">
+                <li><b>Total comp range</b> not disclosed.</li>
+                <li>Equity refresh policy unaddressed.</li>
+                <li>Visa / relocation expectations unclear.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b></div>
+              <div class="comp-row state-ok">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Aug '25 · 9 mo</span>
+                  </div>
+                </div>
+                <div class="comp-range">$280k – $340k · referential</div>
+                <div class="comp-verdict">
+                  <span class="word">Fits<em>.</em></span>
+                  <span class="gloss">Floor <b>clears</b> by $10k</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark" style="left: 17%;">
+                    <span class="lbl">your floor · $290k</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis"><span>$280k</span><span>$340k</span></div>
+                </div>
+                <div class="comp-status">
+                  <span class="glyph">✓ Within</span>
+                  <span class="txt"><b>Low end.</b> Floor clears by $10k. Equity not in band.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next</span>
+                  <span class="txt">Reply: <b>ask total comp + equity refresh</b>. Don't anchor on base.</span>
+                </div>
+                <div class="comp-source">Levels.fyi · Stripe staff band</div>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Draft reply</b></div>
+              <div class="draft-card">
+                <div class="body">Thanks for reaching out. Open to learning more — happy to do a 20-min call this week.
+
+My remote setup is fixed in Mexico City. What's the level band and total comp expectation for this seat?</div>
+                <div class="foot">
+                  <div class="note">Read-only · refine in your client</div>
+                  <button class="copy-btn solid">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+                    Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Mark as replied
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <button class="ghost">Skip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================================== -->
+<!-- 02 · PURSUE (JD PATH, LIVE)                                                    -->
+<!-- ============================================================================== -->
+<section class="screen" data-screen-label="02 Pursue (live)">
+  <div class="screen-label">
+    <span class="num">02 · pursue</span>
+    <h2><em>Pursue.</em></h2>
+    <span class="tag">— JD path, live verdict, no draft reply</span>
+  </div>
+
+  <div class="pair">
+    <div class="desktop-col">
+      <div class="platform-tag"><b>Desktop</b> · labra.app / evaluate / ev_b3f7n9 — live verdict</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app / evaluate / ev_b3f7n9</span>
+        </div>
+        <div class="ev-shell">
+          <div class="ev-appbar">
+            <div class="brand-small">labra<span class="dot">.</span></div>
+            <div class="nav">
+              <a class="on">Evaluate</a><a>Tracker</a><a>Settings</a>
+            </div>
+            <div class="spacer"></div>
+            <div class="userline">
+              <span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out">Sign out</span>
+            </div>
+          </div>
+          <div class="ev-page">
+
+            <div class="v-header">
+              <button class="back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Tracker
+              </button>
+              <div class="spacer"></div>
+              <button class="save">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Save to Tracker
+              </button>
+            </div>
+
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Mercado Libre</span><span class="sep">·</span><span>São Paulo</span><span class="sep">·</span><span>Hybrid 3/2</span><span class="sep">·</span><span>job posting</span>
+              </div>
+              <h2 class="role">Director, Marketplace Operations.</h2>
+              <div class="role-sub">Director <span class="sep">·</span> Public · NASDAQ <span class="sep">·</span> R$1.2M–1.6M base referential <span class="sep">·</span> posted 4d ago</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Pursue.</h1>
+              <p class="reasoning">
+                <span class="lede">Director-level operating role inside a LatAm marketplace at scale</span> — your wheelhouse for seven years. The scope sits adjacent to your current Galgo remit but with category breadth you haven't owned before, mapped to <span class="arch" title="From your profile · Edit in Settings">Archetype 02 · stretch up</span>. Hybrid São Paulo is friction against your stated remote preference, but Brazil sits inside your flagged exception lane.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Gaps</b> — what the posting doesn't say</div>
+              <ul class="gap-list">
+                <li><b>Stock comp structure</b> absent — vest schedule, post-vesting expectations.</li>
+                <li>Reporting line ambiguous — VP Operations or CCO.</li>
+                <li>Relocation support not stated.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b> — reference, not anchor</div>
+              <div class="comp-row state-ok">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Data Q1 2026 · 3 mo old</span>
+                  </div>
+                  <div class="grade-r"><span class="dots">○○○</span>Orientation</div>
+                </div>
+                <div class="comp-range">R$1.2M – 1.6M base + LTI · referential</div>
+                <div class="comp-verdict">
+                  <span class="word">Fits<em>.</em></span>
+                  <span class="gloss">Floor <b>clears</b> by R$100k · LTI undisclosed (upside)</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark" style="left: 25%;">
+                    <span class="lbl">your floor · R$1.30M</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis"><span>R$1.2M</span><span>R$1.6M</span></div>
+                </div>
+                <div class="comp-status">
+                  <span class="glyph">✓ Within range</span>
+                  <span class="txt"><b>Lower third.</b> Floor clears by R$100k; LTI undisclosed in posting, treat as upside.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next move</span>
+                  <span class="txt"><b>Confirm LTI structure pre-intro</b>; negotiate base in MXN-equivalent to hedge BRL/MXN FX before signing.</span>
+                </div>
+                <div class="comp-source">Source · Levels.fyi + Glassdoor BR · Director band · n=58 · Q1 2026</div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Open posting
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+              </button>
+              <button class="ghost" style="color: var(--ink-2);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                Add to application list
+              </button>
+              <div class="spacer"></div>
+              <button class="ghost">Override: Watch</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-col">
+      <div class="platform-tag"><b>Mobile</b> · iPhone 14 Pro</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="right">
+              <span class="signal-bars"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+              <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+              <span class="battery"><span class="fill"></span></span>
+            </div>
+          </div>
+
+          <div class="m-top">
+            <button class="iconbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="spacer"></div>
+            <button class="save">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              Save
+            </button>
+          </div>
+
+          <div class="m-body">
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Mercado Libre</span><span class="sep">·</span><span>São Paulo</span><span class="sep">·</span><span>JD</span>
+              </div>
+              <h2 class="role">Director, Marketplace Operations.</h2>
+              <div class="role-sub">Director <span class="sep">·</span> Public · Hybrid 3/2</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Pursue.</h1>
+              <p class="reasoning">
+                <span class="lede">Director-level ops inside a LatAm marketplace at scale</span> — adjacent to Galgo with category breadth you haven't owned. <span class="arch">Archetype 02 · stretch up</span>. Hybrid São Paulo is friction but Brazil is your flagged exception.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Gaps</b></div>
+              <ul class="gap-list">
+                <li><b>Stock comp structure</b> absent.</li>
+                <li>Reporting line ambiguous.</li>
+                <li>Relocation support not stated.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b></div>
+              <div class="comp-row state-ok">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Q1 '26 · 3 mo</span>
+                  </div>
+                </div>
+                <div class="comp-range">R$1.2M – 1.6M base + LTI</div>
+                <div class="comp-verdict">
+                  <span class="word">Fits<em>.</em></span>
+                  <span class="gloss">Floor <b>clears</b> by R$100k</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark" style="left: 25%;">
+                    <span class="lbl">your floor · R$1.30M</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis"><span>R$1.2M</span><span>R$1.6M</span></div>
+                </div>
+                <div class="comp-status">
+                  <span class="glyph">✓ Within</span>
+                  <span class="txt"><b>Lower third.</b> Clears by R$100k. LTI undisclosed — treat as upside.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next</span>
+                  <span class="txt"><b>Confirm LTI pre-intro</b>; negotiate in MXN-equiv to hedge FX.</span>
+                </div>
+                <div class="comp-source">Levels.fyi + Glassdoor BR</div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Open posting
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+              </button>
+              <button class="ghost">Watch</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================================== -->
+<!-- 03 · WATCH                                                                     -->
+<!-- ============================================================================== -->
+<section class="screen" data-screen-label="03 Watch (live)">
+  <div class="screen-label">
+    <span class="num">03 · watch</span>
+    <h2><em>Watch.</em></h2>
+    <span class="tag">— re-surface signal, save-to-Tracker pre-activated</span>
+  </div>
+
+  <div class="pair">
+    <div class="desktop-col">
+      <div class="platform-tag"><b>Desktop</b> · labra.app / evaluate / ev_c5m1q4 — live verdict</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app / evaluate / ev_c5m1q4</span>
+        </div>
+        <div class="ev-shell">
+          <div class="ev-appbar">
+            <div class="brand-small">labra<span class="dot">.</span></div>
+            <div class="nav"><a class="on">Evaluate</a><a>Tracker</a><a>Settings</a></div>
+            <div class="spacer"></div>
+            <div class="userline"><span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out">Sign out</span></div>
+          </div>
+          <div class="ev-page">
+
+            <div class="v-header">
+              <button class="back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Tracker
+              </button>
+              <div class="spacer"></div>
+              <button class="save on">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Saved to Watch
+              </button>
+            </div>
+
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Bemol Digital</span><span class="sep">·</span><span>Manaus / Remote-BR</span><span class="sep">·</span><span>recruiter DM</span>
+              </div>
+              <h2 class="role">Head of Operations.</h2>
+              <div class="role-sub">Head-of <span class="sep">·</span> Series C <span class="sep">·</span> Comp undisclosed <span class="sep">·</span> posted 2d ago</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Watch.</h1>
+              <p class="reasoning">
+                <span class="lede">Role and lane match your archetype</span> — Head-of-Ops at a LatAm vertical platform, <span class="arch" title="From your profile · Edit in Settings">Archetype 01 · core-fit</span>. But the company sits one stage below your stated preference, and the recruiter has not disclosed comp. Worth tracking — if Bemol announces a Series D or the recruiter circles back with a real comp band, the verdict flips. <span class="lede">Saved to your Watch list.</span>
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Why not Pursue today</b></div>
+              <ul class="gap-list">
+                <li><b>Stage one notch below</b> your stated preference — Series C vs Series D+.</li>
+                <li>Comp band undisclosed in the outreach.</li>
+                <li>Regional remit ambiguous — Brazil-only or LatAm.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Re-surface when</b></div>
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--canvas); border-radius: 11px;">
+                <div style="display: flex; gap: 10px; align-items: center; font-family: 'Albert Sans'; font-size: 14px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Company raises a Series D or signals stage progression.
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; font-family: 'Albert Sans'; font-size: 14px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Recruiter follows up with a comp band.
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; font-family: 'Albert Sans'; font-size: 14px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Peer in your network reports an outcome at this stage / comp shape.
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Open in Tracker
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </button>
+              <div class="spacer"></div>
+              <button class="ghost">Override: Pursue</button>
+              <button class="ghost">Override: Skip</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-col">
+      <div class="platform-tag"><b>Mobile</b> · iPhone 14 Pro</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="right">
+              <span class="signal-bars"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+              <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+              <span class="battery"><span class="fill"></span></span>
+            </div>
+          </div>
+
+          <div class="m-top">
+            <button class="iconbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="spacer"></div>
+            <button class="save on">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              Saved
+            </button>
+          </div>
+
+          <div class="m-body">
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Bemol Digital</span><span class="sep">·</span><span>Manaus</span><span class="sep">·</span><span>DM</span>
+              </div>
+              <h2 class="role">Head of Operations.</h2>
+              <div class="role-sub">Head-of <span class="sep">·</span> Series C <span class="sep">·</span> Comp undisclosed</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Watch.</h1>
+              <p class="reasoning">
+                <span class="lede">Role and lane match</span> — <span class="arch">Archetype 01 · core-fit</span> — but stage and comp aren't there yet. Saved to your Watch list. The verdict flips if Bemol raises or the recruiter discloses a band.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Why not Pursue today</b></div>
+              <ul class="gap-list">
+                <li><b>Stage one notch below</b> — Series C vs D+.</li>
+                <li>Comp band undisclosed.</li>
+                <li>Regional remit ambiguous.</li>
+              </ul>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Re-surface when</b></div>
+              <div style="display: flex; flex-direction: column; gap: 7px; padding: 12px 14px; background: var(--canvas); border-radius: 10px;">
+                <div style="display: flex; gap: 9px; align-items: center; font-family: 'Albert Sans'; font-size: 12.5px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Company raises a Series D.
+                </div>
+                <div style="display: flex; gap: 9px; align-items: center; font-family: 'Albert Sans'; font-size: 12.5px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Recruiter follows up with a comp band.
+                </div>
+                <div style="display: flex; gap: 9px; align-items: center; font-family: 'Albert Sans'; font-size: 12.5px; color: var(--ink-2);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent);"></span>
+                  Peer outcome at this stage.
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Open in Tracker
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              </button>
+              <button class="ghost">Pursue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================================== -->
+<!-- 04 · SKIP                                                                      -->
+<!-- ============================================================================== -->
+<section class="screen" data-screen-label="04 Skip (live)">
+  <div class="screen-label">
+    <span class="num">04 · skip</span>
+    <h2><em>Skip.</em></h2>
+    <span class="tag">— short form, no comp block, archetype mismatch</span>
+  </div>
+
+  <div class="pair">
+    <div class="desktop-col">
+      <div class="platform-tag"><b>Desktop</b> · labra.app / evaluate / ev_d2k9p7 — live verdict</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app / evaluate / ev_d2k9p7</span>
+        </div>
+        <div class="ev-shell" style="min-height: 720px;">
+          <div class="ev-appbar">
+            <div class="brand-small">labra<span class="dot">.</span></div>
+            <div class="nav"><a class="on">Evaluate</a><a>Tracker</a><a>Settings</a></div>
+            <div class="spacer"></div>
+            <div class="userline"><span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out">Sign out</span></div>
+          </div>
+          <div class="ev-page">
+
+            <div class="v-header">
+              <button class="back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Tracker
+              </button>
+              <div class="spacer"></div>
+              <button class="save">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Save to Tracker
+              </button>
+            </div>
+
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Outreach.io</span><span class="sep">·</span><span>Seattle, US-only</span><span class="sep">·</span><span>recruiter DM</span>
+              </div>
+              <h2 class="role">VP, Sales.</h2>
+              <div class="role-sub">VP <span class="sep">·</span> Series B <span class="sep">·</span> US-based — relocation required</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Skip.</h1>
+              <p class="reasoning">
+                <span class="lede">Wrong function and wrong geo.</span> Sales leadership in a US-only Series B is two archetypes removed from your <span class="arch" title="From your profile · Edit in Settings">operator + LatAm</span> lane. Not a fit unless you've changed direction — if so, update your archetypes in Settings and re-evaluate.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Re-evaluate when</b></div>
+              <div class="reeval-row">
+                <div class="toggle"></div>
+                <div>
+                  <b>Re-evaluate this DM</b> if I edit my archetypes or my geo preference in Settings.
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Acknowledge
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <div class="spacer"></div>
+              <button class="ghost">Override: Watch</button>
+              <button class="ghost" style="color: var(--ink-2);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                Edit archetypes
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-col">
+      <div class="platform-tag"><b>Mobile</b> · iPhone 14 Pro</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="right">
+              <span class="signal-bars"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+              <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+              <span class="battery"><span class="fill"></span></span>
+            </div>
+          </div>
+
+          <div class="m-top">
+            <button class="iconbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="spacer"></div>
+            <button class="save">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              Save
+            </button>
+          </div>
+
+          <div class="m-body">
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Outreach.io</span><span class="sep">·</span><span>Seattle</span><span class="sep">·</span><span>DM</span>
+              </div>
+              <h2 class="role">VP, Sales.</h2>
+              <div class="role-sub">VP <span class="sep">·</span> Series B <span class="sep">·</span> US-only</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT</div>
+              <h1 class="label">Skip.</h1>
+              <p class="reasoning">
+                <span class="lede">Wrong function, wrong geo.</span> Sales leadership in a US-only Series B is two archetypes removed from your <span class="arch">operator + LatAm</span> lane.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Re-evaluate when</b></div>
+              <div class="reeval-row">
+                <div class="toggle"></div>
+                <div>
+                  <b>Re-evaluate</b> if I edit my archetypes or geo in Settings.
+                </div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Acknowledge
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <button class="ghost">Watch</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================================== -->
+<!-- 05 · REPORT (revisited Reply, status: in conversation, 4d later)               -->
+<!-- ============================================================================== -->
+<section class="screen" data-screen-label="05 Report (revisited)">
+  <div class="screen-label">
+    <span class="num">05 · report</span>
+    <h2>Same component, <em>revisited</em>.</h2>
+    <span class="tag">— Reply, 4 days later, status: in conversation</span>
+  </div>
+
+  <div class="pair">
+    <div class="desktop-col">
+      <div class="platform-tag"><b>Desktop</b> · labra.app / evaluate / ev_a8j2k1 — revisited (saved state)</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="url">labra.app / evaluate / ev_a8j2k1</span>
+        </div>
+        <div class="ev-shell">
+          <div class="ev-appbar">
+            <div class="brand-small">labra<span class="dot">.</span></div>
+            <div class="nav"><a>Evaluate</a><a class="on">Tracker</a><a>Settings</a></div>
+            <div class="spacer"></div>
+            <div class="userline"><span>nacho@galgo.mx</span><span class="dot-sep">·</span><span class="sign-out">Sign out</span></div>
+          </div>
+          <div class="ev-page">
+
+            <div class="v-header">
+              <button class="back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Tracker
+              </button>
+              <span class="age">Saved · 4 days ago</span>
+              <div class="spacer"></div>
+              <span class="status-pill">In conversation</span>
+              <button class="save on">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Saved
+              </button>
+            </div>
+
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Stripe</span><span class="sep">·</span><span>Mexico City</span><span class="sep">·</span><span>Remote-LatAm</span><span class="sep">·</span><span>recruiter DM · Apr 14</span>
+              </div>
+              <h2 class="role">Staff Product Engineer.</h2>
+              <div class="role-sub">Staff IC <span class="sep">·</span> Series H+ <span class="sep">·</span> $280k–$340k referential</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT · ORIGINAL READ</div>
+              <h1 class="label">Reply.</h1>
+              <p class="reasoning">
+                <span class="lede">This is a tight archetype match.</span> Staff IC at late-stage fintech with a remote-LatAm policy — mapped to <span class="arch">Archetype 02 · stretch up</span>. The recruiter was asking the right opening questions and named a real hub.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>What you sent</b></div>
+              <div class="sent-line">
+                <div class="check">✓</div>
+                <span class="label">Replied</span>
+                <span style="opacity: .55;">· Apr 14, 10:32 — 4 days ago</span>
+                <span class="view">View draft</span>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Status</b> — where this stands</div>
+              <div class="status-block">
+                <div class="status-pills">
+                  <button class="status-pill"><span class="dotmark"></span>Evaluated</button>
+                  <button class="status-pill"><span class="dotmark"></span>Applied</button>
+                  <button class="status-pill on"><span class="dotmark"></span>In conversation</button>
+                  <button class="status-pill"><span class="dotmark"></span>Interviewing</button>
+                  <button class="status-pill"><span class="dotmark"></span>Offer</button>
+                  <button class="status-pill"><span class="dotmark"></span>Declined</button>
+                  <button class="status-pill"><span class="dotmark"></span>Ghosted</button>
+                  <button class="status-pill"><span class="dotmark"></span>Passed</button>
+                </div>
+                <p class="status-prompt">Anything I should know? <span style="font-style: normal; font-family: 'Albert Sans'; font-size: 14px; color: var(--ink-3);">Next call, signal from the recruiter, gut read.</span></p>
+                <div style="background: var(--canvas); border: 0.75px solid var(--line); border-radius: 11px; padding: 12px 14px; font-family: 'Albert Sans'; font-size: 13.5px; color: var(--ink-3); font-style: italic; min-height: 60px;">
+                  e.g. "Recruiter scheduled a 45-min with the hiring manager next Tuesday. Pushed on total comp; got $310 base + 0.04% equity. Below my line, but the team is the right shape."
+                </div>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b> — reference, plus what you've learned</div>
+              <div class="comp-row state-positive">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name" title="Orientation: public sources + segment context. Not yet calibrated against peer outcomes.">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Data Aug 2025 · 9 mo old</span>
+                  </div>
+                  <div class="grade-r"><span class="dots">○○○</span>Orientation</div>
+                </div>
+                <div class="comp-range">$280k – $340k total · referential</div>
+                <div class="comp-verdict">
+                  <span class="word">Strong<em>.</em></span>
+                  <span class="gloss">Quote <b>$20k above floor</b> · mid-band · equity untested</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark outline below" style="left: 17%;">
+                    <span class="dot"></span>
+                    <span class="lbl">your floor · $290k</span>
+                  </div>
+                  <div class="mark" style="left: 50%;">
+                    <span class="lbl">recruiter quote · $310k base</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis" style="top: 28px;"><span>$280k</span><span>$340k</span></div>
+                </div>
+                <div class="comp-status" style="margin-top: 14px;">
+                  <span class="glyph">→ Mid-band</span>
+                  <span class="txt"><b>Recruiter quoted $310k base + 0.04% equity</b> on Apr 16. Base sits at the band's midpoint, $20k above your floor. Equity is untested vs band assumptions — Levels.fyi numbers are total comp, not base-only.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next move</span>
+                  <span class="txt"><b>Counter at $325k base — band supports it.</b> 0.04% equity is light for Staff at Series H+; ask for the refresh policy and grant size in dollars, not percent.</span>
+                </div>
+                <div class="comp-source">Source · Levels.fyi · Stripe Staff IC · n=247 offers · 2024–25 <span style="opacity:.55; padding: 0 6px;">·</span> Quote source · recruiter DM, Apr 16</div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">
+                Save status
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <div class="spacer"></div>
+              <button class="ghost">Re-evaluate with current archetype</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-col">
+      <div class="platform-tag"><b>Mobile</b> · iPhone 14 Pro</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="right">
+              <span class="signal-bars"><span class="bar" style="height:4px;"></span><span class="bar" style="height:6px;"></span><span class="bar" style="height:8px;"></span><span class="bar" style="height:10px;"></span></span>
+              <span style="font-family: 'Albert Sans'; font-weight: 600; font-size: 12px;">5G</span>
+              <span class="battery"><span class="fill"></span></span>
+            </div>
+          </div>
+
+          <div class="m-top">
+            <button class="iconbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <span class="age">Saved · 4d</span>
+            <div class="spacer"></div>
+            <span class="status-pill">In conversation</span>
+          </div>
+
+          <div class="m-body">
+            <div class="v-summary">
+              <div class="meta-line">
+                <span>Stripe</span><span class="sep">·</span><span>Mexico City</span><span class="sep">·</span><span>Apr 14</span>
+              </div>
+              <h2 class="role">Staff Product Engineer.</h2>
+              <div class="role-sub">Staff IC <span class="sep">·</span> Series H+ <span class="sep">·</span> $280–$340k ref</div>
+            </div>
+
+            <div class="v-verdict">
+              <div class="kicker-label">★ VERDICT · ORIGINAL READ</div>
+              <h1 class="label">Reply.</h1>
+              <p class="reasoning">
+                <span class="lede">Tight archetype match.</span> Staff IC at late-stage fintech with remote-LatAm — <span class="arch">Archetype 02 · stretch up</span>.
+              </p>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>What you sent</b></div>
+              <div class="sent-line">
+                <div class="check">✓</div>
+                <span class="label">Replied</span>
+                <span style="opacity: .55;">· Apr 14</span>
+                <span class="view">View</span>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Status</b></div>
+              <div class="status-block">
+                <div class="status-pills">
+                  <button class="status-pill"><span class="dotmark"></span>Applied</button>
+                  <button class="status-pill on"><span class="dotmark"></span>In conversation</button>
+                  <button class="status-pill"><span class="dotmark"></span>Interviewing</button>
+                  <button class="status-pill"><span class="dotmark"></span>Offer</button>
+                  <button class="status-pill"><span class="dotmark"></span>Declined</button>
+                  <button class="status-pill"><span class="dotmark"></span>Ghosted</button>
+                  <button class="status-pill"><span class="dotmark"></span>Passed</button>
+                </div>
+                <p class="status-prompt">Anything I should know?</p>
+                <div style="background: var(--canvas); border: 0.75px solid var(--line); border-radius: 10px; padding: 11px 12px; font-family: 'Albert Sans'; font-size: 12.5px; color: var(--ink-3); font-style: italic; min-height: 52px;">
+                  e.g. "45-min with hiring manager next Tuesday. Got $310 base + 0.04% equity."
+                </div>
+              </div>
+            </div>
+
+            <div class="v-section">
+              <div class="skicker">★ <b>Comp</b></div>
+              <div class="comp-row state-positive">
+                <div class="comp-head">
+                  <div class="comp-kicker">
+                    <span>Comp</span><span class="sep">·</span>
+                    <span class="grade-name">Orientation</span><span class="sep">·</span>
+                    <span class="vintage">Aug '25 · 9 mo</span>
+                  </div>
+                </div>
+                <div class="comp-range">$280k – $340k · referential</div>
+                <div class="comp-verdict">
+                  <span class="word">Strong<em>.</em></span>
+                  <span class="gloss">Quote <b>+$20k</b> over floor · mid-band</span>
+                </div>
+                <div class="comp-track">
+                  <div class="track-bar"><div class="track-fill"></div></div>
+                  <div class="mark outline below" style="left: 17%;">
+                    <span class="dot"></span>
+                    <span class="lbl">floor · $290k</span>
+                  </div>
+                  <div class="mark" style="left: 50%;">
+                    <span class="lbl">quote · $310k base</span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="track-axis" style="top: 26px;"><span>$280k</span><span>$340k</span></div>
+                </div>
+                <div class="comp-status" style="margin-top: 12px;">
+                  <span class="glyph">→ Mid-band</span>
+                  <span class="txt"><b>Quoted $310k base + 0.04% equity</b> Apr 16. Base mid-band, equity untested.</span>
+                </div>
+                <div class="comp-action">
+                  <span class="glyph">→ Next</span>
+                  <span class="txt"><b>Counter at $325k.</b> Ask equity refresh + grant in $.</span>
+                </div>
+                <div class="comp-source">Levels.fyi · Stripe staff band</div>
+              </div>
+            </div>
+
+            <div class="v-actions">
+              <button class="primary">Save status
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <button class="ghost">Re-evaluate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================================== -->
+<!-- INFO STRIPS — decisions log                                                    -->
+<!-- ============================================================================== -->
+<div class="info-strip">
+  <div class="label-x">★ Hierarchy of the screen</div>
+  <div class="body-x">
+    Header is utility — back-to-Tracker and the save action. <b>Summary header</b> uses typography alone to ground context (no card, no border). The <b>verdict label</b> is the editorial moment: Fraunces ~96px on desktop, ~60px on mobile, with a terminal period that mirrors "The read." from the input screen. <b>Reasoning</b> always sits beneath the label and is sized to put verdict + first 1–2 lines above the fold on a 390 px viewport. Everything else scrolls.
+  </div>
+</div>
+
+<div class="info-strip">
+  <div class="label-x">★ Verdict tiers, structurally</div>
+  <div class="body-x">
+    <b>Reply</b> (DM, archetype match) — Verdict → Reasoning → Gaps → Comp → Draft reply → Mark-as-replied. <b>Pursue</b> (JD/URL, archetype match) — same shape minus the draft reply, primary CTA opens the posting. <b>Watch</b> (re-surface signal) — pre-saved to Tracker, no comp emphasis, "Why not Pursue today" replaces Gaps, "Re-surface when" lists the unlocking conditions, schema-committed to peer-data / event-based triggers. <b>Skip</b> — short. Verdict + 2-line reasoning + a re-evaluate toggle pointing at Settings → Archetypes. No comp block, no gaps section.
+  </div>
+</div>
+
+<div class="info-strip">
+  <div class="label-x">★ Live vs revisited</div>
+  <div class="body-x">
+    Same component, same route. The differentiator is a thin band in the header — <b>"Saved · 4 days ago"</b> mono kicker on the left, a dark mono status pill on the right ("In conversation"), and the save button locks to "Saved." The verdict kicker label becomes <b>"VERDICT · ORIGINAL READ"</b> to signal time. <b>Draft reply</b> on a Reply verdict collapses to a one-line confirmation with a "View draft" link — the draft is never gone, just demoted. A new <b>Status</b> section appears between the sent line and Comp, holding the pipeline pills and a free-text "anything I should know" prompt that feeds the moat-relevant <span class="mono">outcomes</span> + <span class="mono">interactions</span> tables.
+  </div>
+</div>
+
+<div class="info-strip">
+  <div class="label-x">★ Comp row · verdict word + state color</div>
+  <div class="body-x">
+    <b>One-glance read.</b> The strip leads with a Fraunces verdict word — <span class="mono">Fits.</span> / <span class="mono">Strong.</span> / <span class="mono">Tight.</span> / <span class="mono">Below.</span> / <span class="mono">Reach.</span> — terminal period, color-keyed to state. Same editorial moment as the main verdict label, smaller scale. <b>State carries through the whole strip</b> via locally-scoped <span class="mono">--signal</span> tokens — border-left rule (5px), background tint, track color, dot fill, status glyph. Amber is reserved for actual concern (below floor, undisclosed, stale > 6 months). The mono gloss next to the verdict word gives the headline number (<span class="mono">Floor clears by $10k</span> / <span class="mono">Quote +$20k over floor</span>). Below the track, the two action lines stay: status (where you are) and next move (what to do).
+  </div>
+</div>
+
+<div class="info-strip">
+  <div class="label-x">★ Open & deferred</div>
+  <div class="body-x">
+    <b>Reasoning length.</b> 4 sentences feels right on a Reply / Pursue at 17px. Watch and Skip can run shorter. We may want a max-character constraint downstream so Sonnet can't sprawl. <br/>
+    <b>Animation between live and revisited.</b> Not shown in this static frame. The live verdict label reveals after the six-row processing collapses; on revisit, no animation — the page is just there. The frame says "VERDICT · ORIGINAL READ" but doesn't show motion. <br/>
+    <b>Status taxonomy on Report</b> uses the previous session's draft list (<span class="mono">evaluated / applied / in_conversation / interviewing / offer / declined / ghosted / passed</span>) — confirm before Tracker session. <br/>
+    <b>Navigation pattern</b> still placeholder. Top-bar nav assumed on desktop, hamburger or tab bar TBD on mobile — owned by the navigation review session.
+  </div>
+</div>
+
+  </div>
+
+<script>
+  function setMode(m) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add('theme-' + m);
+    document.getElementById('mode-light').classList.toggle('on', m === 'light');
+    document.getElementById('mode-dark').classList.toggle('on', m === 'dark');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LeadMe — Hi-fi v0.1 · Discover · Home · Tracker · Evaluate · Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Albert+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ */
+  /* TOKENS                                                         */
+  /* ============================================================ */
+  :root, .theme-light {
+    --bg:        #f6f8f8;
+    --surface:   #ffffff;
+    --surface-2: #fafcfc;
+    --canvas:    #f0f4f4;
+    --ink:       #0a1f24;
+    --ink-2:     #455258;
+    --ink-3:     #889399;
+    --line:      #e2e7e8;
+    --line-2:    #eef2f2;
+    --track:     #edf1f1;
+    --accent:    #0d7c89;
+    --accent-h:  #0a6973;
+    --accent-soft: #d6eef0;
+    --accent-on: #ffffff;
+    --signal:      #c97b0e;
+    --signal-soft: #fbecd6;
+    --signal-on:   #ffffff;
+    --shadow:    transparent;
+  }
+  .theme-dark {
+    --bg:        #0a0e14;
+    --surface:   #1a2230;
+    --surface-2: #161d27;
+    --canvas:    #0f1620;
+    --ink:       #f4f6fa;
+    --ink-2:     #c4cad6;
+    --ink-3:     #8893a3;
+    --line:      #2a3543;
+    --line-2:    #1d2630;
+    --track:     #2a3543;
+    --accent:    #5cb1ff;
+    --accent-h:  #7ec0ff;
+    --accent-soft: #1a2d44;
+    --accent-on: #06101c;
+    --signal:      #ecae4d;
+    --signal-soft: #382b16;
+    --signal-on:   #0a0e14;
+  }
+  .theme-dark .body-copy { font-weight: 450; }
+  .theme-dark .pick-meta,
+  .theme-dark .stat-sub,
+  .theme-dark .pick-role { color: var(--ink); }
+  .theme-dark .editor-note p { color: var(--ink); }
+  .theme-dark .editor-note { background: #16283a; }
+  .theme-dark .ev-textarea { color: var(--ink-2); }
+  .theme-dark .ev-textarea::placeholder { color: var(--ink-3); }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Albert Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s ease, color .25s ease;
+  }
+
+  /* ============================================================ */
+  /* TOP CHROME                                                     */
+  /* ============================================================ */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .brand {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 26px; line-height: 1; letter-spacing: -0.6px;
+    color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); font-style: italic; }
+  .top nav {
+    display: flex; gap: 4px;
+  }
+  .top nav a {
+    text-decoration: none;
+    padding: 6px 14px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 500; font-size: 13.5px;
+    color: var(--ink-2); cursor: pointer;
+  }
+  .top nav a:hover { background: var(--canvas); color: var(--ink); }
+  .top nav a.active { background: var(--ink); color: var(--bg); }
+  .top .spacer { flex: 1; }
+  .top .actions { display: flex; gap: 8px; align-items: center; }
+  .mode-toggle {
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 5px; border-radius: 999px;
+    display: inline-flex; gap: 2px;
+  }
+  .mode-toggle button {
+    border: 0; background: transparent;
+    padding: 4px 10px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-size: 12px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .mode-toggle button.on { background: var(--ink); color: var(--bg); }
+  .top .evaluate-cta {
+    background: var(--accent); color: var(--accent-on); border: 0;
+    padding: 8px 16px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 600; font-size: 13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .top .evaluate-cta::before { content: "✦"; font-size: 11px; }
+
+  /* ============================================================ */
+  /* PAGE LAYOUT                                                    */
+  /* ============================================================ */
+  .stage {
+    max-width: 1480px; margin: 0 auto;
+    padding: 36px 32px 80px;
+  }
+  .screen {
+    margin-bottom: 64px;
+    scroll-margin-top: 80px;
+  }
+  .screen-label {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+  .screen-label .num {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+    padding: 4px 10px; border-radius: 999px; background: var(--canvas);
+  }
+  .screen-label h2 {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 30px; line-height: 1; margin: 0; letter-spacing: -0.8px;
+    color: var(--ink);
+  }
+  .screen-label h2 em { font-style: italic; }
+  .screen-label .tag {
+    font-family: "Albert Sans", sans-serif; font-size: 13px; color: var(--ink-3);
+  }
+
+  /* "browser" frame — minimal */
+  .frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .frame-bar {
+    height: 32px; background: var(--canvas);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+  }
+  .frame-bar .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--line);
+  }
+  .frame-bar .url {
+    margin-left: 8px; font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.3px;
+  }
+  .frame-body { display: flex; min-height: 700px; }
+
+  /* product sidebar */
+  .product-side {
+    width: 220px; flex-shrink: 0;
+    background: var(--canvas);
+    border-right: 1px solid var(--line);
+    padding: 22px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .product-side .brand-small {
+    font-family: "Fraunces", serif; font-weight: 500;
+    font-size: 22px; line-height: 1; margin-bottom: 18px;
+    padding: 0 8px;
+  }
+  .product-side .brand-small .dot { color: var(--accent); }
+  .product-side .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px;
+    font-family: "Albert Sans", sans-serif; font-size: 13.5px; font-weight: 500;
+    color: var(--ink-2); cursor: pointer;
+  }
+  .product-side .nav-item:hover { background: var(--surface); color: var(--ink); }
+  .product-side .nav-item.active { background: var(--ink); color: var(--bg); }
+  .product-side .nav-item .badge {
+    margin-left: auto; padding: 0 7px; border-radius: 999px;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 500;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .product-side .nav-item.active .badge { background: var(--bg); color: var(--ink); }
+  .product-side .nav-cta {
+    margin-top: 12px; margin-bottom: 8px;
+    background: var(--accent); color: var(--accent-on);
+    border: 0; padding: 10px 14px; border-radius: 10px;
+    font-family: "Albert Sans", sans-serif; font-weight: 600; font-size: 13px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .product-side .nav-cta::before { content: "✦"; font-size: 11px; }
+  .product-side .sep { flex: 1; }
+  .product-side .user {
+    padding: 8px 10px; display: flex; align-items: center; gap: 10px;
+    border-top: 1px solid var(--line); padding-top: 14px;
+  }
+  .product-side .user .avatar-sq {
+    width: 30px; height: 30px; border-radius: 10px;
+    background: var(--signal-soft); color: var(--signal);
+    font-family: "Albert Sans"; font-weight: 600; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .product-side .user .ux { display: flex; flex-direction: column; }
+  .product-side .user .ux b { font-family: "Albert Sans"; font-weight: 600; font-size: 13px; color: var(--ink); }
+  .product-side .user .ux span { font-family: "Geist Mono"; font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.6px; }
+
+  /* page content */
+  .main { flex: 1; padding: 32px 36px; overflow: auto; min-width: 0; background: var(--surface-2); }
+  .theme-dark .main { background: var(--canvas); }
+
+  /* ============================================================ */
+  /* PRIMITIVES                                                     */
+  /* ============================================================ */
+  .row { display: flex; align-items: center; gap: 12px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .grow { flex: 1; min-width: 0; }
+
+  .kicker {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .h-editorial {
+    font-family: "Fraunces", serif; font-weight: 400;
+    line-height: 1.05; letter-spacing: -0.5px;
+    color: var(--ink); margin: 0;
+  }
+  .h-editorial em { font-style: italic; }
+  .theme-dark .h-editorial em { color: #c8cfd9; }
+  .h-product {
+    font-family: "Albert Sans", sans-serif; font-weight: 600;
+    line-height: 1.1; letter-spacing: -0.4px; color: var(--ink); margin: 0;
+  }
+  .body-copy {
+    font-family: "Albert Sans", sans-serif; font-size: 14.5px;
+    line-height: 1.55; color: var(--ink-2);
+  }
+  .body-copy b { color: var(--ink); font-weight: 600; }
+  .mono { font-family: "Geist Mono", monospace; letter-spacing: 0.4px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .card.canvas { background: var(--canvas); }
+  .card.tight { padding: 14px 16px; gap: 10px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 11px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 500; font-size: 12px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2);
+  }
+  .pill.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .pill.signal { background: var(--signal); color: var(--signal-on); border-color: transparent; }
+  .pill.signal-soft { color: var(--signal); border-color: var(--signal); background: transparent; }
+  .pill.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .pill.lg { padding: 5px 14px; font-size: 13px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 999px;
+    font-family: "Albert Sans", sans-serif; font-weight: 500; font-size: 13px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .btn:hover { background: var(--canvas); }
+  .btn.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .btn.primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+  .btn.ghost:hover { background: var(--canvas); }
+  .btn.signal { background: var(--signal); color: var(--signal-on); border-color: var(--signal); }
+  .btn.sm { padding: 6px 12px; font-size: 12px; }
+  .btn.lg { padding: 11px 22px; font-size: 14px; font-weight: 600; }
+
+  .avatar-co {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .score {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--accent); color: var(--accent-on);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 700; font-size: 20px;
+    flex-shrink: 0;
+  }
+  .score.sm { width: 44px; height: 44px; font-size: 16px; border-radius: 10px; }
+  .score.flag { background: var(--signal); color: var(--signal-on); }
+  .score.muted { background: var(--canvas); color: var(--ink-2); }
+
+  .divider { height: 1px; background: var(--line); margin: 4px 0; }
+  .divider.dashed { background: transparent; border-top: 1px dashed var(--line); }
+
+  /* salary band */
+  .salary {
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; background: var(--canvas);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .meter {
+    position: relative; height: 10px; border-radius: 5px;
+    background: var(--track);
+  }
+  .meter .band {
+    position: absolute; top: 0; height: 100%; border-radius: 5px;
+    background: var(--accent); opacity: .35;
+  }
+  .meter .pin {
+    position: absolute; top: -3px; width: 2px; height: 16px;
+    background: var(--signal);
+  }
+  .meter .pin::after {
+    content: ''; position: absolute; top: -3px; left: -3px;
+    width: 8px; height: 8px; background: var(--signal); border-radius: 50%;
+  }
+
+  /* fit bars */
+  .fits { display: flex; flex-direction: column; gap: 7px; }
+  .fit-bar { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+  .fit-bar .label-bar {
+    width: 70px; font-family: "Geist Mono", monospace; font-size: 10.5px;
+    color: var(--ink-3); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .fit-bar .track {
+    flex: 1; height: 6px; border-radius: 3px; background: var(--track);
+    position: relative; overflow: hidden;
+  }
+  .fit-bar .fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--accent); border-radius: 3px;
+    transition: width 1.2s cubic-bezier(.2,.7,.2,1);
+  }
+  .fit-bar .fill.soft { background: var(--accent); opacity: .55; }
+  .fit-bar .fill.signal { background: var(--signal); }
+  .fit-bar .grade {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink); width: 22px; text-align: right;
+  }
+
+  /* mode toggle inline */
+  .seg-toggle {
+    display: inline-flex; background: var(--canvas);
+    border-radius: 999px; padding: 3px; gap: 2px;
+    border: 1px solid var(--line);
+  }
+  .seg-toggle .seg {
+    padding: 5px 14px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 12.5px;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .seg-toggle .seg.on { background: var(--ink); color: var(--bg); }
+
+  /* ============================================================ */
+  /* DISCOVER SCREEN                                                */
+  /* ============================================================ */
+  .discover-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+    margin-bottom: 24px;
+  }
+  .discover-head .h-editorial { font-size: 48px; }
+  .discover-head .meta-row {
+    display: flex; gap: 14px; align-items: center;
+    color: var(--ink-3); font-size: 12.5px;
+    margin-bottom: 6px;
+  }
+
+  .editor-note {
+    background: var(--accent-soft);
+    border-radius: 12px; padding: 18px 22px;
+    margin-bottom: 24px;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .theme-dark .editor-note { background: var(--accent-soft); }
+  .editor-note::before {
+    content: "Editor's note";
+    position: absolute; top: -10px; left: 18px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+    background: var(--surface-2); padding: 2px 10px; border-radius: 999px;
+  }
+  .editor-note p {
+    font-family: "Fraunces", serif; font-size: 17px; line-height: 1.5;
+    color: var(--ink); margin: 0; font-weight: 400;
+  }
+  .editor-note p em { font-style: italic; }
+  .editor-note p b { font-weight: 500; }
+
+  .pick {
+    border-bottom: 1px solid var(--line);
+    padding: 26px 0;
+    display: grid; grid-template-columns: 1fr 320px; gap: 28px;
+  }
+  .pick:first-of-type { padding-top: 0; }
+  .pick:last-of-type { border-bottom: none; }
+
+  .pick .pick-head { margin-bottom: 8px; }
+  .pick .pick-title {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  }
+  .pick .pick-co {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 28px; line-height: 1.1; color: var(--ink); letter-spacing: -0.4px;
+  }
+  .pick .pick-co em { font-style: italic; }
+  .pick .pick-role {
+    font-family: "Albert Sans"; font-weight: 600;
+    font-size: 16px; color: var(--ink);
+  }
+  .pick .pick-meta {
+    font-family: "Albert Sans"; font-size: 13px;
+    color: var(--ink-2); margin-top: 4px;
+  }
+  .pick .pick-body { margin-top: 12px; }
+  .pick .pick-actions { margin-top: 14px; display: flex; gap: 8px; align-items: center; }
+
+  /* ============================================================ */
+  /* HOME SCREEN                                                    */
+  /* ============================================================ */
+  .home-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 14px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat-card.signal { background: var(--signal-soft); border-color: var(--signal); }
+  .stat-card .stat-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .stat-card .stat-num {
+    font-family: "Fraunces", serif; font-weight: 400;
+    font-size: 34px; line-height: 1; color: var(--ink); letter-spacing: -0.5px;
+  }
+  .stat-card .stat-num em { font-style: italic; font-size: 28px; }
+  .stat-card .stat-sub {
+    font-family: "Albert Sans"; font-size: 12.5px; color: var(--ink-2);
+  }
+  .stat-card.signal .stat-num { color: var(--signal); }
+  .stat-card.signal .stat-label { color: var(--signal); }
+
+  .home-two {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin-bottom: 24px;
+  }
+  .focus-card { background: var(--accent-soft); border: 1px solid transparent; border-radius: 10px; padding: 18px 20px; }
+  .focus-card .focus-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .focus-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,.08);
+  }
+  .theme-dark .focus-row { border-color: rgba(255,255,255,.08); }
+  .focus-row:last-child { border-bottom: none; }
+  .focus-num {
+    width: 22px; height: 22px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-on);
+    font-family: "Geist Mono"; font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* territory */
+  .territory {
+    position: relative;
+    height: 380px;
+    background: var(--canvas);
+    border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden;
+  }
+  .territory svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .territory .node {
+    position: absolute; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Albert Sans"; font-weight: 600; flex-direction: column;
+    line-height: 1;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink);
+    text-align: center;
+  }
+  .territory .node.strong { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .territory .node.you {
+    background: var(--ink); color: var(--bg); border: 2px solid var(--ink);
+    width: 64px; height: 64px; font-size: 13px;
+  }
+  .territory .node-name { font-size: 11px; }
+  .territory .node-score { font-family: "Geist Mono"; font-size: 10px; opacity: .85; margin-top: 2px; }
+
+  /* ============================================================ */
+  /* TRACKER                                                        */
+  /* ============================================================ */
+  .tracker-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filters .pill { cursor: pointer; }
+  .filters .pill.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .tracker-table {
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    background: var(--surface);
+  }
+  .tracker-row {
+    display: grid; grid-template-columns: 44px 1.8fr 1fr 100px 100px 30px;
+    gap: 12px; padding: 14px 18px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    font-family: "Albert Sans";
+  }
+  .tracker-row:last-child { border-bottom: none; }
+  .tracker-row.head {
+    background: var(--canvas);
+    font-family: "Geist Mono"; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .tracker-row .role { font-size: 14px; color: var(--ink); }
+  .tracker-row .role b { font-weight: 600; }
+  .tracker-row .role span { color: var(--ink-2); }
+  .tracker-row .status { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ink-2);
+  }
+  .status-dot.applied { background: var(--signal); }
+  .status-dot.interview { background: var(--accent); }
+  .status-dot.offer { background: var(--ink); }
+  .status-dot.draft { background: var(--ink-3); }
+  .tracker-row .when { font-family: "Geist Mono"; font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ============================================================ */
+  /* EVALUATE (interactive)                                         */
+  /* ============================================================ */
+  .ev-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 24px; margin-bottom: 24px;
+  }
+  .ev-head .ev-title { font-size: 44px; }
+  .ev-input-modes {
+    display: inline-flex; gap: 6px; flex-wrap: wrap;
+  }
+  .ev-input-modes .pill { cursor: pointer; }
+
+  .ev-flow {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    align-items: flex-start;
+  }
+
+  /* input pane */
+  .ev-input-pane {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px;
+    min-height: 480px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .ev-textarea {
+    flex: 1; min-height: 220px;
+    border: 1px dashed var(--line); border-radius: 10px;
+    background: var(--canvas); padding: 16px 18px;
+    font-family: "Albert Sans"; font-size: 14px; line-height: 1.6;
+    color: var(--ink-2); resize: none;
+    width: 100%;
+    transition: border-color .2s;
+  }
+  .ev-textarea::placeholder { color: var(--ink-3); }
+  .ev-textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); color: var(--ink); }
+  .ev-textarea.filled { background: var(--surface); border-style: solid; color: var(--ink); border-color: var(--line); }
+  .ev-meta {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .ev-extract-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 999px;
+    font-family: "Albert Sans"; font-weight: 500; font-size: 11.5px;
+    background: var(--accent-soft); color: var(--accent);
+    opacity: 0; transform: translateY(4px);
+    transition: all .25s ease;
+  }
+  .ev-extract-pill.show { opacity: 1; transform: translateY(0); }
+  .ev-extract-pill::before { content: "✓"; }
+
+  /* output pane */
+  .ev-output {
+    min-height: 480px;
+    border: 1px solid var(--line); border-radius: 12px;
+    background: var(--surface); padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .ev-empty {
+    flex: 1; display: flex; flex-direction: column; gap: 10px;
+    align-items: center; justify-content: center; text-align: center;
+    color: var(--ink-3);
+  }
+  .ev-empty-glyph {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: var(--canvas); border: 1px dashed var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif; font-size: 28px; font-style: italic;
+    color: var(--ink-3); margin-bottom: 8px;
+  }
+  .ev-empty p {
+    font-family: "Albert Sans"; font-size: 14px; margin: 0; max-width: 280px; line-height: 1.55;
+  }
+  .ev-processing { display: none; flex-direction: column; gap: 16px; flex: 1; }
+  .ev-processing.show { display: flex; }
+  .ev-processing-row {
+    display: flex; gap: 10px; align-items: center;
+    opacity: 0; transform: translateX(-6px);
+    transition: all .3s ease;
+    font-size: 13.5px; color: var(--ink-2);
+  }
+  .ev-processing-row.show { opacity: 1; transform: translateX(0); }
+  .ev-processing-row .check {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-on);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .ev-spin {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    animation: spin .8s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ev-verdict { display: none; flex-direction: column; gap: 18px; }
+  .ev-verdict.show { display: flex; animation: fadein .35s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ============================================================ */
+  /* ONBOARDING                                                     */
+  /* ============================================================ */
+  .ob-stage {
+    display: flex; flex-direction: column;
+  }
+  .ob-progress { display: flex; gap: 6px; margin-bottom: 16px; }
+  .ob-progress .seg { flex: 1; height: 3px; border-radius: 2px; background: var(--track); }
+  .ob-progress .seg.done { background: var(--accent); }
+  .ob-progress .seg.now { background: var(--accent); }
+
+  .ob-headline { font-family: "Fraunces", serif; font-weight: 400; font-size: 36px; line-height: 1.1; color: var(--ink); letter-spacing: -0.6px; margin: 0 0 6px; }
+  .ob-headline em { font-style: italic; }
+  .ob-sub { font-family: "Albert Sans"; font-size: 14px; color: var(--ink-2); margin-bottom: 24px; }
+
+  .ob-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+  .ob-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ob-card .ob-label {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3);
+  }
+  .ob-card .ob-line {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0; font-size: 13.5px; color: var(--ink-2);
+  }
+  .ob-card .ob-line:not(:last-child) { border-bottom: 1px dashed var(--line); }
+  .ob-card .ob-line b { color: var(--ink); font-weight: 600; }
+  .ob-signal-card {
+    background: var(--signal-soft); border: 1px solid var(--signal);
+    border-radius: 10px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .ob-signal-card .label-x {
+    font-family: "Geist Mono"; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--signal);
+  }
+  .ob-signal-card .ask {
+    font-family: "Albert Sans"; font-size: 13.5px; color: var(--ink); display: flex; gap: 10px; align-items: center;
+  }
+  .ob-signal-card .ask b { font-weight: 600; }
+
+  /* ============================================================ */
+  /* DETAILS                                                        */
+  /* ============================================================ */
+  .footer-note {
+    font-family: "Geist Mono"; font-size: 10.5px; letter-spacing: 0.8px;
+    color: var(--ink-3); text-transform: uppercase; padding: 24px 0;
+    text-align: center;
+  }
+
+  /* hide product sidebar on mobile for sanity */
+  @media (max-width: 920px) {
+    .product-side { display: none; }
+    .frame-body { min-height: auto; }
+    .home-grid { grid-template-columns: 1fr 1fr; }
+    .home-two { grid-template-columns: 1fr; }
+    .pick { grid-template-columns: 1fr; }
+    .ev-flow { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="theme-light">
+
+  <!-- TOP CHROME -->
+  <div class="top">
+    <div class="brand">leadme<span class="dot">.</span></div>
+    <nav>
+      <a href="#discover" class="active">Discover</a>
+      <a href="#home">Home</a>
+      <a href="#tracker">Tracker</a>
+      <a href="#evaluate">Evaluate</a>
+      <a href="#onboarding">Onboarding</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actions">
+      <div class="mode-toggle">
+        <button id="mode-light" class="on" onclick="setMode('light')">☼ Light</button>
+        <button id="mode-dark" onclick="setMode('dark')">☾ Dark</button>
+      </div>
+      <button class="evaluate-cta" onclick="document.getElementById('evaluate').scrollIntoView({behavior:'smooth', block:'start'})">Evaluate</button>
+    </div>
+  </div>
+
+  <div class="stage">
+
+    <!-- ============================================================ -->
+    <!-- DISCOVER                                                       -->
+    <!-- ============================================================ -->
+    <section class="screen" id="discover">
+      <div class="screen-label">
+        <span class="num">01 · core</span>
+        <h2>Discover</h2>
+        <span class="tag">— today's brief, daily value delivery</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">leadme.app / discover / 2026-05-14</span>
+        </div>
+        <div class="frame-body">
+
+          <!-- Product sidebar -->
+          <aside class="product-side">
+            <div class="brand-small">leadme<span class="dot">.</span></div>
+            <div class="nav-item active">Discover<span class="badge">7</span></div>
+            <div class="nav-item">Home</div>
+            <div class="nav-item">Tracker<span class="badge">8</span></div>
+            <div class="nav-item">Tailor</div>
+            <div class="nav-item">Prep</div>
+            <div class="nav-item" style="color: var(--ink-3);">Network</div>
+            <div class="nav-item">Settings</div>
+            <button class="nav-cta">Evaluate</button>
+            <div class="sep"></div>
+            <div class="user">
+              <div class="avatar-sq">NL</div>
+              <div class="ux"><b>Nacho L.</b><span>Leverage · MX</span></div>
+            </div>
+          </aside>
+
+          <!-- Main -->
+          <div class="main">
+            <div class="discover-head">
+              <div>
+                <div class="meta-row">
+                  <span class="mono" style="color: var(--ink-3); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;">Issue №14 · Thursday May 14 · CDMX</span>
+                  <span class="pill">Fresh · scanned 4h ago</span>
+                </div>
+                <h1 class="h-editorial">Today's <em>brief</em>.</h1>
+              </div>
+              <div class="seg-toggle">
+                <div class="seg">Need</div>
+                <div class="seg on">Leverage</div>
+                <div class="seg">Open</div>
+              </div>
+            </div>
+
+            <div class="editor-note">
+              <p>Tight slate today. <b>Kavak</b> just opened a Director of Operations seat that matches your scope at Clip almost <em>line-for-line</em>. <b>VTEX</b> is hiring a Head of LatAm Ops — regional, not just MX. I quieted 18 listings — mostly Sr IC and one recruiter for an SMB factoring co. with comp <em>40% below market</em>.</p>
+            </div>
+
+            <!-- Pick 1 -->
+            <div class="pick">
+              <div>
+                <div class="pick-head">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">№ 1 · Strong fit · 2d · LinkedIn LatAm</span>
+                </div>
+                <div class="pick-title">
+                  <span class="pick-co">Kavak just opened <em>your seat</em>.</span>
+                </div>
+                <div class="row" style="margin-top: 10px; gap: 14px;">
+                  <div class="avatar-co">KV</div>
+                  <div class="col" style="gap: 2px;">
+                    <span class="pick-role">Director of Operations</span>
+                    <span class="pick-meta">Kavak · CDMX · Hybrid · Mobility / fintech</span>
+                  </div>
+                  <div style="margin-left: auto;"><div class="score">91</div></div>
+                </div>
+                <p class="body-copy" style="margin: 14px 0 0;">Scope matches your Clip role almost line-for-line — ops org of 40+, fraud + risk + biz ops. <b>Susana M.</b> (ex-Cornershop, 4 mutuals) is the hiring manager.</p>
+                <div class="pick-actions">
+                  <button class="btn primary">Tailor &amp; apply</button>
+                  <button class="btn">Evaluate</button>
+                  <button class="btn ghost" style="margin-left: auto;">Mute</button>
+                </div>
+              </div>
+              <div>
+                <div class="salary" style="margin-top: 8px;">
+                  <div class="row" style="font-size: 13.5px;">
+                    <span style="font-weight: 600;">USD $115–145k</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">EST · BASE</span>
+                    <span class="pill accent" style="margin-left: auto;">in your band</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 38%; width: 32%;"></div>
+                    <div class="pin" style="left: 52%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 11px;">
+                    <span class="mono" style="color: var(--ink-3);">FLOOR $95K</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pick 2 -->
+            <div class="pick">
+              <div>
+                <div class="pick-head">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">№ 2 · Regional play · 6h · careers page</span>
+                </div>
+                <div class="pick-title">
+                  <span class="pick-co">A bigger surface than Clip.</span>
+                </div>
+                <div class="row" style="margin-top: 10px; gap: 14px;">
+                  <div class="avatar-co" style="background: #d6eef0;">VT</div>
+                  <div class="col" style="gap: 2px;">
+                    <span class="pick-role">Head of LatAm Operations</span>
+                    <span class="pick-meta">VTEX · São Paulo or CDMX · Hybrid · e-comm SaaS</span>
+                  </div>
+                  <div style="margin-left: auto;"><div class="score">85</div></div>
+                </div>
+                <p class="body-copy" style="margin: 14px 0 0;">Regional scope: covers MX + CO + AR. Risk: post-acquisition internal politics.</p>
+                <div class="pick-actions">
+                  <button class="btn primary">Tailor &amp; apply</button>
+                  <button class="btn">Evaluate</button>
+                  <button class="btn ghost" style="margin-left: auto;">Mute</button>
+                </div>
+              </div>
+              <div>
+                <div class="salary" style="margin-top: 8px;">
+                  <div class="row" style="font-size: 13.5px;">
+                    <span style="font-weight: 600;">USD $130–170k</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">EST · BASE + BONUS</span>
+                    <span class="pill accent" style="margin-left: auto;">above floor</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 45%; width: 30%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 11px;">
+                    <span class="mono" style="color: var(--ink-3);">MEDIUM CONFIDENCE</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●○ 2 SOURCES</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pick 3 -->
+            <div class="pick">
+              <div>
+                <div class="pick-head">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">№ 3 · Remote-first global · 3d · Greenhouse</span>
+                </div>
+                <div class="pick-title">
+                  <span class="pick-co">US-base comp for a LatAm role.</span>
+                </div>
+                <div class="row" style="margin-top: 10px; gap: 14px;">
+                  <div class="avatar-co">PL</div>
+                  <div class="col" style="gap: 2px;">
+                    <span class="pick-role">Sr. Director, LatAm Operations</span>
+                    <span class="pick-meta">Plaid · Remote · LatAm TZ · Fintech infra</span>
+                  </div>
+                  <div style="margin-left: auto;"><div class="score">87</div></div>
+                </div>
+                <p class="body-copy" style="margin: 14px 0 0;">Stretch on title — but you've been at Director scope 4 yrs. <b>Real remote</b>, not theater.</p>
+                <div class="pick-actions">
+                  <button class="btn primary">Tailor &amp; apply</button>
+                  <button class="btn">Evaluate</button>
+                  <button class="btn ghost" style="margin-left: auto;">Mute</button>
+                </div>
+              </div>
+              <div>
+                <div class="salary" style="margin-top: 8px;">
+                  <div class="row" style="font-size: 13.5px;">
+                    <span style="font-weight: 600;">USD $145–185k</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">+ EQUITY</span>
+                    <span class="pill signal-soft" style="margin-left: auto;">above your band</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 55%; width: 32%;"></div>
+                  </div>
+                  <div class="row" style="font-size: 11px;">
+                    <span class="mono" style="color: var(--ink-3);">US-COMP LATAM HIRE</span>
+                    <span class="mono" style="margin-left: auto; color: var(--ink-3);">●●● HIGH</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- More picks (compact) -->
+            <div class="card canvas tight" style="margin-top: 24px;">
+              <div class="row">
+                <span class="kicker">2 more picks below</span>
+                <span class="kicker" style="margin-left: auto;">18 muted</span>
+                <button class="btn ghost sm">Show all ↓</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- HOME                                                           -->
+    <!-- ============================================================ -->
+    <section class="screen" id="home">
+      <div class="screen-label">
+        <span class="num">02 · home</span>
+        <h2>Home</h2>
+        <span class="tag">— stats, focus, the territory at a glance</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">leadme.app / home</span>
+        </div>
+        <div class="frame-body">
+          <aside class="product-side">
+            <div class="brand-small">leadme<span class="dot">.</span></div>
+            <div class="nav-item">Discover<span class="badge">7</span></div>
+            <div class="nav-item active">Home</div>
+            <div class="nav-item">Tracker<span class="badge">8</span></div>
+            <div class="nav-item">Tailor</div>
+            <div class="nav-item">Prep</div>
+            <div class="nav-item" style="color: var(--ink-3);">Network</div>
+            <div class="nav-item">Settings</div>
+            <button class="nav-cta">Evaluate</button>
+            <div class="sep"></div>
+            <div class="user">
+              <div class="avatar-sq">NL</div>
+              <div class="ux"><b>Nacho L.</b><span>Leverage · MX</span></div>
+            </div>
+          </aside>
+
+          <div class="main">
+            <div class="row" style="margin-bottom: 24px; align-items: flex-end;">
+              <div class="col" style="gap: 4px;">
+                <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Tuesday May 14 · Issue №14</span>
+                <h1 class="h-editorial" style="font-size: 40px;">Good morning, <em>Nacho</em>.</h1>
+              </div>
+              <div class="seg-toggle" style="margin-left: auto;">
+                <div class="seg">Need</div>
+                <div class="seg on">Leverage</div>
+                <div class="seg">Open</div>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="home-grid">
+              <div class="stat-card">
+                <span class="stat-label">Today's brief</span>
+                <span class="stat-num">7 <em>picks</em></span>
+                <span class="stat-sub" style="color: var(--accent);">3 strong fit</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">In pipeline</span>
+                <span class="stat-num">8</span>
+                <span class="stat-sub">1 stale · 1 verbal offer</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Interviews this week</span>
+                <span class="stat-num">2</span>
+                <span class="stat-sub">Plaid Tue · VTEX Fri</span>
+              </div>
+              <div class="stat-card signal">
+                <span class="stat-label">★ Inbound to assess</span>
+                <span class="stat-num" style="font-size: 22px;">Stori DM</span>
+                <span class="stat-sub" style="color: var(--signal);">16% under market</span>
+              </div>
+            </div>
+
+            <!-- Two-up -->
+            <div class="home-two">
+              <div class="focus-card">
+                <div class="focus-head">
+                  <span class="mono" style="font-size: 10px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Today's focus · 12 min</span>
+                </div>
+                <div class="focus-row">
+                  <div class="focus-num">1</div>
+                  <div class="grow" style="font-size: 14px;">Reply to <b>Rita @ Stori</b><span style="color: var(--ink-2); font-weight: 400;"> · draft ready</span></div>
+                  <button class="btn primary sm">Open</button>
+                </div>
+                <div class="focus-row">
+                  <div class="focus-num">2</div>
+                  <div class="grow" style="font-size: 14px;">Tailor CV for <b>Kavak Director Ops</b></div>
+                  <button class="btn sm">Open</button>
+                </div>
+                <div class="focus-row">
+                  <div class="focus-num">3</div>
+                  <div class="grow" style="font-size: 14px;">Prep notes for <b>Plaid Tue 10am</b></div>
+                  <button class="btn sm">Open</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="row" style="justify-content: space-between; align-items: baseline;">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">★ Your market this week</span>
+                  <span class="pill accent">Director · MX fintech</span>
+                </div>
+                <div class="salary">
+                  <div class="row" style="font-size: 14px;">
+                    <span style="font-weight: 600;">MXN $1.9–2.4M</span>
+                    <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">MEDIAN BAND · BASE</span>
+                    <span class="pill" style="margin-left: auto;">●●● HIGH</span>
+                  </div>
+                  <div class="meter">
+                    <div class="band" style="left: 30%; width: 35%;"></div>
+                  </div>
+                </div>
+                <div class="body-copy" style="font-size: 13px;">Bands moved <b>+6% YoY</b>. <span style="color: var(--ink-3);">Phase 2: live updates from new comparables.</span></div>
+              </div>
+            </div>
+
+            <!-- Territory -->
+            <div class="row" style="justify-content: space-between; margin: 18px 0 12px;">
+              <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Your territory · MX fintech ops</span>
+              <span class="kicker">close = better fit · size = score</span>
+            </div>
+            <div class="territory" id="territory">
+              <svg>
+                <circle cx="50%" cy="55%" r="90" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+                <circle cx="50%" cy="55%" r="150" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+                <circle cx="50%" cy="55%" r="220" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+              </svg>
+              <div class="node you" style="left: calc(50% - 32px); top: calc(55% - 32px);">you</div>
+
+              <div class="node strong" style="left: 26%; top: 22%; width: 64px; height: 64px;">
+                <div class="node-name">Kavak</div><div class="node-score">91</div>
+              </div>
+              <div class="node strong" style="left: 64%; top: 18%; width: 58px; height: 58px;">
+                <div class="node-name">Plaid</div><div class="node-score">87</div>
+              </div>
+              <div class="node" style="left: 78%; top: 46%; width: 52px; height: 52px;">
+                <div class="node-name">VTEX</div><div class="node-score">85</div>
+              </div>
+              <div class="node" style="left: 22%; top: 70%; width: 46px; height: 46px;">
+                <div class="node-name">Stori</div><div class="node-score">82</div>
+              </div>
+              <div class="node" style="left: 56%; top: 14%; width: 40px; height: 40px;">
+                <div class="node-name">Konfío</div><div class="node-score">78</div>
+              </div>
+              <div class="node" style="left: 64%; top: 80%; width: 36px; height: 36px;">
+                <div class="node-name">Bitso</div><div class="node-score">74</div>
+              </div>
+              <div class="node" style="left: 14%; top: 46%; width: 34px; height: 34px;">
+                <div class="node-name">Rappi</div><div class="node-score">73</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- TRACKER                                                        -->
+    <!-- ============================================================ -->
+    <section class="screen" id="tracker">
+      <div class="screen-label">
+        <span class="num">03 · tracker</span>
+        <h2>Tracker</h2>
+        <span class="tag">— pipeline, status, follow-ups</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">leadme.app / tracker</span>
+        </div>
+        <div class="frame-body">
+          <aside class="product-side">
+            <div class="brand-small">leadme<span class="dot">.</span></div>
+            <div class="nav-item">Discover<span class="badge">7</span></div>
+            <div class="nav-item">Home</div>
+            <div class="nav-item active">Tracker<span class="badge">8</span></div>
+            <div class="nav-item">Tailor</div>
+            <div class="nav-item">Prep</div>
+            <div class="nav-item" style="color: var(--ink-3);">Network</div>
+            <div class="nav-item">Settings</div>
+            <button class="nav-cta">Evaluate</button>
+            <div class="sep"></div>
+            <div class="user">
+              <div class="avatar-sq">NL</div>
+              <div class="ux"><b>Nacho L.</b><span>Leverage · MX</span></div>
+            </div>
+          </aside>
+
+          <div class="main">
+            <h1 class="h-editorial" style="font-size: 36px; margin-bottom: 20px;">Pipeline · <em>8 active</em>.</h1>
+
+            <div class="tracker-head">
+              <div class="filters">
+                <span class="pill on">All · 8</span>
+                <span class="pill">Assessing · 2</span>
+                <span class="pill">Applied · 3</span>
+                <span class="pill">Interview · 2</span>
+                <span class="pill">Offer · 1</span>
+              </div>
+              <div style="margin-left: auto;" class="row">
+                <span class="pill">MXN</span>
+                <span class="pill" style="background: var(--canvas);">USD</span>
+              </div>
+            </div>
+
+            <div class="tracker-table">
+              <div class="tracker-row head">
+                <span>Score</span><span>Company / role</span><span>Status</span><span>Salary</span><span>Last touch</span><span></span>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm">91</div>
+                <div class="role"><b>Kavak</b> · <span>Director of Operations</span></div>
+                <div class="status"><span class="status-dot draft"></span>Drafting CV</div>
+                <div class="mono" style="font-size: 12px;">$115–145K</div>
+                <div class="when">—</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm flag">82</div>
+                <div class="role"><b>Stori</b> · <span>Head of Operations</span></div>
+                <div class="status"><span class="status-dot draft"></span>Assessing · <span style="color: var(--signal); font-weight: 600;">reply drafted</span></div>
+                <div class="mono" style="font-size: 12px;">$1.6M MXN</div>
+                <div class="when">Today</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm">87</div>
+                <div class="role"><b>Plaid</b> · <span>Sr Director, LatAm Ops</span></div>
+                <div class="status"><span class="status-dot interview"></span>Hiring mgr call Tue</div>
+                <div class="mono" style="font-size: 12px;">$145–185K</div>
+                <div class="when">2d ago</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm">85</div>
+                <div class="role"><b>VTEX</b> · <span>Head of LatAm Ops</span></div>
+                <div class="status"><span class="status-dot interview"></span>Onsite Fri (remote)</div>
+                <div class="mono" style="font-size: 12px;">$130–170K</div>
+                <div class="when">1d ago</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm muted">78</div>
+                <div class="role"><b>Konfío</b> · <span>Head of Risk Ops</span></div>
+                <div class="status"><span class="status-dot applied"></span>Applied · <span style="color: var(--signal);">stale 7d</span></div>
+                <div class="mono" style="font-size: 12px;">$110–140K</div>
+                <div class="when">7d ago</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm muted">73</div>
+                <div class="role"><b>Rappi</b> · <span>Director, Growth Ops</span></div>
+                <div class="status"><span class="status-dot applied"></span>Applied</div>
+                <div class="mono" style="font-size: 12px;">—</div>
+                <div class="when">4d ago</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+              <div class="tracker-row">
+                <div class="score sm muted">74</div>
+                <div class="role"><b>Bitso</b> · <span>Director, Strategy &amp; Ops</span></div>
+                <div class="status"><span class="status-dot offer"></span>Verbal offer · $2.2M MXN</div>
+                <div class="mono" style="font-size: 12px;">$2.2M MXN</div>
+                <div class="when">Yesterday</div>
+                <div style="color: var(--ink-3);">⋯</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- EVALUATE — INTERACTIVE                                         -->
+    <!-- ============================================================ -->
+    <section class="screen" id="evaluate">
+      <div class="screen-label">
+        <span class="num">04 · core · interactive</span>
+        <h2>Evaluate</h2>
+        <span class="tag">— ★ the aha moment · paste &amp; assess · try it below</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">leadme.app / evaluate</span>
+        </div>
+        <div class="frame-body">
+          <aside class="product-side">
+            <div class="brand-small">leadme<span class="dot">.</span></div>
+            <div class="nav-item">Discover<span class="badge">7</span></div>
+            <div class="nav-item">Home</div>
+            <div class="nav-item">Tracker<span class="badge">8</span></div>
+            <div class="nav-item">Tailor</div>
+            <div class="nav-item">Prep</div>
+            <div class="nav-item" style="color: var(--ink-3);">Network</div>
+            <div class="nav-item">Settings</div>
+            <button class="nav-cta" style="box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent);">Evaluate</button>
+            <div class="sep"></div>
+            <div class="user">
+              <div class="avatar-sq">NL</div>
+              <div class="ux"><b>Nacho L.</b><span>Leverage · MX</span></div>
+            </div>
+          </aside>
+
+          <div class="main">
+            <div class="ev-head">
+              <div>
+                <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">★ The aha moment · paste &amp; assess</span>
+                <h1 class="h-editorial ev-title">Got a lead? <em>Paste it.</em></h1>
+              </div>
+              <div class="ev-input-modes">
+                <span class="pill solid">Recruiter DM</span>
+                <span class="pill">Job URL</span>
+                <span class="pill">Paste JD</span>
+              </div>
+            </div>
+
+            <div class="ev-flow">
+
+              <!-- INPUT -->
+              <div class="ev-input-pane">
+                <div class="row" style="justify-content: space-between; align-items: baseline;">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Paste anything</span>
+                  <span class="mono" id="ev-charcount" style="font-size: 10.5px; color: var(--ink-3);">0 chars</span>
+                </div>
+                <textarea id="ev-input" class="ev-textarea" placeholder="Paste a recruiter LinkedIn message, a job URL, or a JD here. I'll parse it, score the fit, check the comp against the market, and draft a reply if it's worth pursuing."></textarea>
+
+                <div class="ev-meta">
+                  <span class="ev-extract-pill" id="extract-co">Stori</span>
+                  <span class="ev-extract-pill" id="extract-role">Head of Ops</span>
+                  <span class="ev-extract-pill" id="extract-loc">CDMX</span>
+                  <span class="ev-extract-pill" id="extract-comp" style="background: var(--signal-soft); color: var(--signal);">$1.6M MXN</span>
+                </div>
+
+                <div class="row" style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line);">
+                  <button class="btn ghost sm" id="ev-sample" onclick="pasteSample()">↘ Paste sample DM</button>
+                  <button class="btn primary" id="ev-go" onclick="runEvaluate()" disabled style="margin-left: auto; opacity: .5;">Evaluate →</button>
+                </div>
+              </div>
+
+              <!-- OUTPUT -->
+              <div class="ev-output">
+
+                <!-- Empty state -->
+                <div class="ev-empty" id="ev-empty">
+                  <div class="ev-empty-glyph"><em>e</em></div>
+                  <p><b style="color: var(--ink);">In about a minute</b><br/>you'll know if it's worth your time, what they should pay, and what to say back.</p>
+                </div>
+
+                <!-- Processing state -->
+                <div class="ev-processing" id="ev-processing">
+                  <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Reading…</span>
+                  <div class="ev-processing-row" id="proc-1"><div class="check">✓</div><span>Parsed message · extracted <b>Stori · Head of Ops · MXN $1.6M</b></span></div>
+                  <div class="ev-processing-row" id="proc-2"><div class="check">✓</div><span>Pulled company context · Series C · 600 ppl · fintech / lending</span></div>
+                  <div class="ev-processing-row" id="proc-3"><div class="check">✓</div><span>Cross-referenced 4 LatAm Director comparables for salary band</span></div>
+                  <div class="ev-processing-row" id="proc-4"><div class="check">✓</div><span>Scored fit against your Clip profile · 10 dimensions</span></div>
+                  <div class="ev-processing-row" id="proc-5"><div class="ev-spin"></div><span>Drafting reply in your voice…</span></div>
+                </div>
+
+                <!-- Verdict state -->
+                <div class="ev-verdict" id="ev-verdict">
+                  <div class="row">
+                    <div class="score flag">82</div>
+                    <div class="col" style="gap: 2px;">
+                      <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Verdict</span>
+                      <h2 class="h-editorial" style="font-size: 22px;">Worth your time — <em>with caveats</em>.</h2>
+                    </div>
+                  </div>
+
+                  <div class="card canvas tight">
+                    <div class="row" style="justify-content: space-between; align-items: baseline;">
+                      <span class="mono" style="font-size: 10.5px; color: var(--signal); letter-spacing: 1px; text-transform: uppercase;">★ Salary check</span>
+                      <span class="pill signal">≈ 16% under market</span>
+                    </div>
+                    <div class="salary" style="background: var(--surface);">
+                      <div class="row" style="font-size: 14px;">
+                        <span style="font-weight: 600;">MXN $1.6M</span>
+                        <span class="mono" style="color: var(--ink-3); font-size: 10.5px;">THEIR OFFER</span>
+                        <span class="mono" style="margin-left: auto; color: var(--ink-3); font-size: 10.5px;">MARKET $1.9–2.4M</span>
+                      </div>
+                      <div class="meter">
+                        <div class="band" style="left: 35%; width: 35%;"></div>
+                        <div class="pin" style="left: 22%;"></div>
+                      </div>
+                      <p class="body-copy" style="font-size: 12.5px; margin: 0;">"Competitive" is doing a lot of work in that DM. Market for Head of Ops at a Series C MX fintech with your scope: <b>$1.9–2.4M MXN base + 0.1–0.25% equity</b>.</p>
+                    </div>
+                  </div>
+
+                  <div class="card tight">
+                    <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Fit · A–F across 10 dimensions</span>
+                    <div class="fits">
+                      <div class="fit-bar"><span class="label-bar">scope</span><span class="track"><span class="fill" style="width: 88%;"></span></span><span class="grade">A</span></div>
+                      <div class="fit-bar"><span class="label-bar">domain</span><span class="track"><span class="fill" style="width: 90%;"></span></span><span class="grade">A</span></div>
+                      <div class="fit-bar"><span class="label-bar">level</span><span class="track"><span class="fill soft" style="width: 60%;"></span></span><span class="grade">C+</span></div>
+                      <div class="fit-bar"><span class="label-bar">comp</span><span class="track"><span class="fill signal" style="width: 40%;"></span></span><span class="grade">D</span></div>
+                      <div class="fit-bar"><span class="label-bar">stage</span><span class="track"><span class="fill" style="width: 82%;"></span></span><span class="grade">A-</span></div>
+                      <div class="fit-bar"><span class="label-bar">location</span><span class="track"><span class="fill" style="width: 100%;"></span></span><span class="grade">A+</span></div>
+                    </div>
+                  </div>
+
+                  <div class="card tight" style="background: var(--accent-soft);">
+                    <div class="row" style="justify-content: space-between; align-items: baseline;">
+                      <span class="mono" style="font-size: 10.5px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">✦ Draft reply</span>
+                      <div class="row" style="gap: 4px;"><span class="pill solid" style="font-size: 10.5px;">warm</span><span class="pill" style="font-size: 10.5px;">cool</span><span class="pill" style="font-size: 10.5px;">decline</span></div>
+                    </div>
+                    <div style="font-family: 'Albert Sans'; font-size: 13px; line-height: 1.55; color: var(--ink); background: var(--surface); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line);">
+                      Hi Rita — thanks for reaching out, and Stori's on my radar (loved the Series C raise).<br/><br/>
+                      Open to the right conversation. Before a call though — could you share the <b style="color: var(--accent);">target base range</b> and whether the role owns credit risk or sits adjacent? My current scope at Clip is broader, so I want to make sure we're aligned on level…
+                    </div>
+                    <div class="row">
+                      <button class="btn primary sm">Send via LinkedIn →</button>
+                      <button class="btn sm">Edit</button>
+                      <button class="btn ghost sm" style="margin-left: auto;">Regenerate</button>
+                    </div>
+                  </div>
+
+                  <div class="row" style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line);">
+                    <button class="btn">Save to Tracker</button>
+                    <button class="btn">Tailor CV</button>
+                    <button class="btn ghost sm" onclick="resetEvaluate()" style="margin-left: auto;">↺ Try another</button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- ONBOARDING (step 2)                                            -->
+    <!-- ============================================================ -->
+    <section class="screen" id="onboarding">
+      <div class="screen-label">
+        <span class="num">05 · critical</span>
+        <h2>Onboarding</h2>
+        <span class="tag">— step 02-B: review what I extracted from your CV</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">leadme.app / welcome / story · review</span>
+        </div>
+        <div class="frame-body" style="min-height: 600px;">
+          <div class="main" style="padding: 48px 60px;">
+
+            <div class="ob-progress">
+              <div class="seg done"></div>
+              <div class="seg done"></div>
+              <div class="seg now"></div>
+              <div class="seg"></div>
+              <div class="seg"></div>
+            </div>
+            <span class="mono" style="font-size: 10.5px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase;">Step 02 / 05 · review what I extracted</span>
+
+            <h1 class="ob-headline" style="margin-top: 6px;">Here's what I read.<br/><em>Correct anything wrong.</em></h1>
+            <div class="row" style="margin-bottom: 24px;">
+              <span class="pill accent">✓ cv-nacho-2026.pdf · 4 pages · 12 yrs</span>
+              <span class="kicker" style="color: var(--ink-3);">extraction took 6.3s</span>
+              <button class="btn ghost sm" style="margin-left: auto;">re-upload</button>
+            </div>
+
+            <div class="ob-grid">
+              <div class="col" style="gap: 14px;">
+                <div class="ob-card">
+                  <span class="ob-label">Selected work · I'll lead with these</span>
+                  <div class="ob-line"><span class="status-dot interview"></span><span><b>Clip</b> · scaled ops from 12 → 40+ across MX/AR · <b style="color: var(--accent);">$3.4B MXN annual TPV</b></span><button class="btn ghost sm" style="margin-left: auto;">edit</button></div>
+                  <div class="ob-line"><span class="status-dot interview"></span><span><b>Kueski</b> · Director of Risk Ops · cut default rate 28% in 18 mo</span><button class="btn ghost sm" style="margin-left: auto;">edit</button></div>
+                  <div class="ob-line"><span class="status-dot draft"></span><span><b>Mastercard LAC</b> · early career · <em style="color: var(--ink-3);">(deprioritized for senior fit)</em></span></div>
+                </div>
+
+                <div class="ob-signal-card">
+                  <div class="row"><span class="label-x">★ Where I'm unsure</span><span class="kicker" style="color: var(--signal); margin-left: auto;">click to confirm</span></div>
+                  <div class="ask"><span class="pill signal-soft" style="font-size: 11px;">team size at Kueski</span><span>read <b>12</b> — sound right?</span><button class="btn sm" style="margin-left: auto; background: var(--signal); color: var(--signal-on); border-color: var(--signal);">12 ✓</button><button class="btn ghost sm">edit</button></div>
+                  <div class="ask"><span class="pill signal-soft" style="font-size: 11px;">Clip end date</span><span>currently? or left 2025?</span><button class="btn sm" style="margin-left: auto; background: var(--signal); color: var(--signal-on); border-color: var(--signal);">currently ✓</button></div>
+                </div>
+              </div>
+
+              <div class="ob-card">
+                <span class="ob-label">Signals derived · feeds every evaluation</span>
+                <div class="ob-line"><span class="pill accent" style="font-size: 11px;">P&amp;L scope</span><span class="mono" style="font-size: 12px; color: var(--ink); margin-left: auto;">$3.4B MXN</span></div>
+                <div class="ob-line"><span class="pill accent" style="font-size: 11px;">Team size</span><span class="mono" style="font-size: 12px; color: var(--ink); margin-left: auto;">40+ direct/dotted</span></div>
+                <div class="ob-line"><span class="pill accent" style="font-size: 11px;">Domain</span><span style="font-size: 12.5px; margin-left: auto;">payments, lending</span></div>
+                <div class="ob-line"><span class="pill signal-soft" style="font-size: 11px;">Multi-country</span><span style="font-size: 12.5px; margin-left: auto;">MX + AR</span></div>
+                <div class="ob-line"><span class="pill" style="font-size: 11px;">Trajectory</span><span style="font-size: 12.5px; margin-left: auto;">IC → Director in 8 yrs</span></div>
+                <div class="ob-line"><span class="pill" style="font-size: 11px;">Languages</span><span style="font-size: 12.5px; margin-left: auto;">ES native · EN fluent</span></div>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--line);">
+              <span class="kicker" style="color: var(--ink-3);">These signals power every score, salary check, and tailored CV</span>
+              <button class="btn ghost" style="margin-left: auto;">← change CV</button>
+              <button class="btn primary lg">Looks right → intake</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="footer-note">LeadMe · hi-fi v0.1 · 5 screens · 1 system · 2 modes</div>
+
+  </div>
+
+
+<script>
+  // ===== Mode toggle =====
+  function setMode(mode) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add('theme-' + mode);
+    document.getElementById('mode-light').classList.toggle('on', mode === 'light');
+    document.getElementById('mode-dark').classList.toggle('on', mode === 'dark');
+    try { localStorage.setItem('leadme-mode', mode); } catch(e) {}
+  }
+  try {
+    const saved = localStorage.getItem('leadme-mode');
+    if (saved) setMode(saved);
+  } catch(e) {}
+
+  // ===== Nav active state on scroll =====
+  const navLinks = document.querySelectorAll('.top nav a');
+  const sections = [...navLinks].map(a => document.querySelector(a.getAttribute('href')));
+  function updateNav() {
+    let active = sections.length - 1;
+    for (let i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].getBoundingClientRect().top < 200) active = i;
+    }
+    navLinks.forEach((a, i) => a.classList.toggle('active', i === active));
+  }
+  window.addEventListener('scroll', updateNav);
+  updateNav();
+
+  // ===== Smooth scroll for nav =====
+  navLinks.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+
+  // ===== Evaluate interactive =====
+  const evInput = document.getElementById('ev-input');
+  const evCount = document.getElementById('ev-charcount');
+  const evGo = document.getElementById('ev-go');
+  const evEmpty = document.getElementById('ev-empty');
+  const evProcessing = document.getElementById('ev-processing');
+  const evVerdict = document.getElementById('ev-verdict');
+  const extractPills = ['extract-co', 'extract-role', 'extract-loc', 'extract-comp'].map(id => document.getElementById(id));
+  const procRows = [1,2,3,4,5].map(n => document.getElementById('proc-' + n));
+
+  const sampleDM = "Hi Nacho! I'm Rita from Stori's talent team. We just opened a Head of Operations seat — Mexico City, hybrid. We're moving fast, just raised a Series C, and your background at Clip is exactly the profile we need.\n\nCompensation is competitive, base around MXN $1.6M + equity. Would you have 15 minutes this week for a quick intro call?";
+
+  evInput.addEventListener('input', () => {
+    const len = evInput.value.length;
+    evCount.textContent = len + ' chars';
+    if (len > 20) {
+      evGo.disabled = false;
+      evGo.style.opacity = '1';
+      evInput.classList.add('filled');
+    } else {
+      evGo.disabled = true;
+      evGo.style.opacity = '.5';
+      evInput.classList.remove('filled');
+      extractPills.forEach(p => p && p.classList.remove('show'));
+    }
+  });
+
+  function pasteSample() {
+    evInput.classList.add('filled');
+    evInput.value = '';
+    let i = 0;
+    const speed = 8;
+    const step = () => {
+      evInput.value = sampleDM.slice(0, i);
+      evCount.textContent = i + ' chars';
+      i += 4;
+      if (i < sampleDM.length) {
+        setTimeout(step, speed);
+      } else {
+        evInput.value = sampleDM;
+        evCount.textContent = sampleDM.length + ' chars';
+        // Show extract pills sequentially
+        extractPills.forEach((p, idx) => {
+          if (p) setTimeout(() => p.classList.add('show'), 200 + idx * 180);
+        });
+        evGo.disabled = false;
+        evGo.style.opacity = '1';
+      }
+    };
+    step();
+  }
+
+  function runEvaluate() {
+    evEmpty.style.display = 'none';
+    evVerdict.classList.remove('show');
+    evProcessing.classList.add('show');
+    procRows.forEach(r => r && r.classList.remove('show'));
+
+    // Show rows progressively
+    const timings = [200, 700, 1300, 1900, 2500];
+    procRows.forEach((row, idx) => {
+      setTimeout(() => row && row.classList.add('show'), timings[idx]);
+    });
+    // Reveal verdict
+    setTimeout(() => {
+      evProcessing.classList.remove('show');
+      evVerdict.classList.add('show');
+      // Animate fit bars by re-applying widths
+      const fills = evVerdict.querySelectorAll('.fit-bar .fill');
+      fills.forEach(f => {
+        const w = f.style.width;
+        f.style.width = '0%';
+        requestAnimationFrame(() => requestAnimationFrame(() => { f.style.width = w; }));
+      });
+    }, 3400);
+  }
+
+  function resetEvaluate() {
+    evVerdict.classList.remove('show');
+    evProcessing.classList.remove('show');
+    evEmpty.style.display = 'flex';
+    evInput.value = '';
+    evInput.classList.remove('filled');
+    evCount.textContent = '0 chars';
+    evGo.disabled = true;
+    evGo.style.opacity = '.5';
+    extractPills.forEach(p => p && p.classList.remove('show'));
+  }
+</script>
+</body>
+</html>

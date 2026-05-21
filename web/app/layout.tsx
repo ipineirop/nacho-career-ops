@@ -28,26 +28,27 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: 'leadme.',
-  description: 'Your AI job search companion — less noise, more signal.',
+  title: 'labra.',
+  description: 'Your thinking partner for career decisions.',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
+  const isDev = process.env.NODE_ENV === 'development';
+  const session = isDev ? { user: { name: 'Demo User', email: 'demo@labra.local' } } : await getServerSession(authOptions);
 
   return (
     <html lang="en" className={`${geistMono.variable} ${albertSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="h-full">
-        <Providers>
-          {session ? (
+        <Providers session={session}>
+          {session || isDev ? (
             <div className="flex h-full flex-col lg:flex-row">
               {/* Desktop sidebar */}
               <Sidebar />
               {/* Mobile top bar */}
               <MobileHeader />
-              {/* Main content — on mobile add bottom padding for the nav bar */}
+              {/* Main content — on mobile add bottom padding for the nav bar (56px) */}
               <main
-                className="flex-1 overflow-auto pb-[64px] lg:pb-0"
+                className="flex-1 overflow-auto pb-[56px] lg:pb-0"
                 style={{ background: 'var(--lm-bg)' }}
               >
                 {children}
