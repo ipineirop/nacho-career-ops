@@ -94,16 +94,24 @@ export async function POST(req: NextRequest) {
   const user = await getAuthUserId();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { text, base64, filename } = await req.json();
+  const { text, base64, filename, lang } = await req.json();
   if (!text?.trim() && !base64?.trim()) return NextResponse.json({ error: 'No content provided' }, { status: 400 });
+
+  // The interpretive fields (pattern, patternDetail, archetypes) are shown
+  // directly to the user, so they must be written in their UI language. The
+  // markdown CV stays in its original language.
+  const langInstruction = lang === 'es'
+    ? '\n\nIMPORTANT: Write the "pattern", "patternDetail", and all archetype "name"/"description"/"why" values in SPANISH (neutral LatAm Spanish). Keep the markdown CV in its original language and keep JSON keys/enum ids in English.\n'
+    : '\n\nIMPORTANT: Write the "pattern", "patternDetail", and all archetype "name"/"description"/"why" values in ENGLISH.\n';
+  const prompt = PARSE_PROMPT + langInstruction;
 
   // Build message content — PDFs go as a native document block, text as plain string
   const userContent = base64
     ? [
         { type: 'document' as const, source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: base64 } },
-        { type: 'text' as const, text: PARSE_PROMPT.replace('CV text to convert:\n', 'The CV is the PDF above. Apply the same instructions.') },
+        { type: 'text' as const, text: prompt.replace('CV text to convert:\n', 'The CV is the PDF above. Apply the same instructions.') },
       ]
-    : PARSE_PROMPT + (text as string).slice(0, 20000);
+    : prompt + (text as string).slice(0, 20000);
 
   // Parse CV with Claude
   const message = await client.messages.create({

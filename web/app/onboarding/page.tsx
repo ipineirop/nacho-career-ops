@@ -121,6 +121,14 @@ interface OnbCtxValue {
   compBasis: 'gross' | 'net';
   isMobile: boolean;
 }
+// Group a raw digit string with locale thousands separators for display.
+// State stays digits-only; only the rendered value is grouped.
+function groupDigits(raw: string, lang: 'en' | 'es'): string {
+  const digits = (raw ?? '').replace(/\D/g, '');
+  if (!digits) return '';
+  return Number(digits).toLocaleString(lang === 'es' ? 'es-CL' : 'en-US');
+}
+
 const OnbCtx = createContext<OnbCtxValue | null>(null);
 function useOnb(): OnbCtxValue {
   const v = useContext(OnbCtx);
@@ -645,9 +653,9 @@ function CompInput({
         <input
           type="text"
           inputMode="numeric"
-          value={value}
+          value={groupDigits(value, lang)}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
           style={{
             flex: 1,
             background: 'transparent',
@@ -1141,12 +1149,12 @@ export default function OnboardingPage() {
         const reader = new FileReader();
         reader.onload = (event) => {
           const base64 = (event.target?.result as string).split(',')[1];
-          callApi({ base64, filename: file.name });
+          callApi({ base64, filename: file.name, lang });
         };
         reader.readAsDataURL(file);
       } else if (ext === 'txt' || ext === 'md') {
         const text = await file.text();
-        callApi({ text, filename: file.name });
+        callApi({ text, filename: file.name, lang });
       } else if (ext === 'docx' || ext === 'doc') {
         // mammoth is a small (~75KB) browser-friendly docx→html/text extractor.
         // Dynamic import keeps it out of the initial bundle.
@@ -1159,7 +1167,7 @@ export default function OnboardingPage() {
           setUploading(false);
           return;
         }
-        callApi({ text, filename: file.name });
+        callApi({ text, filename: file.name, lang });
       } else {
         alert('Unsupported file type. Use PDF, DOCX, TXT, or MD.');
         setStep(1);
@@ -2711,14 +2719,14 @@ export default function OnboardingPage() {
                 value={minComp}
                 onChange={setMinComp}
                 accent={false}
-                placeholder={compPeriod === 'monthly' ? '8,000' : '120,000'}
+                placeholder={groupDigits(compPeriod === 'monthly' ? '8000' : '120000', lang)}
               />
               <CompInput
                 label={t.s4TargetLabel}
                 value={targetComp}
                 onChange={setTargetComp}
                 accent={true}
-                placeholder={compPeriod === 'monthly' ? '10,000' : '150,000'}
+                placeholder={groupDigits(compPeriod === 'monthly' ? '10000' : '150000', lang)}
               />
             </div>
             {compHint && <Caption>{compHint}</Caption>}
@@ -2831,22 +2839,23 @@ export default function OnboardingPage() {
       (r, i) => ({ ...r, ...(roleOverrides[i] ?? {}) })
     );
 
-    // Format the comp range from what the user actually entered in step 4.
+    // Format the comp range from what the user actually entered in step 4,
+    // with locale-correct thousands separators (full numbers, no "2000k").
     const fmtComp = (raw: string): string | null => {
-      const n = Number(raw.replace(/[^0-9.]/g, ''));
-      if (!Number.isFinite(n) || n <= 0) return null;
-      return n >= 1000 ? `${Math.round(n / 1000)}k` : String(Math.round(n));
+      const grouped = groupDigits(raw, lang);
+      return grouped ? `$${grouped}` : null;
     };
     const minFmt = fmtComp(minComp);
     const targetFmt = fmtComp(targetComp);
-    const perSuffix = compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : '';
+    const perSuffix = compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : (lang === 'en' ? '/yr' : '/año');
     const compRange = minFmt && targetFmt
-      ? `$${minFmt} – $${targetFmt}`
+      ? `${minFmt} – ${targetFmt}`
       : targetFmt
-        ? `$${targetFmt}`
+        ? targetFmt
         : minFmt
-          ? `$${minFmt}+`
+          ? `${minFmt}+`
           : (lang === 'en' ? 'Not specified' : 'Sin especificar');
+    const hasComp = !!(minFmt || targetFmt);
     const compCurrencyLabel = `${lang === 'en' ? 'In' : 'En'} ${compCurrency}${perSuffix}${compBasis === 'net' ? (lang === 'en' ? ' · net' : ' · líquido') : ''}`;
 
     return (
@@ -3069,7 +3078,7 @@ export default function OnboardingPage() {
                 lineHeight: 1.1,
               }}
             >
-              {compRange}{perSuffix}
+              {compRange}{hasComp ? perSuffix : ''}
             </div>
             <div
               style={{
