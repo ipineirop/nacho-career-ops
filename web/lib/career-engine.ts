@@ -244,3 +244,57 @@ export async function analyzeCv(input: {
 
   return { markdownCv, profile };
 }
+
+// ── Re-translation ─────────────────────────────────────────────────
+// The interpretive fields are generated in the language at upload time.
+// When the user switches EN↔ES afterward, translate just those fields
+// (fast + cheap) rather than re-running the whole CV analysis.
+
+export interface TranslatableProfile {
+  pattern: string;
+  patternDetail: string;
+  strengths: string[];
+  gaps: string[];
+  archetypes: EngineArchetype[];
+}
+
+export async function translateProfile(
+  fields: TranslatableProfile,
+  targetLang: 'en' | 'es',
+): Promise<TranslatableProfile> {
+  const langName = targetLang === 'es' ? 'neutral LatAm Spanish' : 'English';
+  const message = await client.messages.create({
+    model: MODEL,
+    max_tokens: 4096,
+    system: `You translate career-profile copy into ${langName}. Preserve meaning, tone, and any proper nouns (company names, product names). Return ONLY a JSON object with the same shape you receive — do not add commentary, do not change ids or types.`,
+    messages: [{
+      role: 'user',
+      content: `Translate the human-readable text in this JSON to ${langName}. Keep keys, archetype "id", and archetype "type" UNCHANGED. Translate only pattern, patternDetail, strengths[], gaps[], and each archetype's name/description/why.\n\n\`\`\`json\n${JSON.stringify(fields)}\n\`\`\``,
+    }],
+  });
+
+  const block = message.content.find((b) => b.type === 'text') as { text: string } | undefined;
+  const out = block?.text ?? '';
+  const m = out.match(/```json\s*([\s\S]*?)\s*```/) ?? out.match(/(\{[\s\S]*\})/);
+  if (!m) return fields; // translation failed — keep original
+  try {
+    const parsed = JSON.parse(m[1]) as Partial<TranslatableProfile>;
+    return {
+      pattern: typeof parsed.pattern === 'string' ? parsed.pattern : fields.pattern,
+      patternDetail: typeof parsed.patternDetail === 'string' ? parsed.patternDetail : fields.patternDetail,
+      strengths: Array.isArray(parsed.strengths) ? parsed.strengths : fields.strengths,
+      gaps: Array.isArray(parsed.gaps) ? parsed.gaps : fields.gaps,
+      archetypes: Array.isArray(parsed.archetypes) && parsed.archetypes.length === fields.archetypes.length
+        ? parsed.archetypes.map((a, i) => ({
+            id: fields.archetypes[i].id,
+            type: fields.archetypes[i].type,
+            name: typeof a?.name === 'string' ? a.name : fields.archetypes[i].name,
+            description: typeof a?.description === 'string' ? a.description : fields.archetypes[i].description,
+            why: typeof a?.why === 'string' ? a.why : fields.archetypes[i].why,
+          }))
+        : fields.archetypes,
+    };
+  } catch {
+    return fields;
+  }
+}

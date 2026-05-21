@@ -45,6 +45,12 @@ interface CVSignals {
   // Synthesis produced by the career-ops engine (Claude) from the real CV.
   pattern?: string;
   patternDetail?: string;
+  seniorityLevel?: string;
+  primaryFunction?: string;
+  trajectoryVelocity?: string;
+  domainConsistency?: string;
+  strengths?: string[];
+  gaps?: string[];
   // Archetypes are produced by the career-ops engine (Claude) from the real
   // CV, not synthesized client-side from templates.
   archetypes?: Array<{
@@ -715,6 +721,10 @@ export default function OnboardingPage() {
     false, false, false, false, false, false, false,
   ]);
   const [archetypes, setArchetypes] = useState<Archetype[]>([]);
+  // Language the engine's interpretive text (pattern, archetypes) is currently
+  // in. When the user toggles EN↔ES we re-translate just those fields.
+  const [profileLang, setProfileLang] = useState<'en' | 'es'>('en');
+  const [translatingProfile, setTranslatingProfile] = useState(false);
 
   // Step 4 preferences (prefilled with sensible defaults; the user can edit).
   const [seniorityPick, setSeniorityPick] = useState<string>('');
@@ -752,6 +762,64 @@ export default function OnboardingPage() {
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
+
+  // Re-translate the engine's interpretive text when the user toggles language
+  // after their CV was analyzed. Translates only the human-readable fields
+  // (fast) instead of re-running the full CV analysis.
+  useEffect(() => {
+    if (lang === profileLang) return;
+    if (!cvSignals?.pattern && !archetypes.length) {
+      // Nothing generated yet — just track the language.
+      setProfileLang(lang);
+      return;
+    }
+    const target = lang;
+    let cancelled = false;
+    setTranslatingProfile(true);
+    (async () => {
+      try {
+        const res = await fetch('/api/career-engine/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            targetLang: target,
+            fields: {
+              pattern: cvSignals?.pattern ?? '',
+              patternDetail: cvSignals?.patternDetail ?? '',
+              strengths: cvSignals?.strengths ?? [],
+              gaps: cvSignals?.gaps ?? [],
+              archetypes: archetypes.map((a) => ({
+                id: a.id, type: a.type, name: a.name,
+                description: a.description, why: a.why,
+              })),
+            },
+          }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const f = data.fields;
+        if (cancelled || !f) return;
+        setCvSignals((prev) => prev ? {
+          ...prev,
+          pattern: f.pattern,
+          patternDetail: f.patternDetail,
+          strengths: f.strengths,
+          gaps: f.gaps,
+        } : prev);
+        setArchetypes((prev) => prev.map((a, i) => f.archetypes?.[i] ? {
+          ...a,
+          name: f.archetypes[i].name,
+          description: f.archetypes[i].description,
+          why: f.archetypes[i].why,
+        } : a));
+        if (!cancelled) setProfileLang(target);
+      } finally {
+        if (!cancelled) setTranslatingProfile(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const isDark = theme === 'dark';
   const c = isDark ? TOKENS.dark : TOKENS.light;
@@ -1136,6 +1204,7 @@ export default function OnboardingPage() {
         const data = await res.json();
         setCvSignals(data.signals);
         setArchetypes(archetypesFromSignals(data.signals));
+        setProfileLang(lang); // engine generated in the current UI language
       } else {
         const errBody = await res.text().catch(() => '');
         alert(`Failed to upload resume.${errBody ? ` (${res.status})` : ''} Please try again.`);
@@ -2886,6 +2955,8 @@ export default function OnboardingPage() {
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
+            opacity: translatingProfile ? 0.45 : 1,
+            transition: 'opacity .2s',
           }}
         >
           <Kicker>{t.s5Pattern}</Kicker>
@@ -2946,6 +3017,8 @@ export default function OnboardingPage() {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))',
             gap: 14,
+            opacity: translatingProfile ? 0.45 : 1,
+            transition: 'opacity .2s',
           }}
         >
           {archetypes.map((arch) => {
@@ -3249,7 +3322,6 @@ export default function OnboardingPage() {
           <button
             onClick={async () => {
               try {
-                const selectedArchetype = archetypes.find((a) => a.selected)?.id;
                 await fetch('/api/onboarding/save', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -3266,7 +3338,13 @@ export default function OnboardingPage() {
                     minComp,
                     targetComp,
                     narrative,
-                    archetype: selectedArchetype,
+                    // Full archetype set + which the user confirmed, so the
+                    // evaluate flow can score against the chosen North Stars.
+                    archetypes: archetypes.map((a) => ({
+                      id: a.id, type: a.type, name: a.name,
+                      description: a.description, why: a.why, selected: a.selected,
+                    })),
+                    selectedArchetypes: archetypes.filter((a) => a.selected).map((a) => a.id),
                   }),
                 });
               } catch {

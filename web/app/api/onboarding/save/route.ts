@@ -65,12 +65,32 @@ function mapGeographies(locationPick: string, primaryCity: string): string[] {
   return locationPick ? [locationPick] : [];
 }
 
-// Approximate FX to USD for normalizing the comp floor/target. These are
-// rough — the exact figure + original currency is stored verbatim in
-// user_compensation; the *_usd fields are only for cross-currency benchmarks.
-const FX_TO_USD: Record<string, number> = {
+// Static FX fallback (used only if the live rate fetch fails). The exact
+// figure + original currency is always stored verbatim in user_compensation;
+// the *_usd fields are approximate, for cross-currency benchmarks.
+const FX_TO_USD_FALLBACK: Record<string, number> = {
   USD: 1, EUR: 1.08, MXN: 0.058, CLP: 0.00105, ARS: 0.0011, BRL: 0.18, COP: 0.00025,
 };
+
+// Fetch a live USD conversion rate for one currency. open.er-api.com is free
+// and keyless; we time out fast and fall back to the static table so a comp
+// figure is always normalized even if the FX service is down.
+async function rateToUsd(currency: string): Promise<number> {
+  const cur = currency.toUpperCase();
+  if (cur === 'USD') return 1;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(`https://open.er-api.com/v6/latest/${cur}`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = (await res.json()) as { rates?: Record<string, number> };
+      const perUsd = data.rates?.USD; // 1 <cur> = perUsd USD
+      if (typeof perUsd === 'number' && perUsd > 0) return perUsd;
+    }
+  } catch { /* fall through to static */ }
+  return FX_TO_USD_FALLBACK[cur] ?? 1;
+}
 
 function parseAmount(raw: string): number | null {
   if (!raw) return null;
@@ -78,10 +98,9 @@ function parseAmount(raw: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-function toAnnualUsd(amount: number | null, currency: string, period: 'annual' | 'monthly'): number | null {
+function toAnnualUsd(amount: number | null, period: 'annual' | 'monthly', rate: number): number | null {
   if (amount == null) return null;
   const annual = period === 'monthly' ? amount * 12 : amount;
-  const rate = FX_TO_USD[currency] ?? 1;
   return Math.round(annual * rate);
 }
 
@@ -131,7 +150,11 @@ interface OnboardingPayload {
   minComp?: string;
   targetComp?: string;
   narrative?: string;
-  archetype?: string;
+  archetypes?: Array<{
+    id: string; type: string; name: string;
+    description: string; why: string; selected: boolean;
+  }>;
+  selectedArchetypes?: string[];
 }
 
 function settingsDb() {
@@ -153,8 +176,9 @@ export async function POST(req: NextRequest) {
   const basis = body.compBasis === 'net' ? 'net' : 'gross';
   const minAmt = parseAmount(body.minComp || '');
   const targetAmt = parseAmount(body.targetComp || '');
-  const minUsd = toAnnualUsd(minAmt, currency, period);
-  const targetUsd = toAnnualUsd(targetAmt, currency, period);
+  const fxRate = await rateToUsd(currency);
+  const minUsd = toAnnualUsd(minAmt, period, fxRate);
+  const targetUsd = toAnnualUsd(targetAmt, period, fxRate);
 
   // ── Derive structured positioning fields ─────────────────────────
   const [levelPart, industryPart] = (body.seniorityPick || '').split(',').map((s) => s.trim());
@@ -291,7 +315,7 @@ export async function POST(req: NextRequest) {
   await db.insert(userEvents).values({
     userId: user.id,
     eventType: 'onboarding_completed',
-    eventData: { mode, currency, period, basis, archetype: body.archetype ?? null },
+    eventData: { mode, currency, period, basis, selectedArchetypes: body.selectedArchetypes ?? [] },
   });
 
   // ── 7) settings back-compat blobs (scanner + settings UI read these)
@@ -326,6 +350,20 @@ export async function POST(req: NextRequest) {
     await sql`
       INSERT INTO settings (key, value, updated_at)
       VALUES (${`${user.email}:cv_roles`}, ${JSON.stringify(finalRoles)}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+    `;
+  }
+
+  // Persist the engine's archetypes + which the user confirmed. These are the
+  // user's "North Stars" — the evaluate flow scores roles against them.
+  if (body.archetypes?.length) {
+    await sql`
+      INSERT INTO settings (key, value, updated_at)
+      VALUES (${`${user.email}:leadme_archetypes`}, ${JSON.stringify({
+        archetypes: body.archetypes,
+        selected: body.selectedArchetypes ?? body.archetypes.filter((a) => a.selected).map((a) => a.id),
+        savedAt: new Date().toISOString(),
+      })}, NOW())
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
     `;
   }
