@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getDb, roles, evaluations, evaluationDimensions, evaluationGaps, evaluationProofPoints, companies, NewRole, NewEvaluation } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
+import { loadCandidateContext } from './candidate-context';
 
 interface EvaluationInput {
   jd: string;
@@ -164,16 +165,20 @@ Return a JSON object with:
     roleId = newRole[0].id;
   }
 
-  // Step 4: Score the evaluation
-  const scoringPrompt = `You are an expert career consultant evaluating a job role for a senior LatAm tech professional.
+  // Step 4: Score the evaluation — personalized to the candidate's stored
+  // profile (from onboarding), not a hardcoded template.
+  const ctx = await loadCandidateContext(input.userId);
+  const candidateBlock = ctx.hasProfile
+    ? `${ctx.markdown}${ctx.cvMarkdown ? `\n\n## CV\n${ctx.cvMarkdown.slice(0, 6000)}` : ''}`
+    : `- (No profile on file yet — score conservatively and note that the candidate hasn't completed onboarding.)`;
+
+  const scoringPrompt = `You are an expert career consultant evaluating a job role for a specific candidate. Use ONLY the candidate's profile below — do not assume a generic persona.
 
 Job Description:
 ${input.jd}
 
 Candidate's profile:
-- Seniority: Director-level / Senior IC
-- Domain: LatAm tech (fintech, marketplaces, SaaS)
-- Target: Head of Operations roles in pure-tech or tech-enabled services
+${candidateBlock}
 
 Score this opportunity on the following dimensions, each from 0-100:
 
