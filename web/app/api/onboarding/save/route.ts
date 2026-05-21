@@ -7,6 +7,7 @@ import {
   userCompensation,
   userLocations,
   userEvents,
+  userSignalsDerived,
 } from '@/lib/db';
 import { eq, and, isNull } from 'drizzle-orm';
 import { neon } from '@neondatabase/serverless';
@@ -107,6 +108,15 @@ interface OnboardingPayload {
     trajectory?: string;
     roles?: unknown[];
     yearSpan?: number;
+    // Engine synthesis fields
+    seniorityLevel?: string;
+    primaryFunction?: string;
+    pattern?: string;
+    patternDetail?: string;
+    trajectoryVelocity?: string;
+    domainConsistency?: string;
+    strengths?: string[];
+    gaps?: string[];
   };
   roles?: unknown[]; // final, user-corrected role list from step 3
   seniorityPick?: string; // "Senior, fintech"
@@ -148,7 +158,9 @@ export async function POST(req: NextRequest) {
 
   // ── Derive structured positioning fields ─────────────────────────
   const [levelPart, industryPart] = (body.seniorityPick || '').split(',').map((s) => s.trim());
-  const seniorityLevel = levelPart ? mapSeniority(levelPart) : null;
+  // Engine's calibrated seniority wins; fall back to the user's pill choice.
+  const seniorityLevel = body.cvSignals?.seniorityLevel || (levelPart ? mapSeniority(levelPart) : null);
+  const primaryFunction = body.cvSignals?.primaryFunction || body.primaryFunction || null;
   const industries = body.cvSignals?.industries?.length
     ? body.cvSignals.industries
     : industryPart ? [industryPart] : [];
@@ -169,7 +181,7 @@ export async function POST(req: NextRequest) {
   // ── 1) user_profiles (upsert) ────────────────────────────────────
   const profilePatch = {
     seniorityLevel: seniorityLevel ?? undefined,
-    primaryFunction: body.primaryFunction || undefined,
+    primaryFunction: primaryFunction || undefined,
     industries: targetIndustries.length ? targetIndustries : undefined,
     domains: industries?.length ? industries : undefined,
     languages: languages.length ? languages : undefined,
@@ -208,7 +220,7 @@ export async function POST(req: NextRequest) {
     targetRemoteModes: remoteModes.length ? remoteModes : null,
     targetIndustries: targetIndustries.length ? targetIndustries : null,
     targetSeniorityLevels: seniorityLevel ? [seniorityLevel] : null,
-    targetFunctions: body.primaryFunction ? [body.primaryFunction] : null,
+    targetFunctions: primaryFunction ? [primaryFunction] : null,
     humanAnswer: body.narrative || null,
   });
 
@@ -250,19 +262,44 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── 5) activity log ──────────────────────────────────────────────
+  // ── 5) user_signals_derived (Labra's model of the user) ──────────
+  const sig = body.cvSignals;
+  if (sig?.pattern || sig?.strengths?.length || sig?.trajectoryVelocity) {
+    const arc = [sig.pattern, sig.patternDetail].filter(Boolean).join(' ');
+    const signalsPatch = {
+      careerArcDescription: arc || undefined,
+      trajectoryVelocity: sig.trajectoryVelocity || undefined,
+      domainConsistency: sig.domainConsistency || undefined,
+      inferredStrengths: sig.strengths?.length ? sig.strengths : undefined,
+      inferredGaps: sig.gaps?.length ? sig.gaps : undefined,
+      lastCalculatedAt: new Date(),
+      calculationVersion: 'career-engine-1',
+    };
+    const existingSig = await db
+      .select({ id: userSignalsDerived.id })
+      .from(userSignalsDerived)
+      .where(eq(userSignalsDerived.userId, user.id))
+      .limit(1);
+    if (existingSig.length > 0) {
+      await db.update(userSignalsDerived).set(signalsPatch).where(eq(userSignalsDerived.userId, user.id));
+    } else {
+      await db.insert(userSignalsDerived).values({ userId: user.id, ...signalsPatch });
+    }
+  }
+
+  // ── 6) activity log ──────────────────────────────────────────────
   await db.insert(userEvents).values({
     userId: user.id,
     eventType: 'onboarding_completed',
     eventData: { mode, currency, period, basis, archetype: body.archetype ?? null },
   });
 
-  // ── 6) settings back-compat blobs (scanner + settings UI read these)
+  // ── 7) settings back-compat blobs (scanner + settings UI read these)
   const sql = settingsDb();
   const prefsBlob = {
     mode,
     levels: seniorityLevel ? [seniorityLevel] : [],
-    functions: body.primaryFunction ? [body.primaryFunction] : [],
+    functions: primaryFunction ? [primaryFunction] : [],
     geographies,
     floorSalaryMXN: 0,
     currency,
@@ -293,7 +330,7 @@ export async function POST(req: NextRequest) {
     `;
   }
 
-  // ── 7) mark onboarding complete ──────────────────────────────────
+  // ── 8) mark onboarding complete ──────────────────────────────────
   await sql`
     INSERT INTO settings (key, value, updated_at)
     VALUES (${`${user.email}:leadme_onboarding_complete`}, 'true', NOW())
