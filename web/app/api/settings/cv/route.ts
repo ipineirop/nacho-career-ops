@@ -23,6 +23,9 @@ After the markdown CV, output a JSON block in this exact format (on its own line
   ],
   "languages": ["Spanish", "English"],
   "trajectory": "IC to Director in 8 years",
+  "industries": ["fintech", "marketplaces"],
+  "primaryCity": "Mexico City",
+  "countryCount": 2,
   "pageCount": 2,
   "format": "PDF",
   "isLinkedInExport": false,
@@ -36,6 +39,9 @@ After the markdown CV, output a JSON block in this exact format (on its own line
 \`\`\`
 
 Notes for the JSON fields:
+- industries: 1–3 industry/domain labels the candidate has actually worked in, inferred from the companies and role descriptions (e.g. "fintech", "marketplaces", "SaaS", "healthcare", "logistics"). Lowercase, most-recent/most-relevant first. Be specific to THIS candidate — do not default to generic "tech".
+- primaryCity: the candidate's current/most-recent city (e.g. "Mexico City", "Santiago", "Bogotá"). Use the most recent role's location or an explicit location/header in the CV. If genuinely unknown, omit the field.
+- countryCount: number of distinct countries the candidate has worked in across their roles.
 - pageCount: approximate number of pages in the source
 - format: "PDF" or "DOCX" or "TEXT"
 - isLinkedInExport: true ONLY if the document has clear LinkedIn export markers (e.g., "linkedin.com/in/" URL, LinkedIn-style headers, "Top Skills" section). Otherwise false.

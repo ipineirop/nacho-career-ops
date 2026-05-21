@@ -262,7 +262,7 @@ export default function LabraNavPreview() {
             lineHeight: '1.55',
           }}
         >
-          {activePage === 'evaluate' && 'Paste a recruiter message, a JD, a URL.'}
+          {activePage === 'evaluate' && 'Paste a recruiter message, a job description, a URL.'}
           {activePage === 'tracker' && 'Track every opportunity from first contact to offer.'}
           {activePage === 'settings' && 'Manage your profile and preferences.'}
         </p>

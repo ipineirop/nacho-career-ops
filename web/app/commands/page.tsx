@@ -35,7 +35,7 @@ const CLI_COMMANDS = [
   {
     category: 'Evaluation',
     items: [
-      { label: 'Evaluate a job offer', command: '/career-ops', description: 'Paste a job URL or JD. Runs full 7-block evaluation (A–G) and generates a numbered report.' },
+      { label: 'Evaluate a job offer', command: '/career-ops', description: 'Paste a job URL or description. Runs full 7-block evaluation (A–G) and generates a numbered report.' },
       { label: 'Batch evaluate pipeline', command: '/career-ops batch', description: 'Parallel evaluation of all pending URLs in pipeline.md. Fast for clearing backlogs.', tip: 'Uses more tokens. Run after a portal scan.' },
       { label: 'Deep company research', command: '/career-ops deep', description: 'In-depth research: funding, culture, team, comp benchmarks, red flags.' },
       { label: 'Compare offers', command: '/career-ops compare', description: 'Side-by-side comparison of two or more evaluated offers.' },

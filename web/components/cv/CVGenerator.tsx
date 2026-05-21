@@ -101,7 +101,7 @@ export function CVGenerator({ applications }: { applications: Application[] }) {
                 : 'text-muted-foreground hover:bg-muted',
             )}
           >
-            Paste JD
+            Paste job description
           </button>
         </div>
 
@@ -131,14 +131,14 @@ export function CVGenerator({ applications }: { applications: Application[] }) {
 
             {selectedApp && !selectedApp.reportContent && (
               <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2">
-                No report content found. Paste the JD below for better results.
+                No report content found. Paste the job description below for better results.
               </p>
             )}
 
             {selectedApp && !selectedApp.reportContent && (
               <textarea
                 rows={6}
-                placeholder="Paste JD or role description here…"
+                placeholder="Paste job description or role description here…"
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 value={jd}
                 onChange={(e) => setJd(e.target.value)}
@@ -211,7 +211,7 @@ export function CVGenerator({ applications }: { applications: Application[] }) {
           <div className="flex flex-1 items-center justify-center flex-col gap-3 text-muted-foreground">
             <Loader2 size={32} className="animate-spin opacity-40" />
             <p className="text-sm">Tailoring your CV to this role…</p>
-            <p className="text-xs opacity-60">Reading JD keywords, reordering bullets, injecting context</p>
+            <p className="text-xs opacity-60">Reading job description keywords, reordering bullets, injecting context</p>
           </div>
         )}
 

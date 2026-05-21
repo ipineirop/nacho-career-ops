@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -92,6 +92,596 @@ const TOKENS = {
   },
 } as const;
 
+// ───────────────────────────────────────────────────────────────────
+// Shared context. These presentational components MUST live at module
+// scope (not nested in OnboardingPage) — otherwise every render creates
+// new component identities, React remounts the whole subtree, inputs lose
+// focus, and the page scrolls back to the top on each keystroke.
+// ───────────────────────────────────────────────────────────────────
+type ThemeTokens = Record<keyof typeof TOKENS.light, string>;
+interface OnbCtxValue {
+  c: ThemeTokens;
+  lang: 'en' | 'es';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: Record<string, any>;
+  compCurrency: 'USD' | 'EUR' | 'MXN' | 'CLP' | 'ARS' | 'BRL' | 'COP';
+  compPeriod: 'annual' | 'monthly';
+  compBasis: 'gross' | 'net';
+  isMobile: boolean;
+}
+const OnbCtx = createContext<OnbCtxValue | null>(null);
+function useOnb(): OnbCtxValue {
+  const v = useContext(OnbCtx);
+  if (!v) throw new Error('useOnb must be used within OnbCtx.Provider');
+  return v;
+}
+
+function H1({ a, em }: { a: string; em: string }) {
+  const { c } = useOnb();
+  return (
+    <h1
+      style={{
+        fontFamily: '"Fraunces", serif',
+        fontWeight: 400,
+        fontSize: 46,
+        lineHeight: 1.08,
+        letterSpacing: '-1.2px',
+        color: c.ink,
+        margin: 0,
+      }}
+    >
+      {a}
+      <em style={{ fontStyle: 'italic' }}>{em}</em>
+    </h1>
+  );
+}
+
+function Sub({ children }: { children: React.ReactNode }) {
+  const { c } = useOnb();
+  return (
+    <p
+      style={{
+        fontFamily: '"Albert Sans"',
+        fontSize: 15,
+        lineHeight: 1.55,
+        color: c.ink2,
+        margin: '-4px 0 0',
+        maxWidth: 620,
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function QBlock({ children, isLast }: { children: React.ReactNode; isLast: boolean }) {
+  const { c } = useOnb();
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        paddingBottom: isLast ? 0 : 22,
+        borderBottom: isLast ? 'none' : `0.75px solid ${c.line}`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Inference({ children }: { children: React.ReactNode }) {
+  const { c } = useOnb();
+  return (
+    <div
+      style={{
+        fontFamily: '"Geist Mono", monospace',
+        fontSize: 11,
+        letterSpacing: '0.4px',
+        color: c.ink3,
+        lineHeight: 1.5,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Prompt({ children }: { children: React.ReactNode }) {
+  const { c } = useOnb();
+  return (
+    <div
+      style={{
+        fontFamily: '"Albert Sans"',
+        fontWeight: 500,
+        fontSize: 17,
+        color: c.ink,
+        lineHeight: 1.25,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Helper({ children }: { children: React.ReactNode }) {
+  const { c } = useOnb();
+  return (
+    <p
+      style={{
+        fontFamily: '"Albert Sans"',
+        fontSize: 12.5,
+        color: c.ink3,
+        margin: '-4px 0 0',
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function Caption({ children }: { children: React.ReactNode }) {
+  const { c } = useOnb();
+  return (
+    <div
+      style={{
+        fontFamily: '"Geist Mono", monospace',
+        fontSize: 10.5,
+        color: c.ink3,
+        lineHeight: 1.55,
+        letterSpacing: '0.3px',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PillRow({ children }: { children: React.ReactNode }) {
+  return <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{children}</div>;
+}
+
+function QPill({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  onClick?: () => void;
+}) {
+  const { c } = useOnb();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '8px 14px',
+        borderRadius: 999,
+        fontFamily: '"Albert Sans"',
+        fontWeight: 500,
+        fontSize: 13,
+        border: `0.75px solid ${active ? c.ink : c.line}`,
+        background: active ? c.ink : c.surface,
+        color: active ? c.bg : c.ink2,
+        cursor: 'pointer',
+        transition: 'border-color .15s, background .15s',
+      }}
+    >
+      {children}
+      {active && <span style={{ fontSize: 11, opacity: 0.9 }}>✓</span>}
+    </button>
+  );
+}
+
+function AddRoleButton({ onAdd }: { onAdd: (r: CVRole) => void }) {
+  const { c, lang, t } = useOnb();
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <div
+        onClick={() => setOpen(true)}
+        style={{
+          border: `1px dashed ${c.line}`,
+          borderRadius: 12,
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          fontFamily: '"Albert Sans"',
+          fontSize: 13,
+          color: c.ink3,
+          cursor: 'pointer',
+        }}
+      >
+        <span
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: '50%',
+            border: `1px dashed ${c.ink3}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+          }}
+        >
+          +
+        </span>
+        <span>
+          {t.s3Add}
+          <span style={{ color: c.ink2, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+            {t.s3AddLink}
+          </span>
+          .
+        </span>
+      </div>
+    );
+  }
+  return (
+    <RoleForm
+      onSave={(r) => { onAdd(r); setOpen(false); }}
+      onCancel={() => setOpen(false)}
+      submitLabel={lang === 'en' ? 'Add role' : 'Añadir rol'}
+    />
+  );
+}
+
+function RoleForm({
+  initial,
+  onSave,
+  onCancel,
+  submitLabel,
+}: {
+  initial?: Partial<CVRole>;
+  onSave: (r: CVRole) => void;
+  onCancel: () => void;
+  submitLabel: string;
+}) {
+  const { c, lang, isMobile } = useOnb();
+  const thisYear = new Date().getFullYear();
+  const [company, setCompany] = useState(initial?.company ?? '');
+  const [role, setRole] = useState(initial?.role ?? '');
+  const [fromYear, setFromYear] = useState(initial?.startDate ?? '');
+  const [toYear, setToYear] = useState(initial?.current ? '' : (initial?.endDate ?? ''));
+  const [current, setCurrent] = useState(!!initial?.current);
+  const [outcome, setOutcome] = useState(initial?.metrics?.[0] ?? '');
+
+  const commit = () => {
+    const co = company.trim();
+    const ro = role.trim();
+    const fromN = parseInt(fromYear, 10);
+    const toN = current ? thisYear : parseInt(toYear, 10);
+    if (!co || !ro) { onCancel(); return; }
+    const years = Number.isFinite(fromN) && Number.isFinite(toN) && toN >= fromN ? toN - fromN : 0;
+    const cleanOutcome = outcome.trim();
+    onSave({
+      company: co,
+      role: ro,
+      years,
+      current,
+      metrics: cleanOutcome ? [cleanOutcome] : [],
+      startDate: Number.isFinite(fromN) ? String(fromN) : undefined,
+      endDate: current ? undefined : (Number.isFinite(toN) ? String(toN) : undefined),
+    });
+  };
+
+  const fieldStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: `0.75px solid ${c.line}`,
+    background: c.surface,
+    color: c.ink,
+    fontFamily: '"Albert Sans"',
+    fontSize: 13,
+    outline: 'none',
+    minWidth: 0,
+  };
+
+  const fromN = parseInt(fromYear, 10);
+  const toN = parseInt(toYear, 10);
+  const allYears = Array.from({ length: 45 }, (_, i) => thisYear - i);
+  const fromOptions = Number.isFinite(toN) ? allYears.filter((y) => y <= toN) : allYears;
+  const toOptions = Number.isFinite(fromN) ? allYears.filter((y) => y >= fromN) : allYears;
+
+  return (
+    <div
+      style={{
+        border: `1px dashed ${c.line}`,
+        borderRadius: 12,
+        padding: '14px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}
+    >
+      <input
+        autoFocus={!initial}
+        placeholder={lang === 'en' ? 'Company' : 'Empresa'}
+        value={company}
+        onChange={(e) => setCompany(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && commit()}
+        style={fieldStyle}
+      />
+      <input
+        placeholder={lang === 'en' ? 'Role' : 'Rol'}
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && commit()}
+        style={fieldStyle}
+      />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr auto',
+          gap: 8,
+          alignItems: 'center',
+        }}
+      >
+        <select
+          value={fromYear}
+          onChange={(e) => setFromYear(e.target.value)}
+          style={{ ...fieldStyle, appearance: 'auto' }}
+        >
+          <option value="">{lang === 'en' ? 'From' : 'Desde'}</option>
+          {fromOptions.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+        <select
+          value={current ? '' : toYear}
+          onChange={(e) => setToYear(e.target.value)}
+          disabled={current}
+          style={{ ...fieldStyle, appearance: 'auto', opacity: current ? 0.5 : 1 }}
+        >
+          <option value="">{lang === 'en' ? 'To' : 'Hasta'}</option>
+          {toOptions.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+        <label
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            fontFamily: '"Albert Sans"',
+            fontSize: 12.5,
+            color: c.ink2,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            gridColumn: isMobile ? '1 / -1' : 'auto',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={current}
+            onChange={(e) => setCurrent(e.target.checked)}
+            style={{ cursor: 'pointer' }}
+          />
+          {lang === 'en' ? 'Current role' : 'Rol actual'}
+        </label>
+      </div>
+      <textarea
+        placeholder={lang === 'en'
+          ? 'Outcome — one line, ideally with a number'
+          : 'Resultado — una línea, idealmente con un número'}
+        value={outcome}
+        onChange={(e) => setOutcome(e.target.value)}
+        rows={2}
+        style={{
+          ...fieldStyle,
+          resize: 'vertical',
+          fontFamily: '"Albert Sans"',
+          lineHeight: 1.4,
+        }}
+      />
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 2 }}>
+        <button
+          onClick={onCancel}
+          style={{
+            padding: '8px 14px',
+            background: 'transparent',
+            border: 0,
+            color: c.ink3,
+            fontFamily: '"Geist Mono", monospace',
+            fontSize: 11,
+            cursor: 'pointer',
+          }}
+        >
+          {lang === 'en' ? 'Cancel' : 'Cancelar'}
+        </button>
+        <button
+          onClick={commit}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 999,
+            background: c.ink,
+            color: c.bg,
+            border: 0,
+            fontFamily: '"Albert Sans"',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {submitLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AddOwn({ onAdd }: { onAdd?: (value: string) => void }) {
+  const { c, lang, t } = useOnb();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState('');
+
+  const commit = () => {
+    const v = value.trim();
+    if (!v) {
+      setEditing(false);
+      return;
+    }
+    onAdd?.(v);
+    setValue('');
+    setEditing(false);
+  };
+
+  if (!editing) {
+    return (
+      <span
+        onClick={() => setEditing(true)}
+        style={{
+          fontFamily: '"Fraunces", serif',
+          fontStyle: 'italic',
+          fontSize: 13.5,
+          color: c.ink2,
+          textDecoration: 'underline',
+          textDecorationColor: c.ink3,
+          textUnderlineOffset: 4,
+          cursor: 'pointer',
+          alignSelf: 'flex-start',
+        }}
+      >
+        {t.s4Addown}
+      </span>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start', alignItems: 'center' }}>
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') { setValue(''); setEditing(false); }
+        }}
+        onBlur={commit}
+        placeholder={lang === 'en' ? 'Your own…' : 'El tuyo…'}
+        style={{
+          padding: '6px 12px',
+          borderRadius: 999,
+          border: `0.75px solid ${c.line}`,
+          background: c.surface,
+          color: c.ink,
+          fontFamily: '"Albert Sans"',
+          fontSize: 13,
+          outline: 'none',
+          minWidth: 180,
+        }}
+      />
+    </div>
+  );
+}
+
+function CompInput({
+  label,
+  value,
+  onChange,
+  accent,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  accent: boolean;
+  placeholder?: string;
+}) {
+  const { c, lang, compCurrency, compPeriod } = useOnb();
+  return (
+    <div
+      style={{
+        background: accent ? c.surface : c.canvas,
+        border: `0.75px solid ${c.line}`,
+        borderRadius: 10,
+        padding: '12px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: '"Geist Mono", monospace',
+          fontSize: 9.5,
+          letterSpacing: '0.7px',
+          textTransform: 'uppercase',
+          color: c.ink3,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: '"Albert Sans"',
+          fontWeight: 600,
+          fontSize: 16,
+          color: c.ink,
+          lineHeight: 1.1,
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 2,
+        }}
+      >
+        <span style={{ color: c.ink3, fontWeight: 500 }}>$</span>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            flex: 1,
+            background: 'transparent',
+            border: 0,
+            outline: 'none',
+            fontFamily: 'inherit',
+            fontWeight: 600,
+            fontSize: 16,
+            color: c.ink,
+            padding: 0,
+            minWidth: 0,
+          }}
+        />
+        <span style={{ color: c.ink3, fontWeight: 500, fontSize: 11.5, marginLeft: 4 }}>
+          {compCurrency}
+          {compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : ''}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Kicker({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  const { c } = useOnb();
+  return (
+    <div
+      style={{
+        fontFamily: '"Geist Mono", monospace',
+        fontSize: 10,
+        letterSpacing: '1px',
+        textTransform: 'uppercase',
+        color: c.ink3,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -125,11 +715,10 @@ export default function OnboardingPage() {
   // Comp settings.
   const [compCurrency, setCompCurrency] = useState<'USD' | 'EUR' | 'MXN' | 'CLP' | 'ARS' | 'BRL' | 'COP'>('USD');
   const [compPeriod, setCompPeriod] = useState<'annual' | 'monthly'>('annual');
-  const [minComp, setMinComp] = useState<string>('140,000');
-  const [targetComp, setTargetComp] = useState<string>('170,000');
-  const [narrative, setNarrative] = useState<string>(
-    "I'm looking for operator scope at a company past the chaos — where I can run the function end-to-end. Fintech or marketplaces. Team small enough that I still build, not just review."
-  );
+  const [compBasis, setCompBasis] = useState<'gross' | 'net'>('gross');
+  const [minComp, setMinComp] = useState<string>('');
+  const [targetComp, setTargetComp] = useState<string>('');
+  const [narrative, setNarrative] = useState<string>('');
 
   // Step 5 tooltip auto-show.
   const [tipOpen, setTipOpen] = useState(false);
@@ -208,7 +797,7 @@ export default function OnboardingPage() {
       s4Q2: 'Where are you in this search?',
       s4Q3: 'Open to…',
       s4Q4: 'Office, hybrid, or remote?',
-      s4Q5: 'Base comp — minimum and target, in USD.',
+      s4Q5: 'Base comp — minimum and target.',
       s4Q5Help: 'Shapes what we flag as below-market. Stays private.',
       s4Q6a: 'What are you ',
       s4Q6b: 'really',
@@ -296,7 +885,7 @@ export default function OnboardingPage() {
       s4Q2: '¿Dónde estás en esta búsqueda?',
       s4Q3: 'Abierto a…',
       s4Q4: '¿Oficina, híbrido o remoto?',
-      s4Q5: 'Comp base — mínimo y objetivo, en USD.',
+      s4Q5: 'Comp base — mínimo y objetivo.',
       s4Q5Help: 'Da forma a lo que marcamos como por debajo del mercado. Se mantiene privado.',
       s4Q6a: '¿Qué estás ',
       s4Q6b: 'realmente',
@@ -620,6 +1209,7 @@ export default function OnboardingPage() {
   // Render
   // ───────────────────────────────────────────────────────────────────
   return (
+    <OnbCtx.Provider value={{ c, lang, t, compCurrency, compPeriod, compBasis, isMobile }}>
     <div
       className="min-h-screen flex flex-col"
       style={{
@@ -816,47 +1406,12 @@ export default function OnboardingPage() {
         .animate-fade-up { animation: fade-up .4s ease-out forwards; opacity: 0; }
       `}</style>
     </div>
+    </OnbCtx.Provider>
   );
 
   // ═══════════════════════════════════════════════════════════════════
   // STEP RENDERERS
   // ═══════════════════════════════════════════════════════════════════
-
-  function H1({ a, em }: { a: string; em: string }) {
-    return (
-      <h1
-        style={{
-          fontFamily: '"Fraunces", serif',
-          fontWeight: 400,
-          fontSize: 46,
-          lineHeight: 1.08,
-          letterSpacing: '-1.2px',
-          color: c.ink,
-          margin: 0,
-        }}
-      >
-        {a}
-        <em style={{ fontStyle: 'italic' }}>{em}</em>
-      </h1>
-    );
-  }
-
-  function Sub({ children }: { children: React.ReactNode }) {
-    return (
-      <p
-        style={{
-          fontFamily: '"Albert Sans"',
-          fontSize: 15,
-          lineHeight: 1.55,
-          color: c.ink2,
-          margin: '-4px 0 0',
-          maxWidth: 620,
-        }}
-      >
-        {children}
-      </p>
-    );
-  }
 
   // ─── Step 1 ────────────────────────────────────────────────────────
   function renderStep1() {
@@ -1822,6 +2377,38 @@ export default function OnboardingPage() {
     const seniorityFromCV = cvSignals ? inferSeniority(cvSignals.roles?.[0]) : 'Director';
     const indStr = industries.slice(0, 2).join(' & ');
 
+    // Currency-aware comp hint: net/gross matters everywhere, but a few LatAm
+    // markets have quirks worth surfacing (Chile quotes líquido, Colombia adds
+    // a prima that effectively makes ~13 monthly salaries).
+    const compHint = (() => {
+      const en = lang === 'en';
+      const basisNote = compBasis === 'net'
+        ? (en
+            ? 'Enter take-home (net). '
+            : 'Ingresa el neto (líquido). ')
+        : (en
+            ? 'Enter gross, before tax. '
+            : 'Ingresa el bruto, antes de impuestos. ');
+      const perCurrency: Partial<Record<typeof compCurrency, string>> = {
+        CLP: en
+          ? 'In Chile, offers are usually quoted líquido — toggle Net if that\'s what you mean.'
+          : 'En Chile se cotiza líquido — usa Líquido si es a lo que te refieres.',
+        COP: en
+          ? 'In Colombia, base excludes the prima (~2 extra months) — enter base only.'
+          : 'En Colombia la base excluye la prima (~2 meses extra) — ingresa solo la base.',
+        MXN: en
+          ? 'In Mexico, exclude aguinaldo and bonuses — enter base only.'
+          : 'En México, excluye aguinaldo y bonos — ingresa solo la base.',
+        ARS: en
+          ? 'In Argentina, base excludes the SAC (aguinaldo) — enter base only.'
+          : 'En Argentina la base excluye el SAC (aguinaldo) — ingresa solo la base.',
+        BRL: en
+          ? 'In Brazil, base excludes the 13º salário — enter base only.'
+          : 'En Brasil la base excluye el 13º salário — ingresa solo a base.',
+      };
+      return basisNote + (perCurrency[compCurrency] ?? '');
+    })();
+
     // Question 1: archetype-shaped pills derived from CV, plus user-added customs.
     // De-duplicated because industries[0] and industries[1] can match.
     const lookingForPills = Array.from(
@@ -2046,6 +2633,39 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
+              {/* Gross / net basis — matters in LatAm where líquido ≠ bruto */}
+              <div
+                style={{
+                  display: 'inline-flex',
+                  gap: 2,
+                  padding: 3,
+                  borderRadius: 999,
+                  border: `0.75px solid ${c.line}`,
+                  background: c.surface,
+                }}
+              >
+                {(['gross', 'net'] as const).map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => setCompBasis(b)}
+                    style={{
+                      border: 0,
+                      padding: '4px 12px',
+                      borderRadius: 999,
+                      fontFamily: '"Albert Sans"',
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      background: compBasis === b ? c.ink : 'transparent',
+                      color: compBasis === b ? c.bg : c.ink3,
+                    }}
+                  >
+                    {b === 'gross'
+                      ? (lang === 'en' ? 'Gross' : 'Bruto')
+                      : (lang === 'en' ? 'Net' : 'Líquido')}
+                  </button>
+                ))}
+              </div>
             </div>
             <div
               style={{
@@ -2060,14 +2680,17 @@ export default function OnboardingPage() {
                 value={minComp}
                 onChange={setMinComp}
                 accent={false}
+                placeholder={compPeriod === 'monthly' ? '8,000' : '120,000'}
               />
               <CompInput
                 label={t.s4TargetLabel}
                 value={targetComp}
                 onChange={setTargetComp}
                 accent={true}
+                placeholder={compPeriod === 'monthly' ? '10,000' : '150,000'}
               />
             </div>
+            {compHint && <Caption>{compHint}</Caption>}
           </QBlock>
 
           {/* Q6 — Narrative (free text) */}
@@ -2083,6 +2706,9 @@ export default function OnboardingPage() {
             <textarea
               value={narrative}
               onChange={(e) => setNarrative(e.target.value)}
+              placeholder={lang === 'en'
+                ? "e.g. I'm looking for operator scope at a company past the early chaos — where I can run the function end-to-end. Team small enough that I still build, not just review."
+                : 'p. ej. Busco alcance de operador en una empresa que ya pasó el caos inicial — donde pueda dirigir la función de punta a punta. Un equipo lo bastante pequeño para seguir construyendo, no solo revisar.'}
               rows={4}
               style={{
                 background: c.canvas,
@@ -2609,521 +3235,4 @@ export default function OnboardingPage() {
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────
-  // Small atom-style components scoped inside the page closure so they
-  // pick up theme tokens without prop-drilling.
-  // ───────────────────────────────────────────────────────────────────
-  function QBlock({ children, isLast }: { children: React.ReactNode; isLast: boolean }) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          paddingBottom: isLast ? 0 : 22,
-          borderBottom: isLast ? 'none' : `0.75px solid ${c.line}`,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  function Inference({ children }: { children: React.ReactNode }) {
-    return (
-      <div
-        style={{
-          fontFamily: '"Geist Mono", monospace',
-          fontSize: 11,
-          letterSpacing: '0.4px',
-          color: c.ink3,
-          lineHeight: 1.5,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  function Prompt({ children }: { children: React.ReactNode }) {
-    return (
-      <div
-        style={{
-          fontFamily: '"Albert Sans"',
-          fontWeight: 500,
-          fontSize: 17,
-          color: c.ink,
-          lineHeight: 1.25,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  function Helper({ children }: { children: React.ReactNode }) {
-    return (
-      <p
-        style={{
-          fontFamily: '"Albert Sans"',
-          fontSize: 12.5,
-          color: c.ink3,
-          margin: '-4px 0 0',
-        }}
-      >
-        {children}
-      </p>
-    );
-  }
-
-  function Caption({ children }: { children: React.ReactNode }) {
-    return (
-      <div
-        style={{
-          fontFamily: '"Geist Mono", monospace',
-          fontSize: 10.5,
-          color: c.ink3,
-          lineHeight: 1.55,
-          letterSpacing: '0.3px',
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  function PillRow({ children }: { children: React.ReactNode }) {
-    return <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{children}</div>;
-  }
-
-  function QPill({
-    children,
-    active,
-    onClick,
-  }: {
-    children: React.ReactNode;
-    active: boolean;
-    onClick?: () => void;
-  }) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '8px 14px',
-          borderRadius: 999,
-          fontFamily: '"Albert Sans"',
-          fontWeight: 500,
-          fontSize: 13,
-          border: `0.75px solid ${active ? c.ink : c.line}`,
-          background: active ? c.ink : c.surface,
-          color: active ? c.bg : c.ink2,
-          cursor: 'pointer',
-          transition: 'border-color .15s, background .15s',
-        }}
-      >
-        {children}
-        {active && <span style={{ fontSize: 11, opacity: 0.9 }}>✓</span>}
-      </button>
-    );
-  }
-
-  function AddRoleButton({ onAdd }: { onAdd: (r: CVRole) => void }) {
-    const [open, setOpen] = useState(false);
-    if (!open) {
-      return (
-        <div
-          onClick={() => setOpen(true)}
-          style={{
-            border: `1px dashed ${c.line}`,
-            borderRadius: 12,
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            fontFamily: '"Albert Sans"',
-            fontSize: 13,
-            color: c.ink3,
-            cursor: 'pointer',
-          }}
-        >
-          <span
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              border: `1px dashed ${c.ink3}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 12,
-            }}
-          >
-            +
-          </span>
-          <span>
-            {t.s3Add}
-            <span style={{ color: c.ink2, textDecoration: 'underline', textUnderlineOffset: 3 }}>
-              {t.s3AddLink}
-            </span>
-            .
-          </span>
-        </div>
-      );
-    }
-    return (
-      <RoleForm
-        onSave={(r) => { onAdd(r); setOpen(false); }}
-        onCancel={() => setOpen(false)}
-        submitLabel={lang === 'en' ? 'Add role' : 'Añadir rol'}
-      />
-    );
-  }
-
-  function RoleForm({
-    initial,
-    onSave,
-    onCancel,
-    submitLabel,
-  }: {
-    initial?: Partial<CVRole>;
-    onSave: (r: CVRole) => void;
-    onCancel: () => void;
-    submitLabel: string;
-  }) {
-    const thisYear = new Date().getFullYear();
-    const [company, setCompany] = useState(initial?.company ?? '');
-    const [role, setRole] = useState(initial?.role ?? '');
-    const [fromYear, setFromYear] = useState(initial?.startDate ?? '');
-    const [toYear, setToYear] = useState(initial?.current ? '' : (initial?.endDate ?? ''));
-    const [current, setCurrent] = useState(!!initial?.current);
-    const [outcome, setOutcome] = useState(initial?.metrics?.[0] ?? '');
-
-    const commit = () => {
-      const co = company.trim();
-      const ro = role.trim();
-      const fromN = parseInt(fromYear, 10);
-      const toN = current ? thisYear : parseInt(toYear, 10);
-      if (!co || !ro) { onCancel(); return; }
-      const years = Number.isFinite(fromN) && Number.isFinite(toN) && toN >= fromN ? toN - fromN : 0;
-      const cleanOutcome = outcome.trim();
-      onSave({
-        company: co,
-        role: ro,
-        years,
-        current,
-        metrics: cleanOutcome ? [cleanOutcome] : [],
-        startDate: Number.isFinite(fromN) ? String(fromN) : undefined,
-        endDate: current ? undefined : (Number.isFinite(toN) ? String(toN) : undefined),
-      });
-    };
-
-    const fieldStyle: React.CSSProperties = {
-      padding: '8px 12px',
-      borderRadius: 8,
-      border: `0.75px solid ${c.line}`,
-      background: c.surface,
-      color: c.ink,
-      fontFamily: '"Albert Sans"',
-      fontSize: 13,
-      outline: 'none',
-      minWidth: 0,
-    };
-
-    const fromN = parseInt(fromYear, 10);
-    const toN = parseInt(toYear, 10);
-    const allYears = Array.from({ length: 45 }, (_, i) => thisYear - i);
-    // From can't be after To (when To is set). To can't be before From.
-    const fromOptions = Number.isFinite(toN) ? allYears.filter((y) => y <= toN) : allYears;
-    const toOptions = Number.isFinite(fromN) ? allYears.filter((y) => y >= fromN) : allYears;
-
-    return (
-      <div
-        style={{
-          border: `1px dashed ${c.line}`,
-          borderRadius: 12,
-          padding: '14px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-        }}
-      >
-        <input
-          autoFocus={!initial}
-          placeholder={lang === 'en' ? 'Company' : 'Empresa'}
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && commit()}
-          style={fieldStyle}
-        />
-        <input
-          placeholder={lang === 'en' ? 'Role' : 'Rol'}
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && commit()}
-          style={fieldStyle}
-        />
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr auto',
-            gap: 8,
-            alignItems: 'center',
-          }}
-        >
-          <select
-            value={fromYear}
-            onChange={(e) => setFromYear(e.target.value)}
-            style={{ ...fieldStyle, appearance: 'auto' }}
-          >
-            <option value="">{lang === 'en' ? 'From' : 'Desde'}</option>
-            {fromOptions.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <select
-            value={current ? '' : toYear}
-            onChange={(e) => setToYear(e.target.value)}
-            disabled={current}
-            style={{ ...fieldStyle, appearance: 'auto', opacity: current ? 0.5 : 1 }}
-          >
-            <option value="">{lang === 'en' ? 'To' : 'Hasta'}</option>
-            {toOptions.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <label
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontFamily: '"Albert Sans"',
-              fontSize: 12.5,
-              color: c.ink2,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              gridColumn: isMobile ? '1 / -1' : 'auto',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={current}
-              onChange={(e) => setCurrent(e.target.checked)}
-              style={{ cursor: 'pointer' }}
-            />
-            {lang === 'en' ? 'Current role' : 'Rol actual'}
-          </label>
-        </div>
-        <textarea
-          placeholder={lang === 'en'
-            ? 'Outcome — one line, ideally with a number'
-            : 'Resultado — una línea, idealmente con un número'}
-          value={outcome}
-          onChange={(e) => setOutcome(e.target.value)}
-          rows={2}
-          style={{
-            ...fieldStyle,
-            resize: 'vertical',
-            fontFamily: '"Albert Sans"',
-            lineHeight: 1.4,
-          }}
-        />
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 2 }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '8px 14px',
-              background: 'transparent',
-              border: 0,
-              color: c.ink3,
-              fontFamily: '"Geist Mono", monospace',
-              fontSize: 11,
-              cursor: 'pointer',
-            }}
-          >
-            {lang === 'en' ? 'Cancel' : 'Cancelar'}
-          </button>
-          <button
-            onClick={commit}
-            style={{
-              padding: '8px 18px',
-              borderRadius: 999,
-              background: c.ink,
-              color: c.bg,
-              border: 0,
-              fontFamily: '"Albert Sans"',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            {submitLabel}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  function AddOwn({ onAdd }: { onAdd?: (value: string) => void }) {
-    const [editing, setEditing] = useState(false);
-    const [value, setValue] = useState('');
-
-    const commit = () => {
-      const v = value.trim();
-      if (!v) {
-        setEditing(false);
-        return;
-      }
-      onAdd?.(v);
-      setValue('');
-      setEditing(false);
-    };
-
-    if (!editing) {
-      return (
-        <span
-          onClick={() => setEditing(true)}
-          style={{
-            fontFamily: '"Fraunces", serif',
-            fontStyle: 'italic',
-            fontSize: 13.5,
-            color: c.ink2,
-            textDecoration: 'underline',
-            textDecorationColor: c.ink3,
-            textUnderlineOffset: 4,
-            cursor: 'pointer',
-            alignSelf: 'flex-start',
-          }}
-        >
-          {t.s4Addown}
-        </span>
-      );
-    }
-
-    return (
-      <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start', alignItems: 'center' }}>
-        <input
-          autoFocus
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') commit();
-            if (e.key === 'Escape') { setValue(''); setEditing(false); }
-          }}
-          onBlur={commit}
-          placeholder={lang === 'en' ? 'Your own…' : 'El tuyo…'}
-          style={{
-            padding: '6px 12px',
-            borderRadius: 999,
-            border: `0.75px solid ${c.line}`,
-            background: c.surface,
-            color: c.ink,
-            fontFamily: '"Albert Sans"',
-            fontSize: 13,
-            outline: 'none',
-            minWidth: 180,
-          }}
-        />
-      </div>
-    );
-  }
-
-  function CompInput({
-    label,
-    value,
-    onChange,
-    accent,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    accent: boolean;
-  }) {
-    return (
-      <div
-        style={{
-          background: accent ? c.surface : c.canvas,
-          border: `0.75px solid ${c.line}`,
-          borderRadius: 10,
-          padding: '12px 14px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: '"Geist Mono", monospace',
-            fontSize: 9.5,
-            letterSpacing: '0.7px',
-            textTransform: 'uppercase',
-            color: c.ink3,
-          }}
-        >
-          {label}
-        </div>
-        <div
-          style={{
-            fontFamily: '"Albert Sans"',
-            fontWeight: 600,
-            fontSize: 16,
-            color: c.ink,
-            lineHeight: 1.1,
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: 2,
-          }}
-        >
-          <span style={{ color: c.ink3, fontWeight: 500 }}>$</span>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 0,
-              outline: 'none',
-              fontFamily: 'inherit',
-              fontWeight: 600,
-              fontSize: 16,
-              color: c.ink,
-              padding: 0,
-              minWidth: 0,
-            }}
-          />
-          <span style={{ color: c.ink3, fontWeight: 500, fontSize: 11.5, marginLeft: 4 }}>
-            {compCurrency}
-            {compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : ''}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  function Kicker({
-    children,
-    style,
-  }: {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-  }) {
-    return (
-      <div
-        style={{
-          fontFamily: '"Geist Mono", monospace',
-          fontSize: 10,
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-          color: c.ink3,
-          ...style,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
 }

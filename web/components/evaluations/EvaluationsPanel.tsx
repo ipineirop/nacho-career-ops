@@ -151,7 +151,7 @@ export function EvaluationsPanel() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Sparkles size={24} className="text-muted-foreground/40 mb-2" />
               <p className="text-sm text-muted-foreground">No evaluations yet.</p>
-              <p className="text-xs text-muted-foreground mt-1">Paste a JD above to start.</p>
+              <p className="text-xs text-muted-foreground mt-1">Paste a job description above to start.</p>
             </div>
           )}
           {evaluations.map((ev) => (

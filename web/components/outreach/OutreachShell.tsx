@@ -187,7 +187,7 @@ export function OutreachShell({ applications }: { applications: App[] }) {
               </div>
 
               {/* JD context */}
-              <textarea value={jd} onChange={(e) => setJd(e.target.value)} placeholder="Paste JD or job context (optional — improves quality)"
+              <textarea value={jd} onChange={(e) => setJd(e.target.value)} placeholder="Paste the job description or job context (optional — improves quality)"
                 rows={4}
                 style={{ border: '1px solid var(--lm-line)', borderRadius: 8, padding: '10px 12px', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink)', background: 'var(--lm-canvas)', outline: 'none', resize: 'vertical' }} />
 
@@ -293,7 +293,7 @@ export function OutreachShell({ applications }: { applications: App[] }) {
                 </div>
               )}
 
-              <textarea value={resJd} onChange={(e) => setResJd(e.target.value)} placeholder="Paste JD for targeted research (optional)"
+              <textarea value={resJd} onChange={(e) => setResJd(e.target.value)} placeholder="Paste the job description for targeted research (optional)"
                 rows={5}
                 style={{ border: '1px solid var(--lm-line)', borderRadius: 8, padding: '10px 12px', fontFamily: 'var(--font-albert-sans)', fontSize: 13, color: 'var(--lm-ink)', background: 'var(--lm-canvas)', outline: 'none', resize: 'vertical' }} />
 

@@ -77,7 +77,7 @@ export async function GET() {
     <main class="main">
       <div class="page-kicker" id="kicker">Evaluate</div>
       <h1 class="page-title" id="title">Verdict in &lt;15s.</h1>
-      <p class="page-sub" id="description">Paste a recruiter message, a JD, a URL.</p>
+      <p class="page-sub" id="description">Paste a recruiter message, a job description, a URL.</p>
     </main>
     <nav class="mobile-nav">
       <button class="active" onclick="switchPage('evaluate', this)">Evaluate</button>
@@ -87,7 +87,7 @@ export async function GET() {
   </div>
   <script>
     const pages = {
-      evaluate: { kicker: 'Evaluate', title: 'Verdict in <15s.', description: 'Paste a recruiter message, a JD, a URL.' },
+      evaluate: { kicker: 'Evaluate', title: 'Verdict in <15s.', description: 'Paste a recruiter message, a job description, a URL.' },
       tracker: { kicker: 'Tracker', title: 'Every role, one log.', description: 'Track every opportunity from first contact to offer.' },
       settings: { kicker: 'Settings', title: 'Your profile, plainly.', description: 'Manage your profile and preferences.' }
     };

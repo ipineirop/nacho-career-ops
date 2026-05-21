@@ -139,7 +139,7 @@ export default async function DiscoverPage() {
           </div>
         </div>
         <div style={{ padding: '10px 12px', borderRadius: 10, background: 'var(--lm-accent-soft)', fontFamily: 'var(--font-albert-sans)', fontSize: 13, lineHeight: 1.5, color: 'var(--lm-ink)' }}>
-          {dbJobs.length} leads waiting. Evaluate each one to score it — skip Evaluate → it&apos;ll pre-fill the JD from the posting.
+          {dbJobs.length} leads waiting. Evaluate each one to score it — skip Evaluate → it&apos;ll pre-fill the job description from the posting.
         </div>
         <div style={{ flex: 1 }} />
         <a href="/evaluate" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 16px', borderRadius: 999, background: 'var(--lm-accent)', color: 'var(--lm-accent-on)', fontFamily: 'var(--font-albert-sans)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
