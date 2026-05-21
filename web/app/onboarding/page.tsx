@@ -99,6 +99,7 @@ export default function OnboardingPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [step, setStep] = useState<OnboardingStep>(1);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [cvSignals, setCvSignals] = useState<CVSignals | null>(null);
   const [readingRows, setReadingRows] = useState<boolean[]>([
     false, false, false, false, false, false, false,
@@ -487,7 +488,10 @@ export default function OnboardingPage() {
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    await processFile(file);
+  }
 
+  async function processFile(file: File) {
     const ext = (file.name.split('.').pop() || '').toLowerCase();
 
     setUploading(true);
@@ -870,7 +874,20 @@ export default function OnboardingPage() {
           }}
         >
           {/* Upload card (emph) */}
-          <label style={{ cursor: 'pointer', display: 'block' }}>
+          <label
+            style={{ cursor: 'pointer', display: 'block' }}
+            onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); if (!uploading) setDragOver(true); }}
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); if (!uploading) setDragOver(true); }}
+            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setDragOver(false);
+              if (uploading) return;
+              const file = e.dataTransfer.files?.[0];
+              if (file) void processFile(file);
+            }}
+          >
             <input
               type="file"
               accept=".pdf,.txt,.doc,.docx"
@@ -880,7 +897,7 @@ export default function OnboardingPage() {
             />
             <div
               style={{
-                background: c.surface,
+                background: dragOver ? c.canvas : c.surface,
                 border: `1.5px solid ${c.ink}`,
                 borderRadius: 14,
                 padding: '18px 20px',
@@ -2527,7 +2544,12 @@ export default function OnboardingPage() {
             </div>
           </div>
           <button
-            onClick={() => router.push('/evaluate')}
+            onClick={async () => {
+              try {
+                await fetch('/api/settings/onboarding', { method: 'POST' });
+              } catch {}
+              router.push('/evaluate');
+            }}
             style={{
               padding: '14px 26px',
               borderRadius: 999,
