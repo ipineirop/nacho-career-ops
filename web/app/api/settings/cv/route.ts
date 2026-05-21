@@ -4,6 +4,8 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic();
 
+export const maxDuration = 300;
+
 const PARSE_PROMPT = `Convert the following CV/resume text into clean, well-structured markdown.
 
 Requirements:
