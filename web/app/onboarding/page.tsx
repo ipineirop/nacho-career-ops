@@ -42,6 +42,18 @@ interface CVSignals {
   countryCount?: number;
   industries?: string[];
   unsure: Array<{ field: string; extracted: string; confidence: string }>;
+  // Synthesis produced by the career-ops engine (Claude) from the real CV.
+  pattern?: string;
+  patternDetail?: string;
+  // Archetypes are produced by the career-ops engine (Claude) from the real
+  // CV, not synthesized client-side from templates.
+  archetypes?: Array<{
+    id: 'core-fit' | 'stretch-up' | 'adjacent-pivot';
+    type: string;
+    name: string;
+    description: string;
+    why: string;
+  }>;
 }
 
 interface Archetype {
@@ -957,6 +969,25 @@ export default function OnboardingPage() {
   // Archetype generation from real CV signals.
   // Derives seniority + industries from the data; falls back gracefully.
   // ───────────────────────────────────────────────────────────────────
+  // Prefer the career-ops engine's archetypes (derived from the actual CV).
+  // Fall back to the local template generator only if the engine returned none
+  // (older payloads, parse hiccup) so the screen never renders empty.
+  function archetypesFromSignals(signals: CVSignals): Archetype[] {
+    const fromEngine = signals.archetypes;
+    if (fromEngine && fromEngine.length) {
+      return fromEngine.slice(0, 3).map((a, i) => ({
+        id: a.id,
+        number: (i + 1) as 1 | 2 | 3,
+        type: a.type,
+        name: a.name,
+        description: a.description,
+        why: a.why,
+        selected: true,
+      }));
+    }
+    return generateArchetypes(signals);
+  }
+
   function generateArchetypes(signals: CVSignals): Archetype[] {
     const currentRole = signals.roles?.[0];
     const seniority = inferSeniority(currentRole);
@@ -1096,7 +1127,7 @@ export default function OnboardingPage() {
       if (res.ok) {
         const data = await res.json();
         setCvSignals(data.signals);
-        setArchetypes(generateArchetypes(data.signals));
+        setArchetypes(archetypesFromSignals(data.signals));
       } else {
         const errBody = await res.text().catch(() => '');
         alert(`Failed to upload resume.${errBody ? ` (${res.status})` : ''} Please try again.`);
@@ -2790,8 +2821,33 @@ export default function OnboardingPage() {
 
   // ─── Step 5 ────────────────────────────────────────────────────────
   function renderStep5() {
-    const trajectory = cvSignals?.trajectory ?? 'operator who scales by context';
     const indStr = industries.slice(0, 3).join(', ');
+    const enginePattern = cvSignals?.pattern;
+    const enginePatternDetail = cvSignals?.patternDetail;
+
+    // Final, user-corrected role list (parsed roles + manually added, with
+    // per-role edits applied) — same merge step 3 uses, persisted on save.
+    const finalRoles = [...(cvSignals?.roles ?? []), ...extraRoles].map(
+      (r, i) => ({ ...r, ...(roleOverrides[i] ?? {}) })
+    );
+
+    // Format the comp range from what the user actually entered in step 4.
+    const fmtComp = (raw: string): string | null => {
+      const n = Number(raw.replace(/[^0-9.]/g, ''));
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return n >= 1000 ? `${Math.round(n / 1000)}k` : String(Math.round(n));
+    };
+    const minFmt = fmtComp(minComp);
+    const targetFmt = fmtComp(targetComp);
+    const perSuffix = compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : '';
+    const compRange = minFmt && targetFmt
+      ? `$${minFmt} – $${targetFmt}`
+      : targetFmt
+        ? `$${targetFmt}`
+        : minFmt
+          ? `$${minFmt}+`
+          : (lang === 'en' ? 'Not specified' : 'Sin especificar');
+    const compCurrencyLabel = `${lang === 'en' ? 'In' : 'En'} ${compCurrency}${perSuffix}${compBasis === 'net' ? (lang === 'en' ? ' · net' : ' · líquido') : ''}`;
 
     return (
       <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -2835,10 +2891,16 @@ export default function OnboardingPage() {
               margin: 0,
             }}
           >
-            {lang === 'en' ? "You're an operator who scales " : 'Eres un operador que escala '}
-            <em style={{ fontStyle: 'italic' }}>{lang === 'en' ? 'by context' : 'por contexto'}</em>
-            {lang === 'en' ? ' — ' : ' — '}
-            {indStr}.
+            {enginePattern
+              ? enginePattern
+              : (
+                <>
+                  {lang === 'en' ? "You're an operator who scales " : 'Eres un operador que escala '}
+                  <em style={{ fontStyle: 'italic' }}>{lang === 'en' ? 'by context' : 'por contexto'}</em>
+                  {lang === 'en' ? ' — ' : ' — '}
+                  {indStr}.
+                </>
+              )}
           </p>
           <p
             style={{
@@ -2850,14 +2912,20 @@ export default function OnboardingPage() {
               maxWidth: 660,
             }}
           >
-            {lang === 'en'
-              ? `${countryCount} countries, multiple markets, ${indStr}. The scope keeps growing; the function stays consistent. That makes you durable across messy categories — `
-              : `${countryCount} países, múltiples mercados, ${indStr}. El alcance sigue creciendo; la función se mantiene. Eso te hace duradero en categorías desordenadas — `}
-            <span style={{ color: c.ink, fontWeight: 500 }}>
-              {lang === 'en'
-                ? 'and less obviously placed at companies looking for a deep functional specialist.'
-                : 'y menos obviamente colocado en empresas que buscan un especialista funcional profundo.'}
-            </span>
+            {enginePatternDetail
+              ? enginePatternDetail
+              : (
+                <>
+                  {lang === 'en'
+                    ? `${countryCount} countries, multiple markets, ${indStr}. The scope keeps growing; the function stays consistent. That makes you durable across messy categories — `
+                    : `${countryCount} países, múltiples mercados, ${indStr}. El alcance sigue creciendo; la función se mantiene. Eso te hace duradero en categorías desordenadas — `}
+                  <span style={{ color: c.ink, fontWeight: 500 }}>
+                    {lang === 'en'
+                      ? 'and less obviously placed at companies looking for a deep functional specialist.'
+                      : 'y menos obviamente colocado en empresas que buscan un especialista funcional profundo.'}
+                  </span>
+                </>
+              )}
           </p>
         </div>
 
@@ -3001,7 +3069,7 @@ export default function OnboardingPage() {
                 lineHeight: 1.1,
               }}
             >
-              ${minComp.replace(/,000$/, 'k')} – $210k
+              {compRange}{perSuffix}
             </div>
             <div
               style={{
@@ -3030,7 +3098,7 @@ export default function OnboardingPage() {
               position: 'relative',
             }}
           >
-            <Kicker>{t.s5InUSD}</Kicker>
+            <Kicker>{compCurrencyLabel}</Kicker>
             <div style={{ position: 'relative', display: 'inline-flex' }}>
               <span
                 style={{
@@ -3172,8 +3240,31 @@ export default function OnboardingPage() {
           <button
             onClick={async () => {
               try {
-                await fetch('/api/settings/onboarding', { method: 'POST' });
-              } catch {}
+                const selectedArchetype = archetypes.find((a) => a.selected)?.id;
+                await fetch('/api/onboarding/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    cvSignals,
+                    roles: finalRoles,
+                    seniorityPick,
+                    searchStatus,
+                    locationPick,
+                    workArrangement,
+                    compCurrency,
+                    compPeriod,
+                    compBasis,
+                    minComp,
+                    targetComp,
+                    narrative,
+                    archetype: selectedArchetype,
+                  }),
+                });
+              } catch {
+                // Persistence failed — still mark complete so the user isn't
+                // trapped re-onboarding. The gate falls back to cv_content.
+                try { await fetch('/api/settings/onboarding', { method: 'POST' }); } catch {}
+              }
               router.push('/evaluate');
             }}
             style={{
