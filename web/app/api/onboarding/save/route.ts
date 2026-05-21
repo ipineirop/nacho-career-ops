@@ -11,6 +11,7 @@ import {
 } from '@/lib/db';
 import { eq, and, isNull } from 'drizzle-orm';
 import { neon } from '@neondatabase/serverless';
+import { persistCareerHistory, type RoleInput } from '@/lib/ai/candidate-context';
 
 export const maxDuration = 60;
 
@@ -343,15 +344,12 @@ export async function POST(req: NextRequest) {
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
   `;
 
-  // Persist the final, user-corrected CV roles (no dedicated schema table —
-  // they live alongside cv_content as structured JSON for re-use).
-  const finalRoles = body.roles ?? body.cvSignals?.roles;
-  if (finalRoles) {
-    await sql`
-      INSERT INTO settings (key, value, updated_at)
-      VALUES (${`${user.email}:cv_roles`}, ${JSON.stringify(finalRoles)}, NOW())
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-    `;
+  // Persist the final, user-corrected roles as the authoritative structured
+  // career history (source of truth for role facts; the CV markdown is a
+  // derived rendering). Overwrites whatever the parse seeded.
+  const finalRoles = (body.roles ?? body.cvSignals?.roles ?? []) as RoleInput[];
+  if (finalRoles.length) {
+    await persistCareerHistory(user.id, finalRoles, 'user_input');
   }
 
   // Persist the engine's archetypes + which the user confirmed. These are the

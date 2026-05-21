@@ -5,8 +5,63 @@ import {
   userProfiles,
   userPreferences,
   userSignalsDerived,
+  userCareerHistory,
 } from '@/lib/db';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, asc } from 'drizzle-orm';
+
+// Shape the engine + onboarding produce for a single role.
+export interface RoleInput {
+  company?: string;
+  role?: string;
+  years?: number;
+  current?: boolean;
+  metrics?: string[];
+  seniority?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  industry?: string;
+}
+
+function yearToDate(raw?: string): string | null {
+  if (!raw) return null;
+  const y = parseInt(String(raw).replace(/\D/g, ''), 10);
+  return Number.isFinite(y) && y > 1900 && y < 2100 ? `${y}-01-01` : null;
+}
+
+/**
+ * Replace the user's structured career history with `roles`. user_career_history
+ * is the source of truth for role facts; the CV markdown is a derived rendering.
+ * Best-effort — never throw into the caller's flow.
+ */
+export async function persistCareerHistory(
+  userId: string,
+  roles: RoleInput[],
+  source: 'cv_parse' | 'user_input',
+): Promise<void> {
+  if (!Array.isArray(roles) || !roles.length) return;
+  try {
+    const db = getDb();
+    await db.delete(userCareerHistory).where(eq(userCareerHistory.userId, userId));
+    const rows = roles
+      .filter((r) => (r.company || r.role))
+      .map((r) => ({
+        userId,
+        companyName: r.company || 'Unknown',
+        roleTitle: r.role || 'Unknown',
+        function: r.industry || undefined,
+        seniorityAtRole: r.seniority || undefined,
+        locationDuringRole: r.location || undefined,
+        startedAt: yearToDate(r.startDate) ?? undefined,
+        endedAt: r.current ? undefined : (yearToDate(r.endDate) ?? undefined),
+        keyOutcomesMarkdown: r.metrics?.length ? r.metrics.map((m) => `- ${m}`).join('\n') : undefined,
+        proofPoints: r.metrics?.length ? r.metrics : undefined,
+      }));
+    if (rows.length) await db.insert(userCareerHistory).values(rows);
+  } catch (err) {
+    console.error('persistCareerHistory failed:', err);
+  }
+}
 
 // =====================================================================
 // Candidate context — the read model the AI flows consume. Onboarding
@@ -53,21 +108,23 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     .limit(1);
   const email = userRow[0]?.email ?? '';
 
-  const [profileRow, prefRow, sigRow] = await Promise.all([
+  const [profileRow, prefRow, sigRow, careerRows] = await Promise.all([
     db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1),
     db.select().from(userPreferences)
       .where(and(eq(userPreferences.userId, userId), isNull(userPreferences.supersededAt)))
       .limit(1),
     db.select().from(userSignalsDerived).where(eq(userSignalsDerived.userId, userId)).limit(1),
+    db.select().from(userCareerHistory)
+      .where(eq(userCareerHistory.userId, userId))
+      .orderBy(asc(userCareerHistory.startedAt)),
   ]);
 
-  const [cvMarkdown, archetypesRaw, cvRolesRaw] = email
+  const [cvMarkdown, archetypesRaw] = email
     ? await Promise.all([
         getSetting(email, 'cv_content'),
         getSetting(email, 'leadme_archetypes'),
-        getSetting(email, 'cv_roles'),
       ])
-    : ['', '', ''];
+    : ['', ''];
 
   const profile = profileRow[0];
   const pref = prefRow[0];
@@ -76,7 +133,7 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
   let archetypes: ArchetypeBlob = {};
   try { archetypes = archetypesRaw ? JSON.parse(archetypesRaw) : {}; } catch { /* ignore */ }
 
-  const hasProfile = !!(profile || pref || sig || cvMarkdown || archetypesRaw);
+  const hasProfile = !!(profile || pref || sig || cvMarkdown || archetypesRaw || careerRows.length);
 
   // ── Assemble the markdown block ──────────────────────────────────
   const lines: string[] = [];
@@ -124,18 +181,20 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
       .join('\n');
     block += '\n';
   }
-  if (cvRolesRaw) {
-    // Corrected roles are authoritative over the parsed CV markdown.
-    try {
-      const rolesList = JSON.parse(cvRolesRaw) as Array<{ company?: string; role?: string; years?: number; current?: boolean; metrics?: string[] }>;
-      if (Array.isArray(rolesList) && rolesList.length) {
-        block += `\n## Confirmed Roles (user-corrected — authoritative)\n`;
-        block += rolesList
-          .map((r) => `- ${r.role ?? 'Role'} @ ${r.company ?? 'Company'}${r.years ? ` (${r.years}y${r.current ? ', current' : ''})` : ''}${r.metrics?.length ? ` — ${r.metrics.join('; ')}` : ''}`)
-          .join('\n');
-        block += '\n';
-      }
-    } catch { /* ignore */ }
+  if (careerRows.length) {
+    // Structured career history is authoritative over the parsed CV markdown.
+    const yr = (d: unknown): string => (typeof d === 'string' && d.length >= 4 ? d.slice(0, 4) : (d instanceof Date ? String(d.getFullYear()) : ''));
+    block += `\n## Career History (structured — authoritative over the CV text)\n`;
+    block += careerRows
+      .map((r) => {
+        const span = [yr(r.startedAt), r.endedAt ? yr(r.endedAt) : 'present'].filter(Boolean).join('–');
+        const outcomes = typeof r.keyOutcomesMarkdown === 'string' && r.keyOutcomesMarkdown
+          ? ` — ${r.keyOutcomesMarkdown.replace(/\n/g, '; ').replace(/^- /, '').replace(/; - /g, '; ')}`
+          : '';
+        return `- ${r.roleTitle} @ ${r.companyName}${span ? ` (${span})` : ''}${r.seniorityAtRole ? ` · ${r.seniorityAtRole}` : ''}${outcomes}`;
+      })
+      .join('\n');
+    block += '\n';
   }
 
   return { email, markdown: block.trim(), cvMarkdown, hasProfile };

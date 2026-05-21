@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserId } from '@/lib/auth-bridge';
 import { analyzeCv } from '@/lib/career-engine';
+import { persistCareerHistory } from '@/lib/ai/candidate-context';
 
 export const maxDuration = 300;
 
@@ -47,6 +48,10 @@ export async function POST(req: NextRequest) {
   } else {
     await db.insert(userProfiles).values({ userId: user.id, ...cvPatch });
   }
+
+  // Structured career history is the source of truth for role facts. Seed it
+  // from the parse; step 3 corrections overwrite it on onboarding save.
+  await persistCareerHistory(user.id, profile.roles ?? [], 'cv_parse');
 
   // Back-compat: keep the raw markdown in settings:cv_content (read by the
   // onboarding gate and other legacy paths).
