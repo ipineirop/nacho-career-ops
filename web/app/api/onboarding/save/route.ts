@@ -272,6 +272,11 @@ export async function POST(req: NextRequest) {
 
   // ── 3) user_compensation (target record, exact original figures) ──
   if (targetAmt != null || minAmt != null) {
+    // Replace any prior target record so re-onboarding doesn't accumulate
+    // duplicates (this is the user's single current comp target).
+    await db
+      .delete(userCompensation)
+      .where(and(eq(userCompensation.userId, user.id), eq(userCompensation.recordType, 'target')));
     await db.insert(userCompensation).values({
       userId: user.id,
       recordType: 'target',
