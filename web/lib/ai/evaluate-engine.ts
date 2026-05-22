@@ -4,7 +4,8 @@ import { eq, and, isNull } from 'drizzle-orm';
 import { loadCandidateContext } from './candidate-context';
 import { resolveCompany } from '@/lib/matching/resolve';
 import { matchPastEmployer, type UserEmployer, type PastEmployerMatch } from '@/lib/matching/past-employer';
-import { getFile } from '@/lib/github';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 interface EvaluationInput {
   jd: string;
@@ -78,6 +79,20 @@ function deriveVerdict(score: number, source: EvaluationInput['source']): Verdic
 }
 
 const URL_ONLY = /^https?:\/\/\S+$/i;
+
+/**
+ * Read an evaluation mode file from the deployment filesystem (bundled via
+ * next.config outputFileTracingIncludes). cwd is the web app root on Vercel and
+ * locally. Best-effort: returns '' on failure so the eval degrades, not crashes.
+ */
+async function readModeFile(rel: string): Promise<string> {
+  try {
+    return await readFile(join(process.cwd(), rel), 'utf-8');
+  } catch (err) {
+    console.error('readModeFile failed', rel, (err as Error)?.message);
+    return '';
+  }
+}
 
 /**
  * Fetch a job posting URL and return readable text. Prefers JSON-LD JobPosting
@@ -303,13 +318,17 @@ Return a JSON object with:
     ? `${ctx.markdown}${ctx.cvMarkdown ? `\n\n## CV\n${ctx.cvMarkdown.slice(0, 6000)}` : ''}`
     : `- (No profile on file yet — score conservatively and note that the candidate hasn't completed onboarding.)`;
 
-  // Universal methodology only (no santifer-specific _profile.md). Best-effort:
-  // if the repo files are unreachable, fall back to an empty methodology rather
-  // than failing the whole evaluation.
+  // Universal methodology only (no santifer-specific _profile.md). Read from the
+  // deployment filesystem (bundled via outputFileTracingIncludes) — NOT the GitHub
+  // API, which depends on a token that can expire. Best-effort: fall back to empty
+  // methodology rather than failing the whole evaluation.
   const [shared, oferta] = await Promise.all([
-    getFile('modes/_shared.md').then((f) => f.content).catch(() => ''),
-    getFile('modes/oferta.md').then((f) => f.content).catch(() => ''),
+    readModeFile('modes/_shared.md'),
+    readModeFile('modes/oferta.md'),
   ]);
+  if (!shared || !oferta) {
+    console.error('Modes not loaded from filesystem', { sharedLen: shared.length, ofertaLen: oferta.length, cwd: process.cwd() });
+  }
 
   const compTargetLine = [
     ctx.compFloorUsd != null ? `floor ≈ ${Math.round(ctx.compFloorUsd).toLocaleString('en-US')} USD/yr` : null,
@@ -401,7 +420,7 @@ JSON rules:
       model: 'claude-sonnet-4-6',
       max_tokens: 8000,
       system: evalSystem,
-      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 } as any],
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 } as any],
       messages: [{ role: 'user', content: evalUser }],
     });
     const fullText = evalResponse.content
