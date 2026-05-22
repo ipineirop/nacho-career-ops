@@ -143,6 +143,9 @@ interface OnboardingPayload {
     trajectory?: string;
     roles?: unknown[];
     yearSpan?: number;
+    summary?: string;
+    skills?: string[];
+    education?: Array<{ institution?: string; degree?: string; field?: string; year?: string | number; country?: string }>;
     // Engine synthesis fields
     seniorityLevel?: string;
     primaryFunction?: string;
@@ -166,6 +169,9 @@ interface OnboardingPayload {
   minComp?: string;
   targetComp?: string;
   narrative?: string;
+  summary?: string;
+  skills?: string[];
+  education?: Array<{ institution?: string; degree?: string; field?: string; year?: string | number; country?: string }>;
   archetypes?: Array<{
     id: string; type: string; name: string;
     description: string; why: string; selected: boolean;
@@ -366,31 +372,33 @@ export async function POST(req: NextRequest) {
   const finalRoles = (body.roles ?? body.cvSignals?.roles ?? []) as RoleInput[];
   if (finalRoles.length) {
     await persistCareerHistory(user.id, finalRoles, 'user_input');
+  }
 
-    // Re-render the CV markdown from structured data so it reflects the
-    // corrections. Best-effort — depends on migration 0004 (summary/skills).
-    try {
-      const prof = await db
-        .select({
-          summaryMarkdown: userProfiles.summaryMarkdown,
-          skills: userProfiles.skills,
-          education: userProfiles.education,
-          languages: userProfiles.languages,
-        })
-        .from(userProfiles)
-        .where(eq(userProfiles.userId, user.id))
-        .limit(1);
-      const p = prof[0];
+  // The user-reviewed sections from step 3 (summary/skills/education) are
+  // authoritative. Persist them, then re-render the CV markdown from the
+  // structured data so the document reflects every correction.
+  try {
+    const reviewedSummary = body.summary ?? body.cvSignals?.summary ?? '';
+    const reviewedSkills = body.skills ?? body.cvSignals?.skills ?? [];
+    const reviewedEducation = (body.education ?? body.cvSignals?.education ?? []) as RenderableCv['education'];
+
+    await db.update(userProfiles).set({
+      summaryMarkdown: reviewedSummary || undefined,
+      skills: reviewedSkills.length ? reviewedSkills : undefined,
+      education: reviewedEducation && reviewedEducation.length ? reviewedEducation : undefined,
+    }).where(eq(userProfiles.userId, user.id));
+
+    if (finalRoles.length) {
       const regenerated = renderCvMarkdown({
-        summary: p?.summaryMarkdown ?? undefined,
+        summary: reviewedSummary || undefined,
         roles: finalRoles.map((r) => ({
           company: r.company, role: r.role,
           startDate: r.startDate, endDate: r.endDate, current: r.current,
           seniority: r.seniority, location: r.location, metrics: r.metrics,
         })),
-        education: (p?.education as RenderableCv['education']) ?? [],
-        skills: (p?.skills as string[] | null) ?? [],
-        languages: (p?.languages as string[] | null) ?? body.cvSignals?.languages ?? [],
+        education: reviewedEducation ?? [],
+        skills: reviewedSkills,
+        languages: body.cvSignals?.languages ?? [],
       });
       if (regenerated) {
         await db.update(userProfiles).set({ cvMarkdown: regenerated }).where(eq(userProfiles.userId, user.id));
@@ -400,9 +408,9 @@ export async function POST(req: NextRequest) {
           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
         `;
       }
-    } catch (err) {
-      console.error('CV markdown re-render skipped:', err);
     }
+  } catch (err) {
+    console.error('CV section persist / re-render skipped:', err);
   }
 
   // Persist the engine's archetypes + which the user confirmed. These are the

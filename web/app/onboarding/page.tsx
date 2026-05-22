@@ -39,8 +39,12 @@ interface CVSignals {
   unclearRoles?: number;
   yearSpan?: number;
   primaryCity?: string;
+  primaryCountry?: string;
   countryCount?: number;
   industries?: string[];
+  summary?: string;
+  skills?: string[];
+  education?: Array<{ institution?: string; degree?: string; field?: string; year?: string | number; country?: string }>;
   unsure: Array<{ field: string; extracted: string; confidence: string }>;
   // Synthesis produced by the career-ops engine (Claude) from the real CV.
   pattern?: string;
@@ -745,6 +749,11 @@ export default function OnboardingPage() {
   const [roleOverrides, setRoleOverrides] = useState<Record<number, Partial<CVRole>>>({});
   // Index of the role currently being edited inline (or null).
   const [editingRoleIdx, setEditingRoleIdx] = useState<number | null>(null);
+  // Step 3 review of the non-role CV sections (seeded from the parse, editable).
+  type EduEntry = { institution?: string; degree?: string; field?: string; year?: string | number };
+  const [editedSummary, setEditedSummary] = useState<string>('');
+  const [editedSkills, setEditedSkills] = useState<string>(''); // comma-separated for editing
+  const [editedEducation, setEditedEducation] = useState<EduEntry[]>([]);
   // Comp settings.
   const [compCurrency, setCompCurrency] = useState<'USD' | 'EUR' | 'MXN' | 'CLP' | 'ARS' | 'BRL' | 'COP'>('USD');
   const [compPeriod, setCompPeriod] = useState<'annual' | 'monthly'>('annual');
@@ -1242,7 +1251,11 @@ export default function OnboardingPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setCvSignals(data.signals); // facts only; synthesis runs at step 3→4
+        const sig = data.signals as CVSignals;
+        setCvSignals(sig); // facts only; synthesis runs at step 3→4
+        setEditedSummary(sig.summary ?? '');
+        setEditedSkills((sig.skills ?? []).join(', '));
+        setEditedEducation((sig.education ?? []).map((e) => ({ institution: e.institution, degree: e.degree, field: e.field, year: e.year })));
         setProfileLang(lang);
       } else {
         const errBody = await res.text().catch(() => '');
@@ -2461,6 +2474,86 @@ export default function OnboardingPage() {
         {/* Add row */}
         <AddRoleButton onAdd={(r) => setExtraRoles((prev) => [...prev, r])} />
 
+        {/* Summary / Skills / Education — also extracted, also editable */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
+          {/* Summary */}
+          <div style={{ background: c.surface, border: `0.75px solid ${c.line}`, borderRadius: 12, padding: '16px 18px' }}>
+            <Kicker style={{ marginBottom: 8 }}>{lang === 'en' ? 'Summary' : 'Resumen'}</Kicker>
+            <textarea
+              value={editedSummary}
+              onChange={(e) => setEditedSummary(e.target.value)}
+              rows={3}
+              placeholder={lang === 'en' ? 'A 2–3 sentence summary…' : 'Un resumen de 2–3 frases…'}
+              style={{
+                width: '100%', background: c.canvas, border: `0.75px solid ${c.line}`, borderRadius: 8,
+                padding: '10px 12px', fontFamily: '"Albert Sans"', fontSize: 13.5, lineHeight: 1.5,
+                color: c.ink, resize: 'vertical', outline: 'none',
+              }}
+            />
+          </div>
+
+          {/* Skills */}
+          <div style={{ background: c.surface, border: `0.75px solid ${c.line}`, borderRadius: 12, padding: '16px 18px' }}>
+            <Kicker style={{ marginBottom: 8 }}>{lang === 'en' ? 'Skills' : 'Habilidades'}</Kicker>
+            <input
+              value={editedSkills}
+              onChange={(e) => setEditedSkills(e.target.value)}
+              placeholder={lang === 'en' ? 'Comma-separated, e.g. Python, SQL, leadership' : 'Separadas por comas, p. ej. Python, SQL, liderazgo'}
+              style={{
+                width: '100%', background: c.canvas, border: `0.75px solid ${c.line}`, borderRadius: 8,
+                padding: '10px 12px', fontFamily: '"Albert Sans"', fontSize: 13.5,
+                color: c.ink, outline: 'none',
+              }}
+            />
+          </div>
+
+          {/* Education */}
+          <div style={{ background: c.surface, border: `0.75px solid ${c.line}`, borderRadius: 12, padding: '16px 18px' }}>
+            <Kicker style={{ marginBottom: 8 }}>{lang === 'en' ? 'Education' : 'Educación'}</Kicker>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {editedEducation.map((edu, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1.4fr 0.6fr auto', gap: 8, alignItems: 'center' }}>
+                  <input
+                    value={edu.institution ?? ''}
+                    onChange={(e) => setEditedEducation((prev) => prev.map((x, j) => j === i ? { ...x, institution: e.target.value } : x))}
+                    placeholder={lang === 'en' ? 'Institution' : 'Institución'}
+                    style={{ background: c.canvas, border: `0.75px solid ${c.line}`, borderRadius: 8, padding: '8px 10px', fontFamily: '"Albert Sans"', fontSize: 13, color: c.ink, outline: 'none', minWidth: 0 }}
+                  />
+                  <input
+                    value={edu.degree ?? ''}
+                    onChange={(e) => setEditedEducation((prev) => prev.map((x, j) => j === i ? { ...x, degree: e.target.value } : x))}
+                    placeholder={lang === 'en' ? 'Degree / field' : 'Título / campo'}
+                    style={{ background: c.canvas, border: `0.75px solid ${c.line}`, borderRadius: 8, padding: '8px 10px', fontFamily: '"Albert Sans"', fontSize: 13, color: c.ink, outline: 'none', minWidth: 0 }}
+                  />
+                  <input
+                    value={edu.year != null ? String(edu.year) : ''}
+                    onChange={(e) => setEditedEducation((prev) => prev.map((x, j) => j === i ? { ...x, year: e.target.value } : x))}
+                    placeholder={lang === 'en' ? 'Year' : 'Año'}
+                    style={{ background: c.canvas, border: `0.75px solid ${c.line}`, borderRadius: 8, padding: '8px 10px', fontFamily: '"Albert Sans"', fontSize: 13, color: c.ink, outline: 'none', minWidth: 0 }}
+                  />
+                  <button
+                    onClick={() => setEditedEducation((prev) => prev.filter((_, j) => j !== i))}
+                    style={{ background: 'transparent', border: 0, color: c.ink3, cursor: 'pointer', fontSize: 16, padding: '0 4px' }}
+                    aria-label={lang === 'en' ? 'Remove' : 'Eliminar'}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => setEditedEducation((prev) => [...prev, { institution: '', degree: '', year: '' }])}
+                style={{
+                  alignSelf: 'flex-start', background: 'transparent', border: 0, padding: 0,
+                  fontFamily: '"Fraunces", serif', fontStyle: 'italic', fontSize: 13.5, color: c.ink2,
+                  textDecoration: 'underline', textUnderlineOffset: 4, cursor: 'pointer',
+                }}
+              >
+                {lang === 'en' ? '+ Add education' : '+ Añadir educación'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Footer */}
         <div
           style={{
@@ -3430,6 +3523,12 @@ export default function OnboardingPage() {
                     minComp,
                     targetComp,
                     narrative,
+                    // User-reviewed CV sections from step 3.
+                    summary: editedSummary,
+                    skills: editedSkills.split(',').map((s) => s.trim()).filter(Boolean),
+                    education: editedEducation
+                      .filter((e) => e.institution || e.degree)
+                      .map((e) => ({ ...e, year: e.year ? String(e.year) : undefined })),
                     // Full archetype set + which the user confirmed, so the
                     // evaluate flow can score against the chosen North Stars.
                     archetypes: archetypes.map((a) => ({
