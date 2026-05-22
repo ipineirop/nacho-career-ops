@@ -725,6 +725,9 @@ export default function OnboardingPage() {
   // in. When the user toggles EN↔ES we re-translate just those fields.
   const [profileLang, setProfileLang] = useState<'en' | 'es'>('en');
   const [translatingProfile, setTranslatingProfile] = useState(false);
+  // Pass 2 (pattern + archetypes) runs after role review, so it never blocks
+  // the upload. `synthesizing` drives the step-5 loading state.
+  const [synthesizing, setSynthesizing] = useState(false);
 
   // Step 4 preferences (prefilled with sensible defaults; the user can edit).
   const [seniorityPick, setSeniorityPick] = useState<string>('');
@@ -820,6 +823,15 @@ export default function OnboardingPage() {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
+
+  // Safety net: if the user reaches step 5 without a synthesis (skipped the
+  // step-3 trigger, or it failed), run it now.
+  useEffect(() => {
+    if (step === 5 && cvSignals && !archetypes.length && !synthesizing) {
+      void ensureSynthesis();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const isDark = theme === 'dark';
   const c = isDark ? TOKENS.dark : TOKENS.light;
@@ -1064,6 +1076,34 @@ export default function OnboardingPage() {
     return generateArchetypes(signals);
   }
 
+  // Pass 2: fetch the interpretive synthesis (pattern + archetypes) from the
+  // engine and merge it into cvSignals. Idempotent — skips if already done.
+  async function ensureSynthesis() {
+    if (!cvSignals) return;
+    if (cvSignals.pattern && archetypes.length) return; // already synthesized
+    setSynthesizing(true);
+    try {
+      const res = await fetch('/api/career-engine/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ facts: cvSignals, lang }),
+      });
+      if (!res.ok) {
+        console.error('synthesis failed', res.status, await res.text().catch(() => ''));
+        return;
+      }
+      const { synthesis } = await res.json();
+      const merged: CVSignals = { ...cvSignals, ...synthesis };
+      setCvSignals(merged);
+      setArchetypes(archetypesFromSignals(merged));
+      setProfileLang(lang);
+    } catch (e) {
+      console.error('synthesis error', e);
+    } finally {
+      setSynthesizing(false);
+    }
+  }
+
   function generateArchetypes(signals: CVSignals): Archetype[] {
     const currentRole = signals.roles?.[0];
     const seniority = inferSeniority(currentRole);
@@ -1202,12 +1242,12 @@ export default function OnboardingPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setCvSignals(data.signals);
-        setArchetypes(archetypesFromSignals(data.signals));
-        setProfileLang(lang); // engine generated in the current UI language
+        setCvSignals(data.signals); // facts only; synthesis runs at step 3→4
+        setProfileLang(lang);
       } else {
         const errBody = await res.text().catch(() => '');
-        alert(`Failed to upload resume.${errBody ? ` (${res.status})` : ''} Please try again.`);
+        console.error('CV parse failed', res.status, errBody);
+        alert(`We couldn't read that CV (error ${res.status}). Please try again — if it keeps failing, try a PDF export.`);
         setStep(1);
       }
       setUploading(false);
@@ -1503,7 +1543,7 @@ export default function OnboardingPage() {
         {step === 2 && renderStep2()}
         {step === 3 && cvSignals && renderStep3()}
         {step === 4 && renderStep4()}
-        {step === 5 && archetypes.length > 0 && renderStep5()}
+        {step === 5 && (archetypes.length > 0 ? renderStep5() : renderStep5Loading())}
       </div>
 
       {/* Global keyframes used in Step 2 reveal */}
@@ -2460,7 +2500,7 @@ export default function OnboardingPage() {
             {amberCount > 0 ? t.s3NeedsAttention(amberCount) : ''}
           </span>
           <button
-            onClick={() => setStep(4)}
+            onClick={() => { setStep(4); void ensureSynthesis(); }}
             style={{
               padding: '12px 22px',
               borderRadius: 999,
@@ -2897,6 +2937,58 @@ export default function OnboardingPage() {
   }
 
   // ─── Step 5 ────────────────────────────────────────────────────────
+  function renderStep5Loading() {
+    const failed = !synthesizing;
+    return (
+      <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+        <H1 a={t.s5H1a} em={t.s5H1b} />
+        <div
+          style={{
+            background: c.surface,
+            border: `0.75px solid ${c.line}`,
+            borderRadius: 14,
+            padding: '32px 28px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+          }}
+        >
+          {!failed ? (
+            <>
+              <span className="animate-fade-in" style={{
+                width: 16, height: 16, borderRadius: '50%',
+                border: `2px solid ${c.line}`, borderTopColor: c.accent,
+                animation: 'spin 0.8s linear infinite',
+              }} />
+              <span style={{ fontFamily: '"Albert Sans"', fontSize: 14.5, color: c.ink2 }}>
+                {lang === 'en' ? 'Reading the shape of your career…' : 'Leyendo la forma de tu carrera…'}
+              </span>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+              <span style={{ fontFamily: '"Albert Sans"', fontSize: 14.5, color: c.ink2 }}>
+                {lang === 'en'
+                  ? "Couldn't generate your read just now."
+                  : 'No pudimos generar tu lectura en este momento.'}
+              </span>
+              <button
+                onClick={() => void ensureSynthesis()}
+                style={{
+                  alignSelf: 'flex-start', padding: '8px 16px', borderRadius: 999,
+                  background: c.ink, color: c.bg, border: 0,
+                  fontFamily: '"Albert Sans"', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                {lang === 'en' ? 'Try again' : 'Reintentar'}
+              </button>
+            </div>
+          )}
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   function renderStep5() {
     const indStr = industries.slice(0, 3).join(', ');
     const enginePattern = cvSignals?.pattern;

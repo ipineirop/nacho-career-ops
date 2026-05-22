@@ -106,9 +106,22 @@ function toAnnualUsd(amount: number | null, period: 'annual' | 'monthly', rate: 
   return Math.round(annual * rate);
 }
 
-// Common LatAm/EU cities → ISO country, so we can populate the (notNull)
-// country on user_locations. Unknown cities skip the locations insert
-// rather than writing a bogus country.
+// Country resolution is now global: the engine derives the ISO country code
+// for the candidate's primary city (it knows every city). We validate it's a
+// real ISO 3166-1 alpha-2 code; a tiny city map remains only as a fallback
+// for the rare case the engine omits it.
+const ISO_3166_1: Set<string> = new Set([
+  'AF','AX','AL','DZ','AS','AD','AO','AI','AQ','AG','AR','AM','AW','AU','AT','AZ','BS','BH','BD','BB','BY','BE','BZ','BJ','BM','BT','BO','BQ','BA','BW','BV','BR','IO','BN','BG','BF','BI','CV','KH','CM','CA','KY','CF','TD','CL','CN','CX','CC','CO','KM','CG','CD','CK','CR','CI','HR','CU','CW','CY','CZ','DK','DJ','DM','DO','EC','EG','SV','GQ','ER','EE','SZ','ET','FK','FO','FJ','FI','FR','GF','PF','TF','GA','GM','GE','DE','GH','GI','GR','GL','GD','GP','GU','GT','GG','GN','GW','GY','HT','HM','VA','HN','HK','HU','IS','IN','ID','IR','IQ','IE','IM','IL','IT','JM','JP','JE','JO','KZ','KE','KI','KP','KR','KW','KG','LA','LV','LB','LS','LR','LY','LI','LT','LU','MO','MG','MW','MY','MV','ML','MT','MH','MQ','MR','MU','YT','MX','FM','MD','MC','MN','ME','MS','MA','MZ','MM','NA','NR','NP','NL','NC','NZ','NI','NE','NG','NU','NF','MK','MP','NO','OM','PK','PW','PS','PA','PG','PY','PE','PH','PN','PL','PT','PR','QA','RE','RO','RU','RW','BL','SH','KN','LC','MF','PM','VC','WS','SM','ST','SA','SN','RS','SC','SL','SG','SX','SK','SI','SB','SO','ZA','GS','SS','ES','LK','SD','SR','SJ','SE','CH','SY','TW','TJ','TZ','TH','TL','TG','TK','TO','TT','TN','TR','TM','TC','TV','UG','UA','AE','GB','US','UM','UY','UZ','VU','VE','VN','VG','VI','WF','EH','YE','ZM','ZW',
+]);
+
+function validIso(code?: string): string | null {
+  if (!code) return null;
+  const c = code.trim().toUpperCase();
+  return ISO_3166_1.has(c) ? c : null;
+}
+
+// Last-resort fallback for a handful of common cities if the engine omits the
+// country (it almost never should now that it derives primaryCountry).
 const CITY_TO_ISO: Record<string, string> = {
   'mexico city': 'MX', 'cdmx': 'MX', 'ciudad de méxico': 'MX', 'monterrey': 'MX', 'guadalajara': 'MX',
   'santiago': 'CL', 'bogotá': 'CO', 'bogota': 'CO', 'medellín': 'CO', 'medellin': 'CO',
@@ -124,6 +137,7 @@ interface OnboardingPayload {
   cvSignals?: {
     industries?: string[];
     primaryCity?: string;
+    primaryCountry?: string;
     countryCount?: number;
     languages?: string[];
     trajectory?: string;
@@ -266,9 +280,10 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── 4) user_locations (current residence) — only if we can resolve ISO
-  const iso = primaryCity ? isoFromCity(primaryCity) : null;
-  if (primaryCity && iso) {
+  // ── 4) user_locations (current residence)
+  // Prefer the engine-derived ISO country (global), fall back to the city map.
+  const iso = validIso(body.cvSignals?.primaryCountry) ?? (primaryCity ? isoFromCity(primaryCity) : null);
+  if (iso) {
     // Close any existing open current_residence, then insert fresh
     await db
       .update(userLocations)
@@ -282,7 +297,7 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       locationType: 'current_residence',
       countryIso: iso,
-      city: primaryCity,
+      city: primaryCity || undefined,
       source: 'cv_parse',
       verified: false,
     });

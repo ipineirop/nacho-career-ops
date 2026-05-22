@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserId } from '@/lib/auth-bridge';
-import { analyzeCv } from '@/lib/career-engine';
+import { parseCv } from '@/lib/career-engine';
 import { persistCareerHistory } from '@/lib/ai/candidate-context';
 
 export const maxDuration = 300;
@@ -14,9 +14,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No content provided' }, { status: 400 });
   }
 
-  // The career engine owns parsing + profile synthesis (pattern, archetypes,
-  // derived signals). The route only orchestrates persistence.
-  const { markdownCv, profile } = await analyzeCv({ text, base64, lang });
+  // Pass 1: fast factual parse. Synthesis (pattern, archetypes) runs later via
+  // /api/career-engine/synthesize so it never blocks this upload request.
+  const { markdownCv, profile } = await parseCv({ text, base64, lang });
 
   // Dev bypass: no DB available locally — return the profile without persisting.
   const dbConfigured = !!(process.env.SUPABASE_POSTGRES_URL || process.env.DATABASE_URL);
