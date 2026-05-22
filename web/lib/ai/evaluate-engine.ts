@@ -77,6 +77,72 @@ function deriveVerdict(score: number, source: EvaluationInput['source']): Verdic
   return score >= 4.0 ? 'pursue' : 'watch';
 }
 
+const URL_ONLY = /^https?:\/\/\S+$/i;
+
+/**
+ * Fetch a job posting URL and return readable text. Prefers JSON-LD JobPosting
+ * (most ATS + LinkedIn guest pages embed it), falls back to stripped HTML.
+ * Returns null when the page yields too little (e.g. a hard login wall).
+ */
+async function fetchJobText(url: string): Promise<string | null> {
+  let html = '';
+  try {
+    const res = await fetch(url, {
+      redirect: 'follow',
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml',
+        'accept-language': 'en-US,en;q=0.9',
+      },
+    });
+    if (!res.ok) return null;
+    html = await res.text();
+  } catch {
+    return null;
+  }
+
+  const parts: string[] = [];
+
+  // 1) JSON-LD JobPosting — the cleanest source when present.
+  for (const m of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const data = JSON.parse(m[1].trim());
+      for (const node of Array.isArray(data) ? data : [data]) {
+        if (node && (node['@type'] === 'JobPosting' || node.title || node.description)) {
+          const org = node.hiringOrganization?.name ?? '';
+          const loc = node.jobLocation?.address?.addressLocality ?? node.jobLocation?.address?.addressRegion ?? '';
+          if (node.title) parts.push(`Title: ${node.title}`);
+          if (org) parts.push(`Company: ${org}`);
+          if (loc) parts.push(`Location: ${loc}`);
+          if (node.description) parts.push(stripHtml(String(node.description)));
+        }
+      }
+    } catch { /* not valid JSON-LD, skip */ }
+  }
+
+  // 2) Fallback: <title> + stripped body text.
+  if (parts.join(' ').length < 200) {
+    const title = html.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim();
+    if (title) parts.unshift(`Title: ${title}`);
+    parts.push(stripHtml(html));
+  }
+
+  const text = parts.join('\n\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, 12000);
+  return text.length >= 200 ? text : null;
+}
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -84,14 +150,28 @@ const anthropic = new Anthropic({
 export async function evaluateRole(input: EvaluationInput): Promise<EvaluationResult> {
   const db = getDb();
 
-  // Step 0: Check for duplicate evaluation if sourceRef provided
-  if (input.url) {
-    const sourceRef = input.url;
+  // Step 0a: If the input is a bare URL (or a URL was passed), fetch the page so
+  // there's actual content to evaluate. The user pastes a link; we read it.
+  const bareUrl = URL_ONLY.test(input.jd.trim()) ? input.jd.trim() : undefined;
+  const effectiveUrl = input.url || bareUrl;
+  let jdText = input.jd.trim();
+  if (bareUrl || (input.url && jdText === input.url)) {
+    const fetched = await fetchJobText(effectiveUrl as string);
+    if (!fetched) {
+      throw new Error(
+        "I couldn't read that link — the site may require a login (LinkedIn often does). Paste the role description or the recruiter's message instead.",
+      );
+    }
+    jdText = `Source URL: ${effectiveUrl}\n\n${fetched}`;
+  }
+
+  // Step 0b: Check for duplicate evaluation if a URL identifies the role
+  if (effectiveUrl) {
     const existingEval = await db
       .select({ id: evaluations.id, roleId: evaluations.roleId })
       .from(evaluations)
       .innerJoin(roles, eq(evaluations.roleId, roles.id))
-      .where(and(eq(evaluations.userId, input.userId), eq(roles.sourceRef, sourceRef)))
+      .where(and(eq(evaluations.userId, input.userId), eq(roles.sourceRef, effectiveUrl)))
       .limit(1);
 
     if (existingEval.length > 0) {
@@ -101,10 +181,10 @@ export async function evaluateRole(input: EvaluationInput): Promise<EvaluationRe
     }
   }
 
-  // Step 1: Extract role info from JD using Claude
+  // Step 1: Extract role info from the posting text using Claude
   const extractionPrompt = `Extract the job role information from this job description or recruiter message:
 
-${input.jd}
+${jdText}
 
 Return a JSON object with:
 {
@@ -121,7 +201,7 @@ Return a JSON object with:
   "comp_range_high": null or number,
   "comp_currency": "USD|MXN|etc",
   "key_requirements": ["req1", "req2", "req3", ...],
-  "source": "${input.url || 'paste'}"
+  "source": "${effectiveUrl || 'paste'}"
 }`;
 
   const extractionResponse = await anthropic.messages.create({
@@ -179,7 +259,7 @@ Return a JSON object with:
   const pastEmployerMatch = await computePastEmployerMatch(db, input.userId, company_name);
 
   // Step 3: Create or find role record
-  const sourceRef = `${input.url || company_name}-${role_title}`;
+  const sourceRef = `${effectiveUrl || company_name}-${role_title}`;
   let roleId: string;
   const existingRoles = await db
     .select()
@@ -191,7 +271,7 @@ Return a JSON object with:
     roleId = existingRoles[0].id;
   } else {
     const roleValues: any = {
-      source: input.url ? 'url' : 'paste',
+      source: effectiveUrl ? 'url' : 'paste',
       sourceRef: sourceRef,
       companyName: company_name || 'Unknown',
       roleTitle: role_title || 'Unknown Role',
@@ -203,7 +283,7 @@ Return a JSON object with:
       remotePolicy: remote_policy,
       teamDescription: team_description,
       compCurrency: comp_currency,
-      rawJdText: input.jd,
+      rawJdText: jdText,
     };
 
     if (companyId) roleValues.companyId = companyId;
@@ -263,7 +343,7 @@ Candidate comp targets (for the comp strip marker): ${compTargetLine}
 If the profile lists DEAL-BREAKERS, treat them as hard filters: if the role clearly violates one, say so in Block B / red flags, and keep the score low (≤ 3.0) regardless of other strengths.
 
 # The role to evaluate
-${input.jd}
+${jdText}
 
 ---
 

@@ -73,13 +73,20 @@ export default function EvaluatePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jd, source: inputMode }),
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        let msg = 'Something went wrong. Please try again.';
+        try {
+          const body = await res.json();
+          if (body?.error) msg = body.error;
+        } catch { /* non-JSON error body */ }
+        throw new Error(msg);
+      }
       if (!res.body) throw new Error('No response body');
 
       setStream(res.body);
     } catch (err) {
       console.error(err);
-      alert('Something went wrong. Please try again.');
+      alert(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
