@@ -1481,24 +1481,42 @@ export default function OnboardingPage() {
                   background: c.surface,
                 }}
               >
-                {(['en', 'es'] as const).map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setLang(l)}
-                    style={{
-                      border: 0,
-                      padding: '4px 10px',
-                      borderRadius: 999,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      background: lang === l ? c.ink : 'transparent',
-                      color: lang === l ? c.bg : c.ink3,
-                    }}
-                  >
-                    {l.toUpperCase()}
-                  </button>
-                ))}
+                {(['en', 'es'] as const).map((l) => {
+                  const active = lang === l;
+                  // Show a spinner on the active pill while the read is being
+                  // re-translated, so the toggle feels responsive even though
+                  // the content swaps a beat later.
+                  const busy = active && translatingProfile;
+                  return (
+                    <button
+                      key={l}
+                      onClick={() => setLang(l)}
+                      disabled={translatingProfile}
+                      style={{
+                        border: 0,
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 500,
+                        cursor: translatingProfile ? 'default' : 'pointer',
+                        background: active ? c.ink : 'transparent',
+                        color: active ? c.bg : c.ink3,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                      }}
+                    >
+                      {busy && (
+                        <span style={{
+                          width: 9, height: 9, borderRadius: '50%',
+                          border: `1.5px solid ${c.bg}`, borderTopColor: 'transparent',
+                          display: 'inline-block', animation: 'spin 0.7s linear infinite',
+                        }} />
+                      )}
+                      {l.toUpperCase()}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Signed-in */}
@@ -1563,6 +1581,7 @@ export default function OnboardingPage() {
       <style>{`
         @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .animate-fade-in { animation: fade-in .3s ease-out; }
         .animate-fade-up { animation: fade-up .4s ease-out forwards; opacity: 0; }
       `}</style>
@@ -3083,6 +3102,13 @@ export default function OnboardingPage() {
   }
 
   function renderStep5() {
+    // Render the whole read in the language the engine CONTENT is currently in
+    // (profileLang), not the live `lang`. A toggle flips the top-bar pill (lang)
+    // immediately for feedback, but the read's labels + text only switch together
+    // the instant the new translation lands — so there's never a mixed-language
+    // flash, and no need to hold a long shaded state during the API round-trip.
+    const pl = profileLang;
+    const tr = pl === 'en' ? labels.en : labels.es;
     const indStr = industries.slice(0, 3).join(', ');
     const enginePattern = cvSignals?.pattern;
     const enginePatternDetail = cvSignals?.patternDetail;
@@ -3096,26 +3122,26 @@ export default function OnboardingPage() {
     // Format the comp range from what the user actually entered in step 4,
     // with locale-correct thousands separators (full numbers, no "2000k").
     const fmtComp = (raw: string): string | null => {
-      const grouped = groupDigits(raw, lang);
+      const grouped = groupDigits(raw, pl);
       return grouped ? `$${grouped}` : null;
     };
     const minFmt = fmtComp(minComp);
     const targetFmt = fmtComp(targetComp);
-    const perSuffix = compPeriod === 'monthly' ? (lang === 'en' ? '/mo' : '/mes') : (lang === 'en' ? '/yr' : '/año');
+    const perSuffix = compPeriod === 'monthly' ? (pl === 'en' ? '/mo' : '/mes') : (pl === 'en' ? '/yr' : '/año');
     const compRange = minFmt && targetFmt
       ? `${minFmt} – ${targetFmt}`
       : targetFmt
         ? targetFmt
         : minFmt
           ? `${minFmt}+`
-          : (lang === 'en' ? 'Not specified' : 'Sin especificar');
+          : (pl === 'en' ? 'Not specified' : 'Sin especificar');
     const hasComp = !!(minFmt || targetFmt);
-    const compCurrencyLabel = `${lang === 'en' ? 'In' : 'En'} ${compCurrency}${perSuffix}${compBasis === 'net' ? (lang === 'en' ? ' · net' : ' · líquido') : ''}`;
+    const compCurrencyLabel = `${pl === 'en' ? 'In' : 'En'} ${compCurrency}${perSuffix}${compBasis === 'net' ? (pl === 'en' ? ' · net' : ' · líquido') : ''}`;
 
     return (
       <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         <div>
-          <H1 a={t.s5H1a} em={t.s5H1b} />
+          <H1 a={tr.s5H1a} em={tr.s5H1b} />
           <p
             style={{
               fontFamily: '"Albert Sans"',
@@ -3126,12 +3152,15 @@ export default function OnboardingPage() {
               maxWidth: 720,
             }}
           >
-            {t.s5Sub}
+            {tr.s5Sub}
           </p>
         </div>
 
-        {/* The pattern */}
+        {/* The pattern — keyed on the content language so it crossfades the
+            moment a new translation lands instead of holding a shaded state. */}
         <div
+          key={`pattern-${pl}`}
+          className="animate-fade-in"
           style={{
             background: c.surface2,
             padding: '24px 28px',
@@ -3140,11 +3169,9 @@ export default function OnboardingPage() {
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
-            opacity: translatingProfile ? 0.45 : 1,
-            transition: 'opacity .2s',
           }}
         >
-          <Kicker>{t.s5Pattern}</Kicker>
+          <Kicker>{tr.s5Pattern}</Kicker>
           <p
             style={{
               fontFamily: '"Fraunces", serif',
@@ -3160,9 +3187,9 @@ export default function OnboardingPage() {
               ? enginePattern
               : (
                 <>
-                  {lang === 'en' ? "You're an operator who scales " : 'Eres un operador que escala '}
-                  <em style={{ fontStyle: 'italic' }}>{lang === 'en' ? 'by context' : 'por contexto'}</em>
-                  {lang === 'en' ? ' — ' : ' — '}
+                  {pl === 'en' ? "You're an operator who scales " : 'Eres un operador que escala '}
+                  <em style={{ fontStyle: 'italic' }}>{pl === 'en' ? 'by context' : 'por contexto'}</em>
+                  {pl === 'en' ? ' — ' : ' — '}
                   {indStr}.
                 </>
               )}
@@ -3181,11 +3208,11 @@ export default function OnboardingPage() {
               ? enginePatternDetail
               : (
                 <>
-                  {lang === 'en'
+                  {pl === 'en'
                     ? `${countryCount} countries, multiple markets, ${indStr}. The scope keeps growing; the function stays consistent. That makes you durable across messy categories — `
                     : `${countryCount} países, múltiples mercados, ${indStr}. El alcance sigue creciendo; la función se mantiene. Eso te hace duradero en categorías desordenadas — `}
                   <span style={{ color: c.ink, fontWeight: 500 }}>
-                    {lang === 'en'
+                    {pl === 'en'
                       ? 'and less obviously placed at companies looking for a deep functional specialist.'
                       : 'y menos obviamente colocado en empresas que buscan un especialista funcional profundo.'}
                   </span>
@@ -3194,16 +3221,16 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <Kicker style={{ marginTop: 4 }}>{t.s5Shapes}</Kicker>
+        <Kicker style={{ marginTop: 4 }}>{tr.s5Shapes}</Kicker>
 
-        {/* Three archetype cards grid */}
+        {/* Three archetype cards grid — crossfades on content-language change */}
         <div
+          key={`shapes-${pl}`}
+          className="animate-fade-in"
           style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))',
             gap: 14,
-            opacity: translatingProfile ? 0.45 : 1,
-            transition: 'opacity .2s',
           }}
         >
           {archetypes.map((arch) => {
@@ -3258,7 +3285,7 @@ export default function OnboardingPage() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {lang === 'en' ? 'Archetype' : 'Arquetipo'} {String(arch.number).padStart(2, '0')} ·{' '}
+                  {pl === 'en' ? 'Archetype' : 'Arquetipo'} {String(arch.number).padStart(2, '0')} ·{' '}
                   {arch.type}
                 </div>
                 <div
@@ -3296,7 +3323,7 @@ export default function OnboardingPage() {
                     color: c.ink3,
                   }}
                 >
-                  {t.s5Why}
+                  {tr.s5Why}
                   {arch.why}
                 </div>
               </div>
@@ -3325,7 +3352,7 @@ export default function OnboardingPage() {
               gap: 6,
             }}
           >
-            <Kicker>{t.s5CompCtx}</Kicker>
+            <Kicker>{tr.s5CompCtx}</Kicker>
             <div
               style={{
                 fontFamily: '"Geist Mono", monospace',
@@ -3347,7 +3374,7 @@ export default function OnboardingPage() {
                 maxWidth: 400,
               }}
             >
-              {lang === 'en'
+              {pl === 'en'
                 ? "A reference, not an anchor. We'll sharpen as peers in your segment contribute outcome data."
                 : 'Una referencia, no un anclaje. Afinaremos a medida que los pares en tu segmento contribuyan datos.'}
             </div>
@@ -3389,7 +3416,7 @@ export default function OnboardingPage() {
                     cursor: 'help',
                   }}
                 >
-                  {t.s5Orient}
+                  {tr.s5Orient}
                 </span>
               </span>
               {tipOpen && (
@@ -3420,7 +3447,7 @@ export default function OnboardingPage() {
                       opacity: 0.85,
                     }}
                   >
-                    {t.s5Orient}
+                    {tr.s5Orient}
                   </div>
                   <div
                     style={{
@@ -3429,7 +3456,7 @@ export default function OnboardingPage() {
                       lineHeight: 1.55,
                     }}
                   >
-                    {t.s5TipBody}
+                    {tr.s5TipBody}
                   </div>
                   <button
                     onClick={() => setTipOpen(false)}
@@ -3447,7 +3474,7 @@ export default function OnboardingPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {t.s5TipDismiss}
+                    {tr.s5TipDismiss}
                   </button>
                   <span
                     style={{
@@ -3489,8 +3516,8 @@ export default function OnboardingPage() {
                 lineHeight: 1.2,
               }}
             >
-              {t.s5HandoffH}
-              <em style={{ fontStyle: 'italic' }}>{t.s5HandoffHEm}</em>
+              {tr.s5HandoffH}
+              <em style={{ fontStyle: 'italic' }}>{tr.s5HandoffHEm}</em>
             </div>
             <div
               style={{
@@ -3501,7 +3528,7 @@ export default function OnboardingPage() {
                 marginTop: 4,
               }}
             >
-              {t.s5HandoffS}
+              {tr.s5HandoffS}
             </div>
           </div>
           <button
@@ -3557,7 +3584,7 @@ export default function OnboardingPage() {
               cursor: 'pointer',
             }}
           >
-            {t.s5HandoffCTA}
+            {tr.s5HandoffCTA}
           </button>
         </div>
 
@@ -3584,7 +3611,7 @@ export default function OnboardingPage() {
               cursor: 'pointer',
             }}
           >
-            {t.s5Back}
+            {tr.s5Back}
           </button>
           <span
             style={{
@@ -3597,7 +3624,7 @@ export default function OnboardingPage() {
               textAlign: 'center',
             }}
           >
-            {t.s5MidConfirmed(archConfirmedCount)}
+            {tr.s5MidConfirmed(archConfirmedCount)}
           </span>
         </div>
       </div>
