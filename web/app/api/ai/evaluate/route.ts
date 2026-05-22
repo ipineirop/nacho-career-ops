@@ -3,7 +3,7 @@ import { getAuthUserId } from '@/lib/auth-bridge';
 import { evaluateRole } from '@/lib/ai/evaluate-engine';
 import { UnauthorizedError, ValidationError, handleApiError } from '@/lib/api/errors';
 import { logger } from '@/lib/api/logger';
-import { getDb, evaluations } from '@/lib/db';
+import { getDb, evaluations, userCareerHistory } from '@/lib/db';
 import { eq, gte, and } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
@@ -85,6 +85,36 @@ export async function POST(req: NextRequest) {
     }
 
     chunks.push(`\n## Resumen\n\n${result.summary}\n`);
+
+    // Structured trailer (parsed + stripped by the client) — carries the
+    // interactive verdict surfaces that don't belong in the markdown body:
+    // the past-employer match record (§3.5a/§5.1), pattern hits (§3.5b), and
+    // the user's past employers for the §5.2 "this is actually…" picker.
+    const pastEmployers = await db
+      .select({
+        canonicalId: userCareerHistory.canonicalId,
+        companyName: userCareerHistory.companyName,
+        startedAt: userCareerHistory.startedAt,
+        endedAt: userCareerHistory.endedAt,
+      })
+      .from(userCareerHistory)
+      .where(eq(userCareerHistory.userId, authUser.id));
+
+    const meta = {
+      evaluationId: result.evaluationId,
+      roleId: result.roleId,
+      pastEmployerMatch: result.pastEmployerMatch,
+      patternHits: result.patternHits,
+      pastEmployers: pastEmployers.map((e) => ({
+        canonicalId: e.canonicalId,
+        displayName: e.companyName,
+        dateRange: [e.startedAt, e.endedAt]
+          .map((d) => (typeof d === 'string' ? d.slice(0, 4) : ''))
+          .filter(Boolean)
+          .join('–') || (e.startedAt ? `${String(e.startedAt).slice(0, 4)}–present` : ''),
+      })),
+    };
+    chunks.push(`\n<!--LABRA_META:${JSON.stringify(meta)}-->`);
 
     const stream = new ReadableStream({
       start(controller) {

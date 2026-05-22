@@ -91,6 +91,8 @@ export const userPreferences = pgTable('user_preferences', {
   nonNegotiables: jsonb('non_negotiables'), // [{label, importance}]
   niceToHaves: text('nice_to_haves').array(),
   dealBreakers: text('deal_breakers').array(),
+  pastEmployerSurfaceOnMatch: boolean('past_employer_surface_on_match').default(true), // §1.2 toggle
+  matchSuppressions: jsonb('match_suppressions'), // §5.1 [{canonical_id, role_company_input, suppressed_at}]
   briefCadence: text('brief_cadence').default('weekly'),
   briefPickCount: integer('brief_pick_count').default(5),
   preferredBriefTime: text('preferred_brief_time'), // 'HH:MM' in user tz
@@ -190,6 +192,8 @@ export const userCareerHistory = pgTable('user_career_history', {
   remoteDuringRole: text('remote_during_role'),
   startedAt: date('started_at'),
   endedAt: date('ended_at'), // null if current
+  canonicalId: text('canonical_id'), // resolved against canonical-companies.yaml at CV-parse time
+  matchStatus: text('match_status'), // resolved|unmatched|ambiguous
   teamSizeManaged: integer('team_size_managed'),
   pnlScopeUsd: numeric('pnl_scope_usd'),
   keyOutcomesMarkdown: text('key_outcomes_markdown'),
@@ -257,6 +261,7 @@ export const evaluations = pgTable('evaluations', {
   promptVersion: text('prompt_version'),
   supersededBy: uuid('superseded_by'), // self-FK to evaluations.id (set after insert)
   displayId: text('display_id'), // "001", "002" — backfilled from legacy report_id
+  pastEmployerMatch: jsonb('past_employer_match'), // §2.3 match record (persisted for verdict render on revisit)
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
   userIdx: index('evaluations_user_idx').on(t.userId),

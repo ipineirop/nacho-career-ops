@@ -154,11 +154,27 @@ Field rules:
 
 const SYNTH_SYSTEM = `You are a career strategist. Given a candidate's already-extracted factual profile, you produce an interpretive read: their through-line and the role shapes they can credibly target next. Evidence-grounded; cite real companies/domains from the facts. Never flatten them into a generic "startup operator / GM / Series B–C" template unless the facts genuinely are that. Calibrate to their real seniority and profession.`;
 
-function synthTask(factsJson: string): string {
+function synthTask(
+  factsJson: string,
+  avoid?: { industries?: string[]; culture?: string[]; titles?: string[] },
+): string {
+  const avoidLines = [
+    avoid?.industries?.length ? `- Industries to avoid: ${avoid.industries.join(', ')}` : '',
+    avoid?.culture?.length ? `- Culture / company shapes to avoid: ${avoid.culture.join(', ')}` : '',
+    avoid?.titles?.length ? `- Titles / scope to avoid: ${avoid.titles.join(', ')}` : '',
+  ].filter(Boolean);
+  const avoidBlock = avoidLines.length
+    ? `
+
+The candidate has EXPLICITLY said they do NOT want these going forward:
+${avoidLines.join('\n')}
+
+Honor this when generating archetypes: do NOT propose an archetype centered on an avoided industry, culture, or title — even if the CV points strongly that way (their past is not their aspiration). If the most obvious core-fit lands on something they're avoiding, reframe it toward the transferable scope they'd actually want, or pivot the archetype to an adjacent space. Treat these as aspirations to steer toward the negative space, not hard filters to mention.`
+    : '';
   return `Here is the candidate's extracted factual profile:
 \`\`\`json
 ${factsJson}
-\`\`\`
+\`\`\`${avoidBlock}
 
 Output ONLY a JSON block in EXACTLY this shape:
 \`\`\`json
@@ -338,8 +354,9 @@ export async function parseCv(input: {
 export async function synthesizeProfile(input: {
   facts: Partial<CareerProfile>;
   lang?: string;
+  avoid?: { industries?: string[]; culture?: string[]; titles?: string[] };
 }): Promise<ProfileSynthesis> {
-  const { facts, lang } = input;
+  const { facts, lang, avoid } = input;
   // Send only the fields that inform synthesis (keeps the prompt small).
   const slim = {
     roles: (facts.roles ?? []).map((r) => ({ company: r.company, role: r.role, years: r.years, current: r.current, metrics: r.metrics, industry: r.industry })),
@@ -356,7 +373,7 @@ export async function synthesizeProfile(input: {
     model: MODEL,
     max_tokens: 2048,
     system: SYNTH_SYSTEM,
-    messages: [{ role: 'user', content: `${synthTask(JSON.stringify(slim))}\n\n${synthLangInstruction(lang)}` }],
+    messages: [{ role: 'user', content: `${synthTask(JSON.stringify(slim), avoid)}\n\n${synthLangInstruction(lang)}` }],
   });
   const block = message.content.find((b) => b.type === 'text') as { text: string } | undefined;
   const jsonStr = extractJsonBlock(block?.text ?? '');

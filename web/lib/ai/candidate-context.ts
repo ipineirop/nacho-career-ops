@@ -10,6 +10,7 @@ import {
 } from '@/lib/db';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 import { getSetting as getStoreSetting } from '@/lib/settings-store';
+import { resolveCompany } from '@/lib/matching/resolve';
 
 // Shape the engine + onboarding produce for a single role.
 export interface RoleInput {
@@ -47,22 +48,76 @@ export async function persistCareerHistory(
     await db.delete(userCareerHistory).where(eq(userCareerHistory.userId, userId));
     const rows = roles
       .filter((r) => (r.company || r.role))
-      .map((r) => ({
-        userId,
-        companyName: r.company || 'Unknown',
-        roleTitle: r.role || 'Unknown',
-        function: r.industry || undefined,
-        seniorityAtRole: r.seniority || undefined,
-        locationDuringRole: r.location || undefined,
-        startedAt: yearToDate(r.startDate) ?? undefined,
-        endedAt: r.current ? undefined : (yearToDate(r.endDate) ?? undefined),
-        keyOutcomesMarkdown: r.metrics?.length ? r.metrics.map((m) => `- ${m}`).join('\n') : undefined,
-        proofPoints: r.metrics?.length ? r.metrics : undefined,
-      }));
+      .map((r) => {
+        // Resolve each employer against the canonical table so the evaluate
+        // flow can match a role's company to where the user already worked.
+        const resolved = r.company ? resolveCompany(r.company) : null;
+        return {
+          userId,
+          companyName: r.company || 'Unknown',
+          canonicalId: resolved?.resolved_canonical_id ?? undefined,
+          matchStatus: resolved?.resolved_canonical_id ? 'resolved' : 'unmatched',
+          roleTitle: r.role || 'Unknown',
+          function: r.industry || undefined,
+          seniorityAtRole: r.seniority || undefined,
+          locationDuringRole: r.location || undefined,
+          startedAt: yearToDate(r.startDate) ?? undefined,
+          endedAt: r.current ? undefined : (yearToDate(r.endDate) ?? undefined),
+          keyOutcomesMarkdown: r.metrics?.length ? r.metrics.map((m) => `- ${m}`).join('\n') : undefined,
+          proofPoints: r.metrics?.length ? r.metrics : undefined,
+        };
+      });
     if (rows.length) await db.insert(userCareerHistory).values(rows);
   } catch (err) {
     console.error('persistCareerHistory failed:', err);
   }
+}
+
+/**
+ * Render the user's "avoid" tags (nice_to_haves) into the scoring prompt,
+ * grouped by dimension prefix (spec §6.2). Soft signals, model-judged — no
+ * code-side penalty math. Returns '' when there are no tags so the block is
+ * omitted entirely.
+ */
+function renderAvoidBlock(tags: string[]): string {
+  if (!tags.length) return '';
+  const buckets: Record<'industry' | 'culture' | 'title' | 'other', string[]> = {
+    industry: [],
+    culture: [],
+    title: [],
+    other: [],
+  };
+  for (const raw of tags) {
+    const idx = raw.indexOf(':');
+    if (idx > 0) {
+      const key = raw.slice(0, idx).trim().toLowerCase();
+      const val = raw.slice(idx + 1).trim();
+      if (val && (key === 'industry' || key === 'culture' || key === 'title')) {
+        buckets[key].push(val);
+        continue;
+      }
+    }
+    const fallback = raw.trim();
+    if (fallback) buckets.other.push(fallback);
+  }
+
+  const labelLines: string[] = [];
+  if (buckets.industry.length) labelLines.push(`- Industries: ${buckets.industry.join(', ')}`);
+  if (buckets.culture.length) labelLines.push(`- Culture / company shape: ${buckets.culture.join(', ')}`);
+  if (buckets.title.length) labelLines.push(`- Titles / scope mandates: ${buckets.title.join(', ')}`);
+  if (buckets.other.length) labelLines.push(`- Other preferences to avoid: ${buckets.other.join(', ')}`);
+  if (!labelLines.length) return '';
+
+  return [
+    '## What the user wants to avoid (soft signals — do not cap recommendation)',
+    labelLines.join('\n'),
+    '',
+    'Treat these as soft signals: they should reduce the role\'s fit score when the role clearly exhibits these properties, but should not cap the recommendation at "pass." A role that\'s a strong fit on other dimensions can still surface as worth considering even if it hits one or two of these.',
+    '',
+    'Be cautious with culture tags, which are subjective — only count a hit if the role clearly exhibits the property the user flagged, not on weak inference.',
+    '',
+    'If you identify hits, list them in the verdict as qualitative observations (one line per hit) under a "Pattern hits" section. Do not assign numeric penalties per hit; let the holistic fit score reflect your overall judgment.',
+  ].join('\n');
 }
 
 // =====================================================================
@@ -188,7 +243,7 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     }
     // Hard filters the role must clear (deal-breakers win over a high score).
     if (arr(pref.dealBreakers).length) lines.push(`- DEAL-BREAKERS (hard no): ${arr(pref.dealBreakers).join('; ')}`);
-    if (arr(pref.niceToHaves).length) lines.push(`- Nice-to-haves: ${arr(pref.niceToHaves).join('; ')}`);
+    // nice_to_haves (avoid signals) are rendered as their own grouped block below.
     if (pref.humanAnswer) lines.push(`- In their own words: "${pref.humanAnswer}"`);
   }
 
@@ -209,6 +264,8 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
       .join('\n');
     block += '\n';
   }
+  const avoidBlock = renderAvoidBlock(arr(pref?.niceToHaves));
+  if (avoidBlock) block += `\n${avoidBlock}\n`;
   if (careerRows.length) {
     // Structured career history is authoritative over the parsed CV markdown.
     const yr = (d: unknown): string => (typeof d === 'string' && d.length >= 4 ? d.slice(0, 4) : (d instanceof Date ? String(d.getFullYear()) : ''));

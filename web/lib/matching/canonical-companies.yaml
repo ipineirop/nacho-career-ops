@@ -1,0 +1,10062 @@
+# Labra Canonical Company Table — v2 Expanded Set
+#
+# 694 entries covering high-likelihood appearances in Labra Evaluate runs.
+# Generated as a starting point — team review required before deploy.
+#
+# Per-entry trust calibration:
+#   - canonical_id, display_name: Claude-confident
+#   - country_primary, industry_tags, stage: Claude-confident for well-known companies
+#   - aliases: Claude-confident on common patterns, may miss country-specific variants
+#   - related_entities, acquisition_lineage: VERIFY before deploy where present
+#   - country_present_in: best-effort, may miss smaller markets
+#
+# Fields marked `notes: VERIFY` need human review before this table ships.
+#
+# Sparse entries: many fields are intentionally omitted where I'm not confident.
+# An entry with only canonical_id, display_name, and a partial alias list is still
+# useful — the matching pipeline will work, the verdict copy will work, and missing
+# fields can be filled in later from real data.
+#
+# What this list deliberately does NOT do:
+#   - Guess acquisition years (most lineage fields are empty unless I'm certain)
+#   - Invent subsidiaries
+#   - Pad with companies I can't verify exist
+#
+# Real-data growth via §4.3 of the spec (unmatched-strings backlog) will fill
+# the remaining gaps over the first 4-6 weeks of operation.
+
+- canonical_id: nubank
+  display_name: Nubank
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  - CO
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: public
+  aliases:
+  - nubank
+  - nu
+  - nu holdings
+  - nu mexico
+  - nu méxico
+  - nu colombia
+  - nubank brasil
+  - nubank brazil
+  related_entities: []
+  acquisition_lineage: []
+  notes: Listed NYSE 2021. Hires aggressively across BR/MX/CO.
+- canonical_id: mercado_pago
+  display_name: Mercado Pago
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CL
+  - CO
+  - PE
+  - UY
+  industry_tags:
+  - fintech
+  - payments
+  - consumer_finance
+  stage: public
+  aliases:
+  - mercado pago
+  - mercadopago
+  - mp
+  related_entities:
+  - canonical_id: mercado_libre
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Fintech arm of Mercado Libre. Hires separately from MELI core.
+- canonical_id: clip
+  display_name: Clip
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - payments
+  - sme
+  stage: late_stage
+  aliases:
+  - clip
+  - clip mexico
+  - clip méxico
+  - paymentology
+  related_entities: []
+  acquisition_lineage: []
+  notes: Mexican payments SaaS, SME focus.
+- canonical_id: konfio
+  display_name: Konfío
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - sme_lending
+  - sme
+  stage: late_stage
+  aliases:
+  - konfio
+  - konfío
+  - konfio mexico
+  related_entities: []
+  acquisition_lineage: []
+  notes: SME lender + SaaS, MX.
+- canonical_id: clara
+  display_name: Clara
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - CO
+  industry_tags:
+  - fintech
+  - corporate_cards
+  - b2b
+  stage: growth
+  aliases:
+  - clara
+  - clara mexico
+  - clara méxico
+  - clara card
+  related_entities: []
+  acquisition_lineage: []
+  notes: Corporate cards / expense mgmt. Brex-style for LatAm.
+- canonical_id: kueski
+  display_name: Kueski
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - consumer_lending
+  - bnpl
+  stage: growth
+  aliases:
+  - kueski
+  - kueski pay
+  - kueskipay
+  related_entities:
+  - canonical_id: kueski_pay
+    relation: product_brand
+  acquisition_lineage: []
+  notes: Originally consumer lending, pivoted heavily to BNPL via Kueski Pay.
+- canonical_id: bitso
+  display_name: Bitso
+  country_primary: MX
+  country_present_in:
+  - MX
+  - AR
+  - BR
+  - CO
+  industry_tags:
+  - fintech
+  - crypto
+  - exchange
+  stage: late_stage
+  aliases:
+  - bitso
+  - bitso mexico
+  - bitso méxico
+  related_entities: []
+  acquisition_lineage: []
+  notes: Largest LatAm crypto exchange by volume. MX HQ.
+- canonical_id: dlocal
+  display_name: dLocal
+  country_primary: UY
+  country_present_in:
+  - UY
+  - AR
+  - BR
+  - MX
+  - CO
+  - CL
+  - IN
+  - EG
+  - NG
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  - cross_border
+  stage: public
+  aliases:
+  - dlocal
+  - d local
+  - d-local
+  related_entities: []
+  acquisition_lineage: []
+  notes: Listed NASDAQ. Cross-border payments for emerging markets.
+- canonical_id: belvo
+  display_name: Belvo
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - CO
+  industry_tags:
+  - fintech
+  - open_banking
+  - b2b
+  - api
+  stage: growth
+  aliases:
+  - belvo
+  related_entities: []
+  acquisition_lineage: []
+  notes: Open banking API for LatAm. Plaid analogue.
+- canonical_id: uala
+  display_name: Ualá
+  country_primary: AR
+  country_present_in:
+  - AR
+  - MX
+  - CO
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: late_stage
+  aliases:
+  - uala
+  - ualá
+  related_entities: []
+  acquisition_lineage: []
+  notes: Argentine neobank, expanded to MX.
+- canonical_id: albo
+  display_name: albo
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - albo
+  - albo mx
+  related_entities: []
+  acquisition_lineage: []
+  notes: Mexican neobank.
+- canonical_id: cuenca
+  display_name: Cuenca
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - cuenca
+  related_entities: []
+  acquisition_lineage: []
+  notes: VERIFY status — possible regulatory/operational issues.
+- canonical_id: stori
+  display_name: Stori
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CO
+  industry_tags:
+  - fintech
+  - credit_card
+  - consumer_finance
+  stage: late_stage
+  aliases:
+  - stori
+  - stori card
+  related_entities: []
+  acquisition_lineage: []
+  notes: Underwriting-light credit cards for underbanked MX.
+- canonical_id: kavak_capital
+  display_name: Kavak Capital
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - PE
+  industry_tags:
+  - fintech
+  - auto_lending
+  - b2c
+  stage: growth
+  aliases:
+  - kavak capital
+  related_entities:
+  - canonical_id: kavak
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Auto lending arm of Kavak. VERIFY entity separation.
+- canonical_id: nuvocargo
+  display_name: Nuvocargo
+  country_primary: MX
+  country_present_in:
+  - MX
+  - US
+  industry_tags:
+  - fintech
+  - logistics
+  - cross_border
+  - b2b
+  stage: growth
+  aliases:
+  - nuvocargo
+  related_entities: []
+  acquisition_lineage: []
+  notes: Cross-border freight + fintech, MX-US.
+- canonical_id: plata_card
+  display_name: Plata Card
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - credit_card
+  - consumer_finance
+  stage: growth
+  aliases:
+  - plata
+  - plata card
+  - platacard
+  related_entities: []
+  acquisition_lineage: []
+  notes: MX consumer credit card. Recent entrant.
+- canonical_id: addi
+  display_name: Addi
+  country_primary: CO
+  country_present_in:
+  - CO
+  - BR
+  - MX
+  industry_tags:
+  - fintech
+  - bnpl
+  - consumer_finance
+  stage: growth
+  aliases:
+  - addi
+  related_entities: []
+  acquisition_lineage: []
+  notes: BNPL with LatAm focus.
+- canonical_id: tribal_credit
+  display_name: Tribal
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CO
+  industry_tags:
+  - fintech
+  - corporate_cards
+  - sme
+  - b2b
+  stage: growth
+  aliases:
+  - tribal
+  - tribal credit
+  related_entities: []
+  acquisition_lineage: []
+  notes: SME corporate cards, LatAm focus.
+- canonical_id: mercado_libre
+  display_name: Mercado Libre
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CL
+  - CO
+  - PE
+  - UY
+  - EC
+  industry_tags:
+  - marketplace
+  - ecommerce
+  - logistics
+  stage: public
+  aliases:
+  - mercado libre
+  - mercadolibre
+  - meli
+  - ml
+  related_entities:
+  - canonical_id: mercado_pago
+    relation: subsidiary
+  - canonical_id: mercado_envios
+    relation: product_brand
+  acquisition_lineage: []
+  notes: NASDAQ-listed. The largest tech employer in LatAm.
+- canonical_id: rappi
+  display_name: Rappi
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  - AR
+  - CL
+  - PE
+  - EC
+  - UY
+  - CR
+  industry_tags:
+  - marketplace
+  - delivery
+  - super_app
+  - fintech
+  stage: late_stage
+  aliases:
+  - rappi
+  - rappi inc
+  - rappi mexico
+  - rappi méxico
+  - rappi colombia
+  - rappi brasil
+  - rappi brazil
+  related_entities:
+  - canonical_id: rappi_pay
+    relation: subsidiary
+  - canonical_id: rappi_travel
+    relation: product_brand
+  acquisition_lineage: []
+  notes: Colombian super-app, BC-funded, multi-country.
+- canonical_id: rappi_pay
+  display_name: RappiPay
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - consumer_finance
+  stage: late_stage
+  aliases:
+  - rappi pay
+  - rappipay
+  - rappi card
+  related_entities:
+  - canonical_id: rappi
+    relation: parent
+  acquisition_lineage: []
+  notes: Fintech arm of Rappi. Different culture from core marketplace per recent ops history.
+- canonical_id: kavak
+  display_name: Kavak
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - PE
+  - TR
+  - AE
+  industry_tags:
+  - marketplace
+  - automotive
+  - consumer
+  stage: late_stage
+  aliases:
+  - kavak
+  - kavak mexico
+  - kavak méxico
+  related_entities:
+  - canonical_id: kavak_capital
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Used-car marketplace, MX-founded, expanded to TR/MENA.
+- canonical_id: jüsto
+  display_name: Jüsto
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: growth
+  aliases:
+  - justo
+  - jüsto
+  - just-o
+  related_entities: []
+  acquisition_lineage: []
+  notes: Online grocery, MX HQ.
+- canonical_id: cornershop
+  display_name: Cornershop (acquired)
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  - PE
+  - CA
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: late_stage
+  aliases:
+  - cornershop
+  - cornershop by uber
+  related_entities:
+  - canonical_id: uber_eats_latam
+    relation: parent
+  acquisition_lineage: []
+  notes: 'Acquired by Uber 2021. Original brand wound down progressively in 2022-2023.
+
+    KEY: Uber Eats LatAm''s `acquisition_lineage` should reference cornershop with until: 2021.
+
+    '
+- canonical_id: uber_eats_latam
+  display_name: Uber Eats LatAm
+  country_primary: US
+  country_present_in:
+  - MX
+  - BR
+  - CL
+  - CO
+  - PE
+  - EC
+  - AR
+  industry_tags:
+  - marketplace
+  - delivery
+  - food
+  stage: public
+  aliases:
+  - uber eats
+  - uber eats latam
+  - uber eats latinoamerica
+  - uber eats latinoamérica
+  - uber eats mexico
+  - uber eats méxico
+  related_entities:
+  - canonical_id: uber
+    relation: parent
+  acquisition_lineage:
+  - was: cornershop
+    until: 2021
+  notes: 'VERIFY this lineage carefully — Cornershop''s brand was retired in most markets by 2022-2023,
+
+    but the people and ops continuity is the actual past-employer signal we want to surface.
+
+    '
+- canonical_id: despegar
+  display_name: Despegar
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CL
+  - CO
+  - PE
+  industry_tags:
+  - marketplace
+  - travel
+  - ecommerce
+  stage: public
+  aliases:
+  - despegar
+  - decolar
+  - decolar.com
+  related_entities: []
+  acquisition_lineage: []
+  notes: Listed NYSE. Travel marketplace, multi-brand by country.
+- canonical_id: tiendanube
+  display_name: Tiendanube
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CO
+  - CL
+  industry_tags:
+  - saas
+  - ecommerce
+  - b2b
+  stage: late_stage
+  aliases:
+  - tiendanube
+  - nuvemshop
+  - nuvem shop
+  - tienda nube
+  related_entities: []
+  acquisition_lineage: []
+  notes: Shopify-style ecommerce platform, BR/AR-strong. Nuvemshop is the Brazilian brand (merged).
+- canonical_id: linio
+  display_name: Linio (historical)
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CO
+  - PE
+  - CL
+  - AR
+  industry_tags:
+  - marketplace
+  - ecommerce
+  stage: late_stage
+  aliases:
+  - linio
+  - linio mexico
+  - linio méxico
+  related_entities:
+  - canonical_id: falabella
+    relation: parent
+  acquisition_lineage: []
+  notes: 'Acquired by Falabella ~2018. Operated under Linio brand for years post-acquisition,
+
+    largely wound down by 2024. VERIFY current status.
+
+    '
+- canonical_id: habi
+  display_name: Habi
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  industry_tags:
+  - marketplace
+  - proptech
+  - real_estate
+  stage: late_stage
+  aliases:
+  - habi
+  - habi co
+  - habi colombia
+  related_entities: []
+  acquisition_lineage: []
+  notes: iBuyer for LatAm.
+- canonical_id: la_haus
+  display_name: La Haus
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  industry_tags:
+  - marketplace
+  - proptech
+  - real_estate
+  stage: growth
+  aliases:
+  - la haus
+  - lahaus
+  related_entities: []
+  acquisition_lineage: []
+  notes: Real estate marketplace, BC-backed.
+- canonical_id: loft
+  display_name: Loft
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - marketplace
+  - proptech
+  - real_estate
+  stage: late_stage
+  aliases:
+  - loft
+  - loft brasil
+  - loft brazil
+  related_entities: []
+  acquisition_lineage: []
+  notes: BR proptech, expanded to MX.
+- canonical_id: 99
+  display_name: 99 (acquired by Didi)
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - mobility
+  - rideshare
+  stage: late_stage
+  aliases:
+  - 99
+  - 99app
+  - 99 taxis
+  related_entities:
+  - canonical_id: didi
+    relation: parent
+  acquisition_lineage: []
+  notes: 'Acquired by Didi 2018. Still operates as 99 brand in BR.
+
+    Past-employer treatment: someone who was at 99 in 2017 was at the indie company,
+
+    someone at 99 in 2024 was effectively at Didi. The lineage entry on `didi` should
+
+    reference 99 to handle this — but the brand persisted, so direct match works too.
+
+    '
+- canonical_id: didi
+  display_name: Didi
+  country_primary: CN
+  country_present_in:
+  - CN
+  - BR
+  - MX
+  - AR
+  - CO
+  - CL
+  industry_tags:
+  - mobility
+  - rideshare
+  - delivery
+  stage: public
+  aliases:
+  - didi
+  - didi chuxing
+  - didi mexico
+  - didi méxico
+  - didi brasil
+  related_entities:
+  - canonical_id: '99'
+    relation: subsidiary
+  acquisition_lineage:
+  - was: '99'
+    until: 2018
+  notes: VERIFY acquisition date precisely.
+- canonical_id: cabify
+  display_name: Cabify
+  country_primary: ES
+  country_present_in:
+  - ES
+  - MX
+  - AR
+  - CO
+  - CL
+  - PE
+  - EC
+  - UY
+  industry_tags:
+  - mobility
+  - rideshare
+  stage: late_stage
+  aliases:
+  - cabify
+  related_entities: []
+  acquisition_lineage: []
+  notes: Spanish-founded, LatAm operational center of gravity.
+- canonical_id: beat
+  display_name: Beat (defunct)
+  country_primary: GR
+  country_present_in:
+  - GR
+  - MX
+  - AR
+  - CO
+  - CL
+  - PE
+  industry_tags:
+  - mobility
+  - rideshare
+  stage: late_stage
+  aliases:
+  - beat
+  - beat mexico
+  - beat méxico
+  related_entities: []
+  acquisition_lineage: []
+  notes: 'Defunct as of 2022 in LatAm. Past employer signal still relevant for users
+
+    who worked there 2018-2022.
+
+    '
+- canonical_id: uber
+  display_name: Uber
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - PE
+  industry_tags:
+  - mobility
+  - rideshare
+  - delivery
+  - marketplace
+  stage: public
+  aliases:
+  - uber
+  - uber technologies
+  - uber inc
+  - uber mexico
+  - uber méxico
+  related_entities:
+  - canonical_id: uber_eats_latam
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Core rideshare brand; Uber Eats LatAm has separate canonical for lineage purposes.
+- canonical_id: stripe
+  display_name: Stripe
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  - api
+  stage: late_stage
+  aliases:
+  - stripe
+  - stripe inc
+  related_entities: []
+  acquisition_lineage: []
+  notes: Hires LatAm leadership for regional product/eng/operations.
+- canonical_id: google
+  display_name: Google
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  industry_tags:
+  - tech
+  - advertising
+  - cloud
+  - consumer
+  stage: public
+  aliases:
+  - google
+  - google llc
+  - alphabet
+  - alphabet inc
+  - google mexico
+  - google méxico
+  - google brasil
+  related_entities:
+  - canonical_id: youtube
+    relation: subsidiary
+  - canonical_id: google_cloud
+    relation: product_brand
+  acquisition_lineage: []
+  notes: Wide hiring band; LatAm leadership roles in product, sales, GTM.
+- canonical_id: meta
+  display_name: Meta
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  industry_tags:
+  - tech
+  - advertising
+  - social
+  - consumer
+  stage: public
+  aliases:
+  - meta
+  - facebook
+  - meta platforms
+  - meta inc
+  related_entities:
+  - canonical_id: instagram
+    relation: subsidiary
+  - canonical_id: whatsapp
+    relation: subsidiary
+  acquisition_lineage:
+  - was: facebook
+    until: 2021
+  notes: 'Renamed from Facebook 2021. Treat past Facebook employment as same entity —
+
+    the lineage entry handles this.
+
+    '
+- canonical_id: amazon
+  display_name: Amazon
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - CO
+  - CL
+  - AR
+  industry_tags:
+  - marketplace
+  - cloud
+  - ecommerce
+  - logistics
+  stage: public
+  aliases:
+  - amazon
+  - amazon.com
+  - amazon inc
+  - amazon mexico
+  - amazon méxico
+  - amazon brasil
+  related_entities:
+  - canonical_id: aws
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: AWS treated separately; product/marketplace LatAm roles concentrated MX/BR.
+- canonical_id: aws
+  display_name: AWS
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CL
+  - CO
+  industry_tags:
+  - cloud
+  - b2b
+  - infrastructure
+  stage: public
+  aliases:
+  - aws
+  - amazon web services
+  related_entities:
+  - canonical_id: amazon
+    relation: parent
+  acquisition_lineage: []
+  notes: Different hiring patterns from Amazon core.
+- canonical_id: microsoft
+  display_name: Microsoft
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CL
+  - CO
+  - PE
+  industry_tags:
+  - tech
+  - cloud
+  - b2b
+  - consumer
+  stage: public
+  aliases:
+  - microsoft
+  - microsoft corporation
+  - msft
+  - microsoft mexico
+  - microsoft méxico
+  related_entities:
+  - canonical_id: linkedin
+    relation: subsidiary
+  - canonical_id: github
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: LinkedIn handled separately due to distinct culture/hiring.
+- canonical_id: linkedin
+  display_name: LinkedIn
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - social
+  - b2b
+  stage: public
+  aliases:
+  - linkedin
+  - linkedin corporation
+  related_entities:
+  - canonical_id: microsoft
+    relation: parent
+  acquisition_lineage: []
+  notes: Acquired by Microsoft 2016 but operates with significant autonomy.
+- canonical_id: airbnb
+  display_name: Airbnb
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  industry_tags:
+  - marketplace
+  - travel
+  - consumer
+  stage: public
+  aliases:
+  - airbnb
+  - airbnb inc
+  related_entities: []
+  acquisition_lineage: []
+  notes: LatAm regional roles concentrated MX HQ.
+- canonical_id: cloudflare
+  display_name: Cloudflare
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - infrastructure
+  - b2b
+  stage: public
+  aliases:
+  - cloudflare
+  related_entities: []
+  acquisition_lineage: []
+  notes: Hiring LatAm for technical and GTM.
+- canonical_id: notion
+  display_name: Notion
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: late_stage
+  aliases:
+  - notion
+  - notion labs
+  related_entities: []
+  acquisition_lineage: []
+  notes: Hiring LatAm GTM + product.
+- canonical_id: linear
+  display_name: Linear
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: growth
+  aliases:
+  - linear
+  - linear.app
+  related_entities: []
+  acquisition_lineage: []
+  notes: Remote-first, hires LatAm.
+- canonical_id: vercel
+  display_name: Vercel
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  industry_tags:
+  - saas
+  - devtools
+  - b2b
+  stage: late_stage
+  aliases:
+  - vercel
+  related_entities: []
+  acquisition_lineage: []
+  notes: Remote-first, hires LatAm eng/devrel.
+- canonical_id: stripe_atlas
+  display_name: Stripe Atlas
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  industry_tags:
+  - fintech
+  - b2b
+  - sme
+  stage: late_stage
+  aliases:
+  - stripe atlas
+  related_entities:
+  - canonical_id: stripe
+    relation: product_brand
+  acquisition_lineage: []
+  notes: VERIFY — likely just consolidate into stripe entry; left separate for review.
+- canonical_id: banorte
+  display_name: Banorte
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  - traditional_finance
+  stage: public
+  aliases:
+  - banorte
+  - grupo financiero banorte
+  - gfnorte
+  related_entities: []
+  acquisition_lineage: []
+  notes: MX bank, frequent recruiter of tech talent into digital transformation.
+- canonical_id: bbva_mexico
+  display_name: BBVA México
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  - traditional_finance
+  stage: public
+  aliases:
+  - bbva
+  - bbva mexico
+  - bbva méxico
+  - bbva bancomer
+  - bancomer
+  related_entities:
+  - canonical_id: bbva_global
+    relation: parent
+  acquisition_lineage:
+  - was: bancomer
+    until: 2019
+  notes: VERIFY rebrand timing from Bancomer to BBVA México.
+- canonical_id: santander_mexico
+  display_name: Santander México
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  - traditional_finance
+  stage: public
+  aliases:
+  - santander
+  - santander mexico
+  - santander méxico
+  related_entities:
+  - canonical_id: santander_global
+    relation: parent
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: liverpool
+  display_name: Liverpool
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - retail
+  - ecommerce
+  stage: public
+  aliases:
+  - liverpool
+  - el puerto de liverpool
+  related_entities: []
+  acquisition_lineage: []
+  notes: MX department store, large tech investment in last 5 years.
+- canonical_id: falabella
+  display_name: Falabella
+  country_primary: CL
+  country_present_in:
+  - CL
+  - PE
+  - CO
+  - AR
+  - BR
+  - MX
+  industry_tags:
+  - retail
+  - ecommerce
+  stage: public
+  aliases:
+  - falabella
+  - falabella retail
+  related_entities:
+  - canonical_id: linio
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Chilean retail conglomerate; acquired Linio.
+- canonical_id: america_movil
+  display_name: América Móvil
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - PE
+  - US
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - america movil
+  - américa móvil
+  - amx
+  - telcel
+  - claro
+  related_entities:
+  - canonical_id: telcel
+    relation: subsidiary
+  - canonical_id: claro
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Carlos Slim's telecom group. Treat Telcel/Claro as same parent.
+- canonical_id: cemex
+  display_name: Cemex
+  country_primary: MX
+  country_present_in:
+  - MX
+  - US
+  - EU
+  - multi
+  industry_tags:
+  - industrial
+  - construction
+  stage: public
+  aliases:
+  - cemex
+  related_entities: []
+  acquisition_lineage: []
+  notes: Global cement; growing tech/digital arm.
+- canonical_id: femsa
+  display_name: FEMSA
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - CO
+  - CL
+  - multi
+  industry_tags:
+  - retail
+  - beverage
+  - conglomerate
+  stage: public
+  aliases:
+  - femsa
+  - oxxo
+  related_entities:
+  - canonical_id: oxxo
+    relation: subsidiary
+  acquisition_lineage: []
+  notes: Conglomerate. Oxxo is the consumer-facing brand most users will know.
+- canonical_id: walmart_mexico
+  display_name: Walmart México
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CA
+  industry_tags:
+  - retail
+  - ecommerce
+  stage: public
+  aliases:
+  - walmart mexico
+  - walmart méxico
+  - walmex
+  - bodega aurrera
+  related_entities:
+  - canonical_id: walmart_global
+    relation: parent
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: mckinsey
+  display_name: McKinsey & Company
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - strategy
+  stage: private_equity
+  aliases:
+  - mckinsey
+  - mckinsey and company
+  - mckinsey & company
+  - mck
+  related_entities: []
+  acquisition_lineage: []
+  notes: Heavy presence in LatAm offices (Bogotá, Mexico City, São Paulo).
+- canonical_id: bcg
+  display_name: Boston Consulting Group
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - strategy
+  stage: private_equity
+  aliases:
+  - bcg
+  - boston consulting group
+  - boston consulting
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: bain
+  display_name: Bain & Company
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - strategy
+  stage: private_equity
+  aliases:
+  - bain
+  - bain and company
+  - bain & company
+  - bain consulting
+  related_entities:
+  - canonical_id: bain_capital
+    relation: spinout
+  acquisition_lineage: []
+  notes: 'Bain & Company (consulting) ≠ Bain Capital (PE).
+
+    Past-employer matching should distinguish — they''re meaningfully different work.
+
+    '
+- canonical_id: bain_capital
+  display_name: Bain Capital
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - private_equity
+  - finance
+  - investment
+  stage: private_equity
+  aliases:
+  - bain capital
+  related_entities:
+  - canonical_id: bain
+    relation: parent
+  acquisition_lineage: []
+  notes: Spun off from Bain & Company 1984. Treat as separate entity.
+- canonical_id: accenture
+  display_name: Accenture
+  country_primary: IE
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - technology_services
+  stage: public
+  aliases:
+  - accenture
+  - accenture plc
+  related_entities: []
+  acquisition_lineage: []
+  notes: Large LatAm operational footprint; tech-flavored consulting.
+- canonical_id: deloitte
+  display_name: Deloitte
+  country_primary: UK
+  country_present_in:
+  - US
+  - UK
+  - MX
+  - BR
+  - AR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - accounting
+  - big_four
+  stage: private_equity
+  aliases:
+  - deloitte
+  - deloitte touche tohmatsu
+  related_entities: []
+  acquisition_lineage: []
+  notes: Big Four. Multi-practice; consulting + audit + tax.
+- canonical_id: ey
+  display_name: EY
+  country_primary: UK
+  country_present_in:
+  - US
+  - UK
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - accounting
+  - big_four
+  stage: private_equity
+  aliases:
+  - ey
+  - ernst and young
+  - ernst & young
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: kpmg
+  display_name: KPMG
+  country_primary: NL
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - accounting
+  - big_four
+  stage: private_equity
+  aliases:
+  - kpmg
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: pwc
+  display_name: PwC
+  country_primary: UK
+  country_present_in:
+  - US
+  - UK
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - accounting
+  - big_four
+  stage: private_equity
+  aliases:
+  - pwc
+  - pricewaterhousecoopers
+  - price waterhouse
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: buenbit
+  display_name: Buenbit
+  country_primary: AR
+  country_present_in:
+  - AR
+  - MX
+  - PE
+  industry_tags:
+  - crypto
+  - exchange
+  - fintech
+  stage: growth
+  aliases:
+  - buenbit
+  related_entities: []
+  acquisition_lineage: []
+  notes: AR crypto exchange.
+- canonical_id: lemon_cash
+  display_name: Lemon
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  industry_tags:
+  - crypto
+  - exchange
+  - fintech
+  stage: growth
+  aliases:
+  - lemon
+  - lemon cash
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: ripio
+  display_name: Ripio
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CO
+  - ES
+  industry_tags:
+  - crypto
+  - exchange
+  - fintech
+  stage: growth
+  aliases:
+  - ripio
+  related_entities: []
+  acquisition_lineage: []
+  notes: ''
+- canonical_id: mercado_bitcoin
+  display_name: Mercado Bitcoin
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - crypto
+  - exchange
+  - fintech
+  stage: late_stage
+  aliases:
+  - mercado bitcoin
+  - mb
+  related_entities: []
+  acquisition_lineage: []
+  notes: BR crypto exchange.
+- canonical_id: olist
+  display_name: Olist
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - ecommerce
+  - b2b
+  stage: late_stage
+  aliases:
+  - olist
+  related_entities: []
+  acquisition_lineage: []
+  notes: BR ecommerce SaaS.
+- canonical_id: hotmart
+  display_name: Hotmart
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - saas
+  - edtech
+  - marketplace
+  stage: late_stage
+  aliases:
+  - hotmart
+  related_entities: []
+  acquisition_lineage: []
+  notes: BR creator-economy platform.
+- canonical_id: globant
+  display_name: Globant
+  country_primary: AR
+  country_present_in:
+  - AR
+  - US
+  - MX
+  - CO
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  - software
+  stage: public
+  aliases:
+  - globant
+  related_entities: []
+  acquisition_lineage: []
+  notes: AR-founded IT services, NYSE-listed.
+- canonical_id: c6_bank
+  display_name: C6 Bank
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: late_stage
+  aliases:
+  - c6
+  - c6 bank
+  - c6bank
+- canonical_id: inter
+  display_name: Banco Inter
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - neobank
+  - banking
+  stage: public
+  aliases:
+  - inter
+  - banco inter
+  - inter bank
+- canonical_id: xp_inc
+  display_name: XP Inc.
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - investment
+  - brokerage
+  stage: public
+  aliases:
+  - xp
+  - xp inc
+  - xp investimentos
+- canonical_id: creditas
+  display_name: Creditas
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - fintech
+  - consumer_lending
+  - auto_lending
+  stage: late_stage
+  aliases:
+  - creditas
+- canonical_id: ebanx
+  display_name: EBANX
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - cross_border
+  - b2b
+  stage: late_stage
+  aliases:
+  - ebanx
+  - e banx
+- canonical_id: pagseguro
+  display_name: PagSeguro
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - sme
+  stage: public
+  aliases:
+  - pagseguro
+  - pag seguro
+  - pagbank
+- canonical_id: stone
+  display_name: Stone
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - sme
+  stage: public
+  aliases:
+  - stone
+  - stone co
+  - stoneco
+- canonical_id: neon
+  display_name: Neon
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: late_stage
+  aliases:
+  - neon
+  - neon bank
+  - banco neon
+- canonical_id: warren
+  display_name: Warren
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - investment
+  - wealth
+  stage: growth
+  aliases:
+  - warren
+  - warren brasil
+- canonical_id: kanastra
+  display_name: Kanastra
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - b2b
+  - infrastructure
+  stage: growth
+  aliases:
+  - kanastra
+- canonical_id: conta_simples
+  display_name: Conta Simples
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - b2b
+  - sme
+  - corporate_cards
+  stage: growth
+  aliases:
+  - conta simples
+  - contasimples
+- canonical_id: a55
+  display_name: a55
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - fintech
+  - sme_lending
+  - b2b
+  stage: growth
+  aliases:
+  - a55
+- canonical_id: idwall
+  display_name: idwall
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - b2b
+  - identity
+  - kyc
+  stage: growth
+  aliases:
+  - idwall
+  - id wall
+- canonical_id: fondeadora
+  display_name: Fondeadora
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - fondeadora
+- canonical_id: flink
+  display_name: Flink
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - investment
+  - brokerage
+  - consumer_finance
+  stage: growth
+  aliases:
+  - flink
+  - flink mexico
+- canonical_id: gbm
+  display_name: GBM
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - investment
+  - brokerage
+  stage: late_stage
+  aliases:
+  - gbm
+  - grupo bursatil mexicano
+  - gbm plus
+- canonical_id: aplazo
+  display_name: Aplazo
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - bnpl
+  - consumer_finance
+  stage: growth
+  aliases:
+  - aplazo
+- canonical_id: credijusto
+  display_name: Credijusto
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - sme_lending
+  - b2b
+  stage: growth
+  aliases:
+  - credijusto
+  - credi justo
+- canonical_id: mendel
+  display_name: Mendel
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - corporate_cards
+  - b2b
+  - sme
+  stage: growth
+  aliases:
+  - mendel
+- canonical_id: higo
+  display_name: Higo
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - b2b
+  - ap_automation
+  stage: growth
+  aliases:
+  - higo
+- canonical_id: kapital
+  display_name: Kapital
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - sme
+  - b2b
+  - banking
+  stage: growth
+  aliases:
+  - kapital
+  - kapital bank
+- canonical_id: finerio
+  display_name: Finerio Connect
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - open_banking
+  - api
+  - b2b
+  stage: growth
+  aliases:
+  - finerio
+  - finerio connect
+- canonical_id: baubap
+  display_name: Baubap
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - consumer_lending
+  stage: growth
+  aliases:
+  - baubap
+- canonical_id: vexi
+  display_name: Vexi
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - credit_card
+  - consumer_finance
+  stage: growth
+  aliases:
+  - vexi
+- canonical_id: bold
+  display_name: Bold
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - fintech
+  - payments
+  - sme
+  stage: growth
+  aliases:
+  - bold
+  - bold co
+- canonical_id: ualet
+  display_name: Ualet
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - fintech
+  - investment
+  - wealth
+  stage: growth
+  aliases:
+  - ualet
+- canonical_id: tpaga
+  display_name: tpaga
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - fintech
+  - payments
+  - consumer_finance
+  stage: growth
+  aliases:
+  - tpaga
+  - t paga
+- canonical_id: movii
+  display_name: Movii
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - movii
+- canonical_id: rappi_bank
+  display_name: RappiBank
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - fintech
+  - banking
+  stage: growth
+  aliases:
+  - rappi bank
+  - rappibank
+  related_entities:
+  - canonical_id: rappi
+    relation: subsidiary
+  notes: 'VERIFY: confirm whether RappiBank is a distinct entity from RappiPay or the same thing rebranded.'
+- canonical_id: xepelin
+  display_name: Xepelin
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  industry_tags:
+  - fintech
+  - sme_lending
+  - b2b
+  stage: growth
+  aliases:
+  - xepelin
+- canonical_id: fintual
+  display_name: Fintual
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  industry_tags:
+  - fintech
+  - investment
+  - wealth
+  stage: growth
+  aliases:
+  - fintual
+- canonical_id: destacame
+  display_name: Destacame
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  industry_tags:
+  - fintech
+  - consumer_finance
+  - credit_scoring
+  stage: growth
+  aliases:
+  - destacame
+  - destácame
+- canonical_id: naranja_x
+  display_name: Naranja X
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - fintech
+  - consumer_finance
+  - credit_card
+  stage: late_stage
+  aliases:
+  - naranja
+  - naranja x
+  - tarjeta naranja
+- canonical_id: modo
+  display_name: MODO
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - fintech
+  - payments
+  stage: growth
+  aliases:
+  - modo
+- canonical_id: brubank
+  display_name: Brubank
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - fintech
+  - neobank
+  stage: growth
+  aliases:
+  - brubank
+- canonical_id: personal_pay
+  display_name: Personal Pay
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - fintech
+  - payments
+  stage: growth
+  aliases:
+  - personal pay
+  - personalpay
+- canonical_id: prex
+  display_name: Prex
+  country_primary: AR
+  country_present_in:
+  - AR
+  - UY
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - prex
+- canonical_id: tienda_pago
+  display_name: Tienda Pago
+  country_primary: PE
+  country_present_in:
+  - PE
+  - MX
+  industry_tags:
+  - fintech
+  - sme_lending
+  - b2b
+  stage: growth
+  aliases:
+  - tienda pago
+  - tiendapago
+- canonical_id: yape
+  display_name: Yape
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - fintech
+  - payments
+  stage: growth
+  aliases:
+  - yape
+  notes: Yape is a product of BCP (Banco de Crédito del Perú); VERIFY if it should be modeled as subsidiary or just product.
+- canonical_id: plin
+  display_name: Plin
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - fintech
+  - payments
+  stage: growth
+  aliases:
+  - plin
+- canonical_id: kakau
+  display_name: Kakau
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - insurtech
+  stage: growth
+  aliases:
+  - kakau
+- canonical_id: justos
+  display_name: Justos
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - insurtech
+  - auto
+  stage: growth
+  aliases:
+  - justos
+  - justos seguros
+- canonical_id: bizu
+  display_name: Bizu
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  stage: growth
+  aliases:
+  - bizu
+- canonical_id: crabi
+  display_name: Crabi
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - insurtech
+  - auto
+  stage: growth
+  aliases:
+  - crabi
+- canonical_id: sofia_seguros
+  display_name: Sofía
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - insurtech
+  - health
+  stage: growth
+  aliases:
+  - sofia
+  - sofía
+  - sofia salud
+  - sofía salud
+- canonical_id: magalu
+  display_name: Magazine Luiza
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - ecommerce
+  - marketplace
+  stage: public
+  aliases:
+  - magalu
+  - magazine luiza
+  - magazineluiza
+- canonical_id: americanas
+  display_name: Americanas
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - ecommerce
+  - marketplace
+  stage: public
+  aliases:
+  - americanas
+  - lojas americanas
+  - b2w
+- canonical_id: via
+  display_name: Via
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - ecommerce
+  stage: public
+  aliases:
+  - via
+  - via varejo
+  - casas bahia
+  - ponto
+  notes: VERIFY current corporate structure — was Via Varejo, restructured under multiple brands.
+- canonical_id: petlove
+  display_name: Petlove
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - ecommerce
+  - marketplace
+  - pets
+  stage: late_stage
+  aliases:
+  - petlove
+  - pet love
+- canonical_id: madeira_madeira
+  display_name: MadeiraMadeira
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - ecommerce
+  - home
+  - furniture
+  stage: late_stage
+  aliases:
+  - madeira madeira
+  - madeiramadeira
+- canonical_id: dafiti
+  display_name: Dafiti
+  country_primary: BR
+  country_present_in:
+  - BR
+  - AR
+  - CL
+  - CO
+  industry_tags:
+  - ecommerce
+  - fashion
+  stage: late_stage
+  aliases:
+  - dafiti
+  notes: Part of Global Fashion Group umbrella historically; VERIFY current structure.
+- canonical_id: netshoes
+  display_name: Netshoes
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - ecommerce
+  - retail
+  stage: late_stage
+  aliases:
+  - netshoes
+  notes: VERIFY current ownership — was acquired by Magalu.
+- canonical_id: amaro
+  display_name: Amaro
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - ecommerce
+  - fashion
+  - dtc
+  stage: late_stage
+  aliases:
+  - amaro
+- canonical_id: merqueo
+  display_name: Merqueo
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: growth
+  aliases:
+  - merqueo
+- canonical_id: frubana
+  display_name: Frubana
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - b2b
+  - food
+  stage: late_stage
+  aliases:
+  - frubana
+- canonical_id: daki
+  display_name: Daki
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: late_stage
+  aliases:
+  - daki
+- canonical_id: hugo_app
+  display_name: Hugo
+  country_primary: SV
+  country_present_in:
+  - SV
+  - HN
+  - NI
+  - GT
+  industry_tags:
+  - marketplace
+  - delivery
+  - super_app
+  stage: growth
+  aliases:
+  - hugo
+  - hugo app
+- canonical_id: pedidosya
+  display_name: PedidosYa
+  country_primary: UY
+  country_present_in:
+  - UY
+  - AR
+  - BR
+  - CL
+  - CO
+  - MX
+  - PA
+  industry_tags:
+  - marketplace
+  - delivery
+  - food
+  stage: late_stage
+  aliases:
+  - pedidos ya
+  - pedidosya
+  notes: Owned by Delivery Hero (DE).
+- canonical_id: ifood
+  display_name: iFood
+  country_primary: BR
+  country_present_in:
+  - BR
+  - CO
+  industry_tags:
+  - marketplace
+  - delivery
+  - food
+  stage: late_stage
+  aliases:
+  - ifood
+  - i food
+- canonical_id: merama
+  display_name: Merama
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CL
+  - CO
+  industry_tags:
+  - ecommerce
+  - consumer_goods
+  - aggregator
+  stage: late_stage
+  aliases:
+  - merama
+- canonical_id: valoreo
+  display_name: Valoreo
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CL
+  - CO
+  industry_tags:
+  - ecommerce
+  - consumer_goods
+  - aggregator
+  stage: growth
+  aliases:
+  - valoreo
+- canonical_id: liftit
+  display_name: Liftit
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  - CL
+  industry_tags:
+  - logistics
+  - marketplace
+  - b2b
+  stage: growth
+  aliases:
+  - liftit
+- canonical_id: nowports
+  display_name: Nowports
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CL
+  - PE
+  - UY
+  industry_tags:
+  - logistics
+  - freight
+  - b2b
+  stage: late_stage
+  aliases:
+  - nowports
+- canonical_id: chiper
+  display_name: Chiper
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - b2b
+  - retail
+  stage: growth
+  aliases:
+  - chiper
+- canonical_id: treggo
+  display_name: Treggo
+  country_primary: AR
+  country_present_in:
+  - AR
+  - MX
+  industry_tags:
+  - logistics
+  - delivery
+  - b2b
+  stage: growth
+  aliases:
+  - treggo
+- canonical_id: 99minutos
+  display_name: 99minutos
+  country_primary: MX
+  country_present_in:
+  - MX
+  - CO
+  - PE
+  - CL
+  industry_tags:
+  - logistics
+  - delivery
+  - b2b
+  stage: growth
+  aliases:
+  - 99 minutos
+  - 99minutos
+- canonical_id: solvento
+  display_name: Solvento
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - logistics
+  - b2b
+  stage: growth
+  aliases:
+  - solvento
+- canonical_id: simetrik
+  display_name: Simetrik
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  industry_tags:
+  - fintech
+  - b2b
+  - reconciliation
+  stage: growth
+  aliases:
+  - simetrik
+- canonical_id: kushki
+  display_name: Kushki
+  country_primary: EC
+  country_present_in:
+  - EC
+  - MX
+  - CO
+  - CL
+  - PE
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: late_stage
+  aliases:
+  - kushki
+- canonical_id: pomelo
+  display_name: Pomelo
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - CO
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  - infrastructure
+  stage: late_stage
+  aliases:
+  - pomelo
+- canonical_id: conekta
+  display_name: Conekta
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: late_stage
+  aliases:
+  - conekta
+- canonical_id: openpay
+  display_name: Openpay
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: late_stage
+  aliases:
+  - openpay
+  - open pay
+  notes: Owned by BBVA.
+- canonical_id: envia_com
+  display_name: Envia.com
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - CO
+  industry_tags:
+  - logistics
+  - b2b
+  - shipping
+  stage: growth
+  aliases:
+  - envia
+  - envia com
+  - envia.com
+- canonical_id: quinto_andar
+  display_name: QuintoAndar
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - proptech
+  - marketplace
+  - real_estate
+  stage: late_stage
+  aliases:
+  - quinto andar
+  - quintoandar
+- canonical_id: emcasa
+  display_name: EmCasa
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - proptech
+  - real_estate
+  stage: growth
+  aliases:
+  - emcasa
+  - em casa
+- canonical_id: solfacil
+  display_name: Solfácil
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - energy
+  - solar
+  stage: growth
+  aliases:
+  - solfacil
+  - solfácil
+- canonical_id: housi
+  display_name: Housi
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - proptech
+  - rentals
+  stage: growth
+  aliases:
+  - housi
+- canonical_id: yave
+  display_name: Yave
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - proptech
+  - fintech
+  - mortgages
+  stage: growth
+  aliases:
+  - yave
+- canonical_id: 100ladrillos
+  display_name: 100 Ladrillos
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - proptech
+  - investment
+  stage: growth
+  aliases:
+  - 100 ladrillos
+  - 100ladrillos
+  - cien ladrillos
+- canonical_id: conexa_saude
+  display_name: Conexa Saúde
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - telemedicine
+  stage: growth
+  aliases:
+  - conexa
+  - conexa saude
+  - conexa saúde
+- canonical_id: memed
+  display_name: Memed
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - b2b
+  stage: growth
+  aliases:
+  - memed
+- canonical_id: zenklub
+  display_name: Zenklub
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - mental_health
+  stage: growth
+  aliases:
+  - zenklub
+  - zen klub
+- canonical_id: doctoralia
+  display_name: Doctoralia
+  country_primary: PL
+  country_present_in:
+  - BR
+  - MX
+  - AR
+  - CO
+  - CL
+  industry_tags:
+  - healthtech
+  - marketplace
+  stage: late_stage
+  aliases:
+  - doctoralia
+  notes: Owned by DocPlanner Group (Polish).
+- canonical_id: nilo_saude
+  display_name: Nilo Saúde
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - b2b
+  stage: growth
+  aliases:
+  - nilo
+  - nilo saude
+  - nilo saúde
+- canonical_id: alice
+  display_name: Alice
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - health_insurance
+  stage: late_stage
+  aliases:
+  - alice
+- canonical_id: clivi
+  display_name: Clivi
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - healthtech
+  - chronic_disease
+  stage: growth
+  aliases:
+  - clivi
+- canonical_id: docuro
+  display_name: Docurô
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - healthtech
+  stage: growth
+  aliases:
+  - docuro
+  - docurô
+- canonical_id: mediquo
+  display_name: MediQuo
+  country_primary: ES
+  country_present_in:
+  - ES
+  - MX
+  industry_tags:
+  - healthtech
+  - telemedicine
+  stage: growth
+  aliases:
+  - mediquo
+- canonical_id: crehana
+  display_name: Crehana
+  country_primary: PE
+  country_present_in:
+  - PE
+  - MX
+  - BR
+  - CO
+  - CL
+  - AR
+  industry_tags:
+  - edtech
+  - consumer
+  stage: late_stage
+  aliases:
+  - crehana
+- canonical_id: platzi
+  display_name: Platzi
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - US
+  industry_tags:
+  - edtech
+  - consumer
+  stage: late_stage
+  aliases:
+  - platzi
+  notes: Y Combinator alum; HQ moved to US.
+- canonical_id: ubits
+  display_name: Ubits
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - edtech
+  - b2b
+  stage: growth
+  aliases:
+  - ubits
+- canonical_id: digital_house
+  display_name: Digital House
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - CL
+  - CO
+  - MX
+  industry_tags:
+  - edtech
+  - consumer
+  stage: late_stage
+  aliases:
+  - digital house
+  - digitalhouse
+- canonical_id: descomplica
+  display_name: Descomplica
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - edtech
+  - consumer
+  stage: late_stage
+  aliases:
+  - descomplica
+- canonical_id: kovi
+  display_name: Kovi
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - mobility
+  - auto
+  - rental
+  stage: late_stage
+  aliases:
+  - kovi
+- canonical_id: yummy
+  display_name: Yummy
+  country_primary: VE
+  country_present_in:
+  - VE
+  - MX
+  - CO
+  - PE
+  - CL
+  - EC
+  - BO
+  industry_tags:
+  - marketplace
+  - delivery
+  - super_app
+  stage: growth
+  aliases:
+  - yummy
+  - yummy super app
+- canonical_id: agrotoken
+  display_name: Agrotoken
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  industry_tags:
+  - agtech
+  - fintech
+  - crypto
+  stage: growth
+  aliases:
+  - agrotoken
+- canonical_id: instacrops
+  display_name: Instacrops
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  industry_tags:
+  - agtech
+  - iot
+  stage: growth
+  aliases:
+  - instacrops
+- canonical_id: kilimo
+  display_name: Kilimo
+  country_primary: AR
+  country_present_in:
+  - AR
+  - CL
+  - MX
+  - CO
+  - PE
+  industry_tags:
+  - agtech
+  - water
+  stage: growth
+  aliases:
+  - kilimo
+- canonical_id: bright
+  display_name: Bright
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - energy
+  - solar
+  - fintech
+  stage: growth
+  aliases:
+  - bright
+- canonical_id: apple
+  display_name: Apple
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - consumer
+  - hardware
+  stage: public
+  aliases:
+  - apple
+  - apple inc
+- canonical_id: netflix
+  display_name: Netflix
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  industry_tags:
+  - tech
+  - media
+  - streaming
+  stage: public
+  aliases:
+  - netflix
+  - netflix inc
+- canonical_id: youtube
+  display_name: YouTube
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - media
+  - consumer
+  stage: public
+  aliases:
+  - youtube
+  related_entities:
+  - canonical_id: google
+    relation: parent
+- canonical_id: instagram
+  display_name: Instagram
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: public
+  aliases:
+  - instagram
+  related_entities:
+  - canonical_id: meta
+    relation: parent
+- canonical_id: whatsapp
+  display_name: WhatsApp
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - messaging
+  - consumer
+  stage: public
+  aliases:
+  - whatsapp
+  - whats app
+  related_entities:
+  - canonical_id: meta
+    relation: parent
+- canonical_id: github
+  display_name: GitHub
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - devtools
+  - b2b
+  stage: public
+  aliases:
+  - github
+  related_entities:
+  - canonical_id: microsoft
+    relation: parent
+- canonical_id: google_cloud
+  display_name: Google Cloud
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - cloud
+  - b2b
+  - infrastructure
+  stage: public
+  aliases:
+  - google cloud
+  - gcp
+  related_entities:
+  - canonical_id: google
+    relation: parent
+- canonical_id: salesforce
+  display_name: Salesforce
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  industry_tags:
+  - saas
+  - crm
+  - b2b
+  stage: public
+  aliases:
+  - salesforce
+  - salesforce.com
+- canonical_id: oracle
+  display_name: Oracle
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  industry_tags:
+  - tech
+  - enterprise
+  - database
+  - cloud
+  stage: public
+  aliases:
+  - oracle
+  - oracle corp
+  - oracle corporation
+- canonical_id: sap
+  display_name: SAP
+  country_primary: DE
+  country_present_in:
+  - DE
+  - US
+  - MX
+  - BR
+  - AR
+  industry_tags:
+  - tech
+  - enterprise
+  - saas
+  stage: public
+  aliases:
+  - sap
+  - sap se
+  - sap ag
+- canonical_id: ibm
+  display_name: IBM
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  industry_tags:
+  - tech
+  - enterprise
+  - consulting
+  stage: public
+  aliases:
+  - ibm
+  - international business machines
+- canonical_id: intel
+  display_name: Intel
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - CR
+  industry_tags:
+  - tech
+  - hardware
+  - semiconductors
+  stage: public
+  aliases:
+  - intel
+  - intel corporation
+- canonical_id: cisco
+  display_name: Cisco
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - networking
+  - b2b
+  stage: public
+  aliases:
+  - cisco
+  - cisco systems
+- canonical_id: dell
+  display_name: Dell
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - hardware
+  - enterprise
+  stage: public
+  aliases:
+  - dell
+  - dell technologies
+- canonical_id: hp
+  display_name: HP
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - hardware
+  stage: public
+  aliases:
+  - hp
+  - hewlett packard
+  - hp inc
+- canonical_id: hpe
+  display_name: Hewlett Packard Enterprise
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - enterprise
+  stage: public
+  aliases:
+  - hpe
+  - hewlett packard enterprise
+- canonical_id: vmware
+  display_name: VMware
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - enterprise
+  - virtualization
+  stage: public
+  aliases:
+  - vmware
+  notes: VERIFY current corporate structure — acquired by Broadcom 2023.
+- canonical_id: snowflake
+  display_name: Snowflake
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - data
+  - cloud
+  - b2b
+  stage: public
+  aliases:
+  - snowflake
+- canonical_id: databricks
+  display_name: Databricks
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - data
+  - b2b
+  - ai
+  stage: late_stage
+  aliases:
+  - databricks
+- canonical_id: mongodb
+  display_name: MongoDB
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - database
+  - b2b
+  - devtools
+  stage: public
+  aliases:
+  - mongodb
+  - mongo db
+- canonical_id: elastic
+  display_name: Elastic
+  country_primary: NL
+  country_present_in:
+  - NL
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - search
+  - devtools
+  - b2b
+  stage: public
+  aliases:
+  - elastic
+  - elastic nv
+  - elasticsearch
+- canonical_id: hashicorp
+  display_name: HashiCorp
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - devtools
+  - b2b
+  stage: public
+  aliases:
+  - hashicorp
+  notes: VERIFY ownership — IBM acquired ~2024.
+- canonical_id: twilio
+  display_name: Twilio
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - AR
+  - CO
+  industry_tags:
+  - saas
+  - communications
+  - b2b
+  - api
+  stage: public
+  aliases:
+  - twilio
+- canonical_id: zendesk
+  display_name: Zendesk
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - customer_support
+  - b2b
+  stage: private_equity
+  aliases:
+  - zendesk
+- canonical_id: hubspot
+  display_name: HubSpot
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - CO
+  industry_tags:
+  - saas
+  - crm
+  - marketing
+  - b2b
+  stage: public
+  aliases:
+  - hubspot
+- canonical_id: atlassian
+  display_name: Atlassian
+  country_primary: AU
+  country_present_in:
+  - AU
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - devtools
+  - b2b
+  stage: public
+  aliases:
+  - atlassian
+  - jira
+  - confluence
+- canonical_id: slack
+  display_name: Slack
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - communications
+  - b2b
+  stage: public
+  aliases:
+  - slack
+  related_entities:
+  - canonical_id: salesforce
+    relation: parent
+- canonical_id: zoom
+  display_name: Zoom
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - communications
+  - b2b
+  stage: public
+  aliases:
+  - zoom
+  - zoom video
+  - zoom communications
+- canonical_id: dropbox
+  display_name: Dropbox
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - storage
+  - b2b
+  - consumer
+  stage: public
+  aliases:
+  - dropbox
+- canonical_id: box
+  display_name: Box
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - saas
+  - storage
+  - b2b
+  stage: public
+  aliases:
+  - box
+  - box inc
+- canonical_id: okta
+  display_name: Okta
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - security
+  - identity
+  - b2b
+  stage: public
+  aliases:
+  - okta
+- canonical_id: crowdstrike
+  display_name: CrowdStrike
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - security
+  - b2b
+  stage: public
+  aliases:
+  - crowdstrike
+- canonical_id: palo_alto_networks
+  display_name: Palo Alto Networks
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - security
+  - b2b
+  - networking
+  stage: public
+  aliases:
+  - palo alto networks
+  - palo alto
+- canonical_id: fortinet
+  display_name: Fortinet
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - security
+  - b2b
+  - networking
+  stage: public
+  aliases:
+  - fortinet
+- canonical_id: workday
+  display_name: Workday
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - hr
+  - enterprise
+  stage: public
+  aliases:
+  - workday
+- canonical_id: servicenow
+  display_name: ServiceNow
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - enterprise
+  - b2b
+  stage: public
+  aliases:
+  - servicenow
+  - service now
+- canonical_id: intuit
+  display_name: Intuit
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - fintech
+  - consumer
+  - sme
+  stage: public
+  aliases:
+  - intuit
+  - quickbooks
+  - mailchimp
+  - turbotax
+- canonical_id: adobe
+  display_name: Adobe
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - creative
+  - b2b
+  - consumer
+  stage: public
+  aliases:
+  - adobe
+  - adobe systems
+  - adobe inc
+- canonical_id: autodesk
+  display_name: Autodesk
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - design
+  - b2b
+  stage: public
+  aliases:
+  - autodesk
+- canonical_id: docusign
+  display_name: DocuSign
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: public
+  aliases:
+  - docusign
+  - doc u sign
+- canonical_id: asana
+  display_name: Asana
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: public
+  aliases:
+  - asana
+- canonical_id: monday
+  display_name: Monday.com
+  country_primary: IL
+  country_present_in:
+  - IL
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: public
+  aliases:
+  - monday
+  - monday.com
+  - monday com
+- canonical_id: clickup
+  display_name: ClickUp
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: late_stage
+  aliases:
+  - clickup
+  - click up
+- canonical_id: figma
+  display_name: Figma
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - design
+  - b2b
+  stage: late_stage
+  aliases:
+  - figma
+- canonical_id: miro
+  display_name: Miro
+  country_primary: NL
+  country_present_in:
+  - NL
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - collaboration
+  - b2b
+  stage: late_stage
+  aliases:
+  - miro
+- canonical_id: airtable
+  display_name: Airtable
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - productivity
+  - b2b
+  stage: late_stage
+  aliases:
+  - airtable
+- canonical_id: canva
+  display_name: Canva
+  country_primary: AU
+  country_present_in:
+  - AU
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - design
+  - consumer
+  - b2b
+  stage: late_stage
+  aliases:
+  - canva
+- canonical_id: typeform
+  display_name: Typeform
+  country_primary: ES
+  country_present_in:
+  - ES
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: late_stage
+  aliases:
+  - typeform
+  - type form
+- canonical_id: mercury
+  display_name: Mercury
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - banking
+  - sme
+  - b2b
+  stage: late_stage
+  aliases:
+  - mercury
+  - mercury bank
+- canonical_id: brex
+  display_name: Brex
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - corporate_cards
+  - b2b
+  stage: late_stage
+  aliases:
+  - brex
+- canonical_id: ramp
+  display_name: Ramp
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - corporate_cards
+  - b2b
+  stage: late_stage
+  aliases:
+  - ramp
+- canonical_id: plaid
+  display_name: Plaid
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - api
+  - b2b
+  stage: late_stage
+  aliases:
+  - plaid
+- canonical_id: coinbase
+  display_name: Coinbase
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - crypto
+  - exchange
+  stage: public
+  aliases:
+  - coinbase
+- canonical_id: kraken
+  display_name: Kraken
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - crypto
+  - exchange
+  stage: late_stage
+  aliases:
+  - kraken
+  - kraken exchange
+- canonical_id: binance
+  display_name: Binance
+  country_primary: MT
+  country_present_in:
+  - multi
+  industry_tags:
+  - fintech
+  - crypto
+  - exchange
+  stage: late_stage
+  aliases:
+  - binance
+- canonical_id: circle
+  display_name: Circle
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - crypto
+  - stablecoin
+  - b2b
+  stage: public
+  aliases:
+  - circle
+  - circle internet financial
+- canonical_id: chainalysis
+  display_name: Chainalysis
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - crypto
+  - compliance
+  - b2b
+  stage: late_stage
+  aliases:
+  - chainalysis
+- canonical_id: openai
+  display_name: OpenAI
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - ai
+  - research
+  - b2b
+  - consumer
+  stage: late_stage
+  aliases:
+  - openai
+  - open ai
+- canonical_id: anthropic
+  display_name: Anthropic
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - ai
+  - research
+  - b2b
+  stage: late_stage
+  aliases:
+  - anthropic
+- canonical_id: hugging_face
+  display_name: Hugging Face
+  country_primary: US
+  country_present_in:
+  - US
+  - FR
+  industry_tags:
+  - ai
+  - open_source
+  - b2b
+  stage: late_stage
+  aliases:
+  - hugging face
+  - huggingface
+- canonical_id: cohere
+  display_name: Cohere
+  country_primary: CA
+  country_present_in:
+  - CA
+  - US
+  industry_tags:
+  - ai
+  - b2b
+  - nlp
+  stage: late_stage
+  aliases:
+  - cohere
+- canonical_id: nvidia
+  display_name: NVIDIA
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - hardware
+  - ai
+  - semiconductors
+  stage: public
+  aliases:
+  - nvidia
+  - nvidia corporation
+- canonical_id: scale_ai
+  display_name: Scale AI
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - ai
+  - data
+  - b2b
+  stage: late_stage
+  aliases:
+  - scale
+  - scale ai
+  - scale.ai
+- canonical_id: spotify
+  display_name: Spotify
+  country_primary: SE
+  country_present_in:
+  - SE
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - media
+  - streaming
+  - consumer
+  stage: public
+  aliases:
+  - spotify
+- canonical_id: tiktok
+  display_name: TikTok
+  country_primary: CN
+  country_present_in:
+  - CN
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: private_equity
+  aliases:
+  - tiktok
+  - tik tok
+  related_entities:
+  - canonical_id: bytedance
+    relation: parent
+- canonical_id: bytedance
+  display_name: ByteDance
+  country_primary: CN
+  country_present_in:
+  - CN
+  - US
+  - BR
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: late_stage
+  aliases:
+  - bytedance
+  - byte dance
+- canonical_id: snap
+  display_name: Snap
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: public
+  aliases:
+  - snap
+  - snap inc
+  - snapchat
+- canonical_id: pinterest
+  display_name: Pinterest
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: public
+  aliases:
+  - pinterest
+- canonical_id: twitter
+  display_name: Twitter (X)
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - social
+  stage: private_equity
+  aliases:
+  - twitter
+  - x
+  - x corp
+  acquisition_lineage:
+  - was: twitter
+    until: 2023
+  notes: Renamed to X in 2023 after Musk acquisition; treat as same entity for past-employer matching.
+- canonical_id: reddit
+  display_name: Reddit
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  stage: public
+  aliases:
+  - reddit
+  - reddit inc
+- canonical_id: discord
+  display_name: Discord
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - social
+  - consumer
+  - messaging
+  stage: late_stage
+  aliases:
+  - discord
+- canonical_id: twitch
+  display_name: Twitch
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - tech
+  - media
+  - streaming
+  stage: public
+  aliases:
+  - twitch
+  related_entities:
+  - canonical_id: amazon
+    relation: parent
+- canonical_id: ebay
+  display_name: eBay
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - ecommerce
+  stage: public
+  aliases:
+  - ebay
+- canonical_id: shopify
+  display_name: Shopify
+  country_primary: CA
+  country_present_in:
+  - CA
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - ecommerce
+  - b2b
+  stage: public
+  aliases:
+  - shopify
+- canonical_id: squarespace
+  display_name: Squarespace
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - b2b
+  stage: public
+  aliases:
+  - squarespace
+  - square space
+- canonical_id: wix
+  display_name: Wix
+  country_primary: IL
+  country_present_in:
+  - IL
+  - US
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: public
+  aliases:
+  - wix
+  - wix.com
+- canonical_id: godaddy
+  display_name: GoDaddy
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: public
+  aliases:
+  - godaddy
+  - go daddy
+- canonical_id: squareup
+  display_name: Square (Block)
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - payments
+  - sme
+  stage: public
+  aliases:
+  - square
+  - block
+  - block inc
+  - squareup
+  acquisition_lineage:
+  - was: square
+    until: 2021
+  notes: Renamed to Block 2021.
+- canonical_id: paypal
+  display_name: PayPal
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - consumer
+  stage: public
+  aliases:
+  - paypal
+  - pay pal
+- canonical_id: venmo
+  display_name: Venmo
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - payments
+  - consumer
+  stage: public
+  aliases:
+  - venmo
+  related_entities:
+  - canonical_id: paypal
+    relation: parent
+- canonical_id: zelle
+  display_name: Zelle
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - payments
+  stage: private_equity
+  aliases:
+  - zelle
+- canonical_id: revolut
+  display_name: Revolut
+  country_primary: UK
+  country_present_in:
+  - UK
+  - EU
+  - BR
+  - MX
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer
+  stage: late_stage
+  aliases:
+  - revolut
+- canonical_id: wise
+  display_name: Wise
+  country_primary: UK
+  country_present_in:
+  - UK
+  - US
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - cross_border
+  - consumer
+  stage: public
+  aliases:
+  - wise
+  - transferwise
+  acquisition_lineage:
+  - was: transferwise
+    until: 2021
+- canonical_id: klarna
+  display_name: Klarna
+  country_primary: SE
+  country_present_in:
+  - SE
+  - US
+  - UK
+  industry_tags:
+  - fintech
+  - bnpl
+  - consumer
+  stage: late_stage
+  aliases:
+  - klarna
+- canonical_id: affirm
+  display_name: Affirm
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - bnpl
+  - consumer
+  stage: public
+  aliases:
+  - affirm
+- canonical_id: robinhood
+  display_name: Robinhood
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - fintech
+  - investment
+  - consumer
+  stage: public
+  aliases:
+  - robinhood
+- canonical_id: etoro
+  display_name: eToro
+  country_primary: IL
+  country_present_in:
+  - IL
+  - UK
+  - US
+  industry_tags:
+  - fintech
+  - investment
+  - social
+  stage: public
+  aliases:
+  - etoro
+  - e toro
+- canonical_id: lyft
+  display_name: Lyft
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - mobility
+  - rideshare
+  stage: public
+  aliases:
+  - lyft
+- canonical_id: doordash
+  display_name: DoorDash
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - marketplace
+  - delivery
+  stage: public
+  aliases:
+  - doordash
+  - door dash
+- canonical_id: instacart
+  display_name: Instacart
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: public
+  aliases:
+  - instacart
+  - maplebear
+- canonical_id: grubhub
+  display_name: Grubhub
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - marketplace
+  - delivery
+  stage: private_equity
+  aliases:
+  - grubhub
+  - grub hub
+- canonical_id: wework
+  display_name: WeWork
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - real_estate
+  - coworking
+  stage: public
+  aliases:
+  - wework
+  - we work
+- canonical_id: vrbo
+  display_name: Vrbo
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - marketplace
+  - travel
+  stage: public
+  aliases:
+  - vrbo
+  related_entities:
+  - canonical_id: expedia
+    relation: parent
+- canonical_id: expedia
+  display_name: Expedia
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - travel
+  stage: public
+  aliases:
+  - expedia
+  - expedia group
+- canonical_id: booking
+  display_name: Booking.com
+  country_primary: NL
+  country_present_in:
+  - NL
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - travel
+  stage: public
+  aliases:
+  - booking
+  - booking.com
+  - booking com
+  - booking holdings
+- canonical_id: flexport
+  display_name: Flexport
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - logistics
+  - freight
+  - b2b
+  stage: late_stage
+  aliases:
+  - flexport
+- canonical_id: project44
+  display_name: project44
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - logistics
+  - b2b
+  - saas
+  stage: late_stage
+  aliases:
+  - project44
+  - project 44
+  - p44
+- canonical_id: samsara
+  display_name: Samsara
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  industry_tags:
+  - iot
+  - logistics
+  - b2b
+  stage: public
+  aliases:
+  - samsara
+- canonical_id: criteo
+  display_name: Criteo
+  country_primary: FR
+  country_present_in:
+  - FR
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - adtech
+  - b2b
+  stage: public
+  aliases:
+  - criteo
+- canonical_id: the_trade_desk
+  display_name: The Trade Desk
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - adtech
+  - b2b
+  stage: public
+  aliases:
+  - the trade desk
+  - trade desk
+  - ttd
+- canonical_id: appsflyer
+  display_name: AppsFlyer
+  country_primary: IL
+  country_present_in:
+  - IL
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - adtech
+  - mobile
+  - b2b
+  stage: late_stage
+  aliases:
+  - appsflyer
+  - apps flyer
+- canonical_id: braze
+  display_name: Braze
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - martech
+  - crm
+  - b2b
+  stage: public
+  aliases:
+  - braze
+- canonical_id: iterable
+  display_name: Iterable
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - martech
+  - b2b
+  stage: late_stage
+  aliases:
+  - iterable
+- canonical_id: amplitude
+  display_name: Amplitude
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - analytics
+  - b2b
+  stage: public
+  aliases:
+  - amplitude
+- canonical_id: mixpanel
+  display_name: Mixpanel
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - analytics
+  - b2b
+  stage: late_stage
+  aliases:
+  - mixpanel
+- canonical_id: segment
+  display_name: Segment
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - analytics
+  - b2b
+  - data
+  stage: public
+  aliases:
+  - segment
+  related_entities:
+  - canonical_id: twilio
+    relation: parent
+- canonical_id: totvs
+  display_name: TOTVS
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - enterprise
+  - erp
+  stage: public
+  aliases:
+  - totvs
+- canonical_id: linx
+  display_name: Linx
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - retail
+  - b2b
+  stage: public
+  aliases:
+  - linx
+  related_entities:
+  - canonical_id: stone
+    relation: parent
+  acquisition_lineage:
+  - was: linx
+    until: 2021
+  notes: Acquired by Stone 2021; VERIFY current operational status.
+- canonical_id: locaweb
+  display_name: Locaweb
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - hosting
+  - b2b
+  stage: public
+  aliases:
+  - locaweb
+  - loca web
+- canonical_id: resultados_digitais
+  display_name: Resultados Digitais
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - marketing
+  - b2b
+  stage: late_stage
+  aliases:
+  - resultados digitais
+  - rd station
+  - rdstation
+- canonical_id: movile
+  display_name: Movile
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - tech
+  - venture_builder
+  - marketplace
+  stage: late_stage
+  aliases:
+  - movile
+- canonical_id: buser
+  display_name: Buser
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - mobility
+  - marketplace
+  stage: growth
+  aliases:
+  - buser
+- canonical_id: vtex
+  display_name: VTEX
+  country_primary: BR
+  country_present_in:
+  - BR
+  - US
+  industry_tags:
+  - saas
+  - ecommerce
+  - b2b
+  stage: public
+  aliases:
+  - vtex
+- canonical_id: infracommerce
+  display_name: Infracommerce
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - ecommerce
+  - b2b
+  stage: public
+  aliases:
+  - infracommerce
+  - infra commerce
+- canonical_id: zoop
+  display_name: Zoop
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: growth
+  aliases:
+  - zoop
+- canonical_id: contabilizei
+  display_name: Contabilizei
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - b2b
+  - sme
+  - accounting
+  stage: late_stage
+  aliases:
+  - contabilizei
+- canonical_id: omie
+  display_name: Omie
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - erp
+  - sme
+  - b2b
+  stage: late_stage
+  aliases:
+  - omie
+- canonical_id: conta_azul
+  display_name: Conta Azul
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - sme
+  - b2b
+  - accounting
+  stage: late_stage
+  aliases:
+  - conta azul
+  - contaazul
+- canonical_id: sankhya
+  display_name: Sankhya
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - erp
+  - b2b
+  stage: growth
+  aliases:
+  - sankhya
+- canonical_id: bling
+  display_name: Bling
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - sme
+  - b2b
+  stage: growth
+  aliases:
+  - bling
+  notes: VERIFY ownership — acquired by Locaweb.
+- canonical_id: getnet
+  display_name: Getnet
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  stage: public
+  aliases:
+  - getnet
+  related_entities:
+  - canonical_id: santander_global
+    relation: parent
+- canonical_id: cielo
+  display_name: Cielo
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  stage: public
+  aliases:
+  - cielo
+- canonical_id: rede
+  display_name: Rede
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - payments
+  stage: public
+  aliases:
+  - rede
+  - itaú rede
+  related_entities:
+  - canonical_id: itau
+    relation: parent
+- canonical_id: itau
+  display_name: Itaú
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - itau
+  - itaú
+  - itau unibanco
+  - itaú unibanco
+- canonical_id: bradesco
+  display_name: Bradesco
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bradesco
+  - banco bradesco
+- canonical_id: santander_brasil
+  display_name: Santander Brasil
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - santander brasil
+  - santander brazil
+  related_entities:
+  - canonical_id: santander_global
+    relation: parent
+- canonical_id: bb
+  display_name: Banco do Brasil
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco do brasil
+  - bb
+- canonical_id: caixa
+  display_name: Caixa Econômica Federal
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - banking
+  - finance
+  - government
+  stage: private
+  aliases:
+  - caixa
+  - caixa economica
+  - caixa econômica
+  - caixa federal
+- canonical_id: btg_pactual
+  display_name: BTG Pactual
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - finance
+  - investment
+  - banking
+  stage: public
+  aliases:
+  - btg
+  - btg pactual
+- canonical_id: safra
+  display_name: Safra
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  stage: private
+  aliases:
+  - safra
+  - banco safra
+- canonical_id: votorantim
+  display_name: Votorantim
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - finance
+  - industrial
+  - conglomerate
+  stage: private
+  aliases:
+  - votorantim
+- canonical_id: ambev
+  display_name: Ambev
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - beverage
+  - consumer
+  stage: public
+  aliases:
+  - ambev
+  related_entities:
+  - canonical_id: ab_inbev
+    relation: parent
+- canonical_id: ab_inbev
+  display_name: AB InBev
+  country_primary: BE
+  country_present_in:
+  - BE
+  - BR
+  - US
+  industry_tags:
+  - beverage
+  - consumer
+  stage: public
+  aliases:
+  - ab inbev
+  - anheuser busch
+  - anheuser-busch
+- canonical_id: natura
+  display_name: Natura &Co
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - beauty
+  stage: public
+  aliases:
+  - natura
+  - natura co
+  - natura &co
+- canonical_id: o_boticario
+  display_name: O Boticário
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - consumer
+  - beauty
+  - retail
+  stage: private
+  aliases:
+  - o boticario
+  - o boticário
+  - boticario
+- canonical_id: vivo
+  display_name: Vivo
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - vivo
+  - vivo telecom
+  related_entities:
+  - canonical_id: telefonica
+    relation: parent
+- canonical_id: tim_brasil
+  display_name: TIM Brasil
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - tim
+  - tim brasil
+  - tim brazil
+  related_entities:
+  - canonical_id: tim_group
+    relation: parent
+- canonical_id: oi
+  display_name: Oi
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - oi
+  - oi telecom
+  notes: VERIFY current status — has been in financial restructuring.
+- canonical_id: renner
+  display_name: Lojas Renner
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - renner
+  - lojas renner
+- canonical_id: centauro
+  display_name: Centauro
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - sports
+  stage: public
+  aliases:
+  - centauro
+  - grupo sba
+  - sbf
+- canonical_id: track_field
+  display_name: Track & Field
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - fashion
+  - sports
+  stage: public
+  aliases:
+  - track field
+  - track & field
+  - trackfield
+- canonical_id: c_a
+  display_name: C&A
+  country_primary: BR
+  country_present_in:
+  - BR
+  - EU
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - c&a
+  - c a
+  - ca
+  - cea
+  - c&a brasil
+- canonical_id: riachuelo
+  display_name: Riachuelo
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - riachuelo
+  related_entities:
+  - canonical_id: guararapes
+    relation: parent
+- canonical_id: marisa
+  display_name: Marisa
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - marisa
+- canonical_id: petz
+  display_name: Petz
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - retail
+  - pets
+  stage: public
+  aliases:
+  - petz
+- canonical_id: vale
+  display_name: Vale
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - mining
+  - industrial
+  stage: public
+  aliases:
+  - vale
+  - vale sa
+- canonical_id: petrobras
+  display_name: Petrobras
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - energy
+  - oil_gas
+  - government
+  stage: public
+  aliases:
+  - petrobras
+- canonical_id: braskem
+  display_name: Braskem
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - industrial
+  - petrochemical
+  stage: public
+  aliases:
+  - braskem
+- canonical_id: embraer
+  display_name: Embraer
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - industrial
+  - aerospace
+  stage: public
+  aliases:
+  - embraer
+- canonical_id: weg
+  display_name: WEG
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - industrial
+  stage: public
+  aliases:
+  - weg
+  - weg sa
+- canonical_id: klabin
+  display_name: Klabin
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - industrial
+  - paper
+  stage: public
+  aliases:
+  - klabin
+- canonical_id: eletrobras
+  display_name: Eletrobras
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - energy
+  - utilities
+  stage: public
+  aliases:
+  - eletrobras
+- canonical_id: equatorial
+  display_name: Equatorial Energia
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - energy
+  - utilities
+  stage: public
+  aliases:
+  - equatorial
+  - equatorial energia
+- canonical_id: jbs
+  display_name: JBS
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - industrial
+  stage: public
+  aliases:
+  - jbs
+  - jbs sa
+- canonical_id: brf
+  display_name: BRF
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - brf
+  - brf sa
+  - brasil foods
+- canonical_id: marfrig
+  display_name: Marfrig
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - marfrig
+- canonical_id: rede_dor
+  display_name: Rede D'Or
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - hospitals
+  stage: public
+  aliases:
+  - rede dor
+  - rede d'or
+  - redes dor
+- canonical_id: hapvida
+  display_name: Hapvida
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - health_insurance
+  stage: public
+  aliases:
+  - hapvida
+- canonical_id: notre_dame_intermedica
+  display_name: NotreDame Intermédica
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - health_insurance
+  stage: public
+  aliases:
+  - notre dame
+  - notredame
+  - notredame intermedica
+  - notredame intermédica
+- canonical_id: amil
+  display_name: Amil
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - health_insurance
+  stage: private
+  aliases:
+  - amil
+- canonical_id: dasa
+  display_name: Dasa
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - diagnostics
+  stage: public
+  aliases:
+  - dasa
+- canonical_id: fleury
+  display_name: Fleury
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  - diagnostics
+  stage: public
+  aliases:
+  - fleury
+  - fleury sa
+- canonical_id: globo
+  display_name: Globo
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - media
+  - tv
+  - consumer
+  stage: private
+  aliases:
+  - globo
+  - grupo globo
+  - rede globo
+- canonical_id: ig
+  display_name: iG
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - media
+  - internet
+  stage: private
+  aliases:
+  - ig
+  - ig.com.br
+- canonical_id: uol
+  display_name: UOL
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - media
+  - internet
+  stage: private
+  aliases:
+  - uol
+  - uol inc
+  - grupo folha
+  related_entities:
+  - canonical_id: grupo_folha
+    relation: parent
+- canonical_id: citibanamex
+  display_name: Citibanamex
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - citibanamex
+  - banamex
+  - citi banamex
+  acquisition_lineage:
+  - was: banamex
+    until: 2001
+  notes: Citi acquired Banamex 2001; Citi announced plans to sell — VERIFY current status.
+- canonical_id: hsbc_mexico
+  display_name: HSBC México
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - hsbc mexico
+  - hsbc méxico
+  - hsbc
+  related_entities:
+  - canonical_id: hsbc_global
+    relation: parent
+- canonical_id: scotiabank_mx
+  display_name: Scotiabank México
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - scotiabank mexico
+  - scotiabank méxico
+  - scotia
+- canonical_id: inbursa
+  display_name: Inbursa
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - inbursa
+  - banco inbursa
+- canonical_id: banco_azteca
+  display_name: Banco Azteca
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: private
+  aliases:
+  - banco azteca
+  - azteca
+  related_entities:
+  - canonical_id: grupo_salinas
+    relation: parent
+- canonical_id: compartamos
+  display_name: Compartamos Banco
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  - microfinance
+  stage: public
+  aliases:
+  - compartamos
+  - compartamos banco
+  - banco compartamos
+  related_entities:
+  - canonical_id: gentera
+    relation: parent
+- canonical_id: gentera
+  display_name: Gentera
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  - microfinance
+  stage: public
+  aliases:
+  - gentera
+- canonical_id: banregio
+  display_name: Banregio
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banregio
+  related_entities:
+  - canonical_id: regional
+    relation: subsidiary
+- canonical_id: hey_banco
+  display_name: Hey Banco
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - fintech
+  - neobank
+  stage: growth
+  aliases:
+  - hey banco
+  - hey
+  - heybanco
+  related_entities:
+  - canonical_id: banregio
+    relation: parent
+- canonical_id: banco_del_bajio
+  display_name: Banco del Bajío
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco del bajio
+  - banco del bajío
+  - bajio
+  - bajío
+- canonical_id: bancolombia
+  display_name: Bancolombia
+  country_primary: CO
+  country_present_in:
+  - CO
+  - PA
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bancolombia
+- canonical_id: davivienda
+  display_name: Davivienda
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - davivienda
+  - banco davivienda
+- canonical_id: banco_bogota
+  display_name: Banco de Bogotá
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco de bogota
+  - banco de bogotá
+  related_entities:
+  - canonical_id: grupo_aval
+    relation: parent
+- canonical_id: bbva_colombia
+  display_name: BBVA Colombia
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bbva colombia
+  related_entities:
+  - canonical_id: bbva_global
+    relation: parent
+- canonical_id: grupo_aval
+  display_name: Grupo Aval
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - banking
+  - finance
+  - conglomerate
+  stage: public
+  aliases:
+  - grupo aval
+  - aval
+- canonical_id: banco_galicia
+  display_name: Banco Galicia
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco galicia
+  - galicia
+  - grupo financiero galicia
+- canonical_id: santander_argentina
+  display_name: Santander Argentina
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - santander argentina
+  related_entities:
+  - canonical_id: santander_global
+    relation: parent
+- canonical_id: banco_macro
+  display_name: Banco Macro
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco macro
+  - macro
+- canonical_id: banco_nacion
+  display_name: Banco Nación
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - banking
+  - finance
+  - government
+  stage: private
+  aliases:
+  - banco nacion
+  - banco nación
+  - bna
+- canonical_id: bbva_argentina
+  display_name: BBVA Argentina
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bbva argentina
+  related_entities:
+  - canonical_id: bbva_global
+    relation: parent
+- canonical_id: banco_chile
+  display_name: Banco de Chile
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - banco de chile
+  - banco chile
+- canonical_id: santander_chile
+  display_name: Santander Chile
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - santander chile
+  related_entities:
+  - canonical_id: santander_global
+    relation: parent
+- canonical_id: bci
+  display_name: BCI
+  country_primary: CL
+  country_present_in:
+  - CL
+  - US
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bci
+  - banco de credito e inversiones
+- canonical_id: banco_estado
+  display_name: BancoEstado
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - banking
+  - finance
+  - government
+  stage: private
+  aliases:
+  - banco estado
+  - bancoestado
+- canonical_id: banco_falabella
+  display_name: Banco Falabella
+  country_primary: CL
+  country_present_in:
+  - CL
+  - CO
+  - PE
+  industry_tags:
+  - banking
+  - finance
+  stage: private
+  aliases:
+  - banco falabella
+  related_entities:
+  - canonical_id: falabella
+    relation: parent
+- canonical_id: bcp_peru
+  display_name: BCP
+  country_primary: PE
+  country_present_in:
+  - PE
+  - CO
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bcp
+  - banco de credito del peru
+  - banco de crédito del perú
+  related_entities:
+  - canonical_id: credicorp
+    relation: parent
+- canonical_id: credicorp
+  display_name: Credicorp
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - credicorp
+- canonical_id: interbank
+  display_name: Interbank
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - banking
+  - finance
+  stage: private
+  aliases:
+  - interbank
+  related_entities:
+  - canonical_id: intercorp
+    relation: parent
+- canonical_id: bbva_peru
+  display_name: BBVA Perú
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bbva peru
+  - bbva perú
+  related_entities:
+  - canonical_id: bbva_global
+    relation: parent
+- canonical_id: intercorp
+  display_name: Intercorp
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - finance
+  - conglomerate
+  - retail
+  stage: private
+  aliases:
+  - intercorp
+- canonical_id: bbva_global
+  display_name: BBVA
+  country_primary: ES
+  country_present_in:
+  - ES
+  - MX
+  - AR
+  - CO
+  - PE
+  - TR
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - bbva
+  - banco bilbao vizcaya argentaria
+- canonical_id: santander_global
+  display_name: Santander
+  country_primary: ES
+  country_present_in:
+  - ES
+  - MX
+  - BR
+  - AR
+  - CL
+  - UK
+  - US
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - santander
+  - banco santander
+- canonical_id: hsbc_global
+  display_name: HSBC
+  country_primary: UK
+  country_present_in:
+  - UK
+  - HK
+  - MX
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - hsbc
+  - hsbc holdings
+- canonical_id: citi
+  display_name: Citi
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  stage: public
+  aliases:
+  - citi
+  - citibank
+  - citigroup
+- canonical_id: jpmorgan
+  display_name: JPMorgan
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  - investment
+  stage: public
+  aliases:
+  - jpmorgan
+  - jp morgan
+  - jpmorgan chase
+  - chase
+- canonical_id: goldman_sachs
+  display_name: Goldman Sachs
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  - investment
+  stage: public
+  aliases:
+  - goldman sachs
+  - goldman
+  - gs
+- canonical_id: morgan_stanley
+  display_name: Morgan Stanley
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - banking
+  - finance
+  - investment
+  stage: public
+  aliases:
+  - morgan stanley
+- canonical_id: telcel
+  display_name: Telcel
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - telcel
+  related_entities:
+  - canonical_id: america_movil
+    relation: parent
+- canonical_id: claro
+  display_name: Claro
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CO
+  - CL
+  - PE
+  - EC
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - claro
+  related_entities:
+  - canonical_id: america_movil
+    relation: parent
+- canonical_id: at_t_mexico
+  display_name: AT&T México
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - at&t mexico
+  - at&t méxico
+  - att mexico
+  related_entities:
+  - canonical_id: at_t
+    relation: parent
+- canonical_id: at_t
+  display_name: AT&T
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - at&t
+  - att
+  - at and t
+- canonical_id: movistar
+  display_name: Movistar
+  country_primary: ES
+  country_present_in:
+  - multi
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - movistar
+  related_entities:
+  - canonical_id: telefonica
+    relation: parent
+- canonical_id: telefonica
+  display_name: Telefónica
+  country_primary: ES
+  country_present_in:
+  - ES
+  - BR
+  - AR
+  - CL
+  - CO
+  - MX
+  - PE
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - telefonica
+  - telefónica
+- canonical_id: entel
+  display_name: Entel
+  country_primary: CL
+  country_present_in:
+  - CL
+  - PE
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - entel
+- canonical_id: etb
+  display_name: ETB
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - etb
+- canonical_id: personal
+  display_name: Personal
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - personal
+  - telecom personal
+  related_entities:
+  - canonical_id: telecom_argentina
+    relation: parent
+- canonical_id: telecom_argentina
+  display_name: Telecom Argentina
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - telecom
+  stage: public
+  aliases:
+  - telecom argentina
+- canonical_id: soriana
+  display_name: Soriana
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - soriana
+- canonical_id: chedraui
+  display_name: Chedraui
+  country_primary: MX
+  country_present_in:
+  - MX
+  - US
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - chedraui
+- canonical_id: la_comer
+  display_name: La Comer
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - la comer
+  - lacomer
+- canonical_id: alsea
+  display_name: Alsea
+  country_primary: MX
+  country_present_in:
+  - MX
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - alsea
+- canonical_id: kio
+  display_name: KIO Networks
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - tech
+  - infrastructure
+  - b2b
+  stage: private
+  aliases:
+  - kio
+  - kio networks
+- canonical_id: gruma
+  display_name: Gruma
+  country_primary: MX
+  country_present_in:
+  - MX
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - industrial
+  stage: public
+  aliases:
+  - gruma
+- canonical_id: bimbo
+  display_name: Bimbo
+  country_primary: MX
+  country_present_in:
+  - MX
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - bimbo
+  - grupo bimbo
+- canonical_id: aeromexico
+  display_name: Aeroméxico
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - aeromexico
+  - aeroméxico
+- canonical_id: volaris
+  display_name: Volaris
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - volaris
+- canonical_id: vivaaerobus
+  display_name: Viva Aerobus
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - airline
+  - transportation
+  stage: private
+  aliases:
+  - viva aerobus
+  - vivaaerobus
+- canonical_id: latam_airlines
+  display_name: LATAM Airlines
+  country_primary: CL
+  country_present_in:
+  - CL
+  - BR
+  - PE
+  - EC
+  - CO
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - latam
+  - latam airlines
+- canonical_id: gol
+  display_name: GOL
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - gol
+  - gol linhas aereas
+  - gol linhas aéreas
+- canonical_id: azul
+  display_name: Azul Linhas Aéreas
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - azul
+  - azul linhas aereas
+  - azul linhas aéreas
+- canonical_id: avianca
+  display_name: Avianca
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - airline
+  - transportation
+  stage: public
+  aliases:
+  - avianca
+- canonical_id: grupo_salinas
+  display_name: Grupo Salinas
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - conglomerate
+  - media
+  - retail
+  stage: private
+  aliases:
+  - grupo salinas
+  - salinas group
+  - tv azteca
+  - elektra
+- canonical_id: elektra
+  display_name: Elektra
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - retail
+  - consumer_finance
+  stage: public
+  aliases:
+  - elektra
+  - grupo elektra
+  related_entities:
+  - canonical_id: grupo_salinas
+    relation: parent
+- canonical_id: televisa
+  display_name: Televisa
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - media
+  - tv
+  stage: public
+  aliases:
+  - televisa
+  - grupo televisa
+- canonical_id: tv_azteca
+  display_name: TV Azteca
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - media
+  - tv
+  stage: public
+  aliases:
+  - tv azteca
+  related_entities:
+  - canonical_id: grupo_salinas
+    relation: parent
+- canonical_id: grupo_modelo
+  display_name: Grupo Modelo
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - beverage
+  - consumer
+  stage: public
+  aliases:
+  - grupo modelo
+  - modelo
+  related_entities:
+  - canonical_id: ab_inbev
+    relation: parent
+- canonical_id: herdez
+  display_name: Grupo Herdez
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - herdez
+  - grupo herdez
+- canonical_id: lala
+  display_name: Grupo Lala
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - consumer
+  - food
+  - dairy
+  stage: public
+  aliases:
+  - lala
+  - grupo lala
+- canonical_id: cencosud
+  display_name: Cencosud
+  country_primary: CL
+  country_present_in:
+  - CL
+  - AR
+  - BR
+  - CO
+  - PE
+  industry_tags:
+  - retail
+  - ecommerce
+  stage: public
+  aliases:
+  - cencosud
+  - jumbo
+  - santa isabel
+  - easy
+  - paris
+- canonical_id: ripley
+  display_name: Ripley
+  country_primary: CL
+  country_present_in:
+  - CL
+  - PE
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - ripley
+- canonical_id: smu
+  display_name: SMU
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - smu
+  - unimarc
+- canonical_id: codelco
+  display_name: Codelco
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - mining
+  - industrial
+  - government
+  stage: private
+  aliases:
+  - codelco
+- canonical_id: sqm
+  display_name: SQM
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - mining
+  - industrial
+  stage: public
+  aliases:
+  - sqm
+  - sociedad quimica y minera
+- canonical_id: antofagasta
+  display_name: Antofagasta
+  country_primary: CL
+  country_present_in:
+  - CL
+  - UK
+  industry_tags:
+  - mining
+  - industrial
+  stage: public
+  aliases:
+  - antofagasta
+  - antofagasta plc
+- canonical_id: copec
+  display_name: Copec
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - energy
+  - industrial
+  stage: public
+  aliases:
+  - copec
+- canonical_id: grupo_argos
+  display_name: Grupo Argos
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - industrial
+  - conglomerate
+  stage: public
+  aliases:
+  - grupo argos
+  - argos
+- canonical_id: ecopetrol
+  display_name: Ecopetrol
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - energy
+  - oil_gas
+  - government
+  stage: public
+  aliases:
+  - ecopetrol
+- canonical_id: isa
+  display_name: ISA
+  country_primary: CO
+  country_present_in:
+  - CO
+  - CL
+  - BR
+  - PE
+  industry_tags:
+  - energy
+  - utilities
+  stage: public
+  aliases:
+  - isa
+  - interconexion electrica
+- canonical_id: nutresa
+  display_name: Grupo Nutresa
+  country_primary: CO
+  country_present_in:
+  - CO
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - nutresa
+  - grupo nutresa
+- canonical_id: ypf
+  display_name: YPF
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - energy
+  - oil_gas
+  - government
+  stage: public
+  aliases:
+  - ypf
+- canonical_id: tenaris
+  display_name: Tenaris
+  country_primary: AR
+  country_present_in:
+  - AR
+  - multi
+  industry_tags:
+  - industrial
+  - steel
+  stage: public
+  aliases:
+  - tenaris
+  related_entities:
+  - canonical_id: techint
+    relation: parent
+- canonical_id: techint
+  display_name: Techint
+  country_primary: AR
+  country_present_in:
+  - AR
+  - IT
+  - multi
+  industry_tags:
+  - industrial
+  - conglomerate
+  stage: private
+  aliases:
+  - techint
+  - techint group
+- canonical_id: arcor
+  display_name: Arcor
+  country_primary: AR
+  country_present_in:
+  - AR
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: private
+  aliases:
+  - arcor
+  - grupo arcor
+- canonical_id: clarin
+  display_name: Grupo Clarín
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - media
+  stage: public
+  aliases:
+  - clarin
+  - clarín
+  - grupo clarin
+  - grupo clarín
+- canonical_id: alicorp
+  display_name: Alicorp
+  country_primary: PE
+  country_present_in:
+  - PE
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - industrial
+  stage: public
+  aliases:
+  - alicorp
+- canonical_id: buenaventura
+  display_name: Buenaventura
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - mining
+  stage: public
+  aliases:
+  - buenaventura
+- canonical_id: graña_montero
+  display_name: Aenza
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - construction
+  - industrial
+  stage: public
+  aliases:
+  - aenza
+  - graña y montero
+  - grana y montero
+  acquisition_lineage:
+  - was: graña y montero
+    until: 2020
+  notes: Renamed from Graña y Montero ~2020.
+- canonical_id: oliver_wyman
+  display_name: Oliver Wyman
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  stage: public
+  aliases:
+  - oliver wyman
+  related_entities:
+  - canonical_id: marsh_mclennan
+    relation: parent
+- canonical_id: at_kearney
+  display_name: Kearney
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  stage: private
+  aliases:
+  - kearney
+  - at kearney
+  - a.t. kearney
+  - at_kearney
+- canonical_id: roland_berger
+  display_name: Roland Berger
+  country_primary: DE
+  country_present_in:
+  - DE
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  stage: private
+  aliases:
+  - roland berger
+- canonical_id: simon_kucher
+  display_name: Simon-Kucher
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  - pricing
+  stage: private
+  aliases:
+  - simon kucher
+  - simon-kucher
+  - simon kucher and partners
+- canonical_id: lek
+  display_name: L.E.K. Consulting
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  stage: private
+  aliases:
+  - lek
+  - l.e.k.
+  - lek consulting
+- canonical_id: strategy_and
+  display_name: Strategy&
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - strategy
+  stage: public
+  aliases:
+  - strategy&
+  - strategy and
+  - booz allen
+  related_entities:
+  - canonical_id: pwc
+    relation: parent
+- canonical_id: capgemini
+  display_name: Capgemini
+  country_primary: FR
+  country_present_in:
+  - FR
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - technology_services
+  stage: public
+  aliases:
+  - capgemini
+- canonical_id: ibm_consulting
+  display_name: IBM Consulting
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consulting
+  - technology_services
+  stage: public
+  aliases:
+  - ibm consulting
+  - ibm gbs
+  related_entities:
+  - canonical_id: ibm
+    relation: parent
+- canonical_id: dxc
+  display_name: DXC Technology
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - dxc
+  - dxc technology
+- canonical_id: ntt_data
+  display_name: NTT DATA
+  country_primary: JP
+  country_present_in:
+  - JP
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - ntt data
+  - nttdata
+- canonical_id: everis
+  display_name: Everis
+  country_primary: ES
+  country_present_in:
+  - ES
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - technology_services
+  stage: public
+  aliases:
+  - everis
+  related_entities:
+  - canonical_id: ntt_data
+    relation: parent
+- canonical_id: infosys
+  display_name: Infosys
+  country_primary: IN
+  country_present_in:
+  - IN
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - infosys
+- canonical_id: tcs
+  display_name: Tata Consultancy Services
+  country_primary: IN
+  country_present_in:
+  - IN
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - tcs
+  - tata consultancy services
+  - tata consultancy
+- canonical_id: wipro
+  display_name: Wipro
+  country_primary: IN
+  country_present_in:
+  - IN
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - wipro
+- canonical_id: cognizant
+  display_name: Cognizant
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - technology_services
+  - consulting
+  stage: public
+  aliases:
+  - cognizant
+- canonical_id: genpact
+  display_name: Genpact
+  country_primary: BM
+  country_present_in:
+  - IN
+  - US
+  - MX
+  - multi
+  industry_tags:
+  - technology_services
+  - bpo
+  stage: public
+  aliases:
+  - genpact
+- canonical_id: fti_consulting
+  display_name: FTI Consulting
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - consulting
+  - advisory
+  stage: public
+  aliases:
+  - fti
+  - fti consulting
+- canonical_id: alvarez_marsal
+  display_name: Alvarez & Marsal
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - restructuring
+  stage: private
+  aliases:
+  - alvarez marsal
+  - alvarez & marsal
+  - a&m
+  - a & m
+- canonical_id: kroll
+  display_name: Kroll
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - advisory
+  - risk
+  stage: private
+  aliases:
+  - kroll
+  - kroll inc
+- canonical_id: aon
+  display_name: Aon
+  country_primary: UK
+  country_present_in:
+  - UK
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - insurance
+  - advisory
+  stage: public
+  aliases:
+  - aon
+- canonical_id: marsh_mclennan
+  display_name: Marsh McLennan
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - insurance
+  - advisory
+  - consulting
+  stage: public
+  aliases:
+  - marsh mclennan
+  - marsh and mclennan
+  - mmc
+- canonical_id: willis_towers_watson
+  display_name: WTW
+  country_primary: UK
+  country_present_in:
+  - UK
+  - US
+  - multi
+  industry_tags:
+  - insurance
+  - advisory
+  stage: public
+  aliases:
+  - wtw
+  - willis towers watson
+- canonical_id: kantar
+  display_name: Kantar
+  country_primary: UK
+  country_present_in:
+  - UK
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - consulting
+  - market_research
+  stage: private
+  aliases:
+  - kantar
+- canonical_id: nielsen
+  display_name: Nielsen
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - market_research
+  stage: private
+  aliases:
+  - nielsen
+  - nielseniq
+- canonical_id: integration
+  display_name: Integration Consulting
+  country_primary: BR
+  country_present_in:
+  - BR
+  - multi
+  industry_tags:
+  - consulting
+  stage: private
+  aliases:
+  - integration
+  - integration consulting
+- canonical_id: falconi
+  display_name: Falconi
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - consulting
+  - management
+  stage: private
+  aliases:
+  - falconi
+- canonical_id: softbank
+  display_name: SoftBank
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  - multi
+  industry_tags:
+  - investment
+  - venture_capital
+  - private_equity
+  stage: public
+  aliases:
+  - softbank
+  - softbank group
+  - softbank vision fund
+- canonical_id: kaszek
+  display_name: Kaszek
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - kaszek
+  - kaszek ventures
+- canonical_id: monashees
+  display_name: monashees
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - monashees
+- canonical_id: nazca
+  display_name: Nazca Ventures
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - nazca
+  - nazca ventures
+- canonical_id: dila_capital
+  display_name: DILA Capital
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - dila
+  - dila capital
+- canonical_id: alaya_capital
+  display_name: Alaya Capital
+  country_primary: AR
+  country_present_in:
+  - AR
+  - MX
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - alaya
+  - alaya capital
+- canonical_id: redpoint_eventures
+  display_name: Redpoint eventures
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - redpoint eventures
+  - redpoint ventures
+- canonical_id: valor_capital
+  display_name: Valor Capital Group
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - valor capital
+  - valor capital group
+  - valor
+- canonical_id: general_atlantic
+  display_name: General Atlantic
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - private_equity
+  - investment
+  stage: private
+  aliases:
+  - general atlantic
+- canonical_id: warburg_pincus
+  display_name: Warburg Pincus
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - multi
+  industry_tags:
+  - private_equity
+  - investment
+  stage: private
+  aliases:
+  - warburg pincus
+  - warburg
+- canonical_id: advent
+  display_name: Advent International
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - private_equity
+  - investment
+  stage: private
+  aliases:
+  - advent
+  - advent international
+- canonical_id: kkr
+  display_name: KKR
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - private_equity
+  - investment
+  stage: public
+  aliases:
+  - kkr
+  - kohlberg kravis roberts
+- canonical_id: blackstone
+  display_name: Blackstone
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - private_equity
+  - investment
+  stage: public
+  aliases:
+  - blackstone
+- canonical_id: carlyle
+  display_name: Carlyle
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - private_equity
+  - investment
+  stage: public
+  aliases:
+  - carlyle
+  - carlyle group
+- canonical_id: a16z
+  display_name: Andreessen Horowitz
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - a16z
+  - andreessen horowitz
+- canonical_id: sequoia
+  display_name: Sequoia Capital
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - sequoia
+  - sequoia capital
+- canonical_id: accel
+  display_name: Accel
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - accel
+  - accel partners
+- canonical_id: ggv
+  display_name: GGV Capital
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - venture_capital
+  - investment
+  stage: private
+  aliases:
+  - ggv
+  - ggv capital
+  notes: VERIFY current structure — restructured 2024 into separate US/Asia entities.
+- canonical_id: ycombinator
+  display_name: Y Combinator
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - accelerator
+  - venture_capital
+  stage: private
+  aliases:
+  - yc
+  - y combinator
+  - ycombinator
+- canonical_id: techstars
+  display_name: Techstars
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - accelerator
+  - venture_capital
+  stage: private
+  aliases:
+  - techstars
+- canonical_id: 500_global
+  display_name: 500 Global
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  - MX
+  industry_tags:
+  - venture_capital
+  - accelerator
+  stage: private
+  aliases:
+  - 500 global
+  - 500 startups
+  - 500global
+- canonical_id: loggi
+  display_name: Loggi
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - logistics
+  - delivery
+  stage: late_stage
+  aliases:
+  - loggi
+- canonical_id: z1
+  display_name: Z1
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - neobank
+  - teen
+  stage: growth
+  aliases:
+  - z1
+- canonical_id: dr_consulta
+  display_name: Dr.Consulta
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthcare
+  stage: late_stage
+  aliases:
+  - dr consulta
+  - dr.consulta
+  - drconsulta
+- canonical_id: vittude
+  display_name: Vittude
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - healthtech
+  - mental_health
+  stage: growth
+  aliases:
+  - vittude
+- canonical_id: mottu
+  display_name: Mottu
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - mobility
+  - rental
+  stage: growth
+  aliases:
+  - mottu
+- canonical_id: grow_mobility
+  display_name: Grow Mobility
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - mobility
+  - scooter
+  stage: late_stage
+  aliases:
+  - grow
+  - grow mobility
+  acquisition_lineage:
+  - was: yellow
+    until: 2019
+  - was: grin
+    until: 2019
+  notes: Merger of Yellow (BR) and Grin (MX) in 2019. Operations significantly reduced post-pandemic.
+- canonical_id: dock
+  display_name: Dock
+  country_primary: BR
+  country_present_in:
+  - BR
+  - MX
+  industry_tags:
+  - fintech
+  - b2b
+  - infrastructure
+  stage: late_stage
+  aliases:
+  - dock
+  - dock tech
+- canonical_id: trybe
+  display_name: Trybe
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - edtech
+  - coding_bootcamp
+  stage: growth
+  aliases:
+  - trybe
+- canonical_id: hashdex
+  display_name: Hashdex
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - fintech
+  - crypto
+  - asset_management
+  stage: growth
+  aliases:
+  - hashdex
+- canonical_id: nuvini_holding
+  display_name: Nuvini
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - holding
+  stage: public
+  aliases:
+  - nuvini
+- canonical_id: clicksign
+  display_name: Clicksign
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: growth
+  aliases:
+  - clicksign
+  - click sign
+- canonical_id: hubla
+  display_name: Hubla
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - saas
+  - creator
+  - fintech
+  stage: growth
+  aliases:
+  - hubla
+- canonical_id: trocafone
+  display_name: Trocafone
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - marketplace
+  - electronics
+  stage: growth
+  aliases:
+  - trocafone
+- canonical_id: worky
+  display_name: Worky
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - saas
+  - hr
+  - b2b
+  stage: growth
+  aliases:
+  - worky
+- canonical_id: runa
+  display_name: Runa
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - saas
+  - hr
+  - b2b
+  stage: growth
+  aliases:
+  - runa
+  - runa hr
+- canonical_id: yana_health
+  display_name: Yana
+  country_primary: MX
+  country_present_in:
+  - MX
+  - multi
+  industry_tags:
+  - healthtech
+  - mental_health
+  - ai
+  stage: growth
+  aliases:
+  - yana
+- canonical_id: urbvan
+  display_name: Urbvan
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - mobility
+  - shuttle
+  stage: growth
+  aliases:
+  - urbvan
+- canonical_id: jokr
+  display_name: JOKR
+  country_primary: DE
+  country_present_in:
+  - DE
+  - BR
+  - PE
+  - CO
+  industry_tags:
+  - marketplace
+  - grocery
+  - delivery
+  stage: growth
+  aliases:
+  - jokr
+- canonical_id: flat_mx
+  display_name: Flat
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - proptech
+  - real_estate
+  stage: growth
+  aliases:
+  - flat
+  - flat mx
+- canonical_id: ben_mx
+  display_name: Ben
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - saas
+  - b2b
+  - hr
+  - benefits
+  stage: growth
+  aliases:
+  - ben
+  - ben mexico
+- canonical_id: rappi_travel
+  display_name: Rappi Travel
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - marketplace
+  - travel
+  stage: growth
+  aliases:
+  - rappi travel
+  related_entities:
+  - canonical_id: rappi
+    relation: parent
+- canonical_id: truora
+  display_name: Truora
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - b2b
+  - identity
+  - kyc
+  stage: growth
+  aliases:
+  - truora
+- canonical_id: rappi_cards
+  display_name: RappiCards
+  country_primary: CO
+  country_present_in:
+  - CO
+  - MX
+  - BR
+  industry_tags:
+  - fintech
+  - credit_card
+  stage: growth
+  aliases:
+  - rappi cards
+  - rappicard
+  - rappicards
+  related_entities:
+  - canonical_id: rappi
+    relation: parent
+- canonical_id: zinli
+  display_name: Zinli
+  country_primary: PA
+  country_present_in:
+  - PA
+  - VE
+  - CO
+  industry_tags:
+  - fintech
+  - neobank
+  - consumer_finance
+  stage: growth
+  aliases:
+  - zinli
+- canonical_id: mercado_envios
+  display_name: Mercado Envíos
+  country_primary: AR
+  country_present_in:
+  - multi
+  industry_tags:
+  - logistics
+  stage: public
+  aliases:
+  - mercado envios
+  - mercado envíos
+  related_entities:
+  - canonical_id: mercado_libre
+    relation: parent
+- canonical_id: auth0
+  display_name: Auth0
+  country_primary: US
+  country_present_in:
+  - US
+  - AR
+  industry_tags:
+  - saas
+  - security
+  - identity
+  - b2b
+  stage: public
+  aliases:
+  - auth0
+  related_entities:
+  - canonical_id: okta
+    relation: parent
+- canonical_id: aleph_holding
+  display_name: Aleph Group
+  country_primary: AR
+  country_present_in:
+  - AR
+  - multi
+  industry_tags:
+  - adtech
+  - marketing
+  stage: private
+  aliases:
+  - aleph
+  - aleph group
+  - aleph holding
+- canonical_id: etermax
+  display_name: Etermax
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - gaming
+  - consumer
+  stage: private
+  aliases:
+  - etermax
+- canonical_id: mulesoft
+  display_name: MuleSoft
+  country_primary: US
+  country_present_in:
+  - US
+  - AR
+  industry_tags:
+  - saas
+  - b2b
+  - integration
+  stage: public
+  aliases:
+  - mulesoft
+  - mule soft
+  related_entities:
+  - canonical_id: salesforce
+    relation: parent
+- canonical_id: ualabee
+  display_name: Ualabee
+  country_primary: AR
+  country_present_in:
+  - AR
+  - MX
+  industry_tags:
+  - mobility
+  - transit
+  stage: growth
+  aliases:
+  - ualabee
+- canonical_id: zolvers
+  display_name: Zolvers
+  country_primary: AR
+  country_present_in:
+  - AR
+  - CL
+  - MX
+  industry_tags:
+  - marketplace
+  - services
+  stage: growth
+  aliases:
+  - zolvers
+- canonical_id: agrofy
+  display_name: Agrofy
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  industry_tags:
+  - marketplace
+  - agtech
+  - b2b
+  stage: growth
+  aliases:
+  - agrofy
+- canonical_id: buk
+  display_name: Buk
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  - CO
+  - PE
+  industry_tags:
+  - saas
+  - hr
+  - b2b
+  stage: late_stage
+  aliases:
+  - buk
+- canonical_id: toku
+  display_name: Toku
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: growth
+  aliases:
+  - toku
+- canonical_id: notco
+  display_name: NotCo
+  country_primary: CL
+  country_present_in:
+  - CL
+  - US
+  industry_tags:
+  - consumer
+  - food
+  - ai
+  stage: late_stage
+  aliases:
+  - notco
+  - the not company
+- canonical_id: crystal_lagoons
+  display_name: Crystal Lagoons
+  country_primary: CL
+  country_present_in:
+  - CL
+  - multi
+  industry_tags:
+  - proptech
+  - tech
+  stage: private
+  aliases:
+  - crystal lagoons
+- canonical_id: haulmer
+  display_name: Haulmer
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - saas
+  - sme
+  - b2b
+  stage: growth
+  aliases:
+  - haulmer
+- canonical_id: betterfly
+  display_name: Betterfly
+  country_primary: CL
+  country_present_in:
+  - CL
+  - multi
+  industry_tags:
+  - saas
+  - hr
+  - b2b
+  - wellness
+  stage: late_stage
+  aliases:
+  - betterfly
+- canonical_id: cumplo
+  display_name: Cumplo
+  country_primary: CL
+  country_present_in:
+  - CL
+  - MX
+  - PE
+  industry_tags:
+  - fintech
+  - sme_lending
+  stage: growth
+  aliases:
+  - cumplo
+- canonical_id: agros
+  display_name: Agros
+  country_primary: PE
+  country_present_in:
+  - PE
+  industry_tags:
+  - agtech
+  - fintech
+  stage: growth
+  aliases:
+  - agros
+- canonical_id: clinicas_del_azucar
+  display_name: Clínicas del Azúcar
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - healthcare
+  - chronic_disease
+  stage: growth
+  aliases:
+  - clinicas del azucar
+  - clínicas del azúcar
+- canonical_id: intelimotor
+  display_name: Intelimotor
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - saas
+  - automotive
+  - b2b
+  stage: growth
+  aliases:
+  - intelimotor
+- canonical_id: kolors
+  display_name: Kolors
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - mobility
+  - transportation
+  stage: growth
+  aliases:
+  - kolors
+- canonical_id: openzeppelin
+  display_name: OpenZeppelin
+  country_primary: AR
+  country_present_in:
+  - AR
+  - US
+  industry_tags:
+  - crypto
+  - security
+  - devtools
+  stage: growth
+  aliases:
+  - openzeppelin
+  - open zeppelin
+- canonical_id: rootstock
+  display_name: Rootstock
+  country_primary: AR
+  country_present_in:
+  - AR
+  - multi
+  industry_tags:
+  - crypto
+  - blockchain
+  stage: private
+  aliases:
+  - rootstock
+  - rsk
+- canonical_id: decentraland
+  display_name: Decentraland
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - crypto
+  - metaverse
+  - gaming
+  stage: private
+  aliases:
+  - decentraland
+- canonical_id: bitfarms
+  display_name: Bitfarms
+  country_primary: CA
+  country_present_in:
+  - CA
+  - AR
+  - US
+  industry_tags:
+  - crypto
+  - mining
+  stage: public
+  aliases:
+  - bitfarms
+- canonical_id: bitpanda
+  display_name: Bitpanda
+  country_primary: AT
+  country_present_in:
+  - AT
+  - EU
+  industry_tags:
+  - fintech
+  - crypto
+  - exchange
+  stage: late_stage
+  aliases:
+  - bitpanda
+- canonical_id: wildlife_studios
+  display_name: Wildlife Studios
+  country_primary: BR
+  country_present_in:
+  - BR
+  - US
+  industry_tags:
+  - gaming
+  - consumer
+  stage: late_stage
+  aliases:
+  - wildlife studios
+  - wildlife
+- canonical_id: riot_games
+  display_name: Riot Games
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  - MX
+  industry_tags:
+  - gaming
+  - consumer
+  stage: public
+  aliases:
+  - riot games
+  - riot
+  related_entities:
+  - canonical_id: tencent
+    relation: parent
+- canonical_id: activision_blizzard
+  display_name: Activision Blizzard
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - gaming
+  - consumer
+  stage: public
+  aliases:
+  - activision
+  - activision blizzard
+  - blizzard
+  related_entities:
+  - canonical_id: microsoft
+    relation: parent
+  acquisition_lineage:
+  - was: activision_blizzard
+    until: 2023
+  notes: Acquired by Microsoft 2023.
+- canonical_id: ea
+  display_name: Electronic Arts
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - gaming
+  - consumer
+  stage: public
+  aliases:
+  - ea
+  - electronic arts
+- canonical_id: ubisoft
+  display_name: Ubisoft
+  country_primary: FR
+  country_present_in:
+  - FR
+  - BR
+  - US
+  industry_tags:
+  - gaming
+  - consumer
+  stage: public
+  aliases:
+  - ubisoft
+- canonical_id: epic_games
+  display_name: Epic Games
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - gaming
+  - consumer
+  - engine
+  stage: private
+  aliases:
+  - epic games
+  - epic
+- canonical_id: playstation
+  display_name: PlayStation
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  industry_tags:
+  - gaming
+  - consumer
+  - hardware
+  stage: public
+  aliases:
+  - playstation
+  - sony interactive
+  related_entities:
+  - canonical_id: sony
+    relation: parent
+- canonical_id: nintendo
+  display_name: Nintendo
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  industry_tags:
+  - gaming
+  - consumer
+  - hardware
+  stage: public
+  aliases:
+  - nintendo
+- canonical_id: sony
+  display_name: Sony
+  country_primary: JP
+  country_present_in:
+  - JP
+  - multi
+  industry_tags:
+  - consumer
+  - hardware
+  - media
+  stage: public
+  aliases:
+  - sony
+  - sony group
+  - sony corporation
+- canonical_id: united_healthcare
+  display_name: UnitedHealthcare
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - healthcare
+  - health_insurance
+  stage: public
+  aliases:
+  - united healthcare
+  - unitedhealth
+  - unitedhealth group
+- canonical_id: johnson_johnson
+  display_name: Johnson & Johnson
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - pharma
+  - consumer
+  - healthcare
+  stage: public
+  aliases:
+  - johnson and johnson
+  - johnson & johnson
+  - j&j
+  - j and j
+- canonical_id: pfizer
+  display_name: Pfizer
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - pfizer
+- canonical_id: merck
+  display_name: Merck
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - merck
+  - merck & co
+  - msd
+- canonical_id: roche
+  display_name: Roche
+  country_primary: CH
+  country_present_in:
+  - CH
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - roche
+  - roche holding
+- canonical_id: novartis
+  display_name: Novartis
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - novartis
+- canonical_id: astrazeneca
+  display_name: AstraZeneca
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - astrazeneca
+  - astra zeneca
+- canonical_id: sanofi
+  display_name: Sanofi
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - sanofi
+- canonical_id: gsk
+  display_name: GSK
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - pharma
+  stage: public
+  aliases:
+  - gsk
+  - glaxosmithkline
+- canonical_id: bayer
+  display_name: Bayer
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - pharma
+  - agtech
+  stage: public
+  aliases:
+  - bayer
+- canonical_id: abbott
+  display_name: Abbott
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - pharma
+  - healthcare
+  stage: public
+  aliases:
+  - abbott
+  - abbott laboratories
+- canonical_id: unilever
+  display_name: Unilever
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  stage: public
+  aliases:
+  - unilever
+- canonical_id: nestle
+  display_name: Nestlé
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  - food
+  stage: public
+  aliases:
+  - nestle
+  - nestlé
+- canonical_id: procter_gamble
+  display_name: P&G
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  stage: public
+  aliases:
+  - p&g
+  - procter & gamble
+  - procter and gamble
+  - p and g
+- canonical_id: colgate
+  display_name: Colgate-Palmolive
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  stage: public
+  aliases:
+  - colgate
+  - colgate palmolive
+  - colgate-palmolive
+- canonical_id: kimberly_clark
+  display_name: Kimberly-Clark
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  stage: public
+  aliases:
+  - kimberly clark
+  - kimberly-clark
+  - k-c
+- canonical_id: kellogg
+  display_name: Kellanova
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - kellanova
+  - kellogg
+  - kellogg's
+  - kellogg company
+  acquisition_lineage:
+  - was: kellogg_company
+    until: 2023
+  notes: Spun off from Kellogg Company 2023 as Kellanova; cereal business kept the Kellogg name as WK Kellogg Co.
+- canonical_id: pepsico
+  display_name: PepsiCo
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  - beverage
+  stage: public
+  aliases:
+  - pepsi
+  - pepsico
+- canonical_id: coca_cola
+  display_name: Coca-Cola
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - fmcg
+  - beverage
+  stage: public
+  aliases:
+  - coca cola
+  - coca-cola
+  - coke
+  - the coca-cola company
+- canonical_id: coca_cola_femsa
+  display_name: Coca-Cola FEMSA
+  country_primary: MX
+  country_present_in:
+  - MX
+  - BR
+  - AR
+  - CO
+  - multi
+  industry_tags:
+  - consumer
+  - beverage
+  stage: public
+  aliases:
+  - coca cola femsa
+  - kof
+  - coca-cola femsa
+  related_entities:
+  - canonical_id: femsa
+    relation: parent
+- canonical_id: danone
+  display_name: Danone
+  country_primary: FR
+  country_present_in:
+  - FR
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - fmcg
+  stage: public
+  aliases:
+  - danone
+- canonical_id: mars
+  display_name: Mars
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - fmcg
+  stage: private
+  aliases:
+  - mars
+  - mars inc
+  - mars wrigley
+- canonical_id: mondelez
+  display_name: Mondelēz International
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - fmcg
+  stage: public
+  aliases:
+  - mondelez
+  - mondelez international
+  - mondelēz
+- canonical_id: loreal
+  display_name: L'Oréal
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - consumer
+  - beauty
+  - fmcg
+  stage: public
+  aliases:
+  - l'oreal
+  - loreal
+  - l'oréal
+- canonical_id: estee_lauder
+  display_name: Estée Lauder
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - beauty
+  stage: public
+  aliases:
+  - estee lauder
+  - estée lauder
+  - the estée lauder companies
+- canonical_id: toyota
+  display_name: Toyota
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - toyota
+  - toyota motor
+- canonical_id: nissan
+  display_name: Nissan
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  - MX
+  - multi
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - nissan
+  - nissan motor
+- canonical_id: honda
+  display_name: Honda
+  country_primary: JP
+  country_present_in:
+  - JP
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - honda
+  - honda motor
+- canonical_id: vw
+  display_name: Volkswagen
+  country_primary: DE
+  country_present_in:
+  - DE
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - vw
+  - volkswagen
+- canonical_id: audi
+  display_name: Audi
+  country_primary: DE
+  country_present_in:
+  - DE
+  - MX
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - audi
+  related_entities:
+  - canonical_id: vw
+    relation: parent
+- canonical_id: bmw
+  display_name: BMW
+  country_primary: DE
+  country_present_in:
+  - DE
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - bmw
+- canonical_id: mercedes_benz
+  display_name: Mercedes-Benz
+  country_primary: DE
+  country_present_in:
+  - DE
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - mercedes
+  - mercedes benz
+  - mercedes-benz
+  - daimler
+- canonical_id: ford
+  display_name: Ford
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - ford
+  - ford motor
+- canonical_id: gm
+  display_name: General Motors
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - gm
+  - general motors
+  - chevrolet
+  - chevy
+- canonical_id: stellantis
+  display_name: Stellantis
+  country_primary: NL
+  country_present_in:
+  - multi
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - stellantis
+  - fiat
+  - chrysler
+  - peugeot
+  - citroen
+  acquisition_lineage:
+  - was: fca
+    until: 2021
+  - was: psa
+    until: 2021
+- canonical_id: tesla
+  display_name: Tesla
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  industry_tags:
+  - auto
+  - energy
+  - tech
+  stage: public
+  aliases:
+  - tesla
+  - tesla motors
+- canonical_id: byd
+  display_name: BYD
+  country_primary: CN
+  country_present_in:
+  - CN
+  - MX
+  - BR
+  industry_tags:
+  - auto
+  - industrial
+  stage: public
+  aliases:
+  - byd
+- canonical_id: fedex
+  display_name: FedEx
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - logistics
+  stage: public
+  aliases:
+  - fedex
+  - fed ex
+- canonical_id: ups
+  display_name: UPS
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - logistics
+  stage: public
+  aliases:
+  - ups
+  - united parcel service
+- canonical_id: dhl
+  display_name: DHL
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - logistics
+  stage: public
+  aliases:
+  - dhl
+  related_entities:
+  - canonical_id: deutsche_post
+    relation: parent
+- canonical_id: maersk
+  display_name: Maersk
+  country_primary: DK
+  country_present_in:
+  - DK
+  - multi
+  industry_tags:
+  - logistics
+  - shipping
+  stage: public
+  aliases:
+  - maersk
+  - a.p. moller maersk
+- canonical_id: samsung
+  display_name: Samsung
+  country_primary: KR
+  country_present_in:
+  - KR
+  - multi
+  industry_tags:
+  - tech
+  - hardware
+  - consumer
+  stage: public
+  aliases:
+  - samsung
+  - samsung electronics
+- canonical_id: lg
+  display_name: LG Electronics
+  country_primary: KR
+  country_present_in:
+  - KR
+  - multi
+  industry_tags:
+  - consumer
+  - hardware
+  stage: public
+  aliases:
+  - lg
+  - lg electronics
+- canonical_id: huawei
+  display_name: Huawei
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - tech
+  - hardware
+  - telecom
+  stage: private
+  aliases:
+  - huawei
+- canonical_id: xiaomi
+  display_name: Xiaomi
+  country_primary: CN
+  country_present_in:
+  - CN
+  - MX
+  - BR
+  industry_tags:
+  - tech
+  - hardware
+  - consumer
+  stage: public
+  aliases:
+  - xiaomi
+- canonical_id: lenovo
+  display_name: Lenovo
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - tech
+  - hardware
+  stage: public
+  aliases:
+  - lenovo
+- canonical_id: siemens
+  display_name: Siemens
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - industrial
+  - technology
+  stage: public
+  aliases:
+  - siemens
+- canonical_id: philips
+  display_name: Philips
+  country_primary: NL
+  country_present_in:
+  - NL
+  - multi
+  industry_tags:
+  - consumer
+  - healthcare
+  - tech
+  stage: public
+  aliases:
+  - philips
+  - royal philips
+- canonical_id: schneider_electric
+  display_name: Schneider Electric
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - industrial
+  - energy
+  stage: public
+  aliases:
+  - schneider
+  - schneider electric
+- canonical_id: abb
+  display_name: ABB
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - industrial
+  - automation
+  stage: public
+  aliases:
+  - abb
+- canonical_id: ge
+  display_name: GE
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - industrial
+  - energy
+  stage: public
+  aliases:
+  - ge
+  - general electric
+- canonical_id: honeywell
+  display_name: Honeywell
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - industrial
+  - aerospace
+  stage: public
+  aliases:
+  - honeywell
+- canonical_id: 3m
+  display_name: 3M
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - industrial
+  - consumer
+  stage: public
+  aliases:
+  - 3m
+  - 3m company
+- canonical_id: zara
+  display_name: Zara (Inditex)
+  country_primary: ES
+  country_present_in:
+  - ES
+  - multi
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - zara
+  - inditex
+  - zara home
+  - pull and bear
+  - pull&bear
+  - bershka
+  - stradivarius
+  notes: Treat sister brands (Pull&Bear, Bershka, Stradivarius, Massimo Dutti, etc.) under Inditex parent.
+- canonical_id: hm
+  display_name: H&M
+  country_primary: SE
+  country_present_in:
+  - SE
+  - multi
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - h&m
+  - hm
+  - h and m
+  - hennes mauritz
+- canonical_id: uniqlo
+  display_name: Uniqlo
+  country_primary: JP
+  country_present_in:
+  - JP
+  - multi
+  industry_tags:
+  - retail
+  - fashion
+  stage: public
+  aliases:
+  - uniqlo
+  related_entities:
+  - canonical_id: fast_retailing
+    relation: parent
+- canonical_id: nike
+  display_name: Nike
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - sports
+  - fashion
+  stage: public
+  aliases:
+  - nike
+- canonical_id: adidas
+  display_name: Adidas
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - consumer
+  - sports
+  - fashion
+  stage: public
+  aliases:
+  - adidas
+- canonical_id: puma
+  display_name: Puma
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - consumer
+  - sports
+  - fashion
+  stage: public
+  aliases:
+  - puma
+- canonical_id: lvmh
+  display_name: LVMH
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - luxury
+  - consumer
+  - fashion
+  stage: public
+  aliases:
+  - lvmh
+  - louis vuitton
+  - moet hennessy
+  - moët hennessy
+- canonical_id: kering
+  display_name: Kering
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - luxury
+  - consumer
+  - fashion
+  stage: public
+  aliases:
+  - kering
+  - gucci
+- canonical_id: richemont
+  display_name: Richemont
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - luxury
+  - consumer
+  stage: public
+  aliases:
+  - richemont
+  - cartier
+- canonical_id: marriott
+  display_name: Marriott
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - hospitality
+  - consumer
+  stage: public
+  aliases:
+  - marriott
+  - marriott international
+- canonical_id: hilton
+  display_name: Hilton
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - hospitality
+  - consumer
+  stage: public
+  aliases:
+  - hilton
+- canonical_id: hyatt
+  display_name: Hyatt
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - hospitality
+  - consumer
+  stage: public
+  aliases:
+  - hyatt
+- canonical_id: accor
+  display_name: Accor
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - hospitality
+  - consumer
+  stage: public
+  aliases:
+  - accor
+  - accor hotels
+- canonical_id: axa
+  display_name: AXA
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - axa
+- canonical_id: allianz
+  display_name: Allianz
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - allianz
+- canonical_id: mapfre
+  display_name: MAPFRE
+  country_primary: ES
+  country_present_in:
+  - ES
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - mapfre
+- canonical_id: zurich_insurance
+  display_name: Zurich Insurance
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - zurich
+  - zurich insurance
+- canonical_id: metlife
+  display_name: MetLife
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - metlife
+- canonical_id: aig
+  display_name: AIG
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - insurance
+  stage: public
+  aliases:
+  - aig
+  - american international group
+- canonical_id: munich_re
+  display_name: Munich Re
+  country_primary: DE
+  country_present_in:
+  - DE
+  - multi
+  industry_tags:
+  - insurance
+  - reinsurance
+  stage: public
+  aliases:
+  - munich re
+  - munichre
+- canonical_id: swiss_re
+  display_name: Swiss Re
+  country_primary: CH
+  country_present_in:
+  - CH
+  - multi
+  industry_tags:
+  - insurance
+  - reinsurance
+  stage: public
+  aliases:
+  - swiss re
+  - swissre
+- canonical_id: starbucks
+  display_name: Starbucks
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  - BR
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - starbucks
+- canonical_id: mcdonalds
+  display_name: McDonald's
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - mcdonalds
+  - mcdonald's
+  - mcd
+- canonical_id: arcos_dorados
+  display_name: Arcos Dorados
+  country_primary: AR
+  country_present_in:
+  - AR
+  - BR
+  - MX
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - arcos dorados
+  - mcdonalds latam
+  - mcdonald's latam
+  related_entities:
+  - canonical_id: mcdonalds
+    relation: franchisee
+  notes: Largest McDonald's franchisee, operates throughout LatAm.
+- canonical_id: kfc
+  display_name: KFC
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - kfc
+  - kentucky fried chicken
+  related_entities:
+  - canonical_id: yum_brands
+    relation: parent
+- canonical_id: yum_brands
+  display_name: Yum Brands
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - yum brands
+  - yum
+- canonical_id: dominos
+  display_name: Domino's
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - dominos
+  - domino's
+  - dominos pizza
+- canonical_id: burger_king
+  display_name: Burger King
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  - retail
+  stage: public
+  aliases:
+  - burger king
+  - bk
+  related_entities:
+  - canonical_id: restaurant_brands_intl
+    relation: parent
+- canonical_id: restaurant_brands_intl
+  display_name: Restaurant Brands International
+  country_primary: CA
+  country_present_in:
+  - CA
+  - multi
+  industry_tags:
+  - consumer
+  - food
+  stage: public
+  aliases:
+  - restaurant brands international
+  - rbi
+- canonical_id: walmart_global
+  display_name: Walmart
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - retail
+  - consumer
+  stage: public
+  aliases:
+  - walmart
+- canonical_id: costco
+  display_name: Costco
+  country_primary: US
+  country_present_in:
+  - US
+  - MX
+  industry_tags:
+  - retail
+  - consumer
+  stage: public
+  aliases:
+  - costco
+- canonical_id: warner_music
+  display_name: Warner Music
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - media
+  - music
+  stage: public
+  aliases:
+  - warner music
+  - wmg
+- canonical_id: sony_music
+  display_name: Sony Music
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - media
+  - music
+  stage: public
+  aliases:
+  - sony music
+  related_entities:
+  - canonical_id: sony
+    relation: parent
+- canonical_id: universal_music
+  display_name: Universal Music Group
+  country_primary: NL
+  country_present_in:
+  - NL
+  - US
+  - multi
+  industry_tags:
+  - media
+  - music
+  stage: public
+  aliases:
+  - universal music
+  - umg
+  - universal music group
+- canonical_id: inter_american_development_bank
+  display_name: IDB
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - finance
+  - development
+  - multilateral
+  stage: private
+  aliases:
+  - idb
+  - iadb
+  - inter american development bank
+  - inter-american development bank
+  - bid
+- canonical_id: world_bank
+  display_name: World Bank
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - finance
+  - development
+  - multilateral
+  stage: private
+  aliases:
+  - world bank
+  - banco mundial
+  - ibrd
+- canonical_id: imf
+  display_name: IMF
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - finance
+  - multilateral
+  stage: private
+  aliases:
+  - imf
+  - international monetary fund
+  - fmi
+- canonical_id: oecd
+  display_name: OECD
+  country_primary: FR
+  country_present_in:
+  - FR
+  industry_tags:
+  - multilateral
+  - policy
+  stage: private
+  aliases:
+  - oecd
+- canonical_id: un
+  display_name: United Nations
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - multilateral
+  - ngo
+  stage: private
+  aliases:
+  - un
+  - united nations
+  - naciones unidas
+- canonical_id: undp
+  display_name: UNDP
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - multilateral
+  - ngo
+  - development
+  stage: private
+  aliases:
+  - undp
+  - un development programme
+- canonical_id: unicef
+  display_name: UNICEF
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - multilateral
+  - ngo
+  stage: private
+  aliases:
+  - unicef
+- canonical_id: gates_foundation
+  display_name: Gates Foundation
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - ngo
+  - philanthropy
+  stage: private
+  aliases:
+  - gates foundation
+  - bill and melinda gates foundation
+  - bmgf
+- canonical_id: ford_foundation
+  display_name: Ford Foundation
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - ngo
+  - philanthropy
+  stage: private
+  aliases:
+  - ford foundation
+- canonical_id: rockefeller_foundation
+  display_name: Rockefeller Foundation
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - ngo
+  - philanthropy
+  stage: private
+  aliases:
+  - rockefeller foundation
+- canonical_id: acumen
+  display_name: Acumen
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - ngo
+  - impact_investment
+  stage: private
+  aliases:
+  - acumen
+- canonical_id: harvard
+  display_name: Harvard University
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - harvard
+  - harvard university
+  - harvard business school
+  - hbs
+- canonical_id: stanford
+  display_name: Stanford University
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - stanford
+  - stanford university
+  - stanford gsb
+- canonical_id: mit
+  display_name: MIT
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - mit
+  - massachusetts institute of technology
+  - mit sloan
+- canonical_id: wharton
+  display_name: Wharton
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - wharton
+  - wharton school
+  related_entities:
+  - canonical_id: upenn
+    relation: parent
+- canonical_id: upenn
+  display_name: University of Pennsylvania
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - upenn
+  - university of pennsylvania
+- canonical_id: northwestern
+  display_name: Northwestern University
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - northwestern
+  - northwestern university
+- canonical_id: columbia
+  display_name: Columbia University
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - columbia
+  - columbia university
+  - columbia business school
+  - cbs
+- canonical_id: uchicago
+  display_name: University of Chicago
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - uchicago
+  - university of chicago
+  - chicago booth
+  - booth
+- canonical_id: london_business_school
+  display_name: London Business School
+  country_primary: UK
+  country_present_in:
+  - UK
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - lbs
+  - london business school
+- canonical_id: insead
+  display_name: INSEAD
+  country_primary: FR
+  country_present_in:
+  - FR
+  - SG
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - insead
+- canonical_id: ie_business_school
+  display_name: IE Business School
+  country_primary: ES
+  country_present_in:
+  - ES
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - ie
+  - ie business school
+  - instituto de empresa
+- canonical_id: iese
+  display_name: IESE Business School
+  country_primary: ES
+  country_present_in:
+  - ES
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - iese
+  - iese business school
+- canonical_id: itam
+  display_name: ITAM
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - itam
+  - instituto tecnologico autonomo de mexico
+  - instituto tecnológico autónomo de méxico
+- canonical_id: tec_monterrey
+  display_name: Tec de Monterrey
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - tec de monterrey
+  - tecnologico de monterrey
+  - tecnológico de monterrey
+  - itesm
+  - tec
+- canonical_id: unam
+  display_name: UNAM
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - education
+  - academia
+  stage: public
+  aliases:
+  - unam
+  - universidad nacional autonoma de mexico
+  - universidad nacional autónoma de méxico
+- canonical_id: ipade
+  display_name: IPADE
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - ipade
+  - ipade business school
+- canonical_id: anahuac
+  display_name: Universidad Anáhuac
+  country_primary: MX
+  country_present_in:
+  - MX
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - anahuac
+  - anáhuac
+  - universidad anahuac
+- canonical_id: uniandes
+  display_name: Universidad de los Andes
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - uniandes
+  - los andes
+  - universidad de los andes
+- canonical_id: javeriana
+  display_name: Pontificia Universidad Javeriana
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - javeriana
+  - universidad javeriana
+- canonical_id: inalde
+  display_name: INALDE
+  country_primary: CO
+  country_present_in:
+  - CO
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - inalde
+  - inalde business school
+- canonical_id: usp
+  display_name: USP
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - education
+  - academia
+  stage: public
+  aliases:
+  - usp
+  - universidade de sao paulo
+  - universidade de são paulo
+- canonical_id: fgv
+  display_name: FGV
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - fgv
+  - fundacao getulio vargas
+  - fundação getulio vargas
+- canonical_id: insper
+  display_name: Insper
+  country_primary: BR
+  country_present_in:
+  - BR
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - insper
+- canonical_id: uba
+  display_name: UBA
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - education
+  - academia
+  stage: public
+  aliases:
+  - uba
+  - universidad de buenos aires
+- canonical_id: ucema
+  display_name: UCEMA
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - ucema
+  - universidad del cema
+- canonical_id: udesa
+  display_name: UdeSA
+  country_primary: AR
+  country_present_in:
+  - AR
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - udesa
+  - universidad de san andres
+  - universidad de san andrés
+- canonical_id: uc_chile
+  display_name: Universidad Católica de Chile
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - education
+  - academia
+  stage: private
+  aliases:
+  - uc
+  - universidad catolica
+  - universidad católica
+  - pontificia universidad catolica de chile
+- canonical_id: uchile
+  display_name: Universidad de Chile
+  country_primary: CL
+  country_present_in:
+  - CL
+  industry_tags:
+  - education
+  - academia
+  stage: public
+  aliases:
+  - universidad de chile
+  - u de chile
+- canonical_id: wpp
+  display_name: WPP
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - adtech
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - wpp
+- canonical_id: publicis
+  display_name: Publicis Groupe
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - adtech
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - publicis
+  - publicis groupe
+- canonical_id: omnicom
+  display_name: Omnicom
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - adtech
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - omnicom
+  - omnicom group
+- canonical_id: ipg
+  display_name: Interpublic Group
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - adtech
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - ipg
+  - interpublic
+  - interpublic group
+- canonical_id: ogilvy
+  display_name: Ogilvy
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - ogilvy
+  related_entities:
+  - canonical_id: wpp
+    relation: parent
+- canonical_id: jwt
+  display_name: Wunderman Thompson
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - marketing
+  - agency
+  stage: public
+  aliases:
+  - wunderman thompson
+  - jwt
+  - j. walter thompson
+  related_entities:
+  - canonical_id: wpp
+    relation: parent
+- canonical_id: ericsson
+  display_name: Ericsson
+  country_primary: SE
+  country_present_in:
+  - SE
+  - multi
+  industry_tags:
+  - telecom
+  - tech
+  stage: public
+  aliases:
+  - ericsson
+- canonical_id: nokia
+  display_name: Nokia
+  country_primary: FI
+  country_present_in:
+  - FI
+  - multi
+  industry_tags:
+  - telecom
+  - tech
+  stage: public
+  aliases:
+  - nokia
+- canonical_id: alibaba
+  display_name: Alibaba
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - ecommerce
+  - cloud
+  - tech
+  stage: public
+  aliases:
+  - alibaba
+  - alibaba group
+- canonical_id: tencent
+  display_name: Tencent
+  country_primary: CN
+  country_present_in:
+  - CN
+  industry_tags:
+  - tech
+  - gaming
+  - social
+  stage: public
+  aliases:
+  - tencent
+- canonical_id: baidu
+  display_name: Baidu
+  country_primary: CN
+  country_present_in:
+  - CN
+  industry_tags:
+  - tech
+  - search
+  stage: public
+  aliases:
+  - baidu
+- canonical_id: jd_com
+  display_name: JD.com
+  country_primary: CN
+  country_present_in:
+  - CN
+  industry_tags:
+  - ecommerce
+  stage: public
+  aliases:
+  - jd
+  - jd.com
+  - jd com
+- canonical_id: flipkart
+  display_name: Flipkart
+  country_primary: IN
+  country_present_in:
+  - IN
+  industry_tags:
+  - ecommerce
+  stage: private
+  aliases:
+  - flipkart
+  related_entities:
+  - canonical_id: walmart_global
+    relation: parent
+- canonical_id: zs_associates
+  display_name: ZS Associates
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consulting
+  - advisory
+  - pharma
+  stage: private
+  aliases:
+  - zs
+  - zs associates
+- canonical_id: iqvia
+  display_name: IQVIA
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - consulting
+  - pharma
+  - data
+  stage: public
+  aliases:
+  - iqvia
+  - quintiles
+- canonical_id: guidehouse
+  display_name: Guidehouse
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - consulting
+  - advisory
+  stage: private
+  aliases:
+  - guidehouse
+- canonical_id: zoominfo
+  display_name: ZoomInfo
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - b2b
+  - data
+  stage: public
+  aliases:
+  - zoominfo
+  - zoom info
+- canonical_id: gong
+  display_name: Gong
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  - sales
+  stage: late_stage
+  aliases:
+  - gong
+  - gong.io
+- canonical_id: outreach
+  display_name: Outreach
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - b2b
+  - sales
+  stage: late_stage
+  aliases:
+  - outreach
+  - outreach.io
+- canonical_id: salesloft
+  display_name: Salesloft
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - b2b
+  - sales
+  stage: private_equity
+  aliases:
+  - salesloft
+  - sales loft
+- canonical_id: intercom
+  display_name: Intercom
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - saas
+  - b2b
+  - support
+  stage: late_stage
+  aliases:
+  - intercom
+- canonical_id: freshworks
+  display_name: Freshworks
+  country_primary: IN
+  country_present_in:
+  - IN
+  - US
+  - MX
+  - BR
+  industry_tags:
+  - saas
+  - b2b
+  stage: public
+  aliases:
+  - freshworks
+  - freshdesk
+- canonical_id: toast
+  display_name: Toast
+  country_primary: US
+  country_present_in:
+  - US
+  industry_tags:
+  - saas
+  - restaurant
+  - fintech
+  stage: public
+  aliases:
+  - toast
+  - toast inc
+- canonical_id: global_payments
+  display_name: Global Payments
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  stage: public
+  aliases:
+  - global payments
+- canonical_id: fiserv
+  display_name: Fiserv
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: public
+  aliases:
+  - fiserv
+- canonical_id: fis
+  display_name: FIS
+  country_primary: US
+  country_present_in:
+  - US
+  - multi
+  industry_tags:
+  - fintech
+  - b2b
+  stage: public
+  aliases:
+  - fis
+  - fidelity national information services
+- canonical_id: worldline
+  display_name: Worldline
+  country_primary: FR
+  country_present_in:
+  - FR
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: public
+  aliases:
+  - worldline
+- canonical_id: adyen
+  display_name: Adyen
+  country_primary: NL
+  country_present_in:
+  - NL
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: public
+  aliases:
+  - adyen
+- canonical_id: checkout_com
+  display_name: Checkout.com
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: late_stage
+  aliases:
+  - checkout
+  - checkout.com
+  - checkout com
+- canonical_id: rapyd
+  display_name: Rapyd
+  country_primary: UK
+  country_present_in:
+  - UK
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: late_stage
+  aliases:
+  - rapyd
+- canonical_id: nuvei
+  display_name: Nuvei
+  country_primary: CA
+  country_present_in:
+  - CA
+  - multi
+  industry_tags:
+  - fintech
+  - payments
+  - b2b
+  stage: public
+  aliases:
+  - nuvei
+- canonical_id: oxxo
+  display_name: OXXO
+  country_primary: MX
+  country_present_in:
+  - MX
+  - multi
+  industry_tags:
+  - retail
+  stage: public
+  aliases:
+  - oxxo
+  related_entities:
+  - canonical_id: femsa
+    relation: parent
+- canonical_id: groupon
+  display_name: Groupon
+  country_primary: US
+  country_present_in:
+  - US
+  - BR
+  industry_tags:
+  - marketplace
+  - consumer
+  stage: public
+  aliases:
+  - groupon
+- canonical_id: ali_express
+  display_name: AliExpress
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - ecommerce
+  - marketplace
+  stage: public
+  aliases:
+  - aliexpress
+  - ali express
+  related_entities:
+  - canonical_id: alibaba
+    relation: parent
+- canonical_id: shein
+  display_name: SHEIN
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - ecommerce
+  - fashion
+  stage: private
+  aliases:
+  - shein
+- canonical_id: temu
+  display_name: Temu
+  country_primary: CN
+  country_present_in:
+  - CN
+  - multi
+  industry_tags:
+  - ecommerce
+  - marketplace
+  stage: public
+  aliases:
+  - temu
+  related_entities:
+  - canonical_id: pdd
+    relation: parent
+- canonical_id: pdd
+  display_name: PDD Holdings
+  country_primary: CN
+  country_present_in:
+  - CN
+  industry_tags:
+  - ecommerce
+  stage: public
+  aliases:
+  - pdd
+  - pdd holdings
+  - pinduoduo

@@ -610,6 +610,100 @@ function AddOwn({ onAdd }: { onAdd?: (value: string) => void }) {
   );
 }
 
+// Free-add tag input (chips with x-to-remove, enter/comma to commit). Used by
+// the Step 4 "avoid" block. Soft, optional — empty by default.
+function TagField({
+  label,
+  placeholder,
+  tags,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  tags: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const { c } = useOnb();
+  const [value, setValue] = useState('');
+
+  const add = (raw: string) => {
+    const v = raw.replace(/,$/, '').trim();
+    if (!v) return;
+    if (tags.some((t) => t.toLowerCase() === v.toLowerCase())) return;
+    onChange([...tags, v]);
+  };
+  const removeAt = (i: number) => onChange(tags.filter((_, idx) => idx !== i));
+
+  return (
+    <div style={{ marginTop: 18 }}>
+      <div style={{ fontFamily: '"Albert Sans"', fontWeight: 600, fontSize: 13, color: c.ink }}>{label}</div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 8,
+          alignItems: 'center',
+          marginTop: 9,
+          paddingBottom: 5,
+          borderBottom: `0.75px solid ${c.line}`,
+        }}
+      >
+        {tags.map((tag, i) => {
+          const warn = tag.length > 60;
+          return (
+            <span
+              key={`${tag}-${i}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                background: warn ? c.signalSoft : c.accentSoft,
+                color: warn ? c.signalInk : c.accent,
+                borderRadius: 999,
+                padding: '5px 9px 5px 11px',
+                fontFamily: '"Albert Sans"',
+                fontSize: 12.5,
+                fontWeight: 500,
+                maxWidth: '100%',
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tag}</span>
+              <button
+                onClick={() => removeAt(i)}
+                title="remove"
+                style={{ border: 0, background: 'none', color: 'inherit', cursor: 'pointer', fontSize: 14, lineHeight: 1, opacity: 0.65, padding: 0 }}
+              >
+                ×
+              </button>
+            </span>
+          );
+        })}
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(value); setValue(''); }
+            else if (e.key === 'Backspace' && !value && tags.length) removeAt(tags.length - 1);
+          }}
+          onBlur={() => { if (value.trim()) { add(value); setValue(''); } }}
+          placeholder={placeholder}
+          style={{
+            flex: 1,
+            minWidth: 150,
+            border: 0,
+            outline: 'none',
+            background: 'none',
+            fontFamily: '"Albert Sans"',
+            fontSize: 13,
+            color: c.ink,
+            padding: '5px 2px',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function CompInput({
   label,
   value,
@@ -732,6 +826,9 @@ export default function OnboardingPage() {
   // Pass 2 (pattern + archetypes) runs after role review, so it never blocks
   // the upload. `synthesizing` drives the step-5 loading state.
   const [synthesizing, setSynthesizing] = useState(false);
+  // The "avoid" signature synthesis last ran with — when it changes (user edits
+  // the avoid block and returns to step 5), archetypes regenerate.
+  const [synthesizedAvoidSig, setSynthesizedAvoidSig] = useState<string | null>(null);
 
   // Step 4 preferences (prefilled with sensible defaults; the user can edit).
   const [seniorityPick, setSeniorityPick] = useState<string>('');
@@ -761,6 +858,12 @@ export default function OnboardingPage() {
   const [minComp, setMinComp] = useState<string>('');
   const [targetComp, setTargetComp] = useState<string>('');
   const [narrative, setNarrative] = useState<string>('');
+  // Step 4 "avoid" block — soft signals, optional, empty by default.
+  const [avoidIndustries, setAvoidIndustries] = useState<string[]>([]);
+  const [avoidCulture, setAvoidCulture] = useState<string[]>([]);
+  const [avoidTitles, setAvoidTitles] = useState<string[]>([]);
+  // Past-employer flagging toggle (§1.2) — default ON.
+  const [flagPastEmployers, setFlagPastEmployers] = useState<boolean>(true);
 
   // Step 5 tooltip auto-show.
   const [tipOpen, setTipOpen] = useState(false);
@@ -836,10 +939,19 @@ export default function OnboardingPage() {
   // Safety net: if the user reaches step 5 without a synthesis (skipped the
   // step-3 trigger, or it failed), run it now.
   useEffect(() => {
-    if (step === 5 && cvSignals && !archetypes.length && !synthesizing) {
+    // Runs on every entry to step 5. ensureSynthesis guards internally: it
+    // regenerates if archetypes are missing OR the avoid signals changed.
+    if (step === 5 && cvSignals && !synthesizing) {
       void ensureSynthesis();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // Each step should open at the top. The app layout's <main> is the scroll
+  // container (not window), so reset both to be safe.
+  useEffect(() => {
+    document.querySelector('main')?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
   }, [step]);
 
   const isDark = theme === 'dark';
@@ -1089,13 +1201,25 @@ export default function OnboardingPage() {
   // engine and merge it into cvSignals. Idempotent — skips if already done.
   async function ensureSynthesis() {
     if (!cvSignals) return;
-    if (cvSignals.pattern && archetypes.length) return; // already synthesized
+    const avoidSig = JSON.stringify({ i: avoidIndustries, c: avoidCulture, t: avoidTitles });
+    // Up-to-date: synthesized already AND the avoid signals haven't changed.
+    if (cvSignals.pattern && archetypes.length && synthesizedAvoidSig === avoidSig) return;
+    // Regenerating after an avoid edit — drop stale archetypes so the step-5
+    // loading state shows while fresh ones (steered by the new avoid) generate.
+    if (archetypes.length) setArchetypes([]);
     setSynthesizing(true);
     try {
       const res = await fetch('/api/career-engine/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ facts: cvSignals, lang }),
+        body: JSON.stringify({
+          facts: cvSignals,
+          lang,
+          // The "avoid" signals from step 4 steer archetypes away from shapes
+          // the user explicitly doesn't want (e.g. don't suggest retail if they
+          // flagged retail). Empty arrays leave synthesis unaffected.
+          avoid: { industries: avoidIndustries, culture: avoidCulture, titles: avoidTitles },
+        }),
       });
       if (!res.ok) {
         console.error('synthesis failed', res.status, await res.text().catch(() => ''));
@@ -1106,6 +1230,7 @@ export default function OnboardingPage() {
       setCvSignals(merged);
       setArchetypes(archetypesFromSignals(merged));
       setProfileLang(lang);
+      setSynthesizedAvoidSig(avoidSig);
     } catch (e) {
       console.error('synthesis error', e);
     } finally {
@@ -2612,7 +2737,7 @@ export default function OnboardingPage() {
             {amberCount > 0 ? t.s3NeedsAttention(amberCount) : ''}
           </span>
           <button
-            onClick={() => { setStep(4); void ensureSynthesis(); }}
+            onClick={() => setStep(4)}
             style={{
               padding: '12px 22px',
               borderRadius: 999,
@@ -2987,6 +3112,130 @@ export default function OnboardingPage() {
               }}
             />
           </QBlock>
+
+          {/* Avoid block + past-employer toggle (§1) — optional soft signals. */}
+          {(() => {
+            const pastEmployers = [...(cvSignals?.roles ?? []), ...extraRoles]
+              .map((r) => ({
+                company: r.company,
+                start: r.startDate,
+                end: r.current ? null : r.endDate,
+              }))
+              .filter((e) => !!e.company);
+            const shown = pastEmployers.slice(0, 6);
+            const extra = pastEmployers.length - shown.length;
+            return (
+              <div style={{ marginTop: 30, paddingTop: 26, borderTop: `0.75px solid ${c.line2}` }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+                  <span style={{ fontFamily: '"Fraunces", serif', fontSize: 20, fontWeight: 400, letterSpacing: '-0.4px', color: c.ink }}>
+                    {lang === 'en' ? "And what you're not looking for." : 'Y lo que no estás buscando.'}
+                  </span>
+                  <span style={{ fontFamily: '"Geist Mono", monospace', fontSize: 10, letterSpacing: '0.8px', textTransform: 'uppercase', color: c.ink3 }}>
+                    {lang === 'en' ? 'optional' : 'opcional'}
+                  </span>
+                </div>
+                <p style={{ color: c.ink2, marginTop: 6, fontStyle: 'italic', fontSize: 13.5 }}>
+                  {lang === 'en'
+                    ? 'The shape of your "no" tells me as much as your yes.'
+                    : 'La forma de tu "no" me dice tanto como tu sí.'}
+                </p>
+
+                <TagField
+                  label={lang === 'en' ? 'Industries' : 'Industrias'}
+                  placeholder={lang === 'en' ? '+ add — e.g. consulting firms' : '+ agregar — p. ej. consultoras'}
+                  tags={avoidIndustries}
+                  onChange={setAvoidIndustries}
+                />
+                <TagField
+                  label={lang === 'en' ? 'Culture / company shape' : 'Cultura / tipo de empresa'}
+                  placeholder={lang === 'en' ? '+ add — e.g. founder-still-CEO companies' : '+ agregar — p. ej. empresas con el fundador aún de CEO'}
+                  tags={avoidCulture}
+                  onChange={setAvoidCulture}
+                />
+                <TagField
+                  label={lang === 'en' ? 'Titles / scope' : 'Puestos / alcance'}
+                  placeholder={lang === 'en' ? '+ add — e.g. VP of everything' : '+ agregar — p. ej. VP de todo'}
+                  tags={avoidTitles}
+                  onChange={setAvoidTitles}
+                />
+                <p style={{ fontSize: 12, color: c.ink3, marginTop: 9 }}>
+                  {lang === 'en'
+                    ? "Press enter or comma to add. These are soft signals — they nudge a role's score, they don't rule it out."
+                    : 'Presiona enter o coma para agregar. Son señales suaves — ajustan el puntaje de un puesto, no lo descartan.'}
+                </p>
+
+                {pastEmployers.length > 0 && (
+                  <div style={{ marginTop: 28 }}>
+                    <div style={{ fontFamily: '"Albert Sans"', fontWeight: 600, fontSize: 13.5, color: c.ink }}>
+                      {lang === 'en' ? "Companies you've already been through" : 'Empresas por las que ya pasaste'}
+                    </div>
+                    <div style={{ fontFamily: '"Geist Mono", monospace', fontSize: 10, letterSpacing: '0.6px', textTransform: 'uppercase', color: c.ink3, margin: '13px 0 7px' }}>
+                      {lang === 'en' ? 'Pulled from your CV' : 'De tu CV'}
+                    </div>
+                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4, padding: 0, margin: 0 }}>
+                      {shown.map((e, i) => (
+                        <li key={`${e.company}-${i}`} style={{ color: c.ink2, fontSize: 13.5 }}>
+                          <span style={{ color: c.ink, fontWeight: 500 }}>{e.company}</span>
+                          {(e.start || e.end) && (
+                            <span style={{ fontFamily: '"Geist Mono", monospace', fontSize: 12, color: c.ink3 }}>
+                              {' · '}{e.start ?? '?'}{'–'}{e.end ?? (lang === 'en' ? 'present' : 'presente')}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                      {extra > 0 && (
+                        <li style={{ color: c.ink3, fontSize: 12.5 }}>{lang === 'en' ? `+${extra} more` : `+${extra} más`}</li>
+                      )}
+                    </ul>
+
+                    <div
+                      onClick={() => setFlagPastEmployers((v) => !v)}
+                      style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginTop: 20, cursor: 'pointer' }}
+                    >
+                      <div
+                        style={{
+                          flex: 'none',
+                          width: 40,
+                          height: 23,
+                          borderRadius: 999,
+                          background: flagPastEmployers ? c.accent : c.line,
+                          position: 'relative',
+                          transition: 'background 0.15s',
+                          marginTop: 1,
+                        }}
+                      >
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: 2,
+                            left: flagPastEmployers ? 19 : 2,
+                            width: 19,
+                            height: 19,
+                            borderRadius: '50%',
+                            background: '#fff',
+                            transition: 'left 0.15s',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: '"Albert Sans"', fontWeight: 500, fontSize: 13.5, color: c.ink }}>
+                          {lang === 'en'
+                            ? 'Flag when a role looks like a past employer'
+                            : 'Avísame cuando un puesto sea de una empresa donde ya trabajaste'}
+                        </div>
+                        <div style={{ color: c.ink3, fontSize: 12.5, marginTop: 3, maxWidth: 460, lineHeight: 1.5 }}>
+                          {lang === 'en'
+                            ? "I'll catch the obvious cases. Acquisitions, subsidiaries, and roles where the company isn't clearly named will sometimes slip through — you can flag them from any verdict."
+                            : 'Detectaré los casos obvios. Adquisiciones, filiales y puestos donde la empresa no se nombra claramente a veces se escaparán — puedes marcarlos desde cualquier veredicto.'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer */}
@@ -3550,6 +3799,11 @@ export default function OnboardingPage() {
                     minComp,
                     targetComp,
                     narrative,
+                    // Avoid block + past-employer toggle (§1).
+                    avoidIndustries,
+                    avoidCulture,
+                    avoidTitles,
+                    flagPastEmployers,
                     // User-reviewed CV sections from step 3.
                     summary: editedSummary,
                     skills: editedSkills.split(',').map((s) => s.trim()).filter(Boolean),

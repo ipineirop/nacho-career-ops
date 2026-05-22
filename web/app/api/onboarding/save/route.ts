@@ -169,6 +169,10 @@ interface OnboardingPayload {
   minComp?: string;
   targetComp?: string;
   narrative?: string;
+  avoidIndustries?: string[];
+  avoidCulture?: string[];
+  avoidTitles?: string[];
+  flagPastEmployers?: boolean;
   summary?: string;
   skills?: string[];
   education?: Array<{ institution?: string; degree?: string; field?: string; year?: string | number; country?: string }>;
@@ -219,6 +223,15 @@ export async function POST(req: NextRequest) {
   const mode = mapMode(body.searchStatus || '');
   const languages = (body.cvSignals?.languages ?? []).map((l) => ({ code: l, fluency: 'professional' }));
 
+  // ── Avoid block → dimension-prefixed nice_to_haves (spec §1.1 / §6) ──
+  // The prefix is consumed by the scoring-prompt renderer (candidate-context).
+  const avoidTags = [
+    ...(body.avoidIndustries ?? []).map((t) => `industry:${t.trim()}`),
+    ...(body.avoidCulture ?? []).map((t) => `culture:${t.trim()}`),
+    ...(body.avoidTitles ?? []).map((t) => `title:${t.trim()}`),
+  ].filter((t) => t.split(':')[1]?.trim());
+  const surfacePastEmployer = body.flagPastEmployers !== false; // default ON
+
   // ── 1) user_profiles (upsert) ────────────────────────────────────
   const profilePatch = {
     seniorityLevel: seniorityLevel ?? undefined,
@@ -263,6 +276,8 @@ export async function POST(req: NextRequest) {
     targetSeniorityLevels: seniorityLevel ? [seniorityLevel] : null,
     targetFunctions: primaryFunction ? [primaryFunction] : null,
     humanAnswer: body.narrative || null,
+    niceToHaves: avoidTags.length ? avoidTags : null,
+    pastEmployerSurfaceOnMatch: surfacePastEmployer,
   });
 
   // ── 3) user_compensation (target record, exact original figures) ──

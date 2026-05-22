@@ -11,9 +11,13 @@ export async function POST(req: NextRequest) {
   const user = await getAuthUserId();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { facts, lang } = (await req.json()) as { facts?: Partial<CareerProfile>; lang?: string };
+  const { facts, lang, avoid } = (await req.json()) as {
+    facts?: Partial<CareerProfile>;
+    lang?: string;
+    avoid?: { industries?: string[]; culture?: string[]; titles?: string[] };
+  };
   if (!facts) return NextResponse.json({ error: 'No facts provided' }, { status: 400 });
 
-  const synthesis = await synthesizeProfile({ facts, lang });
+  const synthesis = await synthesizeProfile({ facts, lang, avoid });
   return NextResponse.json({ ok: true, synthesis });
 }

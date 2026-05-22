@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StreamingOutput } from '@/components/ai/StreamingOutput';
+import { VerdictSurfaces, type VerdictMeta } from '@/components/evaluations/VerdictSurfaces';
 import { FitBars } from '@/components/ui/fit-bars';
 import { SalaryBand } from '@/components/ui/salary-band';
 import { ScoreChip } from '@/components/ui/score-chip';
@@ -18,6 +19,16 @@ export default function EvaluatePage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const isDark = theme === 'dark';
+
+  // Split the structured trailer (past-employer match, pattern hits, etc.) off
+  // the markdown body so it isn't rendered as text.
+  const { displayText, meta } = useMemo(() => {
+    const m = streamText.match(/<!--LABRA_META:([\s\S]*?)-->/);
+    if (!m) return { displayText: streamText, meta: null as VerdictMeta | null };
+    let parsed: VerdictMeta | null = null;
+    try { parsed = JSON.parse(m[1]) as VerdictMeta; } catch { parsed = null; }
+    return { displayText: streamText.replace(m[0], '').trimEnd(), meta: parsed };
+  }, [streamText]);
 
   useEffect(() => {
     if (!stream) {
@@ -193,7 +204,8 @@ export default function EvaluatePage() {
           }}>
             EVALUATION IN PROGRESS
           </div>
-          <StreamingOutput text={streamText} isDone={done} onComplete={() => setDone(true)} />
+          <StreamingOutput text={displayText} isDone={done} onComplete={() => setDone(true)} />
+          {done && meta && <VerdictSurfaces meta={meta} />}
           {done && (
             <div style={{ display: 'flex', gap: 8, paddingTop: 16, borderTop: '1px solid var(--lm-line)' }}>
               <a

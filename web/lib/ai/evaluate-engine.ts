@@ -1,7 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getDb, roles, evaluations, evaluationDimensions, evaluationGaps, evaluationProofPoints, companies, NewRole, NewEvaluation } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { getDb, roles, evaluations, evaluationDimensions, evaluationGaps, evaluationProofPoints, companies, userCareerHistory, userPreferences, userEvents, NewRole, NewEvaluation } from '@/lib/db';
+import { eq, and, isNull } from 'drizzle-orm';
 import { loadCandidateContext } from './candidate-context';
+import { resolveCompany } from '@/lib/matching/resolve';
+import { matchPastEmployer, type UserEmployer, type PastEmployerMatch } from '@/lib/matching/past-employer';
 
 interface EvaluationInput {
   jd: string;
@@ -31,6 +33,10 @@ interface EvaluationResult {
     evidence: string;
     matchStrength: 'match' | 'partial' | 'miss';
   }>;
+  // §3.5b — qualitative "things you said you're avoiding" hits, model-judged.
+  patternHits: string[];
+  // §2.3 — past-employer match record (or null).
+  pastEmployerMatch: PastEmployerMatch | null;
 }
 
 const anthropic = new Anthropic({
@@ -129,6 +135,11 @@ Return a JSON object with:
     }
   }
 
+  // Step 2.5: Past-employer matching (spec §3) — resolve the role's company to
+  // a canonical id and check it against where the user already worked. Pure
+  // logic in lib/matching; this only loads the user's employers + preferences.
+  const pastEmployerMatch = await computePastEmployerMatch(db, input.userId, company_name);
+
   // Step 3: Create or find role record
   const sourceRef = `${input.url || company_name}-${role_title}`;
   let roleId: string;
@@ -215,8 +226,11 @@ Return a JSON object:
   ],
   "overall_score": 78,
   "recommendation": "apply|hold|pass",
-  "summary": "One paragraph summary of the opportunity and recommendation"
-}`;
+  "summary": "One paragraph summary of the opportunity and recommendation",
+  "pattern_hits": ["Culture: founder is still CEO, the stage you flagged", "Title: scope reads like the 'VP of everything' pattern you flagged"]
+}
+
+For "pattern_hits": ONLY if the candidate profile listed things to avoid (the "What the user wants to avoid" block). Each hit is one short qualitative line prefixed with its dimension (Industry/Culture/Title). Do NOT invent hits, do NOT assign numeric penalties, and return an empty array [] if the role exhibits none of the avoided patterns.`;
 
   const scoringResponse = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -236,6 +250,10 @@ Return a JSON object:
   } catch {
     throw new Error('Failed to score evaluation');
   }
+
+  const patternHits: string[] = Array.isArray(scoringData.pattern_hits)
+    ? scoringData.pattern_hits.filter((h: unknown) => typeof h === 'string' && h.trim()).map((h: string) => h.trim())
+    : [];
 
   // Step 5: Calculate weighted overall score (0-5 scale)
   const dimensionScores = scoringData.dimensions.map((d: any) => d.score / 20);
@@ -303,7 +321,13 @@ ${d.reasoning}`).join('\n\n')}
 
 ${scoringData.red_flags && scoringData.red_flags.length > 0 ? scoringData.red_flags.map((flag: any) => `- **${flag.flag || flag.description}** (${flag.severity})
   - Mitigation: ${flag.mitigation}`).join('\n') : 'None identified'}
-`;
+${patternHits.length > 0 ? `
+## Pattern Hits — things you said you're avoiding
+
+${patternHits.map((h) => `- ${h}`).join('\n')}
+
+The score above factors these in.
+` : ''}`;
 
   // Step 8: Assign displayId (sequential report number)
   const userEvals = await db
@@ -324,6 +348,7 @@ ${scoringData.red_flags && scoringData.red_flags.length > 0 ? scoringData.red_fl
     modelUsed: 'claude-sonnet-4-6',
     promptVersion: '1.0',
     displayId,
+    pastEmployerMatch, // §2.3 — persisted so the verdict renders on revisit
   };
 
   if (scoringData.dimensions[0]) evaluationValues.cvMatchScore = scoringData.dimensions[0].score;
@@ -377,5 +402,96 @@ ${scoringData.red_flags && scoringData.red_flags.length > 0 ? scoringData.red_fl
     dimensions: scoringData.dimensions,
     gaps: scoringData.red_flags,
     proofPoints: proofPointsData,
+    patternHits,
+    pastEmployerMatch: pastEmployerMatch ?? null,
   };
+}
+
+/**
+ * Resolve the role's company and match it against the user's past employers
+ * (spec §3). Applies the surface toggle (§1.2) and suppressions (§5.1), which
+ * can only turn surfacing OFF. Logs instrumentation (§3.1.1 / §8). Best-effort:
+ * never throws into the evaluate flow.
+ */
+async function computePastEmployerMatch(
+  db: ReturnType<typeof getDb>,
+  userId: string,
+  companyName: string | undefined,
+): Promise<PastEmployerMatch | null> {
+  try {
+    if (!companyName) {
+      await db.insert(userEvents).values({
+        userId,
+        eventType: 'company_extraction_failed',
+        eventData: { reason: 'no company_name extracted from input' },
+      });
+      return null;
+    }
+
+    const resolved = resolveCompany(companyName);
+
+    // User's past employers, canonical-resolved at CV-parse time (A4).
+    const history = await db
+      .select({
+        canonicalId: userCareerHistory.canonicalId,
+        companyName: userCareerHistory.companyName,
+        startedAt: userCareerHistory.startedAt,
+        endedAt: userCareerHistory.endedAt,
+      })
+      .from(userCareerHistory)
+      .where(eq(userCareerHistory.userId, userId));
+
+    const employers: UserEmployer[] = history.map((h) => ({
+      canonical_id: h.canonicalId ?? null,
+      display_name: h.companyName,
+      startedAt: h.startedAt as string | null,
+      endedAt: h.endedAt as string | null,
+    }));
+
+    const match = matchPastEmployer(resolved, employers);
+
+    // Apply preferences: surface toggle + per-canonical suppression can only
+    // turn surfacing OFF, never on.
+    const pref = (
+      await db
+        .select({
+          surfaceOn: userPreferences.pastEmployerSurfaceOnMatch,
+          suppressions: userPreferences.matchSuppressions,
+        })
+        .from(userPreferences)
+        .where(and(eq(userPreferences.userId, userId), isNull(userPreferences.supersededAt)))
+        .limit(1)
+    )[0];
+
+    if (pref) {
+      if (pref.surfaceOn === false) match.surface = false;
+      const suppressed = Array.isArray(pref.suppressions)
+        ? (pref.suppressions as Array<{ canonical_id?: string }>).some(
+            (s) => s.canonical_id && s.canonical_id === match.resolved_canonical_id,
+          )
+        : false;
+      if (suppressed) match.surface = false;
+    }
+
+    // Instrumentation (§3.1.1 / §8): one event per resolution; unmatched
+    // strings become the canonical-table backlog.
+    await db.insert(userEvents).values({
+      userId,
+      eventType: resolved.resolved_canonical_id ? 'company_resolution' : 'company_unmatched',
+      eventData: {
+        role_company_input: companyName,
+        normalized: resolved.normalized,
+        resolved_canonical_id: resolved.resolved_canonical_id,
+        resolved_confidence: resolved.resolved_confidence,
+        matches_user_past_employer: match.matches_user_past_employer,
+        surfaced: match.surface,
+        relation: match.matches_via?.relation ?? null,
+      },
+    });
+
+    return match;
+  } catch (err) {
+    console.error('computePastEmployerMatch failed:', err);
+    return null;
+  }
 }
