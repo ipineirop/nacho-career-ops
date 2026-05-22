@@ -1,4 +1,3 @@
-import { neon } from '@neondatabase/serverless';
 import {
   getDb,
   users,
@@ -8,6 +7,7 @@ import {
   userCareerHistory,
 } from '@/lib/db';
 import { eq, and, isNull, asc } from 'drizzle-orm';
+import { getSetting as getStoreSetting } from '@/lib/settings-store';
 
 // Shape the engine + onboarding produce for a single role.
 export interface RoleInput {
@@ -71,15 +71,8 @@ export async function persistCareerHistory(
 // hardcoded template profile.
 // =====================================================================
 
-function getDbUrl() {
-  return (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-}
-
 async function getSetting(email: string, key: string): Promise<string> {
-  const sql = neon(getDbUrl());
-  const rows = await sql`SELECT value FROM settings WHERE key = ${`${email}:${key}`} LIMIT 1`;
-  return (rows as { value: string }[])[0]?.value ?? '';
+  return (await getStoreSetting(`${email}:${key}`)) ?? '';
 }
 
 interface ArchetypeBlob {

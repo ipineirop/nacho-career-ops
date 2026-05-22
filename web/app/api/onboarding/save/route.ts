@@ -10,7 +10,7 @@ import {
   userSignalsDerived,
 } from '@/lib/db';
 import { eq, and, isNull } from 'drizzle-orm';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 import { persistCareerHistory, type RoleInput } from '@/lib/ai/candidate-context';
 import { renderCvMarkdown, type RenderableCv } from '@/lib/career-engine';
 
@@ -179,11 +179,6 @@ interface OnboardingPayload {
   selectedArchetypes?: string[];
 }
 
-function settingsDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
-}
 
 export async function POST(req: NextRequest) {
   const user = await getAuthUserId();
@@ -347,7 +342,7 @@ export async function POST(req: NextRequest) {
   });
 
   // ── 7) settings back-compat blobs (scanner + settings UI read these)
-  const sql = settingsDb();
+  const sql = getSql();
   const prefsBlob = {
     mode,
     levels: seniorityLevel ? [seniorityLevel] : [],

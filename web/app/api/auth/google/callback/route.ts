@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
-
-function getUrl() {
-  return (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-}
+import { getSql } from '@/lib/db';
 
 async function upsertSetting(key: string, value: string) {
-  const sql = neon(getUrl());
+  const sql = getSql();
   await sql`
     INSERT INTO settings (key, value, updated_at) VALUES (${key}, ${value}, NOW())
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()

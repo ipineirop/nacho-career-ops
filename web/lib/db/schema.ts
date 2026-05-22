@@ -476,6 +476,28 @@ export const signinCodes = pgTable('signin_codes', {
   emailIdx: index('signin_codes_email_idx').on(t.email),
 }));
 
+// settings — key/value store (per-user keys are `${email}:${name}`).
+// Single source of truth on Supabase; replaces the deprecated Neon instance.
+export const settings = pgTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// jobs — portal-scanner dedup/inbox (legacy shape, used by /api/scan).
+// Moved off Neon onto Supabase. TODO: fold into roles/pipeline_status.
+export const jobs = pgTable('jobs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userEmail: text('user_email'),
+  url: text('url').unique(),
+  company: text('company'),
+  role: text('role'),
+  portal: text('portal'),
+  firstSeen: text('first_seen'),
+  status: text('status'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================

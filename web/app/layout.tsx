@@ -10,7 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
+import { getSetting, setSetting } from '@/lib/settings-store';
 
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
@@ -51,26 +51,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       pathname.startsWith('/invitations');
     if (!exempt && session.user?.email) {
       try {
-        const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-          .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-        const sql = neon(url);
         const email = session.user.email;
         const flagKey = `${email}:leadme_onboarding_complete`;
-        const cvKey = `${email}:cv_content`;
-        const rows = await sql`
-          SELECT key FROM settings WHERE key IN (${flagKey}, ${cvKey})
-        ` as Array<{ key: string }>;
-        const hasFlag = rows.some((r) => r.key === flagKey);
-        const hasCv = rows.some((r) => r.key === cvKey);
-        if (!hasFlag && hasCv) {
-          // Pre-existing user from before the gate existed — backfill the flag
-          // so we don't pay this query on every page load.
-          await sql`
-            INSERT INTO settings (key, value, updated_at) VALUES (${flagKey}, 'true', NOW())
-            ON CONFLICT (key) DO UPDATE SET value = 'true', updated_at = NOW()
-          `;
-        } else if (!hasFlag && !hasCv) {
-          redirect('/onboarding');
+        const hasFlag = (await getSetting(flagKey)) === 'true';
+        if (!hasFlag) {
+          // Pre-existing user: treat a stored CV as completed onboarding so we
+          // never re-gate someone who already finished, then backfill the flag.
+          const hasCv = !!(await getSetting(`${email}:cv_content`));
+          if (hasCv) {
+            await setSetting(flagKey, 'true');
+          } else {
+            redirect('/onboarding');
+          }
         }
       } catch (err) {
         // If the gate query fails for an infra reason, fall through rather than

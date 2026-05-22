@@ -1,14 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { neon } from '@neondatabase/serverless';
 import fs from 'fs';
 import path from 'path';
+import { getSetting } from '@/lib/settings-store';
 
 const MODEL = 'claude-sonnet-4-6';
-
-function getDbUrl() {
-  return (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-}
 
 function readModeFile(name: string): string {
   const filePath = path.join(process.cwd(), 'modes', name);
@@ -16,9 +11,7 @@ function readModeFile(name: string): string {
 }
 
 async function getUserSetting(userEmail: string, key: string): Promise<string> {
-  const sql = neon(getDbUrl());
-  const rows = await sql`SELECT value FROM settings WHERE key = ${userEmail + ':' + key} LIMIT 1`;
-  return (rows as { value: string }[])[0]?.value ?? '';
+  return (await getSetting(`${userEmail}:${key}`)) ?? '';
 }
 
 export async function loadPromptFiles(userEmail: string) {

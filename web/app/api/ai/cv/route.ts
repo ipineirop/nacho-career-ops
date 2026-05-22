@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { requireAuth } from '@/lib/require-auth';
+import { getAuthUserId } from '@/lib/auth-bridge';
 import { getFile } from '@/lib/github';
-import { getDb, documents, evaluations, roles } from '@/lib/db';
+import { getDb, documents, evaluations, roles, userProfiles } from '@/lib/db';
 import { eq } from 'drizzle-orm';
+import { getSetting } from '@/lib/settings-store';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -11,20 +13,26 @@ export const maxDuration = 300;
 export async function POST(req: NextRequest) {
   const denied = await requireAuth();
   if (denied) return denied;
+  const authUser = await getAuthUserId();
 
   const { jd, applicationId } = await req.json();
-  if (!jd?.trim()) return NextResponse.json({ error: 'No JD provided' }, { status: 400 });
+  if (!jd?.trim()) return NextResponse.json({ error: 'No job description provided' }, { status: 400 });
 
-  // CV: prefer DB (no spurious GitHub commits), fall back to file
+  // CV for the CURRENT user: prefer the structured cv_markdown, then the
+  // per-user cv_content key, then the repo file. (Was reading a global,
+  // non-user-scoped key — a multi-tenant bug.)
   async function getCv() {
     try {
-      const { neon } = await import('@neondatabase/serverless');
-      const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-        .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-      const sql = neon(url);
-      const rows = await sql`SELECT value FROM settings WHERE key = 'cv_content' LIMIT 1`;
-      const row = (rows as { value: string }[])[0];
-      if (row?.value) return row.value;
+      if (authUser) {
+        const prof = await getDb()
+          .select({ cvMarkdown: userProfiles.cvMarkdown })
+          .from(userProfiles)
+          .where(eq(userProfiles.userId, authUser.id))
+          .limit(1);
+        if (prof[0]?.cvMarkdown) return prof[0].cvMarkdown;
+        const byKey = await getSetting(`${authUser.email}:cv_content`);
+        if (byKey) return byKey;
+      }
     } catch { /* fall through */ }
     return getFile('cv.md').then((f) => f.content);
   }

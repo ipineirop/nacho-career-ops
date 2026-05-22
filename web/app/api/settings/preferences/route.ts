@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/require-auth';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
+  return getSql();
 }
 
 export async function GET() {

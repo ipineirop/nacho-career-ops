@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserId } from '@/lib/auth-bridge';
 import { parseCv } from '@/lib/career-engine';
 import { persistCareerHistory } from '@/lib/ai/candidate-context';
+import { setSetting } from '@/lib/settings-store';
 
 export const maxDuration = 300;
 
@@ -64,17 +65,9 @@ export async function POST(req: NextRequest) {
   // from the parse; step 3 corrections overwrite it on onboarding save.
   await persistCareerHistory(user.id, profile.roles ?? [], 'cv_parse');
 
-  // Back-compat: keep the raw markdown in settings:cv_content (read by the
-  // onboarding gate and other legacy paths).
-  const { neon } = await import('@neondatabase/serverless');
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  const sql = neon(url);
-  await sql`
-    INSERT INTO settings (key, value, updated_at)
-    VALUES (${`${user.email}:cv_content`}, ${markdownCv}, NOW())
-    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-  `;
+  // Mirror the raw markdown into settings:cv_content (Supabase) for the
+  // onboarding gate and AI flows that still read it by key.
+  await setSetting(`${user.email}:cv_content`, markdownCv);
 
   return NextResponse.json({ ok: true, signals: profile, preview: markdownCv.slice(0, 800) });
 }

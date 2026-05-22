@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/require-auth';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -93,16 +93,11 @@ const DEFAULT_KEYWORDS = [
   'director de operaciones', 'gerente general', 'gerente de operaciones',
 ];
 
-function getDbUrl() {
-  return (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-}
-
 export async function POST() {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const sql = neon(getDbUrl());
+  const sql = getSql();
 
   // Load user preferences for target companies + keywords
   const rows = await sql`SELECT value FROM settings WHERE key = ${user.email + ':leadme_preferences'} LIMIT 1`;
@@ -119,7 +114,7 @@ export async function POST() {
 
   // Get existing URLs to skip duplicates
   const existingRows = await sql`SELECT url FROM jobs WHERE user_email = ${user.email}`;
-  const existingUrls = new Set((existingRows as { url: string }[]).map((r) => r.url));
+  const existingUrls = new Set((existingRows as unknown as { url: string }[]).map((r) => r.url));
 
   // Fetch all companies in parallel (concurrency ~10)
   const fetchers = toScan.map(async (companyName) => {

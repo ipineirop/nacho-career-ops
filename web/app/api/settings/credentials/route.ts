@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/require-auth';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
+  return getSql();
 }
 
 const KEYS = ['linkedin_email', 'linkedin_password', 'apify_api_token', 'gemini_api_key'];
