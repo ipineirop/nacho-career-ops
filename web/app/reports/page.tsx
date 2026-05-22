@@ -1,12 +1,10 @@
 import { ReportsGrid } from '@/components/reports/ReportsGrid';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 function getDb() {
-  const url = (process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL!)
-    .replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?&/, '?').replace(/[?&]$/, '');
-  return neon(url);
+  return getSql();
 }
 
 export default async function ReportsPage() {

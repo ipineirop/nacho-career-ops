@@ -484,6 +484,28 @@ export const settings = pgTable('settings', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// applications — legacy tracker/reports table (used by /api/ai/save-report,
+// /api/reports, /reports). Moved off Neon onto Supabase. TODO: fold into the
+// modern evaluations/roles model.
+export const applications = pgTable('applications', {
+  id: integer('id').generatedByDefaultAsIdentity().primaryKey(),
+  date: text('date'),
+  company: text('company'),
+  role: text('role'),
+  score: text('score'),
+  scoreNum: real('score_num'),
+  status: text('status'),
+  hasPdf: boolean('has_pdf'),
+  reportId: text('report_id'),
+  driveReportUrl: text('drive_report_url'),
+  driveCvUrl: text('drive_cv_url'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  reportContent: text('report_content'),
+  userEmail: text('user_email'),
+});
+
 // jobs — portal-scanner dedup/inbox (legacy shape, used by /api/scan).
 // Moved off Neon onto Supabase. TODO: fold into roles/pipeline_status.
 export const jobs = pgTable('jobs', {

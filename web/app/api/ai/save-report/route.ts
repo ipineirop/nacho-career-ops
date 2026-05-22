@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createFile } from '@/lib/github';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 function extractScore(text: string): { score: string; scoreNum: number } {
   const match =
@@ -43,16 +43,12 @@ export async function POST(req: NextRequest) {
   const { content } = await req.json();
   if (!content?.trim()) return NextResponse.json({ error: 'content required' }, { status: 400 });
 
-  const dbUrl = process.env.DATABASE_URL;
-  if (!dbUrl) return NextResponse.json({ error: 'DATABASE_URL not configured' }, { status: 500 });
-
   const today = new Date().toISOString().split('T')[0];
   const { score, scoreNum } = extractScore(content);
   const company = extractCompany(content);
   const role = extractRole(content);
 
-  // Raw Neon SQL — bypasses Drizzle ORM to avoid any adapter issues
-  const sql = neon(dbUrl);
+  const sql = getSql();
 
   let appId: number;
   try {

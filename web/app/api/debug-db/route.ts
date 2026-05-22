@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
+import { getSql } from '@/lib/db';
 
 export async function GET() {
-  const url = process.env.DATABASE_URL;
-  if (!url) return NextResponse.json({ error: 'DATABASE_URL not set' }, { status: 500 });
-
   try {
-    const sql = neon(url);
+    const sql = getSql();
     const rows = await sql`SELECT id, company, date FROM applications ORDER BY id DESC LIMIT 3`;
-    return NextResponse.json({ ok: true, url_prefix: url.slice(0, 40), rows });
+    return NextResponse.json({ ok: true, rows });
   } catch (err: unknown) {
     const e = err as { message?: string; code?: string; stack?: string };
     return NextResponse.json({
