@@ -142,6 +142,11 @@ export interface CandidateContext {
   markdown: string; // assembled profile block for prompts
   cvMarkdown: string;
   hasProfile: boolean;
+  // Structured comp targets — the comp strip needs raw numbers to position the
+  // "your floor" marker on the band, not just the rendered markdown line.
+  compFloorUsd: number | null;
+  compTargetUsd: number | null;
+  compCurrency: string | null;
 }
 
 /**
@@ -282,5 +287,13 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     block += '\n';
   }
 
-  return { email, markdown: block.trim(), cvMarkdown, hasProfile };
+  return {
+    email,
+    markdown: block.trim(),
+    cvMarkdown,
+    hasProfile,
+    compFloorUsd: pref?.floorCompUsd != null ? Number(pref.floorCompUsd) : null,
+    compTargetUsd: pref?.targetCompUsd != null ? Number(pref.targetCompUsd) : null,
+    compCurrency: pref?.compCurrencyDisplay ? String(pref.compCurrencyDisplay).toUpperCase() : null,
+  };
 }

@@ -72,6 +72,12 @@
   --lm-signal:      #c97b0e;
   --lm-signal-soft: #fbecd6;
   --lm-signal-on:   #ffffff;
+  /* Extended signal set — comp strip (caution/amber default) */
+  --lm-signal-bg:      #faeeda;
+  --lm-signal-ink:     #854f0b;
+  --lm-signal-deep:    #4a2a0c;
+  --lm-signal-track:   rgba(201, 123, 14, 0.18);
+  --lm-signal-divider: rgba(201, 123, 14, 0.3);
 
   /* Shadcn/Tailwind mapped to LeadMe palette */
   --background:             #f6f8f8;
@@ -131,6 +137,12 @@
   --lm-signal:      #ecae4d;
   --lm-signal-soft: #382b16;
   --lm-signal-on:   #0a0e14;
+  /* Extended signal set — comp strip (caution/saffron default) */
+  --lm-signal-bg:      #2a1f10;
+  --lm-signal-ink:     #f2c987;
+  --lm-signal-deep:    #f8dfaf;
+  --lm-signal-track:   rgba(236, 174, 77, 0.22);
+  --lm-signal-divider: rgba(236, 174, 77, 0.3);
 
   --background:             #0a0e14;
   --foreground:             #f4f6fa;
@@ -197,3 +209,223 @@
 .font-ui {
   font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
 }
+
+/* ================================================================
+   Editorial Evaluate Verdict — faithful port of
+   Design/screens/Labra Evaluate Verdict.html. Design token names
+   (--ink / --bg / --signal*) are aliased to --lm-* at the scope root
+   so the copied rules resolve; comp-row state-* overrides redefine
+   --signal* locally exactly as the mockup does.
+   ================================================================ */
+.verdict-view {
+  --bg: var(--lm-bg);
+  --surface: var(--lm-surface);
+  --surface-2: var(--lm-surface-2);
+  --canvas: var(--lm-canvas);
+  --ink: var(--lm-ink);
+  --ink-2: var(--lm-ink-2);
+  --ink-3: var(--lm-ink-3);
+  --line: var(--lm-line);
+  --accent: var(--lm-accent);
+  --accent-on: var(--lm-accent-on);
+  --signal: var(--lm-signal);
+  --signal-bg: var(--lm-signal-bg);
+  --signal-ink: var(--lm-signal-ink);
+  --signal-deep: var(--lm-signal-deep);
+  --signal-on: var(--lm-signal-on);
+  --signal-track: var(--lm-signal-track);
+  --signal-divider: var(--lm-signal-divider);
+
+  display: flex; flex-direction: column; gap: 32px;
+  max-width: 720px;
+}
+
+.verdict-view .v-summary { display: flex; flex-direction: column; gap: 8px; }
+.verdict-view .v-summary .meta-line {
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px;
+  letter-spacing: 0.9px; text-transform: uppercase; color: var(--ink-3);
+  display: flex; flex-wrap: wrap; gap: 0;
+}
+.verdict-view .v-summary .meta-line .sep { color: var(--ink-3); opacity: .45; padding: 0 8px; }
+.verdict-view .v-summary .role {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif; font-weight: 400;
+  font-size: 28px; line-height: 1.12; letter-spacing: -0.7px; color: var(--ink); margin: 0;
+}
+.verdict-view .v-summary .role em { font-style: italic; }
+.verdict-view .v-summary .role-sub {
+  font-family: var(--font-geist-mono), monospace; font-size: 12px;
+  letter-spacing: 0.3px; color: var(--ink-2);
+}
+.verdict-view .v-summary .role-sub .sep { color: var(--ink-3); opacity: .55; padding: 0 7px; }
+
+.verdict-view .v-verdict { display: flex; flex-direction: column; gap: 18px; padding-top: 6px; }
+.verdict-view .v-verdict .kicker-label {
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px;
+  letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+}
+.verdict-view .v-verdict .label {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif; font-weight: 500;
+  font-size: 96px; line-height: 0.92; letter-spacing: -3.2px; color: var(--ink); margin: 0;
+}
+.verdict-view .v-verdict .label em { font-style: italic; }
+.verdict-view .v-verdict .reasoning {
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+  font-size: 17px; line-height: 1.55; color: var(--ink); margin: 0;
+  max-width: 620px; text-wrap: pretty;
+}
+.verdict-view .v-verdict .reasoning .lede { color: var(--ink); font-weight: 500; }
+
+.verdict-view .v-section { display: flex; flex-direction: column; gap: 12px; }
+.verdict-view .v-section .skicker {
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px;
+  letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-3);
+}
+.verdict-view .v-section .skicker b { color: var(--ink); font-weight: 500; }
+
+.verdict-view .gap-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.verdict-view .gap-list li {
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+  font-size: 14.5px; line-height: 1.5; color: var(--ink-2);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.verdict-view .gap-list li b { color: var(--ink); font-weight: 600; }
+.verdict-view .gap-list li::before {
+  content: ''; flex-shrink: 0; margin-top: 9px;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--ink-3);
+}
+
+/* Comp strip */
+.verdict-view .comp-row {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 18px 16px 20px;
+  border-left: 5px solid var(--signal);
+  background: var(--signal-bg);
+  border-radius: 0 12px 12px 0;
+  position: relative;
+}
+.verdict-view .comp-row .comp-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verdict-view .comp-row .comp-kicker {
+  font-family: var(--font-geist-mono), monospace; font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--signal-ink);
+  display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; flex-wrap: wrap;
+}
+.verdict-view .comp-row .comp-kicker .sep { color: var(--signal-ink); opacity: .45; }
+.verdict-view .comp-row .comp-kicker .grade-name {
+  border-bottom: 0.75px dotted var(--signal); padding-bottom: 1px; cursor: help; color: var(--signal-deep);
+}
+.verdict-view .comp-row .comp-kicker .vintage { color: var(--signal-ink); }
+.verdict-view .comp-row .grade-r {
+  font-family: var(--font-geist-mono), monospace; font-size: 11px;
+  color: var(--signal-ink); letter-spacing: 0.4px; flex-shrink: 0;
+}
+.verdict-view .comp-row .grade-r .dots { color: var(--signal); letter-spacing: 1.5px; font-size: 12px; margin-right: 4px; }
+.verdict-view .comp-row .comp-verdict { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin: 4px 0 0; }
+.verdict-view .comp-row .comp-verdict .word {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif; font-weight: 500;
+  font-size: 44px; line-height: 0.95; letter-spacing: -1.4px; color: var(--signal-deep);
+}
+.verdict-view .comp-row .comp-verdict .word em { font-style: italic; }
+.verdict-view .comp-row .comp-verdict .gloss {
+  font-family: var(--font-geist-mono), monospace; font-size: 11px;
+  letter-spacing: 0.8px; text-transform: uppercase; color: var(--signal-ink); padding-bottom: 6px;
+}
+.verdict-view .comp-row .comp-verdict .gloss b { color: var(--signal-deep); font-weight: 500; }
+.verdict-view .comp-row .comp-range {
+  font-family: var(--font-geist-mono), monospace; font-weight: 500;
+  font-size: 14px; color: var(--signal-deep); letter-spacing: 0.2px; opacity: .85;
+}
+.verdict-view .comp-row .comp-track { position: relative; margin: 18px 8px 28px 8px; }
+.verdict-view .comp-row .comp-track .track-bar {
+  position: relative; height: 6px; background: var(--signal-track); border-radius: 999px; overflow: visible;
+}
+.verdict-view .comp-row .comp-track .track-fill {
+  position: absolute; inset: 0; background: var(--signal); opacity: 0.42; border-radius: 999px;
+}
+.verdict-view .comp-row .comp-track .track-axis {
+  position: absolute; top: 10px; left: 0; right: 0;
+  display: flex; justify-content: space-between;
+  font-family: var(--font-geist-mono), monospace; font-size: 9.5px;
+  color: var(--signal-ink); opacity: .7; letter-spacing: 0.3px;
+}
+.verdict-view .comp-row .comp-track .mark { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2; }
+.verdict-view .comp-row .comp-track .mark .dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--signal-deep); box-shadow: 0 0 0 3px var(--signal-bg);
+}
+.verdict-view .comp-row .comp-track .mark .lbl {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-geist-mono), monospace; font-size: 9.5px;
+  letter-spacing: 0.6px; text-transform: uppercase; color: var(--signal-deep);
+  white-space: nowrap; background: var(--signal-bg); padding: 0 4px;
+}
+.verdict-view .comp-row .comp-status {
+  display: flex; gap: 8px; align-items: center;
+  padding-top: 8px; border-top: 0.5px dashed var(--signal-divider); flex-wrap: wrap;
+}
+.verdict-view .comp-row .comp-status .glyph {
+  flex-shrink: 0; font-family: var(--font-geist-mono), monospace;
+  font-size: 9.5px; letter-spacing: 0.7px; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 4px; background: var(--signal-deep); color: var(--signal-bg); font-weight: 500;
+}
+.verdict-view .comp-row .comp-status .txt {
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+  font-size: 13.5px; line-height: 1.4; color: var(--signal-deep); flex: 1; min-width: 0;
+}
+.verdict-view .comp-row .comp-status .txt b { font-weight: 600; }
+.verdict-view .comp-row .comp-source {
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px; color: var(--signal-ink); letter-spacing: 0.4px;
+}
+.verdict-view .comp-row .comp-action { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.verdict-view .comp-row .comp-action .glyph {
+  flex-shrink: 0; font-family: var(--font-geist-mono), monospace;
+  font-size: 9.5px; letter-spacing: 0.7px; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 4px; background: transparent; color: var(--signal-deep);
+  border: 0.75px solid var(--signal); font-weight: 500;
+}
+.verdict-view .comp-row .comp-action .txt {
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+  font-size: 13.5px; line-height: 1.4; color: var(--signal-deep); flex: 1; min-width: 0;
+}
+.verdict-view .comp-row .comp-action .txt b { font-weight: 600; }
+
+/* Comp strip states — color carries meaning */
+.verdict-view .comp-row.state-ok {
+  --signal: #0d7c89; --signal-bg: #dceaec; --signal-ink: #3e6d75; --signal-deep: #0a4a52;
+  --signal-on: #ffffff; --signal-track: rgba(13, 124, 137, 0.16); --signal-divider: rgba(13, 124, 137, 0.28);
+}
+.dark .verdict-view .comp-row.state-ok {
+  --signal: #5cb1ff; --signal-bg: #14283b; --signal-ink: #8ab0d0; --signal-deep: #d4e6f2;
+  --signal-on: #06101c; --signal-track: rgba(92, 177, 255, 0.18); --signal-divider: rgba(92, 177, 255, 0.3);
+}
+.verdict-view .comp-row.state-positive {
+  --signal: #0a5c66; --signal-bg: #b9d9dc; --signal-ink: #1f4d54; --signal-deep: #052e34;
+  --signal-on: #ffffff; --signal-track: rgba(10, 92, 102, 0.28); --signal-divider: rgba(10, 92, 102, 0.4);
+}
+.dark .verdict-view .comp-row.state-positive {
+  --signal: #7ec0ff; --signal-bg: #1a3a55; --signal-ink: #a3c7e3; --signal-deep: #e6f0fa;
+  --signal-on: #06101c; --signal-track: rgba(126, 192, 255, 0.22); --signal-divider: rgba(126, 192, 255, 0.35);
+}
+.verdict-view .comp-row.state-positive .comp-status .glyph { background: var(--signal); color: var(--signal-on); }
+
+/* Action footer */
+.verdict-view .v-actions {
+  display: flex; align-items: center; gap: 12px;
+  padding-top: 8px; border-top: 0.75px solid var(--line); margin-top: 8px; flex-wrap: wrap;
+}
+.verdict-view .v-actions .primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 12px 22px; border-radius: 999px;
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif; font-weight: 600; font-size: 14px;
+  background: var(--ink); color: var(--bg); border: 1px solid var(--ink); cursor: pointer; text-decoration: none;
+}
+.verdict-view .v-actions .ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 12px 16px; border-radius: 999px;
+  font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif; font-weight: 500; font-size: 13.5px;
+  color: var(--ink-3); background: transparent; border: 0; cursor: pointer; text-decoration: none;
+}
+.verdict-view .v-actions .ghost:hover { color: var(--ink-2); }
+.verdict-view .v-actions .spacer { flex: 1; }

@@ -1,42 +1,80 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getDb, roles, evaluations, evaluationDimensions, evaluationGaps, evaluationProofPoints, companies, userCareerHistory, userPreferences, userEvents, NewRole, NewEvaluation } from '@/lib/db';
+import { getDb, roles, evaluations, evaluationGaps, companies, userCareerHistory, userPreferences, userEvents, NewRole } from '@/lib/db';
 import { eq, and, isNull } from 'drizzle-orm';
 import { loadCandidateContext } from './candidate-context';
 import { resolveCompany } from '@/lib/matching/resolve';
 import { matchPastEmployer, type UserEmployer, type PastEmployerMatch } from '@/lib/matching/past-employer';
+import { getFile } from '@/lib/github';
 
 interface EvaluationInput {
   jd: string;
   url?: string;
   userId: string;
+  // What the user pasted: a recruiter DM, a posting URL, or raw role details.
+  // Drives the verdict word (a DM you "Reply" to; a posting you "Pursue").
+  source?: 'dm' | 'url' | 'jd';
+}
+
+export type Verdict = 'reply' | 'pursue' | 'watch' | 'skip';
+export type Legitimacy = 'High Confidence' | 'Proceed with Caution' | 'Suspicious';
+
+// Presentation of Block D (comp & demand) + the user's stored floor/target.
+// The model fills this from web-searched market data; code clamps markPct.
+export interface CompStrip {
+  state: 'amber' | 'ok' | 'positive';
+  rangeLabel: string;   // "$280k – $340k total · referential"
+  gradeLabel: string;   // "Orientation"
+  gradeDots: string;    // "○○○"
+  vintage: string;      // "Data Q1 2026 · 3 mo old"
+  word: string;         // "Fits", "Strong", "Below"
+  gloss: string;        // "Floor clears the band by $10k · $50k headroom"
+  floorValue: number;
+  ceilingValue: number;
+  markValue: number;
+  markPct: number;      // 0–100, marker position on the band
+  markLabel: string;    // "your floor · $290k"
+  statusGlyph: string;  // "✓ Within range"
+  statusText: string;
+  actionGlyph: string;  // "→ Next move"
+  actionText: string;
+  source: string;       // "Levels.fyi · Director band · n=58 · Q1 2026"
+}
+
+// Structured payload the editorial verdict UI renders (the markdown report is
+// the full A–G; this is the concise hero derived from it).
+export interface VerdictPayload {
+  verdict: Verdict;
+  score: number;            // 1–5 (canonical)
+  reasoningLede: string;    // strong opening sentence
+  reasoningBody: string;    // 1–2 sentences after the lede
+  gaps: Array<{ text: string; severity: 'hard' | 'soft' }>;
+  comp: CompStrip | null;   // null when comp is undisclosed and unsearchable
+  legitimacy: Legitimacy;
+  patternHits: string[];    // §3.5b — "things you said you're avoiding"
 }
 
 interface EvaluationResult {
   roleId: string;
   evaluationId: string;
-  score: number;
+  displayId: string;
+  score: number;            // 1–5
   recommendation: 'apply' | 'hold' | 'pass';
-  summary: string;
-  dimensions: Array<{
-    name: string;
-    grade: string;
-    score: number;
-    reasoning: string;
-  }>;
-  gaps: Array<{
-    description: string;
-    severity: 'hard' | 'soft' | 'none';
-    mitigation: string;
-  }>;
-  proofPoints: Array<{
-    requirement: string;
-    evidence: string;
-    matchStrength: 'match' | 'partial' | 'miss';
-  }>;
+  verdict: Verdict;
+  payload: VerdictPayload;
+  reportMarkdown: string;   // canonical A–G report
   // §3.5b — qualitative "things you said you're avoiding" hits, model-judged.
   patternHits: string[];
   // §2.3 — past-employer match record (or null).
   pastEmployerMatch: PastEmployerMatch | null;
+}
+
+// Score band → verdict word, per modes/_shared.md interpretation, adjusted for
+// source: a recruiter DM is something you "Reply" to; a posting you "Pursue".
+function deriveVerdict(score: number, source: EvaluationInput['source']): Verdict {
+  const isDm = source === 'dm';
+  if (score < 3.5) return 'skip';
+  if (isDm) return 'reply';        // worth engaging the person
+  return score >= 4.0 ? 'pursue' : 'watch';
 }
 
 const anthropic = new Anthropic({
@@ -176,232 +214,244 @@ Return a JSON object with:
     roleId = newRole[0].id;
   }
 
-  // Step 4: Score the evaluation — personalized to the candidate's stored
-  // profile (from onboarding), not a hardcoded template.
+  // Step 4: Run the CANONICAL evaluation. The engine is the /career-ops modes
+  // (oferta.md + _shared.md = universal methodology), executed PER-USER against
+  // this candidate's stored onboarding profile. The single-user _profile.md file
+  // is NOT loaded — candidate-context (DB) is the per-user personalization layer.
   const ctx = await loadCandidateContext(input.userId);
   const candidateBlock = ctx.hasProfile
     ? `${ctx.markdown}${ctx.cvMarkdown ? `\n\n## CV\n${ctx.cvMarkdown.slice(0, 6000)}` : ''}`
     : `- (No profile on file yet — score conservatively and note that the candidate hasn't completed onboarding.)`;
 
-  const scoringPrompt = `You are an expert career consultant evaluating a job role for a specific candidate. Use ONLY the candidate's profile below — do not assume a generic persona.
+  // Universal methodology only (no santifer-specific _profile.md). Best-effort:
+  // if the repo files are unreachable, fall back to an empty methodology rather
+  // than failing the whole evaluation.
+  const [shared, oferta] = await Promise.all([
+    getFile('modes/_shared.md').then((f) => f.content).catch(() => ''),
+    getFile('modes/oferta.md').then((f) => f.content).catch(() => ''),
+  ]);
 
-Job Description:
-${input.jd}
+  const compTargetLine = [
+    ctx.compFloorUsd != null ? `floor ≈ ${Math.round(ctx.compFloorUsd).toLocaleString('en-US')} USD/yr` : null,
+    ctx.compTargetUsd != null ? `target ≈ ${Math.round(ctx.compTargetUsd).toLocaleString('en-US')} USD/yr` : null,
+    ctx.compCurrency ? `display currency ${ctx.compCurrency}` : null,
+  ].filter(Boolean).join(' · ') || 'not stated';
 
-Candidate's profile:
+  const evalSystem = `# IMPORTANT — API CONTEXT
+You are running the career-ops evaluation via the Anthropic API. You have the web_search tool for Block D (comp & demand) and Block G (company hiring signals) — use it; never invent comp or layoff data. All other inputs are pre-loaded below.
+
+# Evaluation methodology (universal — apply to THIS candidate)
+${shared}
+
+---
+
+${oferta}
+
+---
+
+# How this differs from the CLI
+- The candidate's personalization (target archetypes / North Stars, comp floor & target, deal-breakers, avoid signals) comes from their stored profile below — NOT from any example archetypes in the methodology above. The methodology's archetype list is illustrative of the method; use THIS candidate's own targets.
+- Produce the full A–G report in English (the candidate's UI is English). Do not use the word "JD" in any candidate-facing prose; say "the posting" or "the role".`;
+
+  const evalUser = `Evaluate the role below for this candidate. Produce the complete canonical report (Blocks A–G; H only if score ≥ 4.5), then a machine-readable verdict block.
+
+# Candidate profile (onboarding — authoritative)
 ${candidateBlock}
 
-If the candidate profile lists DEAL-BREAKERS, treat them as hard filters: if the role clearly violates one, say so explicitly in Red Flags (severity "hard"), cap the recommendation at "pass", and keep the overall score low regardless of other strengths.
+Candidate comp targets (for the comp strip marker): ${compTargetLine}
 
-Score this opportunity on the following dimensions, each from 0-100:
+If the profile lists DEAL-BREAKERS, treat them as hard filters: if the role clearly violates one, say so in Block B / red flags, and keep the score low (≤ 3.0) regardless of other strengths.
 
-1. **CV Match** (0-100): How well the role aligns with the candidate's actual experience, skills, seniority, and function (use the Career History + Skills + CV).
-2. **North Star** (0-100): How well it matches their chosen Target Archetypes and target seniority/industries.
-3. **Compensation** (0-100): Pay vs the candidate's stated floor/target. Respect the comp basis — if their target is net (take-home), compare like-for-like; note currency. If the JD omits comp, say so and score on market estimate.
-4. **Culture/Company** (0-100): Cultural fit, stability, growth — and fit with their stated work modes, geographies/current location, and "in their own words" preferences.
-5. **Red Flags** (-30 to 0): Concerns, including any deal-breaker violations (hard) and location/work-mode/comp mismatches (soft).
-
-Each dimension should also have:
-- A letter grade (A, B+, B, B-, C, etc.)
-- A 2-3 sentence reasoning
-
-Return a JSON object:
-{
-  "dimensions": [
-    {
-      "name": "CV Match",
-      "grade": "B+",
-      "score": 75,
-      "reasoning": "Your experience in FinOps aligns well with payment processing requirements..."
-    },
-    ...
-  ],
-  "red_flags": [
-    {
-      "flag": "description",
-      "severity": "soft|hard|none",
-      "mitigation": "how to address"
-    },
-    ...
-  ],
-  "overall_score": 78,
-  "recommendation": "apply|hold|pass",
-  "summary": "One paragraph summary of the opportunity and recommendation",
-  "pattern_hits": ["Culture: founder is still CEO, the stage you flagged", "Title: scope reads like the 'VP of everything' pattern you flagged"]
-}
-
-For "pattern_hits": ONLY if the candidate profile listed things to avoid (the "What the user wants to avoid" block). Each hit is one short qualitative line prefixed with its dimension (Industry/Culture/Title). Do NOT invent hits, do NOT assign numeric penalties, and return an empty array [] if the role exhibits none of the avoided patterns.`;
-
-  const scoringResponse = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
-    messages: [
-      {
-        role: 'user',
-        content: scoringPrompt,
-      },
-    ],
-  });
-
-  let scoringData: any;
-  try {
-    const jsonMatch = (scoringResponse.content[0] as any).text.match(/\{[\s\S]*\}/);
-    scoringData = JSON.parse(jsonMatch![0]);
-  } catch {
-    throw new Error('Failed to score evaluation');
-  }
-
-  const patternHits: string[] = Array.isArray(scoringData.pattern_hits)
-    ? scoringData.pattern_hits.filter((h: unknown) => typeof h === 'string' && h.trim()).map((h: string) => h.trim())
-    : [];
-
-  // Step 5: Calculate weighted overall score (0-5 scale)
-  const dimensionScores = scoringData.dimensions.map((d: any) => d.score / 20);
-  const redFlagAdjustment = Math.min(0, scoringData.red_flags.reduce((acc: number, flag: any) => {
-    if (flag.severity === 'hard') return acc - 0.5;
-    if (flag.severity === 'soft') return acc - 0.2;
-    return acc;
-  }, 0));
-
-  const overallScore = Math.max(0, Math.min(5, (dimensionScores.reduce((a: number, b: number) => a + b) / dimensionScores.length) + redFlagAdjustment));
-
-  // Step 6: Generate proof points mapping
-  const proofPointsPrompt = `Given this job description and the requirements, identify what proof points from the candidate's experience would demonstrate capability. Return a JSON array:
-
-[
-  {
-    "requirement": "5+ years in fraud/disputes operations",
-    "evidence": "How the candidate's CV demonstrates this",
-    "matchStrength": "match|partial|miss"
-  },
-  ...
-]
-
-Job description:
+# The role to evaluate
 ${input.jd}
 
-Return a JSON array with 5-8 proof points.`;
+---
 
-  const proofPointsResponse = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1000,
-    messages: [
-      {
-        role: 'user',
-        content: proofPointsPrompt,
-      },
-    ],
-  });
+OUTPUT FORMAT — produce exactly two parts:
 
-  let proofPointsData: Array<any> = [];
+1. The full Markdown report. Start with the canonical header:
+   # Evaluation: {Company} — {Role}
+   **Date:** ${new Date().toISOString().split('T')[0]}
+   **Archetype:** {best-fit from the candidate's own target archetypes}
+   **Score:** {X.X}/5
+   **Legitimacy:** {High Confidence | Proceed with Caution | Suspicious}
+
+   Then Blocks A–G (## A) … through ## G) Posting Legitimacy), per the methodology.
+
+2. After the report, a fenced \`\`\`json code block containing EXACTLY this shape (no comments):
+{
+  "score": 4.2,
+  "legitimacy": "High Confidence",
+  "reasoningLede": "One strong opening sentence — the headline of the verdict.",
+  "reasoningBody": "1–2 sentences expanding the lede: the core fit, the main tension.",
+  "gaps": [{ "text": "What the posting doesn't say, or a real gap. Use **bold** for the key term.", "severity": "soft" }],
+  "patternHits": [],
+  "comp": {
+    "state": "ok",
+    "rangeLabel": "$280k – $340k total · referential",
+    "gradeLabel": "Orientation",
+    "gradeDots": "○○○",
+    "vintage": "Data Q1 2026 · 3 mo old",
+    "word": "Fits",
+    "gloss": "FLOOR CLEARS THE BAND BY $10K",
+    "floorValue": 280000,
+    "ceilingValue": 340000,
+    "markValue": 290000,
+    "markPct": 17,
+    "markLabel": "your floor · $290k",
+    "statusGlyph": "✓ Within range",
+    "statusText": "Sits at the low end. Equity not in the band — treat as upside.",
+    "actionGlyph": "→ Next move",
+    "actionText": "Ask for total comp + equity refresh before any call.",
+    "source": "Levels.fyi · band · n=247 · Q1 2026"
+  }
+}
+
+JSON rules:
+- "score": number 1–5 (one decimal), MUST equal the report's **Score**.
+- "legitimacy": MUST equal the report's **Legitimacy** (this is Block G; it does NOT change the score).
+- "gaps": 2–4 items from Block B / what the posting omits. severity "hard" (deal-breaker / blocker) or "soft".
+- "patternHits": ONLY if the profile listed things to avoid. Each is one short line prefixed with its dimension (Industry/Culture/Title). Empty array [] otherwise. No numeric penalties.
+- "comp": Block D presented for the candidate. Use web_search for the market band; numbers in the candidate's display currency where possible. "state" = "amber" (below floor / stale / undisclosed), "ok" (within range), or "positive" (clears comfortably / strong). "markValue" = the candidate's floor. "markPct" = where markValue sits between floorValue and ceilingValue, 0–100. If comp is genuinely undisclosed AND no market estimate is possible, set "comp": null. Keep "gloss" SHORT and uppercase-friendly.`;
+
+  let reportMarkdown = '';
+  let payloadRaw: any = {};
   try {
-    const jsonMatch = (proofPointsResponse.content[0] as any).text.match(/\[[\s\S]*\]/);
-    proofPointsData = JSON.parse(jsonMatch![0]);
-  } catch {
-    proofPointsData = [];
+    const evalResponse = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8000,
+      system: evalSystem,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 } as any],
+      messages: [{ role: 'user', content: evalUser }],
+    });
+    const fullText = evalResponse.content
+      .filter((b: any) => b.type === 'text')
+      .map((b: any) => b.text)
+      .join('');
+    // Split the report (markdown) from the trailing ```json verdict block.
+    const jsonFence = fullText.match(/```json\s*([\s\S]*?)```\s*$/);
+    if (jsonFence) {
+      reportMarkdown = fullText.slice(0, jsonFence.index).trim();
+      try { payloadRaw = JSON.parse(jsonFence[1]); } catch { payloadRaw = {}; }
+    } else {
+      // No fenced block — fall back to the last {...} object, keep report as-is.
+      reportMarkdown = fullText.trim();
+      const obj = fullText.match(/\{[\s\S]*\}\s*$/);
+      if (obj) { try { payloadRaw = JSON.parse(obj[0]); } catch { payloadRaw = {}; } }
+    }
+  } catch (err) {
+    console.error('Canonical evaluation failed:', err);
+    throw new Error('Failed to evaluate the role');
   }
 
-  // Step 7: Generate full report markdown
-  const reportMarkdown = `# ${company_name} · ${role_title}
+  // Step 5: Normalize the structured payload.
+  const score = Math.max(1, Math.min(5, Number(payloadRaw.score) || 3));
+  const verdict = deriveVerdict(score, input.source);
+  const recommendation: 'apply' | 'hold' | 'pass' =
+    verdict === 'skip' ? 'pass' : verdict === 'watch' ? 'hold' : 'apply';
 
-**Date:** ${new Date().toISOString().split('T')[0]}
+  const patternHits: string[] = Array.isArray(payloadRaw.patternHits)
+    ? payloadRaw.patternHits.filter((h: unknown) => typeof h === 'string' && h.trim()).map((h: string) => h.trim())
+    : [];
 
-## Overall Score: ${Math.round(overallScore * 20)}/100
+  const gaps: Array<{ text: string; severity: 'hard' | 'soft' }> = Array.isArray(payloadRaw.gaps)
+    ? payloadRaw.gaps
+        .filter((g: any) => g && typeof g.text === 'string' && g.text.trim())
+        .map((g: any) => ({ text: String(g.text).trim(), severity: (g.severity === 'hard' ? 'hard' : 'soft') as 'hard' | 'soft' }))
+    : [];
 
-**Recommendation:** ${scoringData.recommendation.toUpperCase()}
+  const legitimacy: Legitimacy =
+    payloadRaw.legitimacy === 'Suspicious' || payloadRaw.legitimacy === 'Proceed with Caution'
+      ? payloadRaw.legitimacy
+      : 'High Confidence';
 
-${scoringData.summary}
+  let comp: CompStrip | null = null;
+  const c = payloadRaw.comp;
+  if (c && typeof c === 'object') {
+    const floorValue = Number(c.floorValue) || 0;
+    const ceilingValue = Number(c.ceilingValue) || 0;
+    const markValue = Number(c.markValue) || 0;
+    const span = ceilingValue - floorValue;
+    const markPct = Number.isFinite(Number(c.markPct))
+      ? Math.max(0, Math.min(100, Number(c.markPct)))
+      : span > 0 ? Math.max(0, Math.min(100, ((markValue - floorValue) / span) * 100)) : 0;
+    comp = {
+      state: c.state === 'positive' || c.state === 'ok' ? c.state : 'amber',
+      rangeLabel: String(c.rangeLabel ?? ''),
+      gradeLabel: String(c.gradeLabel ?? 'Orientation'),
+      gradeDots: String(c.gradeDots ?? '○○○'),
+      vintage: String(c.vintage ?? ''),
+      word: String(c.word ?? ''),
+      gloss: String(c.gloss ?? ''),
+      floorValue, ceilingValue, markValue, markPct,
+      markLabel: String(c.markLabel ?? ''),
+      statusGlyph: String(c.statusGlyph ?? ''),
+      statusText: String(c.statusText ?? ''),
+      actionGlyph: String(c.actionGlyph ?? ''),
+      actionText: String(c.actionText ?? ''),
+      source: String(c.source ?? ''),
+    };
+  }
 
-## Dimension Scores
+  const reasoningLede = String(payloadRaw.reasoningLede ?? '').trim();
+  const reasoningBody = String(payloadRaw.reasoningBody ?? '').trim();
+  const verdictSummary = [reasoningLede, reasoningBody].filter(Boolean).join(' ');
 
-${scoringData.dimensions.map((d: any) => `### ${d.name}: ${d.grade} (${d.score}/100)
-${d.reasoning}`).join('\n\n')}
+  const payload: VerdictPayload = {
+    verdict, score, reasoningLede, reasoningBody, gaps, comp, legitimacy, patternHits,
+  };
 
-## Red Flags & Concerns
+  // Guard against an empty report (model returned only JSON).
+  if (!reportMarkdown) {
+    reportMarkdown = `# Evaluation: ${company_name ?? 'Unknown'} — ${role_title ?? 'Role'}\n\n**Score:** ${score.toFixed(1)}/5\n**Legitimacy:** ${legitimacy}\n\n${verdictSummary}`;
+  }
 
-${scoringData.red_flags && scoringData.red_flags.length > 0 ? scoringData.red_flags.map((flag: any) => `- **${flag.flag || flag.description}** (${flag.severity})
-  - Mitigation: ${flag.mitigation}`).join('\n') : 'None identified'}
-${patternHits.length > 0 ? `
-## Pattern Hits — things you said you're avoiding
-
-${patternHits.map((h) => `- ${h}`).join('\n')}
-
-The score above factors these in.
-` : ''}`;
-
-  // Step 8: Assign displayId (sequential report number)
+  // Step 6: Assign displayId (sequential report number)
   const userEvals = await db
-    .select()
+    .select({ id: evaluations.id })
     .from(evaluations)
     .where(eq(evaluations.userId, input.userId));
   const nextNum = userEvals.length + 1;
   const displayId = String(nextNum).padStart(3, '0');
 
-  // Step 9: Store evaluation and related data
+  // Step 7: Persist the evaluation.
   const evaluationValues: any = {
     userId: input.userId,
     roleId,
-    overallScore: Math.round(overallScore * 20), // Convert to 0-100
-    recommendation: scoringData.recommendation,
-    verdictSummary: scoringData.summary,
+    overallScore: Math.round(score * 20), // 0–100 for the dashboard/tracker
+    recommendation,
+    verdictSummary,
     fullReportMarkdown: reportMarkdown,
+    verdictPayload: payload, // editorial verdict (drives the live hero + future report parity)
     modelUsed: 'claude-sonnet-4-6',
-    promptVersion: '1.0',
+    promptVersion: '2.0-modes',
     displayId,
     pastEmployerMatch, // §2.3 — persisted so the verdict renders on revisit
   };
 
-  if (scoringData.dimensions[0]) evaluationValues.cvMatchScore = scoringData.dimensions[0].score;
-  if (scoringData.dimensions[1]) evaluationValues.northStarScore = scoringData.dimensions[1].score;
-  if (scoringData.dimensions[2]) evaluationValues.compScore = scoringData.dimensions[2].score;
-  if (scoringData.dimensions[3]) evaluationValues.culturalScore = scoringData.dimensions[3].score;
-  if (redFlagAdjustment) evaluationValues.redFlagAdjustment = redFlagAdjustment * 20;
-
   const evaluation = await db.insert(evaluations).values(evaluationValues as any).returning({ id: evaluations.id });
   const evaluationId = evaluation[0].id;
 
-  // Store dimensions
-  await db.insert(evaluationDimensions).values(
-    scoringData.dimensions.map((d: any) => ({
-      evaluationId,
-      dimensionName: d.name.toLowerCase().replace(/ /g, '_'),
-      grade: d.grade,
-      scoreNumeric: d.score,
-      reasoningMarkdown: d.reasoning,
-    })) as any
-  );
-
-  // Store gaps
-  await db.insert(evaluationGaps).values(
-    scoringData.red_flags.map((flag: any) => ({
-      evaluationId,
-      gapDescription: flag.description || flag.flag,
-      blockerSeverity: flag.severity,
-      mitigationStrategy: flag.mitigation,
-    })) as any
-  );
-
-  // Store proof points
-  if (proofPointsData.length > 0) {
-    await db.insert(evaluationProofPoints).values(
-      proofPointsData.map((pp: any) => ({
+  // Store gaps so downstream (tracker / analysis) isn't empty.
+  if (gaps.length > 0) {
+    await db.insert(evaluationGaps).values(
+      gaps.map((g) => ({
         evaluationId,
-        requirement: pp.requirement,
-        evidence: pp.evidence,
-        matchStrength: pp.matchStrength,
+        gapDescription: g.text,
+        blockerSeverity: g.severity,
       })) as any
-    );
+    ).catch((err) => console.error('Failed to store gaps:', err));
   }
 
   return {
     roleId,
     evaluationId,
-    score: overallScore,
-    recommendation: scoringData.recommendation,
-    summary: scoringData.summary,
-    dimensions: scoringData.dimensions,
-    gaps: scoringData.red_flags,
-    proofPoints: proofPointsData,
+    displayId,
+    score,
+    recommendation,
+    verdict,
+    payload,
+    reportMarkdown,
     patternHits,
     pastEmployerMatch: pastEmployerMatch ?? null,
   };

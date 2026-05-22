@@ -97,7 +97,8 @@ export async function POST(req: NextRequest) {
             evaluationId: result.evaluationId,
             score: result.score,
             recommendation: result.recommendation,
-            summary: result.summary.split('\n')[0], // First line only
+            verdict: result.verdict,
+            summary: result.payload.reasoningLede, // headline of the verdict
           },
         });
 

@@ -262,6 +262,7 @@ export const evaluations = pgTable('evaluations', {
   supersededBy: uuid('superseded_by'), // self-FK to evaluations.id (set after insert)
   displayId: text('display_id'), // "001", "002" — backfilled from legacy report_id
   pastEmployerMatch: jsonb('past_employer_match'), // §2.3 match record (persisted for verdict render on revisit)
+  verdictPayload: jsonb('verdict_payload'), // editorial verdict (verdict word, reasoning, comp strip, gaps, legitimacy)
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
   userIdx: index('evaluations_user_idx').on(t.userId),

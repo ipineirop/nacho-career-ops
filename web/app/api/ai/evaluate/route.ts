@@ -3,7 +3,7 @@ import { getAuthUserId } from '@/lib/auth-bridge';
 import { evaluateRole } from '@/lib/ai/evaluate-engine';
 import { UnauthorizedError, ValidationError, handleApiError } from '@/lib/api/errors';
 import { logger } from '@/lib/api/logger';
-import { getDb, evaluations, userCareerHistory } from '@/lib/db';
+import { getDb, evaluations, userCareerHistory, roles } from '@/lib/db';
 import { eq, gte, and } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
@@ -41,55 +41,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { jd, url } = await req.json();
+    const { jd, url, source } = await req.json();
     if (!jd || !jd.trim()) {
-      throw new ValidationError('JD (job description) is required');
+      throw new ValidationError('A role, posting, or message is required');
     }
 
-    logger.info('Evaluation request received', { userId: authUser.id, hasUrl: !!url });
+    logger.info('Evaluation request received', { userId: authUser.id, hasUrl: !!url, source });
 
-    // Run evaluation
+    // Run the canonical (modes-driven) evaluation
     const result = await evaluateRole({
       jd: jd.trim(),
       url,
       userId: authUser.id,
+      source,
     });
 
-    // Build streaming response
+    // Build streaming response. The body IS the canonical A–G report (the
+    // "working" view streams it; /reports/[id] renders the same markdown).
     const encoder = new TextEncoder();
-
-    const chunks = [
-      `# Evaluación: ${result.summary.split('\n')[0]}\n\n`,
-      `**Score:** ${Math.round(result.score * 20)}/100 (${result.score.toFixed(1)}/5)\n`,
-      `**Recomendación:** ${result.recommendation.toUpperCase()}\n\n`,
-      `## Dimensiones de Evaluación\n\n`,
-      ...result.dimensions.map((dim) =>
-        `### ${dim.name}\n**Calificación:** ${dim.grade} (${dim.score}/100)\n\n${dim.reasoning}\n\n`
-      ),
-    ];
-
-    if (result.gaps.length > 0) {
-      chunks.push(`## Señales de Alerta\n\n`);
-      chunks.push(
-        ...result.gaps.map(
-          (gap) => `- **${gap.description}** [${gap.severity}]\n  Mitigación: ${gap.mitigation}\n\n`
-        )
-      );
-    }
-
-    if (result.proofPoints.length > 0) {
-      chunks.push(`## Puntos de Evidencia\n\n`);
-      chunks.push(
-        ...result.proofPoints.map((pp) => `| ${pp.requirement} | ${pp.matchStrength} |\n`)
-      );
-    }
-
-    chunks.push(`\n## Resumen\n\n${result.summary}\n`);
+    const chunks = [result.reportMarkdown.endsWith('\n') ? result.reportMarkdown : `${result.reportMarkdown}\n`];
 
     // Structured trailer (parsed + stripped by the client) — carries the
-    // interactive verdict surfaces that don't belong in the markdown body:
-    // the past-employer match record (§3.5a/§5.1), pattern hits (§3.5b), and
-    // the user's past employers for the §5.2 "this is actually…" picker.
+    // editorial verdict payload and the interactive surfaces that don't belong
+    // in the markdown body: the past-employer match record (§3.5a/§5.1), pattern
+    // hits (§3.5b), and the user's past employers for the §5.2 picker.
     const pastEmployers = await db
       .select({
         canonicalId: userCareerHistory.canonicalId,
@@ -100,9 +75,35 @@ export async function POST(req: NextRequest) {
       .from(userCareerHistory)
       .where(eq(userCareerHistory.userId, authUser.id));
 
+    // Role facts for the verdict summary header (Company · Location · Mode · Source).
+    const roleRow = (await db
+      .select({
+        companyName: roles.companyName,
+        roleTitle: roles.roleTitle,
+        location: roles.location,
+        remotePolicy: roles.remotePolicy,
+        seniorityLevel: roles.seniorityLevel,
+      })
+      .from(roles)
+      .where(eq(roles.id, result.roleId))
+      .limit(1))[0];
+
+    const sourceLabel = source === 'dm' ? 'message' : 'job posting';
+
     const meta = {
       evaluationId: result.evaluationId,
       roleId: result.roleId,
+      displayId: result.displayId,
+      verdict: result.payload, // editorial verdict (hero/comp/gaps)
+      role: {
+        company: roleRow?.companyName ?? '',
+        title: roleRow?.roleTitle ?? '',
+        location: roleRow?.location ?? '',
+        remotePolicy: roleRow?.remotePolicy ?? '',
+        seniority: roleRow?.seniorityLevel ?? '',
+        sourceLabel,
+        url: url ?? null,
+      },
       pastEmployerMatch: result.pastEmployerMatch,
       patternHits: result.patternHits,
       pastEmployers: pastEmployers.map((e) => ({
