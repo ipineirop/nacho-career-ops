@@ -112,9 +112,10 @@ export async function POST() {
     ? targetCompanies.filter((c) => COMPANY_PORTALS[c])
     : Object.keys(COMPANY_PORTALS);
 
-  // Get existing URLs to skip duplicates
-  const existingRows = await sql`SELECT url FROM jobs WHERE user_email = ${user.email}`;
-  const existingUrls = new Set((existingRows as unknown as { url: string }[]).map((r) => r.url));
+  // Get existing role source_refs to skip duplicates (roles is the shared,
+  // deduped opportunity table; source_ref is globally unique).
+  const existingRows = await sql`SELECT source_ref FROM roles WHERE source_ref IS NOT NULL`;
+  const existingUrls = new Set((existingRows as unknown as { source_ref: string }[]).map((r) => r.source_ref));
 
   // Fetch all companies in parallel (concurrency ~10)
   const fetchers = toScan.map(async (companyName) => {
@@ -132,19 +133,19 @@ export async function POST() {
   const allJobs = (await Promise.all(fetchers)).flat();
 
   // Filter by keywords + deduplicate
-  const today = new Date().toISOString().split('T')[0];
   const newJobs = allJobs.filter(
     (j) => matchesKeywords(j.title, keywords) && !existingUrls.has(j.url)
   );
 
-  // Batch insert
+  // Batch insert as roles (scanned opportunities). They surface in the
+  // pipeline as pending until evaluated; no pipeline_status row needed.
   let inserted = 0;
   for (const j of newJobs) {
     try {
       await sql`
-        INSERT INTO jobs (user_email, url, company, role, portal, first_seen, status)
-        VALUES (${user.email}, ${j.url}, ${j.company}, ${j.title}, ${COMPANY_PORTALS[j.company]?.portal ?? ''}, ${today}, 'pending')
-        ON CONFLICT (url) DO NOTHING
+        INSERT INTO roles (source, source_ref, company_name, role_title, portal, scraped_at, liveness_status)
+        VALUES ('scan', ${j.url}, ${j.company}, ${j.title}, ${COMPANY_PORTALS[j.company]?.portal ?? ''}, NOW(), 'active')
+        ON CONFLICT (source_ref) DO NOTHING
       `;
       inserted++;
     } catch { /* skip on conflict */ }
