@@ -426,7 +426,8 @@ JSON rules:
 
   // Step 5: Normalize the structured payload.
   const score = Math.max(1, Math.min(5, Number(payloadRaw.score) || 3));
-  const verdict = deriveVerdict(score, input.source);
+  // A fetched URL is a posting (Pursue/Watch/Skip), even if pasted in the DM tab.
+  const verdict = deriveVerdict(score, effectiveUrl ? 'url' : input.source);
   const recommendation: 'apply' | 'hold' | 'pass' =
     verdict === 'skip' ? 'pass' : verdict === 'watch' ? 'hold' : 'apply';
 
