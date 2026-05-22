@@ -11,6 +11,8 @@ import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getSetting, setSetting } from '@/lib/settings-store';
+import { getDb, userProfiles, users } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
@@ -57,7 +59,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         if (!hasFlag) {
           // Pre-existing user: treat a stored CV as completed onboarding so we
           // never re-gate someone who already finished, then backfill the flag.
-          const hasCv = !!(await getSetting(`${email}:cv_content`));
+          // user_profiles.cv_markdown is the authoritative CV signal (always on
+          // Supabase); fall back to the cv_content key for older rows.
+          const db = getDb();
+          const prof = await db
+            .select({ cv: userProfiles.cvMarkdown })
+            .from(userProfiles)
+            .innerJoin(users, eq(users.id, userProfiles.userId))
+            .where(eq(users.email, email))
+            .limit(1);
+          const hasCv = !!prof[0]?.cv || !!(await getSetting(`${email}:cv_content`));
           if (hasCv) {
             await setSetting(flagKey, 'true');
           } else {
