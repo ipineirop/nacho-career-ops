@@ -180,13 +180,15 @@ ${input.jd}
 Candidate's profile:
 ${candidateBlock}
 
+If the candidate profile lists DEAL-BREAKERS, treat them as hard filters: if the role clearly violates one, say so explicitly in Red Flags (severity "hard"), cap the recommendation at "pass", and keep the overall score low regardless of other strengths.
+
 Score this opportunity on the following dimensions, each from 0-100:
 
-1. **CV Match** (0-100): How well does the role align with the candidate's experience
-2. **North Star** (0-100): How well does it match their target role archetype
-3. **Compensation** (0-100): How competitive is the pay relative to market
-4. **Culture/Company** (0-100): Cultural fit, company stability, growth potential
-5. **Red Flags** (-30 to 0): Deduct points for concerns
+1. **CV Match** (0-100): How well the role aligns with the candidate's actual experience, skills, seniority, and function (use the Career History + Skills + CV).
+2. **North Star** (0-100): How well it matches their chosen Target Archetypes and target seniority/industries.
+3. **Compensation** (0-100): Pay vs the candidate's stated floor/target. Respect the comp basis — if their target is net (take-home), compare like-for-like; note currency. If the JD omits comp, say so and score on market estimate.
+4. **Culture/Company** (0-100): Cultural fit, stability, growth — and fit with their stated work modes, geographies/current location, and "in their own words" preferences.
+5. **Red Flags** (-30 to 0): Concerns, including any deal-breaker violations (hard) and location/work-mode/comp mismatches (soft).
 
 Each dimension should also have:
 - A letter grade (A, B+, B, B-, C, etc.)

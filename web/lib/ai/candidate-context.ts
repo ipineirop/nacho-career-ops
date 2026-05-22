@@ -5,6 +5,8 @@ import {
   userPreferences,
   userSignalsDerived,
   userCareerHistory,
+  userCompensation,
+  userLocations,
 } from '@/lib/db';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 import { getSetting as getStoreSetting } from '@/lib/settings-store';
@@ -101,13 +103,16 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     .limit(1);
   const email = userRow[0]?.email ?? '';
 
-  const [profileRow, prefRow, sigRow, careerRows] = await Promise.all([
+  const [profileRow, prefRow, sigRow, careerRows, compRow, locRow] = await Promise.all([
     db.select({
       seniorityLevel: userProfiles.seniorityLevel,
       primaryFunction: userProfiles.primaryFunction,
       industries: userProfiles.industries,
       yearsOfExperience: userProfiles.yearsOfExperience,
       remotePreference: userProfiles.remotePreference,
+      relocationWillingness: userProfiles.relocationWillingness,
+      skills: userProfiles.skills,
+      languages: userProfiles.languages,
     }).from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1),
     db.select().from(userPreferences)
       .where(and(eq(userPreferences.userId, userId), isNull(userPreferences.supersededAt)))
@@ -116,6 +121,12 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     db.select().from(userCareerHistory)
       .where(eq(userCareerHistory.userId, userId))
       .orderBy(asc(userCareerHistory.startedAt)),
+    db.select().from(userCompensation)
+      .where(and(eq(userCompensation.userId, userId), eq(userCompensation.recordType, 'target')))
+      .limit(1),
+    db.select().from(userLocations)
+      .where(and(eq(userLocations.userId, userId), eq(userLocations.locationType, 'current_residence'), isNull(userLocations.untilDate)))
+      .limit(1),
   ]);
 
   const [cvMarkdown, archetypesRaw] = email
@@ -128,6 +139,8 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
   const profile = profileRow[0];
   const pref = prefRow[0];
   const sig = sigRow[0];
+  const comp = compRow[0];
+  const loc = locRow[0];
 
   let archetypes: ArchetypeBlob = {};
   try { archetypes = archetypesRaw ? JSON.parse(archetypesRaw) : {}; } catch { /* ignore */ }
@@ -142,7 +155,15 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
   if (profile?.primaryFunction) lines.push(`- Primary function: ${profile.primaryFunction}`);
   if (arr(profile?.industries).length) lines.push(`- Industries: ${arr(profile?.industries).join(', ')}`);
   if (typeof profile?.yearsOfExperience === 'number') lines.push(`- Years of experience: ${profile?.yearsOfExperience}`);
+  if (arr(profile?.skills).length) lines.push(`- Skills: ${arr(profile?.skills).join(', ')}`);
+  // Languages are stored as [{code, fluency}] jsonb
+  const langs = Array.isArray(profile?.languages)
+    ? (profile?.languages as Array<{ code?: string; fluency?: string }>).map((l) => l?.code).filter(Boolean)
+    : [];
+  if (langs.length) lines.push(`- Languages: ${langs.join(', ')}`);
+  if (loc?.city || loc?.countryIso) lines.push(`- Currently based in: ${[loc?.city, loc?.countryIso].filter(Boolean).join(', ')}`);
   if (profile?.remotePreference) lines.push(`- Remote preference: ${profile.remotePreference}`);
+  if (profile?.relocationWillingness) lines.push(`- Relocation: ${profile.relocationWillingness}`);
 
   if (sig?.careerArcDescription) lines.push(`- Career arc: ${sig.careerArcDescription}`);
   if (sig?.trajectoryVelocity) lines.push(`- Trajectory velocity: ${sig.trajectoryVelocity}`);
@@ -160,6 +181,14 @@ export async function loadCandidateContext(userId: string): Promise<CandidateCon
     if (pref.floorCompUsd) lines.push(`- Comp floor (USD/yr, approx): ${Math.round(Number(pref.floorCompUsd)).toLocaleString('en-US')}`);
     if (pref.targetCompUsd) lines.push(`- Comp target (USD/yr, approx): ${Math.round(Number(pref.targetCompUsd)).toLocaleString('en-US')}`);
     if (pref.compCurrencyDisplay) lines.push(`- Comp currency: ${String(pref.compCurrencyDisplay).toUpperCase()}`);
+    // Exact original figure + gross/net basis (the *_usd above are approximate).
+    if (comp?.baseAmount) {
+      const basisNote = typeof comp.bonusStructureMarkdown === 'string' ? comp.bonusStructureMarkdown : '';
+      lines.push(`- Comp target (exact): ${Number(comp.baseAmount).toLocaleString('en-US')} ${comp.baseCurrency ?? ''}${basisNote ? ` (${basisNote})` : ''}`);
+    }
+    // Hard filters the role must clear (deal-breakers win over a high score).
+    if (arr(pref.dealBreakers).length) lines.push(`- DEAL-BREAKERS (hard no): ${arr(pref.dealBreakers).join('; ')}`);
+    if (arr(pref.niceToHaves).length) lines.push(`- Nice-to-haves: ${arr(pref.niceToHaves).join('; ')}`);
     if (pref.humanAnswer) lines.push(`- In their own words: "${pref.humanAnswer}"`);
   }
 
