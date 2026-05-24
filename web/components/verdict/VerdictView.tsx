@@ -82,14 +82,26 @@ export function VerdictView({
         )}
       </div>
 
-      {/* Gaps */}
+      {/* Gaps — parse "**Term**: rest" explicitly so the bold + description
+          render as clean inline text without tabs/multi-space artifacts that
+          the model sometimes emits between the term and the description. */}
       {v.gaps.length > 0 && (
         <div className="v-section">
           <div className="skicker">★ <b>Gaps</b> — what the posting doesn&apos;t say</div>
           <ul className="gap-list">
-            {v.gaps.map((g, i) => (
-              <li key={i} dangerouslySetInnerHTML={{ __html: boldify(g.text) }} />
-            ))}
+            {v.gaps.map((g, i) => {
+              const m = g.text.match(/^\s*\*\*([^*]+?)\*\*\s*[:—\-]\s*([\s\S]+)$/);
+              const term = m?.[1]?.replace(/\s+/g, ' ').trim();
+              const rest = (m?.[2] ?? g.text).replace(/\s+/g, ' ').trim();
+              return (
+                <li key={i}>
+                  <span className="gap-text">
+                    {term && <><b>{term}</b>{' — '}</>}
+                    {rest}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

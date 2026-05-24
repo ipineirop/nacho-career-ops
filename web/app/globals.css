@@ -310,6 +310,16 @@
 
   display: flex; flex-direction: column; gap: 32px;
   max-width: 720px;
+  /* Center within the main content area + give the editorial column air on
+     both sides so it doesn't slam against the sidebar. */
+  margin-inline: auto;
+  padding: 32px 24px;
+}
+@media (min-width: 1024px) {
+  .verdict-view {
+    padding: 56px 48px;
+    gap: 44px; /* a touch more breathing room between sections on lg+ */
+  }
 }
 
 .verdict-view .v-summary { display: flex; flex-direction: column; gap: 8px; }
