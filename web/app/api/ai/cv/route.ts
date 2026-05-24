@@ -121,7 +121,7 @@ ${jd}`;
 
       if (eval_) {
         const [roleData] = await db.select({ companyName: roles.companyName, roleTitle: roles.roleTitle })
-          .from(roles).where(eq(roles.id, eval_.roleId));
+          .from(roles).where(eq(roles.id, eval_.roleId!));
 
         await db.insert(documents).values({
           userId: eval_.userId,

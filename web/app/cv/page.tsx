@@ -17,7 +17,7 @@ export default async function CVPage() {
       const roleData = await db
         .select()
         .from(roles)
-        .where(eq(roles.id, e.roleId))
+        .where(eq(roles.id, e.roleId!))
         .limit(1);
 
       return {

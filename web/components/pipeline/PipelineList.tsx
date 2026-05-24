@@ -49,7 +49,8 @@ export function PipelineList({ initialJobs }: { initialJobs: PipelineJob[] }) {
         {visible.map((job) => (
           <div
             key={job.url}
-            className="flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 hover:bg-accent/30"
+            // `accent` is now Petrol; the soft hover tint is `accent-soft`.
+            className="flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 hover:bg-accent-soft/30"
           >
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">

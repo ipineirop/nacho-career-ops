@@ -47,6 +47,61 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ================================================================
+     LeadMe Evaluate Design System — Tailwind v4 utility tokens.
+     Mapped to the same --lm-* values so light/dark swap automatically.
+     ----------------------------------------------------------------
+     Hard rules (enforce in code; do not violate):
+       01  Only `accent` (Petrol) and `signal` (Amber) are chromatic.
+           Everything else is the neutral ink/surface/line ladder.
+       02  Only `rounded-card` (10px) or `rounded-pill` (999px).
+           No rounded-md / rounded-xl / etc.
+       03  No `shadow-*` utilities. Hierarchy from color, border, density.
+       04  Only spacing from s1..s7 (p-s1, gap-s4, etc). No p-5/gap-7.
+       07  Fraunces (font-serif) only at 22 / 28 / 44 / 68 px. Never in
+           paragraphs or labels.
+       10  Words over glyphs — text labels (e.g. "Close") rather than icons
+           in the panel and FAB.
+     NOTE: `--color-accent` is the Petrol primary here, overriding the
+     shadcn convention where `accent` meant the soft tint. The soft tint
+     is now reached via `bg-accent-soft`. Audit any usage accordingly.
+     ================================================================ */
+  --color-bg:           var(--lm-bg);
+  --color-surface:      var(--lm-surface);
+  --color-surface-2:    var(--lm-surface-2);
+  --color-canvas:       var(--lm-canvas);
+  --color-ink:          var(--lm-ink);
+  --color-ink-2:        var(--lm-ink-2);
+  --color-ink-3:        var(--lm-ink-3);
+  --color-line:         var(--lm-line);
+  --color-line-2:       var(--lm-line-2);
+  --color-accent:       var(--lm-accent);
+  --color-accent-h:     var(--lm-accent-h);
+  --color-accent-soft:  var(--lm-accent-soft);
+  --color-accent-on:    var(--lm-accent-on);
+  --color-accent-foreground: var(--lm-accent-on); /* flipped: text on accent is on-color */
+  --color-signal:       var(--lm-signal);
+  --color-signal-soft:  var(--lm-signal-soft);
+  --color-signal-on:    var(--lm-signal-on);
+  --color-signal-ink:   var(--lm-signal-ink);
+
+  /* Spacing scale — strict (Rule 04). Do not introduce values between these. */
+  --spacing-s1: 4px;
+  --spacing-s2: 8px;
+  --spacing-s3: 12px;
+  --spacing-s4: 16px;
+  --spacing-s5: 24px;
+  --spacing-s6: 32px;
+  --spacing-s7: 48px;
+
+  /* Radii — two values only (Rule 02). */
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  /* Font families — Rule 07: Fraunces is `font-serif`. */
+  --font-body:  var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), "Fraunces", Georgia, serif;
 }
 
 /* ================================================================
@@ -208,6 +263,23 @@
 }
 .font-ui {
   font-family: var(--font-albert-sans), "Albert Sans", system-ui, sans-serif;
+}
+
+/* ================================================================
+   FAB pulse — post-onboarding teaching moment only.
+   ----------------------------------------------------------------
+   This is a deliberate, scoped exception to Rule 03 (no shadows):
+   - it's an *animation*, not chrome
+   - it lives for ~3.5s total (two iterations of 1800ms + 400ms delay)
+   - it fires only on the user's first visit to an empty Tracker
+   - dismissal is sticky (user_preferences.coach_mark_dismissed)
+   ================================================================ */
+@keyframes fab-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(13, 124, 137, 0.45); }
+  100% { box-shadow: 0 0 0 16px rgba(13, 124, 137, 0); }
+}
+.fab-pulse {
+  animation: fab-pulse 1800ms ease-out 400ms 2;
 }
 
 /* ================================================================

@@ -14,6 +14,10 @@ interface EvaluationInput {
   // What the user pasted: a recruiter DM, a posting URL, or raw role details.
   // Drives the verdict word (a DM you "Reply" to; a posting you "Pursue").
   source?: 'dm' | 'url' | 'jd';
+  // When set, UPDATE this existing evaluations row instead of inserting a new
+  // one. Used by the FAB+panel flow: the row is created up-front by the route
+  // (status='processing') and filled in here when the background work finishes.
+  existingEvaluationId?: string;
 }
 
 export type Verdict = 'reply' | 'pursue' | 'watch' | 'skip';
@@ -180,8 +184,9 @@ export async function evaluateRole(input: EvaluationInput): Promise<EvaluationRe
     jdText = `Source URL: ${effectiveUrl}\n\n${fetched}`;
   }
 
-  // Step 0b: Check for duplicate evaluation if a URL identifies the role
-  if (effectiveUrl) {
+  // Step 0b: Check for duplicate evaluation if a URL identifies the role.
+  // Skip when we're refilling an existing row (the route already created it).
+  if (effectiveUrl && !input.existingEvaluationId) {
     const existingEval = await db
       .select({ id: evaluations.id, roleId: evaluations.roleId })
       .from(evaluations)
@@ -514,23 +519,41 @@ JSON rules:
   const nextNum = userEvals.length + 1;
   const displayId = String(nextNum).padStart(3, '0');
 
-  // Step 7: Persist the evaluation.
-  const evaluationValues: any = {
-    userId: input.userId,
+  // Step 7: Persist the evaluation. Two paths:
+  //   • existingEvaluationId set (FAB+panel flow) → UPDATE the row created by
+  //     the route, flipping status from 'processing' → 'complete'.
+  //   • Otherwise → INSERT a fresh row (legacy /api/ai/evaluate path).
+  const evaluationValues: Record<string, unknown> = {
     roleId,
     overallScore: Math.round(score * 20), // 0–100 for the dashboard/tracker
     recommendation,
+    verdict, // denormalized top-level enum (migration 0011)
     verdictSummary,
     fullReportMarkdown: reportMarkdown,
-    verdictPayload: payload, // editorial verdict (drives the live hero + future report parity)
+    verdictPayload: payload,
     modelUsed: 'claude-sonnet-4-6',
     promptVersion: '2.0-modes',
     displayId,
-    pastEmployerMatch, // §2.3 — persisted so the verdict renders on revisit
+    pastEmployerMatch,
+    status: 'complete',
   };
 
-  const evaluation = await db.insert(evaluations).values(evaluationValues as any).returning({ id: evaluations.id });
-  const evaluationId = evaluation[0].id;
+  let evaluationId: string;
+  if (input.existingEvaluationId) {
+    const updated = await db
+      .update(evaluations)
+      .set(evaluationValues)
+      .where(and(eq(evaluations.id, input.existingEvaluationId), eq(evaluations.userId, input.userId)))
+      .returning({ id: evaluations.id });
+    if (updated.length === 0) {
+      throw new Error('Evaluation row not found or not owned by user');
+    }
+    evaluationId = updated[0].id;
+  } else {
+    evaluationValues.userId = input.userId;
+    const evaluation = await db.insert(evaluations).values(evaluationValues as any).returning({ id: evaluations.id });
+    evaluationId = evaluation[0].id;
+  }
 
   // Store gaps so downstream (tracker / analysis) isn't empty.
   if (gaps.length > 0) {

@@ -822,6 +822,25 @@ export default function OnboardingPage() {
   // Language the engine's interpretive text (pattern, archetypes) is currently
   // in. When the user toggles EN↔ES we re-translate just those fields.
   const [profileLang, setProfileLang] = useState<'en' | 'es'>('en');
+
+  // Dev shortcut: `?dev_step=5` jumps straight to the final step with three
+  // mock archetypes so the onboarding → Evaluate handoff is testable without
+  // walking through every prior screen. Guarded against production NODE_ENV.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (process.env.NODE_ENV === 'production') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('dev_step') === '5') {
+      setArchetypes([
+        { id: 'core-fit',       number: 1, type: 'Operations', name: 'Head of Operations',          description: 'Run a complex ops org end-to-end at scale.', why: "Matches the last three roles' scope on your CV.", selected: true },
+        { id: 'stretch-up',     number: 2, type: 'Strategy',   name: 'Chief of Staff to a founder', description: 'Run the office of the CEO at a Series C.',   why: 'A natural stretch from your current remit.',     selected: true },
+        { id: 'adjacent-pivot', number: 3, type: 'Product',    name: 'Director of Product Ops',     description: 'Adjacent pivot into product operations.',    why: 'Lateral move with strong overlap.',              selected: true },
+      ]);
+      setStep(5);
+    }
+    // intentionally empty deps — runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [translatingProfile, setTranslatingProfile] = useState(false);
   // Pass 2 (pattern + archetypes) runs after role review, so it never blocks
   // the upload. `synthesizing` drives the step-5 loading state.
@@ -1050,7 +1069,7 @@ export default function OnboardingPage() {
       s5HandoffH: 'Now we evaluate ',
       s5HandoffHEm: 'something real.',
       s5HandoffS: "Paste a recruiter DM, a job posting, or a job URL. You'll see what a full read looks like.",
-      s5HandoffCTA: 'Open Evaluate →',
+      s5HandoffCTA: "I'm ready →",
       s5Back: '‹ Back',
       s5MidConfirmed: (n: number) => `${n} archetype${n === 1 ? '' : 's'} confirmed · saved to your profile`,
       s5Why: 'Why this fits — ',
@@ -1137,7 +1156,7 @@ export default function OnboardingPage() {
       s5HandoffH: 'Ahora evaluamos ',
       s5HandoffHEm: 'algo real.',
       s5HandoffS: 'Pega un DM de reclutador, una oferta, o una URL de trabajo. Verás cómo se ve una lectura completa.',
-      s5HandoffCTA: 'Abrir Evaluar →',
+      s5HandoffCTA: 'Estoy listo →',
       s5Back: '‹ Atrás',
       s5MidConfirmed: (n: number) =>
         `${n} arquetipo${n === 1 ? '' : 's'} confirmado${n === 1 ? '' : 's'} · guardado en tu perfil`,
@@ -3824,7 +3843,11 @@ export default function OnboardingPage() {
                 // trapped re-onboarding. The gate falls back to cv_content.
                 try { await fetch('/api/settings/onboarding', { method: 'POST' }); } catch {}
               }
-              router.push('/evaluate');
+              // Post-onboarding teaching moment: land on the empty Tracker.
+              // Tracker renders the editorial empty state ("Paste your first
+              // one.") + coach mark + FAB pulse — the panel opens only when
+              // the user taps the FAB themselves. Don't auto-open here.
+              router.push('/tracker');
             }}
             style={{
               padding: '14px 26px',

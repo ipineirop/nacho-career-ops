@@ -6,6 +6,9 @@ import { Providers } from '@/components/providers';
 import { Sidebar } from '@/components/nav/Sidebar';
 import { MobileHeader } from '@/components/nav/MobileHeader';
 import { MobileNav } from '@/components/nav/MobileNav';
+import { EvaluatePanelProvider } from '@/components/evaluate/EvaluatePanelProvider';
+import { EvaluateFab } from '@/components/evaluate/EvaluateFab';
+import { EvaluatePanel } from '@/components/evaluate/EvaluatePanel';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
@@ -88,25 +91,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${geistMono.variable} ${albertSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="h-full">
         <Providers session={session}>
-          {session || isDev ? (
-            <div className="flex h-full flex-col lg:flex-row">
-              {/* Desktop sidebar */}
-              <Sidebar />
-              {/* Mobile top bar */}
-              <MobileHeader />
-              {/* Main content — on mobile add bottom padding for the nav bar (56px) */}
-              <main
-                className="flex-1 overflow-auto pb-[56px] lg:pb-0"
-                style={{ background: 'var(--lm-bg)' }}
-              >
-                {children}
-              </main>
-              {/* Mobile bottom nav */}
-              <MobileNav />
-            </div>
-          ) : (
-            children
-          )}
+          <EvaluatePanelProvider>
+            {session || isDev ? (
+              <div className="flex h-full flex-col lg:flex-row">
+                {/* Desktop sidebar */}
+                <Sidebar />
+                {/* Mobile top bar */}
+                <MobileHeader />
+                {/* Main content — on mobile add bottom padding for the nav bar (56px) */}
+                <main
+                  className="flex-1 overflow-auto pb-[56px] lg:pb-0"
+                  style={{ background: 'var(--lm-bg)' }}
+                >
+                  {children}
+                </main>
+                {/* Mobile bottom nav */}
+                <MobileNav />
+                {/* Evaluate FAB + panel — root overlay; the FAB hides itself on /onboarding/* and when the panel is open. */}
+                <EvaluateFab />
+                <EvaluatePanel />
+              </div>
+            ) : (
+              children
+            )}
+          </EvaluatePanelProvider>
         </Providers>
       </body>
     </html>

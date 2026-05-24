@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const roleData = await db
       .select()
       .from(roles)
-      .where(eq(roles.id, eval_.roleId))
+      .where(eq(roles.id, eval_.roleId!))
       .limit(1);
 
     const role = roleData[0];

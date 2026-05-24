@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     // By domain
     const byDomain = await Promise.all(
-      [...new Set(evals.map((e) => e.roleId))].map(async (roleId) => {
+      [...new Set(evals.map((e) => e.roleId).filter((id): id is string => !!id))].map(async (roleId) => {
         const role = await db.select().from(roles).where(eq(roles.id, roleId)).limit(1);
         return role[0]?.domain || 'Unknown';
       })

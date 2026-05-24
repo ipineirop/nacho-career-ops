@@ -24,6 +24,30 @@ export async function getAuthUserId(): Promise<{ id: string; email: string; name
     };
   }
 
+  // Dev bypass with a real DB connection: when running locally against the
+  // real Supabase, resolve DEV_USER_EMAIL to the actual user row so onboarding-
+  // gated pages render against real data. Hard-guarded: dev-only env, never
+  // active in production.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.NEXT_PUBLIC_DEV_BYPASS === '1' &&
+    process.env.DEV_USER_EMAIL
+  ) {
+    const db = getDb();
+    const rows = await db
+      .select({ id: users.id, email: users.email, nameFull: users.nameFull })
+      .from(users)
+      .where(eq(users.email, process.env.DEV_USER_EMAIL))
+      .limit(1);
+    if (rows.length > 0) {
+      return {
+        id: rows[0].id,
+        email: rows[0].email,
+        name: rows[0].nameFull ?? rows[0].email.split('@')[0],
+      };
+    }
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return null;
 

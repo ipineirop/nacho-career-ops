@@ -97,6 +97,9 @@ export const userPreferences = pgTable('user_preferences', {
   briefPickCount: integer('brief_pick_count').default(5),
   preferredBriefTime: text('preferred_brief_time'), // 'HH:MM' in user tz
   humanAnswer: text('human_answer'), // open-ended "what are you looking for"
+  // Post-onboarding teaching moment (migration 0012). Sticky: once flipped to
+  // true on the user's first FAB tap, the coach mark + pulse never return.
+  coachMarkDismissed: boolean('coach_mark_dismissed').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow(),
   supersededAt: timestamp('superseded_at'), // null if current
 }, (t) => ({
@@ -245,7 +248,9 @@ export const roles = pgTable('roles', {
 export const evaluations = pgTable('evaluations', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  roleId: uuid('role_id').notNull().references(() => roles.id),
+  // Nullable: the FAB+panel flow inserts the evaluation row immediately and
+  // fills role_id from the background extraction pipeline. Migration 0011.
+  roleId: uuid('role_id').references(() => roles.id),
   evaluatedAt: timestamp('evaluated_at').defaultNow(),
   evaluationVersion: integer('evaluation_version').default(1),
   overallScore: numeric('overall_score'), // 0-100 scale
@@ -263,11 +268,18 @@ export const evaluations = pgTable('evaluations', {
   displayId: text('display_id'), // "001", "002" — backfilled from legacy report_id
   pastEmployerMatch: jsonb('past_employer_match'), // §2.3 match record (persisted for verdict render on revisit)
   verdictPayload: jsonb('verdict_payload'), // editorial verdict (verdict word, reasoning, comp strip, gaps, legitimacy)
+  // FAB+panel processing model (migration 0011):
+  status: text('status').notNull().default('processing'), // processing|complete|failed
+  inputType: text('input_type'), // dm|jd|url — what the user pasted (or detected)
+  classificationConfidence: real('classification_confidence'), // 0..1, from Haiku-class classifier
+  rawInput: text('raw_input'), // the original paste, before fetch/extraction
+  verdict: text('verdict'), // reply|pursue|watch|skip — denormalized from verdict_payload
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
   userIdx: index('evaluations_user_idx').on(t.userId),
   roleIdx: index('evaluations_role_idx').on(t.roleId),
   userRoleIdx: index('evaluations_user_role_idx').on(t.userId, t.roleId),
+  userStatusIdx: index('evaluations_user_status_idx').on(t.userId, t.status),
 }));
 
 // evaluation_dimensions — per-dimension breakdown

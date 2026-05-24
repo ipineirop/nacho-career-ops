@@ -33,7 +33,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
   const roleData = await db
     .select()
     .from(roles)
-    .where(eq(roles.id, evaluation.roleId))
+    .where(eq(roles.id, evaluation.roleId!))
     .limit(1);
 
   const role = roleData[0];

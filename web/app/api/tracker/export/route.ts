@@ -38,16 +38,16 @@ export async function GET(req: NextRequest) {
     const enriched = await Promise.all(
       evals.map(async (evaluation) => {
         const [roleData, pipelineData, outcomeData] = await Promise.all([
-          db.select().from(roles).where(eq(roles.id, evaluation.roleId)).limit(1),
+          db.select().from(roles).where(eq(roles.id, evaluation.roleId!)).limit(1),
           db
             .select()
             .from(pipelineStatus)
-            .where(and(eq(pipelineStatus.userId, authUser.id), eq(pipelineStatus.roleId, evaluation.roleId)))
+            .where(and(eq(pipelineStatus.userId, authUser.id), eq(pipelineStatus.roleId, evaluation.roleId!)))
             .limit(1),
           db
             .select()
             .from(outcomes)
-            .where(and(eq(outcomes.userId, authUser.id), eq(outcomes.roleId, evaluation.roleId)))
+            .where(and(eq(outcomes.userId, authUser.id), eq(outcomes.roleId, evaluation.roleId!)))
             .limit(1),
         ]);
 

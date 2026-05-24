@@ -22,13 +22,13 @@ export async function GET() {
       const roleData = await db
         .select()
         .from(roles)
-        .where(eq(roles.id, e.roleId))
+        .where(eq(roles.id, e.roleId!))
         .limit(1);
 
       const pipelineData = await db
         .select()
         .from(pipelineStatus)
-        .where(and(eq(pipelineStatus.userId, user.id), eq(pipelineStatus.roleId, e.roleId)))
+        .where(and(eq(pipelineStatus.userId, user.id), eq(pipelineStatus.roleId, e.roleId!)))
         .limit(1);
 
       return {
@@ -86,7 +86,7 @@ export async function PATCH(req: NextRequest) {
     .where(
       and(
         eq(pipelineStatus.userId, user.id),
-        eq(pipelineStatus.roleId, eval_.roleId)
+        eq(pipelineStatus.roleId, eval_.roleId!)
       )
     )
     .returning();

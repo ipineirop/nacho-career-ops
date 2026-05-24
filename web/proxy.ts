@@ -22,6 +22,16 @@ export default withAuth(
         ) {
           return true;
         }
+        // Dev-only: bypass when DEV_USER_EMAIL is set (paired with the
+        // auth-bridge branch that resolves it to a real user row). Hard-guarded:
+        // never active in production.
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          process.env.NEXT_PUBLIC_DEV_BYPASS === '1' &&
+          process.env.DEV_USER_EMAIL
+        ) {
+          return true;
+        }
         return !!token;
       },
     },

@@ -45,13 +45,13 @@ export default async function DashboardPage() {
       const role = await db
         .select()
         .from(roles)
-        .where(eq(roles.id, eval_.roleId))
+        .where(eq(roles.id, eval_.roleId!))
         .limit(1);
 
       const pipeline = await db
         .select()
         .from(pipelineStatus)
-        .where(and(eq(pipelineStatus.userId, authUser.id), eq(pipelineStatus.roleId, eval_.roleId)))
+        .where(and(eq(pipelineStatus.userId, authUser.id), eq(pipelineStatus.roleId, eval_.roleId!)))
         .limit(1);
 
       return {
