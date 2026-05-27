@@ -225,13 +225,27 @@ export async function assembleBrief(params: AssembleParams): Promise<BriefApiRes
   const visible = visibleAll.slice(0, 5);
   const collapsed = Math.max(0, visibleAll.length - 5);
 
+  // Second quiet-day gate: even when computeSignals() returned ≥1 signal
+  // (so the LLM ran), the body lint can drop all of them, leaving
+  // visibleAll empty. In that case the LLM's editor's note — which was
+  // anchored on those signals — describes things the user can no longer
+  // see. Override with the deterministic quiet-day copy so the editor's
+  // note stays consistent with what's rendered below it.
+  const effectiveEditorsNote =
+    visibleAll.length === 0 && !isQuietDay
+      ? {
+          text: BRIEF_STRINGS.editorsNoteQuietDay,
+          generationMethod: 'fallback' as const,
+        }
+      : {
+          text: generated.editorsNote,
+          generationMethod: generated.generationMethod,
+        };
+
   const payload: BriefPayload = {
     pending: false,
     masthead,
-    editorsNote: {
-      text: generated.editorsNote,
-      generationMethod: generated.generationMethod,
-    },
+    editorsNote: effectiveEditorsNote,
     pick: null,
     signals: { visible, collapsed },
     pipelineSummary: {
