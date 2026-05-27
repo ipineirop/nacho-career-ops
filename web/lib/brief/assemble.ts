@@ -28,7 +28,7 @@ import { generateBrief, type BriefSignalSeed } from '@/lib/ai/evaluate-engine';
 import { issueNumberFor } from './issueNumber';
 import { cityCodeFor, cityNameFor } from './cityCode';
 import { formatPipelineSentence } from './formatters';
-import { resolveActionLabel, snoozeLabelWithDuration } from './i18n';
+import { resolveActionLabel, snoozeLabelWithDuration, BRIEF_STRINGS } from './i18n';
 import type {
   BriefApiResponse,
   BriefMasthead,
@@ -166,15 +166,35 @@ export async function assembleBrief(params: AssembleParams): Promise<BriefApiRes
       : 'No signals firing today.',
   ].join('\n\n');
 
-  const generated = await generateBrief({
-    userId,
-    today: isoDate,
-    issueNumber: masthead.issueNumber,
-    primaryLocale,
-    userContext,
-    signals: signalSeeds,
-    pick: null, // v1: Pick stubbed
-  });
+  // Quiet-day short-circuit: when computeSignals() returns an empty array
+  // there is no actionable signal for the editor's note to anchor on.
+  // Without this, the LLM borrows pipeline counts as prose and writes
+  // things like "1 on the table today" while the signal stack renders
+  // empty — visible mismatch with the rest of the page (the Pipeline
+  // summary at the bottom already restates the counts). Bypass the LLM
+  // entirely on these days and use the deterministic
+  // BRIEF_STRINGS.editorsNoteQuietDay copy. Pipeline counts (if any)
+  // still render in the Pipeline summary block.
+  const isQuietDay = signals.length === 0;
+
+  const generated = isQuietDay
+    ? {
+        editorsNote: BRIEF_STRINGS.editorsNoteQuietDay,
+        generationMethod: 'fallback' as const,
+        pickEditorialSummary: null,
+        signals: [] as Array<{ id: string; body: { en: string; es: string } }>,
+        cost: { model: 'none', inputTokens: 0, outputTokens: 0 },
+        lintFindings: { editorsNote: { en: [], es: [] }, signals: [] },
+      }
+    : await generateBrief({
+        userId,
+        today: isoDate,
+        issueNumber: masthead.issueNumber,
+        primaryLocale,
+        userContext,
+        signals: signalSeeds,
+        pick: null, // v1: Pick stubbed
+      });
 
   // Record per-user daily LLM cost as a userEvents row (handoff §9.5).
   if (generated.cost.inputTokens > 0 || generated.cost.outputTokens > 0) {

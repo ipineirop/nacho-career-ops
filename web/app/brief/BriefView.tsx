@@ -123,7 +123,6 @@ export function BriefView({ initialPayload, isoDate }: BriefViewProps) {
 }
 
 function BriefBody({ payload, locale }: { payload: BriefPayload; locale: Locale }) {
-  const hasVisibleSignals = payload.signals.visible.length > 0 || payload.signals.collapsed > 0;
   return (
     // Reading column matches the source: max-width 760px, 56/32/120 padding.
     <div
@@ -137,13 +136,14 @@ function BriefBody({ payload, locale }: { payload: BriefPayload; locale: Locale 
       <HeaderBlock masthead={payload.masthead} locale={locale} />
       <EditorsNote note={payload.editorsNote} locale={locale} />
       {payload.pick && <PickCard pick={payload.pick} locale={locale} />}
-      {hasVisibleSignals && (
-        <SignalStack
-          visible={payload.signals.visible}
-          collapsed={payload.signals.collapsed}
-          locale={locale}
-        />
-      )}
+      {/* SignalStack owns its own empty state ("all quiet today") so the
+          Brief never has a visual gap between the editor's note and the
+          pipeline summary. */}
+      <SignalStack
+        visible={payload.signals.visible}
+        collapsed={payload.signals.collapsed}
+        locale={locale}
+      />
       <PipelineSummary summary={payload.pipelineSummary} locale={locale} />
     </div>
   );
