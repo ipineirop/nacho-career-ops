@@ -1,18 +1,57 @@
 import { z } from 'zod';
 
-// Canonical status values
+/**
+ * Canonical pipeline-status taxonomy (DS §11 v3).
+ *
+ * Four active states + five terminal states. The DB enforces this set via
+ * a CHECK constraint added in migration 0014; this zod enum is the
+ * client-facing gate.
+ *
+ * The keys here are the internal codes — the same strings written to
+ * pipeline_status.status. Bilingual display labels live in
+ * `web/lib/brief/i18n.ts` under STATUS_LABELS (added by Phase 3).
+ */
 export const PIPELINE_STATUS = {
+  // active phase
   evaluating: 'evaluating',
   applied: 'applied',
   interviewing: 'interviewing',
-  offer: 'offer',
-  accepted: 'accepted',
+  offer_pending: 'offer_pending',
+  // terminal phase
+  offer_accepted: 'offer_accepted',
   rejected: 'rejected',
-  withdrawn: 'withdrawn',
+  withdrew: 'withdrew',
   passed: 'passed',
+  ghosted: 'ghosted',
 } as const;
 
 export type PipelineStatus = typeof PIPELINE_STATUS[keyof typeof PIPELINE_STATUS];
+
+/** Active subset — used by the Tracker "active only" toggle and by Way-A
+ *  triggers that only fire on in-flight roles. */
+export const ACTIVE_PIPELINE_STATUSES: ReadonlyArray<PipelineStatus> = [
+  'evaluating',
+  'applied',
+  'interviewing',
+  'offer_pending',
+];
+
+/** Terminal subset — surfaces in the closed-30d group below the active rows. */
+export const TERMINAL_PIPELINE_STATUSES: ReadonlyArray<PipelineStatus> = [
+  'offer_accepted',
+  'rejected',
+  'withdrew',
+  'passed',
+  'ghosted',
+];
+
+export function isTerminalStatus(s: string): s is PipelineStatus {
+  return (TERMINAL_PIPELINE_STATUSES as ReadonlyArray<string>).includes(s);
+}
+
+export function isActiveStatus(s: string): s is PipelineStatus {
+  return (ACTIVE_PIPELINE_STATUSES as ReadonlyArray<string>).includes(s);
+}
 
 // Request validation schemas
 export const updatePipelineStatusSchema = z.object({
@@ -37,6 +76,11 @@ export const searchOpportunitiesSchema = z.object({
   offset: z.coerce.number().min(0).default(0),
 });
 
+/**
+ * `outcome_type` is a separate enum (the captured offer/rejection record),
+ * intentionally NOT renamed in lockstep with the pipeline-status migration.
+ * The wiring doc keeps `ghost` here to avoid a redundant rename.
+ */
 export const createOutcomeSchema = z.object({
   roleId: z.string().uuid('Invalid role ID'),
   outcomeType: z.enum(['offer', 'rejection', 'ghost', 'withdrawn', 'accepted', 'negotiated']),

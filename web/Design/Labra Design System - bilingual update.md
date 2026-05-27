@@ -205,6 +205,74 @@ The Brief defines its own specific kicker vocabulary; that's documented in `Labr
 
 ---
 
+## 11. Status taxonomy
+
+A system-wide primitive added to DS v3 alongside the bilingual rules above. Used by:
+
+- **Tracker** — primary consumer. Row status display, status pill, filter strip, outcome capture, status change flows.
+- **Brief** — `pipeline.next` signals fire on status transitions; pipeline summary counts items by active status (distinct from verdict-shape counts).
+- **Verdict** — sets initial status `evaluating` when a Verdict is rendered.
+- **Pattern log** (v1.5) — per-status outcome tracking will read from this taxonomy.
+
+Each Tracker row has exactly one status at any time. Status is **distinct from verdict shape**: verdict shape is the system's recommendation set at evaluation time; status is the operational state that evolves as the application progresses.
+
+### Internal codes and bilingual UI labels
+
+Internal codes (DB, API, analytics, logs) stay English snake_case. UI labels resolve via i18n catalog at render. **Nine statuses total**: four active, five terminal.
+
+#### Active phase
+
+| Internal code | EN UI | ES UI |
+|---|---|---|
+| `evaluating` | Evaluating | Evaluando |
+| `applied` | Applied | Aplicada |
+| `interviewing` | Interviewing | En entrevista |
+| `offer_pending` | Offer pending | Oferta pendiente |
+
+#### Terminal phase
+
+| Internal code | EN UI | ES UI |
+|---|---|---|
+| `offer_accepted` | Offer accepted | Aceptada |
+| `rejected` | Rejected | Rechazada |
+| `withdrew` | Withdrew | Retirada |
+| `passed` | Passed | Descartada |
+| `ghosted` | Ghosted | Sin respuesta |
+
+### Canonical happy-path flow
+
+`evaluating` → `applied` → `interviewing` → `offer_pending` → `offer_accepted`
+
+This is the documented success path. Surfaces that visualize progress (horizontal status indicators, milestone graphics) should follow this sequence.
+
+### Transition rules
+
+**Loose in v1.** Users can move any row to any other status at any time. The taxonomy documents the canonical flow for reference, but transitions are not strictly enforced.
+
+Reasons:
+- Real recruiter behavior frequently skips stages — direct CV-to-offer happens; ghosting can occur mid-interview; an offer can be rejected and then re-extended
+- Forcing intermediate statuses just to "follow the flow" creates fake data
+- Telemetry can surface misuse patterns; formalize enforcement later if needed
+
+Allowed transitions:
+- Any active → any active (forward, backward, or sideways)
+- Any active → any terminal
+- Any terminal → any active (reversal of a mistake; or a rejected decision that gets re-opened)
+
+### Why `offer_accepted` is a captured status, not an implicit pipeline exit
+
+When a user accepts an offer, the role is functionally done — they're no longer actively job-hunting it. The temptation is to make this an implicit completion that removes the row from the pipeline entirely.
+
+This is wrong for two reasons:
+
+1. **Intelligence-model signal.** The accepted offer is the most important data point in the user's entire history. It captures what they actually chose, comparable against everything they rejected/passed/withdrew from. The signal calibration in the Brief (Bar drift, Pipeline behavior, future Pattern log analysis) depends on having both wins and losses to triangulate from. A Tracker that only captures losses produces a survivorship-bias product.
+
+2. **Historical record.** The Tracker is *"a private deal log a lawyer or investor would keep"* — wins are part of the log, not just losses. The accepted offer is the user's "this is the job I took, and this is the pipeline that led to it."
+
+Therefore: `offer_accepted` is a normal terminal status. The row stays in the user's Tracker (in the closed-30d group), visible in counts and historical analysis, available to the intelligence model.
+
+---
+
 ## Open items for the design team
 
 These are real follow-ups before this update lands in production:
@@ -218,6 +286,8 @@ These are real follow-ups before this update lands in production:
 4. **Locale toggle visual design** — the actual chip/control in the global nav. Two-state toggle vs dropdown. Behavior at narrow viewports.
 
 5. **Date display patterns in other surfaces.** This doc locks formats for the Brief masthead. Other surfaces (Tracker timestamps, Verdict received-on dates, etc.) may have different conventions; revisit when those surfaces get bilingual updates.
+
+6. **Status taxonomy visualization in DS v3** — the table above is the content; design owns the visual treatment of the status pills, the canonical-flow progress indicator (if one is built), and the active-vs-terminal distinction (color, weight, position in the row).
 
 ---
 

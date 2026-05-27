@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb, evaluations, roles, pipelineStatus } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { getAuthUserId } from '@/lib/auth-bridge';
+import { PIPELINE_STATUS, type PipelineStatus } from '@/lib/api/validation';
+
+const STATUS_VALUES = new Set<string>(Object.values(PIPELINE_STATUS));
+function isCanonicalStatus(s: unknown): s is PipelineStatus {
+  return typeof s === 'string' && STATUS_VALUES.has(s);
+}
 
 export async function GET() {
   const user = await getAuthUserId();
@@ -62,6 +68,16 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'id and status or notes required' }, { status: 400 });
   }
 
+  // Status, when present, must be in the DS §11 v3 taxonomy. The DB CHECK
+  // constraint added in migration 0014 enforces this too; gate here so the
+  // failure returns a 400 instead of bubbling up as a 500.
+  if (status !== undefined && !isCanonicalStatus(status)) {
+    return NextResponse.json(
+      { error: `status must be one of: ${[...STATUS_VALUES].join(', ')}` },
+      { status: 400 },
+    );
+  }
+
   const db = getDb();
 
   // Get the evaluation to find the role
@@ -75,10 +91,23 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Evaluation not found' }, { status: 404 });
   }
 
-  // Update pipeline_status with status and notes
-  const updates: Record<string, unknown> = {};
-  if (status !== undefined) updates.status = status;
+  // Update pipeline_status with status and notes. When status changes, bump
+  // statusChangedAt so Way-A (Phase 5) and the transition log (Phase 2) see
+  // the correct delta.
+  const now = new Date();
+  const updates: Record<string, unknown> = { lastTouchAt: now };
+  if (status !== undefined) {
+    updates.status = status;
+    updates.statusChangedAt = now;
+  }
   if (notes !== undefined) updates.notesMarkdown = notes;
+
+  // Read prior status before the update so we can emit a transition event.
+  const [prior] = await db
+    .select({ status: pipelineStatus.status })
+    .from(pipelineStatus)
+    .where(and(eq(pipelineStatus.userId, user.id), eq(pipelineStatus.roleId, eval_.roleId!)))
+    .limit(1);
 
   const [updated] = await db
     .update(pipelineStatus)
@@ -90,6 +119,19 @@ export async function PATCH(req: NextRequest) {
       )
     )
     .returning();
+
+  // Emit the tracker.status_changed observation (Phase 2). Only when status
+  // actually moves; notes-only updates skip the log.
+  if (updated && status !== undefined && prior?.status !== status) {
+    const { logTrackerStatusChange } = await import('@/lib/tracker/observation-log');
+    await logTrackerStatusChange({
+      userId: user.id,
+      roleId: eval_.roleId!,
+      fromStatus: prior?.status ?? null,
+      toStatus: status as PipelineStatus,
+      occurredAt: now,
+    });
+  }
 
   return NextResponse.json(updated || { id, status, notes });
 }

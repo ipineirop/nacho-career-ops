@@ -100,6 +100,10 @@ export const userPreferences = pgTable('user_preferences', {
   // Post-onboarding teaching moment (migration 0012). Sticky: once flipped to
   // true on the user's first FAB tap, the coach mark + pulse never return.
   coachMarkDismissed: boolean('coach_mark_dismissed').notNull().default(false),
+  // Tracker active-only toggle (migration 0014). When true, the list view
+  // hides the closed-30d group. Persisted per user so the choice syncs
+  // across devices; default off matches the v0.2 mockup.
+  trackerActiveOnly: boolean('tracker_active_only').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow(),
   supersededAt: timestamp('superseded_at'), // null if current
 }, (t) => ({
@@ -345,7 +349,10 @@ export const pipelineStatus = pgTable('pipeline_status', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   roleId: uuid('role_id').notNull().references(() => roles.id),
-  status: text('status').notNull(), // evaluating|applied|interviewing|offer|accepted|rejected|withdrawn|passed
+  // DS §11 v3 taxonomy. Migration 0014 normalized prior codes
+  // (offer→offer_pending, accepted→offer_accepted, withdrawn→withdrew) and
+  // added `ghosted`. A pg CHECK constraint enforces membership.
+  status: text('status').notNull(), // evaluating|applied|interviewing|offer_pending|offer_accepted|rejected|withdrew|passed|ghosted
   statusChangedAt: timestamp('status_changed_at').defaultNow(),
   appliedAt: timestamp('applied_at'),
   lastTouchAt: timestamp('last_touch_at'),
@@ -545,6 +552,11 @@ export const signalStates = pgTable('signal_states', {
 //   brief.signal_rendered  → { signalId, signalType, entitiesReferenced }
 //   brief.signal_action    → { signalId, signalType, action }
 //   brief.generation_cost  → { inputTokens, outputTokens, model, costUsd }
+// Tracker (wiring §D, Phase 2 + Phase 5):
+//   tracker.status_changed       → { roleId, fromStatus, toStatus, occurredAt }
+//   tracker.wayA_shown           → { roleId, triggerCode }
+//   tracker.wayA_dismissed       → { roleId, triggerCode }
+//   tracker.activeOnly_toggled   → { active: boolean }
 // No new table.
 
 // ============================================================

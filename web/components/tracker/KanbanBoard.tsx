@@ -3,9 +3,13 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ScoreChip } from '@/components/ui/score-chip';
+import { useLocale } from '@/components/locale/LocaleProvider';
 
 interface AppCard {
   id: string;
+  /** The role the evaluation/pipeline row points at. Required for status
+   *  PATCH; without it we can't update the canonical pipeline_status row. */
+  roleId: string | null;
   company: string;
   role: string;
   status: string;
@@ -14,23 +18,27 @@ interface AppCard {
   reportId: string | null;
 }
 
-const COLUMNS: { id: string; label: string; statuses: string[]; targetStatus: string }[] = [
-  { id: 'leads',     label: 'Leads',     statuses: ['evaluated'],                    targetStatus: 'Evaluated' },
-  { id: 'applied',   label: 'Applied',   statuses: ['applied', 'responded'],         targetStatus: 'Applied' },
-  { id: 'interview', label: 'Interview', statuses: ['interview'],                    targetStatus: 'Interview' },
-  { id: 'offer',     label: 'Offer',     statuses: ['offer'],                        targetStatus: 'Offer' },
-  { id: 'closed',    label: 'Closed',    statuses: ['rejected', 'discarded', 'skip', 'passed'], targetStatus: 'Discarded' },
+// Each of the nine DS §11 v3 statuses points to exactly one column.
+// Dragging a card into a column writes `targetStatus` as the new value, so
+// the Offer column rendezvous'es offer_pending + offer_accepted under a
+// single visual but the row pill inside each card disambiguates which.
+const COLUMNS: { id: string; label: { en: string; es: string }; statuses: string[]; targetStatus: string }[] = [
+  { id: 'leads',     label: { en: 'Leads',     es: 'Leads' },     statuses: ['evaluating'],                              targetStatus: 'evaluating' },
+  { id: 'applied',   label: { en: 'Applied',   es: 'Aplicadas' }, statuses: ['applied'],                                 targetStatus: 'applied' },
+  { id: 'interview', label: { en: 'Interview', es: 'Entrevista' }, statuses: ['interviewing'],                          targetStatus: 'interviewing' },
+  { id: 'offer',     label: { en: 'Offer',     es: 'Oferta' },    statuses: ['offer_pending', 'offer_accepted'],         targetStatus: 'offer_pending' },
+  { id: 'closed',    label: { en: 'Closed',    es: 'Cerradas' },  statuses: ['rejected', 'withdrew', 'passed', 'ghosted'], targetStatus: 'passed' },
 ];
 
 function colFor(status: string): string {
-  const s = status.toLowerCase();
   for (const col of COLUMNS) {
-    if (col.statuses.some((w) => s.includes(w))) return col.id;
+    if (col.statuses.includes(status)) return col.id;
   }
   return 'leads';
 }
 
 export function KanbanBoard({ applications }: { applications: AppCard[] }) {
+  const { locale } = useLocale();
   const [cards, setCards] = useState(applications);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overCol, setOverCol] = useState<string | null>(null);
@@ -39,13 +47,22 @@ export function KanbanBoard({ applications }: { applications: AppCard[] }) {
   async function moveCard(cardId: string, targetColId: string) {
     const col = COLUMNS.find((c) => c.id === targetColId);
     if (!col) return;
+    const card = cards.find((c) => c.id === cardId);
+    // Cards without a roleId can't be updated (the canonical pipeline_status
+    // row is keyed by (userId, roleId)). Skip with a no-op rather than
+    // optimistically moving and silently dropping the change.
+    if (!card?.roleId) return;
     const newStatus = col.targetStatus;
     setCards((prev) => prev.map((c) => c.id === cardId ? { ...c, status: newStatus } : c));
-    await fetch('/api/applications', {
+    // `/api/pipeline/status` upserts (matches the same path the list-view
+    // status dropdown uses). The previous target `/api/applications` only
+    // UPDATEd existing rows — cards in Leads (no pipeline_status row yet)
+    // silently no-op'd, which is why moves didn't persist.
+    await fetch('/api/pipeline/status', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: cardId, status: newStatus }),
-    });
+      body: JSON.stringify({ roleId: card.roleId, status: newStatus }),
+    }).catch(() => { /* swallow; UI already moved optimistically */ });
   }
 
   return (
@@ -88,7 +105,7 @@ export function KanbanBoard({ applications }: { applications: AppCard[] }) {
                 letterSpacing: '1.2px', textTransform: 'uppercase',
                 transition: 'color 0.15s',
               }}>
-                {col.label}
+                {col.label[locale]}
               </span>
               <span style={{
                 fontFamily: 'var(--font-geist-mono)', fontSize: 11,

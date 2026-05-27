@@ -5,6 +5,7 @@ import { KanbanBoard } from './KanbanBoard';
 
 interface AppRow {
   id: string;
+  roleId: string | null;
   date: string;
   company: string;
   role: string;
