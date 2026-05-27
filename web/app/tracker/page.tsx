@@ -1,26 +1,33 @@
-import { getDb, evaluations, roles, pipelineStatus } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { getDb, evaluations, roles, pipelineStatus, userPreferences, users } from '@/lib/db';
+import { eq, and, desc, isNull } from 'drizzle-orm';
 import { getAuthUserId } from '@/lib/auth-bridge';
 import { redirect } from 'next/navigation';
 import { isFirstEvalVisit } from '@/lib/onboarding/isFirstVisit';
 import { TrackerEmptyState } from '@/components/tracker/TrackerEmptyState';
+import { TrackerShell, type AppRow } from '@/components/tracker/TrackerShell';
 import { TrackerClient } from './TrackerClient';
+import { resolveWayAForUser, type WayARenderable } from '@/lib/tracker/wayA';
+import type { VerdictCode, Locale } from '@/lib/brief/i18n';
 
 export const dynamic = 'force-dynamic';
 
-async function loadApps(userId: string) {
+async function loadApps(userId: string): Promise<AppRow[]> {
   // No-DB dev-preview mode → empty pipeline (so the teaching-moment empty
   // state renders). Real users always have a DB configured.
   if (!process.env.DATABASE_URL && !process.env.SUPABASE_POSTGRES_URL) return [];
   try {
     const db = getDb();
+    // Pull the latest evaluation per role (`supersededBy IS NULL`).
+    // Multiple-eval per role lands in Phase 6 chapter substrate; for v1
+    // the row's verdict is the latest one.
     const rows = await db
       .select()
       .from(evaluations)
-      .where(eq(evaluations.userId, userId));
+      .where(and(eq(evaluations.userId, userId), isNull(evaluations.supersededBy)))
+      .orderBy(desc(evaluations.evaluatedAt));
 
     return await Promise.all(
-      rows.map(async (r) => {
+      rows.map(async (r): Promise<AppRow> => {
         const [roleData] = r.roleId
           ? await db.select().from(roles).where(eq(roles.id, r.roleId)).limit(1)
           : [undefined];
@@ -34,11 +41,19 @@ async function loadApps(userId: string) {
           : [undefined];
 
         return {
+          id: r.id,
+          roleId: r.roleId ?? null,
           company: roleData?.companyName ?? 'Unknown',
           role: roleData?.roleTitle ?? 'Unknown',
-          status: statusData?.status ?? r.recommendation ?? 'Evaluated',
-          score: r.overallScore ? Number(r.overallScore) / 20 : 0,
+          status: statusData?.status ?? 'evaluating',
+          // Verdict precedence: denormalized `verdict` column (set when the
+          // editorial run completes), falling back to verdictPayload, then
+          // null. Null gracefully omits the verdict pill — no placeholder.
+          verdict: ((r.verdict as VerdictCode | null) ?? extractVerdictFromPayload(r.verdictPayload)) || null,
+          scoreNum: r.overallScore ? Number(r.overallScore) / 20 : 0,
           date: r.evaluatedAt?.toISOString().split('T')[0] ?? new Date().toISOString().split('T')[0],
+          statusChangedAt: statusData?.statusChangedAt ?? null,
+          reportId: r.displayId ?? null,
         };
       })
     );
@@ -48,70 +63,69 @@ async function loadApps(userId: string) {
   }
 }
 
+function extractVerdictFromPayload(payload: unknown): VerdictCode | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const v = (payload as { verdict?: unknown }).verdict;
+  if (typeof v !== 'string') return null;
+  if (v === 'reply' || v === 'pursue' || v === 'watch' || v === 'skip') return v;
+  return null;
+}
+
+async function loadUserContext(userId: string): Promise<{ locale: Locale; trackerActiveOnly: boolean }> {
+  if (!process.env.DATABASE_URL && !process.env.SUPABASE_POSTGRES_URL) {
+    return { locale: 'en', trackerActiveOnly: false };
+  }
+  try {
+    const db = getDb();
+    const [u] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [prefs] = await db
+      .select()
+      .from(userPreferences)
+      .where(and(eq(userPreferences.userId, userId), isNull(userPreferences.supersededAt)))
+      .limit(1);
+    const locale: Locale = (u?.locale ?? '').startsWith('en') ? 'en' : 'es';
+    return { locale, trackerActiveOnly: prefs?.trackerActiveOnly ?? false };
+  } catch {
+    return { locale: 'en', trackerActiveOnly: false };
+  }
+}
+
 export default async function TrackerPage() {
   const authUser = await getAuthUserId();
   if (!authUser) redirect('/auth/signin');
 
-  const [apps, firstVisit] = await Promise.all([
+  const [apps, firstVisit, ctx, wayATriggers] = await Promise.all([
     loadApps(authUser.id),
     isFirstEvalVisit(authUser.id),
+    loadUserContext(authUser.id),
+    // Phase 5 — pre-resolve Way-A triggers on the server. `logShownEvents`
+    // is true here so one-shots are marked as surfaced on the first
+    // render after a status transition.
+    resolveWayAForUser(authUser.id, { logShownEvents: true }).catch(() => [] as WayARenderable[]),
   ]);
   const isEmpty = apps.length === 0;
 
+  // Build a roleId → renderable map for the shell to consume per-row.
+  const wayAByRole: Record<string, WayARenderable> = {};
+  for (const r of wayATriggers) {
+    if (r.trigger.roleId) wayAByRole[r.trigger.roleId] = r;
+  }
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--lm-bg)', color: 'var(--lm-ink)' }}>
-      <div className="sticky top-0 z-50 border-b" style={{ background: 'var(--lm-bg)', borderColor: 'var(--lm-line)' }}>
-        <div className="flex items-center justify-between px-8 py-4 gap-6">
-          <div className="flex items-center gap-4">
-            <div className="font-serif text-2xl font-500 tracking-tight">labra<span style={{ color: 'var(--lm-accent)', fontStyle: 'italic' }}>.</span></div>
-            <div className="font-mono text-xs uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Tracker</div>
-          </div>
-          <div className="flex-1" />
-        </div>
-      </div>
-
+      {/* The TrackerShell renders its own *Pipeline* heading + count. No
+          duplicate editorial copy here — the "Every role, one log." line
+          was design-handoff chrome, not a production header. */}
       <div className="max-w-6xl mx-auto px-8 py-9">
-        <div className="mb-10 max-w-3xl">
-          <div className="font-mono text-xs uppercase tracking-widest mb-3" style={{ color: 'var(--lm-ink-3)' }}>
-            {isEmpty ? (firstVisit ? 'Welcome · nothing yet' : 'Nothing yet') : 'Pipeline'}
-          </div>
-          <h1 className="font-serif text-6xl font-400 leading-none mb-4">
-            {isEmpty ? <>Your pipeline<span style={{ color: 'var(--lm-accent)', fontStyle: 'italic' }}>.</span></> : <>Every role, one <em>log.</em></>}
-          </h1>
-          {!isEmpty && (
-            <p className="text-lg leading-relaxed" style={{ color: 'var(--lm-ink-2)' }}>
-              Track every opportunity from first contact to offer. Status, score, documents, notes.
-            </p>
-          )}
-        </div>
-
         {isEmpty ? (
           <TrackerEmptyState />
         ) : (
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--lm-line)' }}>
-            <table className="w-full">
-              <thead style={{ borderBottom: '1px solid var(--lm-line)', background: 'var(--lm-surface-2)' }}>
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-500 uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Company</th>
-                  <th className="px-6 py-4 text-left text-xs font-500 uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Role</th>
-                  <th className="px-6 py-4 text-left text-xs font-500 uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-500 uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Score</th>
-                  <th className="px-6 py-4 text-left text-xs font-500 uppercase tracking-widest" style={{ color: 'var(--lm-ink-3)' }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {apps.map((app, idx) => (
-                  <tr key={`${app.company}-${idx}`} style={{ borderBottom: '1px solid var(--lm-line)', background: idx % 2 === 0 ? 'var(--lm-surface)' : 'var(--lm-surface-2)' }}>
-                    <td className="px-6 py-4 font-500" style={{ color: 'var(--lm-ink)' }}>{app.company}</td>
-                    <td className="px-6 py-4" style={{ color: 'var(--lm-ink-2)' }}>{app.role}</td>
-                    <td className="px-6 py-4"><span className="px-3 py-1 rounded-full text-xs font-500" style={{ background: 'var(--lm-accent-soft)', color: 'var(--lm-accent)' }}>{app.status}</span></td>
-                    <td className="px-6 py-4" style={{ color: 'var(--lm-ink-2)' }}>{app.score.toFixed(1)}/5</td>
-                    <td className="px-6 py-4 font-mono text-sm" style={{ color: 'var(--lm-ink-3)' }}>{app.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TrackerShell
+            apps={apps}
+            locale={ctx.locale}
+            initialActiveOnly={ctx.trackerActiveOnly}
+            wayAByRole={wayAByRole}
+          />
         )}
       </div>
 

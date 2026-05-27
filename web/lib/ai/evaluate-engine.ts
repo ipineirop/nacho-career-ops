@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getDb, roles, evaluations, evaluationGaps, companies, userCareerHistory, userPreferences, userEvents, NewRole } from '@/lib/db';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, ne } from 'drizzle-orm';
 import { loadCandidateContext } from './candidate-context';
 import { resolveCompany } from '@/lib/matching/resolve';
 import { matchPastEmployer, type UserEmployer, type PastEmployerMatch } from '@/lib/matching/past-employer';
@@ -555,6 +555,31 @@ JSON rules:
     evaluationValues.userId = input.userId;
     const evaluation = await db.insert(evaluations).values(evaluationValues as any).returning({ id: evaluations.id });
     evaluationId = evaluation[0].id;
+  }
+
+  // Verdict chapter substrate (wiring doc §C, Phase 6): when this
+  // evaluation is the latest for its role, mark every prior evaluation on
+  // the same role as superseded. Latest-verdict readers (Tracker, Report,
+  // Brief Pick) filter by `supersededBy IS NULL`. Runs after both the
+  // INSERT and UPDATE paths so manual re-evaluations chain correctly.
+  if (roleId) {
+    await db
+      .update(evaluations)
+      .set({ supersededBy: evaluationId })
+      .where(
+        and(
+          eq(evaluations.userId, input.userId),
+          eq(evaluations.roleId, roleId),
+          // Mark only complete-status prior rows; in-flight (`processing`)
+          // rows from the FAB+panel flow stay unmarked so the panel can
+          // still resolve to them.
+          eq(evaluations.status, 'complete'),
+          // Exclude the row we just wrote so it isn't self-superseded.
+          ne(evaluations.id, evaluationId),
+          isNull(evaluations.supersededBy),
+        ),
+      )
+      .catch((err) => console.error('Failed to chain superseded_by:', err));
   }
 
   // Store gaps so downstream (tracker / analysis) isn't empty.

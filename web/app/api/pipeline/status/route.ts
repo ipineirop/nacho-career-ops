@@ -2,8 +2,9 @@ import { NextRequest } from 'next/server';
 import { getAuthUserId } from '@/lib/auth-bridge';
 import { getDb, pipelineStatus, roles } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
-import { updatePipelineStatusSchema } from '@/lib/api/validation';
+import { updatePipelineStatusSchema, type PipelineStatus } from '@/lib/api/validation';
 import { handleApiError, UnauthorizedError, NotFoundError, ValidationError } from '@/lib/api/errors';
+import { logTrackerStatusChange } from '@/lib/tracker/observation-log';
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -46,8 +47,9 @@ export async function PATCH(req: NextRequest) {
       lastTouchAt: new Date(),
     };
 
+    const prior = existing[0];
     let result;
-    if (existing.length > 0) {
+    if (prior) {
       // Update existing
       result = await db
         .update(pipelineStatus)
@@ -57,6 +59,19 @@ export async function PATCH(req: NextRequest) {
     } else {
       // Insert new
       result = await db.insert(pipelineStatus).values(values as any).returning();
+    }
+
+    // Emit tracker.status_changed when the status actually moves. Insert
+    // case logs against `null` as the prior state. Phase 2 requirement.
+    const updatedStatus = result[0]?.status;
+    if (updatedStatus && updatedStatus !== prior?.status) {
+      await logTrackerStatusChange({
+        userId: authUser.id,
+        roleId: input.roleId,
+        fromStatus: prior?.status ?? null,
+        toStatus: updatedStatus as PipelineStatus,
+        occurredAt: values.statusChangedAt,
+      });
     }
 
     return new Response(

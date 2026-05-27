@@ -134,6 +134,17 @@
   --lm-signal-track:   rgba(201, 123, 14, 0.18);
   --lm-signal-divider: rgba(201, 123, 14, 0.3);
 
+  /* Win tokens (DS §11, Tracker v0.2): the Aceptada pill + accepted-row
+     treatment. Settled sage/teal, distinct from --lm-accent (active) and
+     terminal greys (losses). */
+  --lm-win:         #4a7a5c;
+  --lm-win-soft:    #dde8e0;
+  --lm-win-ink:     #2a4a3a;
+  --lm-win-deep:    #1c3324;
+
+  /* Tracker v0.2 (DS v2 §17.5): below 720px the row-level verdict pill
+     hides; verdict surfaces on the mobile-card variant only. */
+
   /* Shadcn/Tailwind mapped to LeadMe palette */
   --background:             #f6f8f8;
   --foreground:             #0a1f24;
@@ -198,6 +209,12 @@
   --lm-signal-deep:    #f8dfaf;
   --lm-signal-track:   rgba(236, 174, 77, 0.22);
   --lm-signal-divider: rgba(236, 174, 77, 0.3);
+
+  /* Win tokens — dark theme (Tracker v0.2 source lines 63–65). */
+  --lm-win:         #9ec5b1;
+  --lm-win-soft:    #1d2e25;
+  --lm-win-ink:     #9ec5b1;
+  --lm-win-deep:    #c8e0d2;
 
   --background:             #0a0e14;
   --foreground:             #f4f6fa;
@@ -515,3 +532,377 @@
 /* Brief — ghost actions reveal on row hover, per Labra Brief.html §sig */
 .brief-sig:hover .brief-ghost-actions,
 .brief-sig:focus-within .brief-ghost-actions { opacity: 1 !important; }
+
+/* ============================================================
+   Tracker v0.2 — ported verbatim from
+   `web/Design/screens/Labra Tracker.html` (Figma export, lines 305–660,
+   1466–1485 markup). Token names mapped from the source's `--ink/--bg/...`
+   to this codebase's `--lm-*` namespace. Selectors scoped under
+   `.tracker-list` so the generic class names (`.row`, `.who`,
+   `.statuspill`) don't bleed onto other surfaces.
+   ============================================================ */
+
+/* --- Header (kicker + title + view seg) --- */
+.tracker-head {
+  display: flex; align-items: flex-end; gap: 18px;
+  margin-bottom: 22px;
+}
+.tracker-head .title-block { flex: 1; min-width: 0; }
+.tracker-head .kicker {
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px;
+  letter-spacing: 1.2px; text-transform: uppercase; color: var(--lm-ink-3);
+  margin-bottom: 8px;
+}
+.tracker-head h1 {
+  font-family: var(--font-fraunces), "Fraunces", serif; font-weight: 400;
+  font-size: 40px; line-height: 1; margin: 0; letter-spacing: -1.1px; color: var(--lm-ink);
+}
+.tracker-head h1 em { font-style: italic; }
+.tracker-head h1 .count {
+  font-family: var(--font-geist-mono), monospace; font-weight: 400;
+  font-size: 16px; color: var(--lm-ink-3); letter-spacing: 0.4px;
+  margin-left: 14px; vertical-align: middle;
+}
+.tracker-head .right-actions {
+  display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.tracker-list .ctrl-seg {
+  border: 1px solid var(--lm-line); background: var(--lm-surface);
+  padding: 3px; border-radius: 999px;
+  display: inline-flex; gap: 2px;
+}
+.tracker-list .ctrl-seg button {
+  border: 0; background: transparent;
+  padding: 5px 11px; border-radius: 999px;
+  font-family: var(--font-albert-sans); font-size: 12px; font-weight: 500;
+  color: var(--lm-ink-3); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.tracker-list .ctrl-seg button.on { background: var(--lm-ink); color: var(--lm-bg); }
+
+/* --- Filter strip --- */
+.tracker-list .filter-strip {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--lm-line);
+  margin-bottom: 4px;
+}
+.tracker-list .filter-strip .label {
+  font-family: var(--font-geist-mono), monospace; font-size: 10px;
+  letter-spacing: 1.2px; text-transform: uppercase; color: var(--lm-ink-3);
+  margin-right: 4px;
+  /* Holds MOSTRAR (ES) so EN/ES chips line up at the same x. */
+  min-width: 64px;
+  display: inline-block;
+}
+.tracker-list .filter-strip .divider {
+  width: 1px; height: 22px; background: var(--lm-line); margin: 0 4px;
+}
+.tracker-list .chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 999px;
+  font-family: var(--font-albert-sans); font-size: 12.5px; font-weight: 500;
+  border: 1px solid var(--lm-line); background: var(--lm-surface);
+  color: var(--lm-ink-2); cursor: pointer;
+}
+.tracker-list .chip:hover { color: var(--lm-ink); }
+.tracker-list .chip.on { background: var(--lm-ink); color: var(--lm-bg); border-color: var(--lm-ink); }
+.tracker-list .chip .caret { font-family: var(--font-geist-mono); font-size: 9px; color: inherit; opacity: .6; }
+.tracker-list .chip .n {
+  font-family: var(--font-geist-mono); font-size: 10.5px; padding: 1px 6px;
+  background: var(--lm-canvas); color: var(--lm-ink-3); border-radius: 999px;
+  margin-left: 2px;
+}
+.tracker-list .chip.on .n { background: rgba(255,255,255,.18); color: var(--lm-bg); }
+.tracker-list .chip.signal { background: var(--lm-signal-bg); color: var(--lm-signal-ink); border-color: transparent; }
+.tracker-list .chip.signal .n { background: rgba(133, 79, 11, 0.16); color: var(--lm-signal-ink); }
+
+.tracker-list .chip.toggle {
+  gap: 9px;
+  padding-left: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.tracker-list .chip.toggle .rail {
+  width: 22px; height: 12px; border-radius: 999px;
+  background: var(--lm-track); position: relative; display: inline-block;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.tracker-list .chip.toggle .rail::after {
+  content: ''; position: absolute; top: 1px; left: 1px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--lm-surface); border: 1px solid var(--lm-line);
+  transition: transform .18s ease;
+}
+.tracker-list .chip.toggle.on { background: var(--lm-ink); color: var(--lm-bg); border-color: var(--lm-ink); }
+.tracker-list .chip.toggle.on .rail { background: var(--lm-accent); }
+.tracker-list .chip.toggle.on .rail::after { transform: translateX(10px); border-color: var(--lm-accent); background: #fff; }
+
+.tracker-list .filter-strip .spacer { flex: 1; }
+.tracker-list .filter-strip .sort {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-albert-sans); font-size: 12.5px; color: var(--lm-ink-2);
+  padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  background: transparent; border: 0;
+  /* Anchored to the right via spacer flex:1 — fixing the width keeps the
+     SORT label position stable when the dropdown text length changes
+     between locales ("Most recently touched" vs "Toque más reciente"). */
+  min-width: 220px;
+  justify-content: flex-end;
+}
+.tracker-list .filter-strip .sort:hover { background: var(--lm-canvas); }
+.tracker-list .filter-strip .sort .mono {
+  font-family: var(--font-geist-mono); font-size: 10.5px; letter-spacing: 0.4px; color: var(--lm-ink-3);
+}
+
+/* --- List + rows (7-column grid) --- */
+.tracker-list .list { display: flex; flex-direction: column; }
+.tracker-list .group-head {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 22px 8px 8px;
+  font-family: var(--font-geist-mono), monospace; font-size: 10.5px;
+  letter-spacing: 1.2px; text-transform: uppercase; color: var(--lm-ink-3);
+}
+.tracker-list .group-head .n { color: var(--lm-ink); font-weight: 500; }
+.tracker-list .group-head .ln { flex: 1; height: 1px; background: var(--lm-line); margin-left: 8px; }
+
+/* v0.2 source row layout — gap-based, no vertical dividers. Column widths
+   widened from the source defaults (130/120) so the longest ES labels
+   ("Oferta pendiente", "What happened?") stay on one line. */
+.tracker-list .row {
+  display: grid;
+  grid-template-columns:
+    14px              /* status dot */
+    minmax(0, 1.4fr)  /* company · role */
+    120px             /* verdict pill */
+    160px             /* status pill */
+    160px             /* signal / follow-up */
+    90px              /* days */
+    90px;             /* report link */
+  gap: 14px;
+  align-items: center;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--lm-line-2);
+  cursor: pointer;
+  position: relative;
+}
+
+.tracker-list .row .days { text-align: right; }
+.tracker-list .row .reportlink { text-align: right; }
+.tracker-list .statuspill { white-space: nowrap; }
+.tracker-list .row:hover { background: var(--lm-surface-2); }
+
+.tracker-list .row .sdot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--lm-ink-3);
+  justify-self: center;
+}
+.tracker-list .row .sdot.evaluating { background: var(--lm-ink-3); }
+.tracker-list .row .sdot.applied { background: var(--lm-signal); }
+.tracker-list .row .sdot.interviewing { background: var(--lm-accent); }
+.tracker-list .row .sdot.offer_pending { background: var(--lm-ink); }
+.tracker-list .row .sdot.offer_accepted { background: var(--lm-win); box-shadow: 0 0 0 2px var(--lm-win-soft); }
+.tracker-list .row .sdot.rejected,
+.tracker-list .row .sdot.withdrew,
+.tracker-list .row .sdot.passed,
+.tracker-list .row .sdot.ghosted { background: var(--lm-ink-3); opacity: .4; }
+
+.tracker-list .row .who { display: flex; flex-direction: column; min-width: 0; }
+.tracker-list .row .who .co {
+  font-family: var(--font-albert-sans); font-weight: 600; font-size: 14.5px;
+  color: var(--lm-ink); letter-spacing: -0.15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.tracker-list .row .who .co .pin {
+  font-family: var(--font-geist-mono), monospace; font-size: 10px;
+  color: var(--lm-win); opacity: .85;
+  letter-spacing: 0; line-height: 1;
+  transform: translateY(-1px);
+}
+.tracker-list .row .who .role {
+  font-family: var(--font-albert-sans); font-weight: 400; font-size: 13px;
+  color: var(--lm-ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.tracker-list .row .who .role .sep { color: var(--lm-ink-3); opacity: .55; padding: 0 4px; }
+
+/* --- Verdict pill (port of source 502–565) --- */
+.tracker-list .verdict {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 12px 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  /* min-width holds the widest ES word ("Responde" italic) + glyph so the
+     pill block has consistent left/right boundaries across locales.
+     Content centers within. */
+  min-width: 96px;
+  justify-content: center;
+}
+.tracker-list .verdict.verdict-es { font-style: italic; }
+.tracker-list .verdict::before {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 500;
+  line-height: 1;
+}
+.tracker-list .verdict.reply::before  { content: '↪'; font-size: 13px; transform: translateY(-1px); }
+.tracker-list .verdict.pursue::before { content: '▲'; font-size: 9px; }
+.tracker-list .verdict.watch::before  { content: '○'; font-size: 10px; }
+.tracker-list .verdict.skip::before   { content: '✕'; font-size: 11px; }
+
+.tracker-list .verdict.reply  { background: var(--lm-accent-soft); color: var(--lm-accent-h); border: 1px solid transparent; font-weight: 600; }
+.tracker-list .verdict.pursue { background: var(--lm-ink); color: var(--lm-bg); border: 1px solid var(--lm-ink); font-weight: 600; }
+.tracker-list .verdict.watch  { background: var(--lm-surface); color: var(--lm-ink-2); border: 1px solid var(--lm-line); }
+.tracker-list .verdict.skip   { background: transparent; color: var(--lm-ink-3); border: 1px dashed var(--lm-line); }
+
+.dark .tracker-list .verdict.reply { background: var(--lm-accent-soft); color: var(--lm-accent); }
+.dark .tracker-list .verdict.watch { background: var(--lm-surface-2); }
+
+/* Visual weight via `:has()` cascade — pursue/reply assert; watch neutral;
+   skip muted. Mirrors v0.2 source lines 566–576. */
+.tracker-list .row:has(.verdict.skip) .who .co { font-weight: 500; color: var(--lm-ink-2); }
+.tracker-list .row:has(.verdict.skip) .who .role { color: var(--lm-ink-3); opacity: .85; }
+.tracker-list .row:has(.verdict.skip) .sdot { opacity: .65; }
+.tracker-list .row:has(.verdict.watch) .who .co { font-weight: 600; }
+.tracker-list .row:has(.verdict.pursue) .who .co { font-weight: 700; letter-spacing: -0.2px; }
+.tracker-list .row:has(.verdict.reply) .who .co { font-weight: 700; letter-spacing: -0.2px; }
+.tracker-list .row.terminal:has(.verdict.pursue) .who .co,
+.tracker-list .row.terminal:has(.verdict.watch) .who .co { font-weight: 500; color: var(--lm-ink-2); }
+.tracker-list .row.terminal .verdict { opacity: .6; }
+.tracker-list .row.terminal:has(.statuspill.offer_accepted) .verdict { opacity: 1; }
+
+/* --- Status pill --- */
+.tracker-list .statuspill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 11px 4px 8px; border-radius: 999px;
+  font-family: var(--font-albert-sans); font-size: 12.5px; font-weight: 500;
+  color: var(--lm-ink-2); background: var(--lm-canvas); border: 1px solid transparent;
+  cursor: pointer; transition: background .12s;
+  /* Holds the widest ES label ("Oferta pendiente") so EN/ES rows line up. */
+  min-width: 148px;
+  justify-content: flex-start;
+}
+.tracker-list .statuspill:hover { background: var(--lm-surface); border-color: var(--lm-line); color: var(--lm-ink); }
+.tracker-list .statuspill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lm-ink-3); }
+.tracker-list .statuspill.evaluating .dot { background: var(--lm-ink-3); }
+.tracker-list .statuspill.applied .dot { background: var(--lm-signal); }
+.tracker-list .statuspill.interviewing .dot { background: var(--lm-accent); }
+.tracker-list .statuspill.offer_pending { background: var(--lm-surface); border-color: var(--lm-ink); color: var(--lm-ink); font-weight: 600; }
+.tracker-list .statuspill.offer_pending .dot { background: var(--lm-ink); }
+.tracker-list .statuspill.offer_accepted {
+  background: var(--lm-win-soft); color: var(--lm-win-ink);
+  border-color: transparent; font-weight: 600;
+}
+.tracker-list .statuspill.offer_accepted .dot { background: var(--lm-win); }
+.tracker-list .statuspill.offer_accepted:hover {
+  background: var(--lm-win-soft); color: var(--lm-win-deep); border-color: var(--lm-win);
+}
+.tracker-list .statuspill.rejected .dot,
+.tracker-list .statuspill.withdrew .dot,
+.tracker-list .statuspill.passed .dot,
+.tracker-list .statuspill.ghosted .dot { background: var(--lm-ink-3); opacity: .5; }
+.tracker-list .statuspill .caret {
+  font-family: var(--font-geist-mono); font-size: 8px; color: var(--lm-ink-3); margin-left: 2px;
+}
+
+/* --- Follow-up / signal cell --- */
+.tracker-list .followup {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-albert-sans); font-size: 12.5px; color: var(--lm-ink-3);
+}
+.tracker-list .followup.stale { color: var(--lm-signal-ink); }
+.tracker-list .followup .pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--lm-signal);
+  flex-shrink: 0;
+}
+.tracker-list .followup .calm { color: var(--lm-ink-3); opacity: .4; }
+.tracker-list .outcome-aff {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--lm-accent-soft); color: var(--lm-accent-h);
+  font-family: var(--font-albert-sans); font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 0;
+  /* Holds widest EN string ("What happened? →"). */
+  min-width: 132px;
+  justify-content: center;
+  white-space: nowrap;
+}
+.tracker-list .followup { white-space: nowrap; }
+.tracker-list .outcome-aff .ar { font-family: var(--font-geist-mono); }
+
+/* --- Days / report --- */
+.tracker-list .row .days {
+  font-family: var(--font-geist-mono), monospace; font-size: 11.5px;
+  color: var(--lm-ink-3); letter-spacing: 0.3px;
+  text-align: right;
+}
+.tracker-list .row .days b { color: var(--lm-ink-2); font-weight: 500; }
+.tracker-list .row .reportlink {
+  font-family: var(--font-albert-sans); font-size: 13px; font-weight: 500;
+  color: var(--lm-accent); text-align: right; text-decoration: none;
+  opacity: .85;
+}
+.tracker-list .row:hover .reportlink { opacity: 1; }
+
+/* --- Terminal variants --- */
+.tracker-list .row.terminal { background: transparent; }
+.tracker-list .row.terminal .who .co { color: var(--lm-ink-2); font-weight: 500; }
+.tracker-list .row.terminal .who .role { color: var(--lm-ink-3); }
+.tracker-list .row.terminal .reportlink { color: var(--lm-ink-3); opacity: .7; }
+.tracker-list .row.terminal.accepted-row {
+  background: var(--lm-win-soft); border-bottom-color: transparent;
+}
+.tracker-list .row.terminal.accepted-row .who .co { color: var(--lm-win-deep); font-weight: 700; }
+.tracker-list .row.terminal.accepted-row .who .role { color: var(--lm-win-ink); opacity: .9; }
+.tracker-list .row.terminal.accepted-row .reportlink { color: var(--lm-win-ink); opacity: 1; }
+.tracker-list .row.terminal.accepted-row .days,
+.tracker-list .row.terminal.accepted-row .days b { color: var(--lm-win-ink); }
+
+/* --- Way-A line — sibling of the row, indented past the sdot column to
+   align with the company name. The row above keeps its border-bottom; the
+   Way-A line tucks under it and shares the same line color. --- */
+.tracker-list .wayA-line {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 14px 10px 42px;
+  margin-top: -1px;
+  border-bottom: 1px solid var(--lm-line-2);
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--lm-ink-2);
+  opacity: .9;
+}
+.tracker-list .wayA-line .lead { color: var(--lm-accent); font-style: normal; }
+.tracker-list .wayA-line .body { flex: 1; }
+.tracker-list .wayA-line button {
+  font-family: var(--font-albert-sans);
+  font-style: normal; font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--lm-line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: var(--lm-ink-2);
+  cursor: pointer;
+}
+.tracker-list .wayA-line button.dismiss {
+  border: 0; color: var(--lm-ink-3); font-size: 13px; padding: 2px 6px;
+}
+
+/* --- Mobile (<720px): drop the row-level verdict; mobile-row variant
+   not yet ported but reserves the verdict signal for it. --- */
+@media (max-width: 720px) {
+  .tracker-list .row {
+    grid-template-columns: 28px minmax(0, 1fr) auto 90px;
+  }
+  .tracker-list .row > .verdict,
+  .tracker-list .row > .followup,
+  .tracker-list .row > .outcome-aff {
+    display: none;
+  }
+}
