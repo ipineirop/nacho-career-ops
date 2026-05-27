@@ -156,6 +156,23 @@ export const BRIEF_STRINGS = {
     en: 'Signals · grounded today',
     es: 'Señales · fundadas hoy',
   },
+  // Quiet-day variants. Used when computeSignals() returns an empty array
+  // AND no signals are firing — the Brief skips the LLM call and renders
+  // deterministic copy instead of risking a "1 on the table" hallucination.
+  signalsHeadQuiet: {
+    en: 'Signals · all quiet',
+    es: 'Señales · todo en calma',
+  },
+  signalsQuietBody: {
+    en: 'Nothing pressing today. The pipeline below is the next place to look.',
+    es: 'Nada urgente hoy. La pipeline abajo es el siguiente lugar para mirar.',
+  },
+  // Deterministic editor's note for quiet days. Matches the existing tone
+  // (short, declarative, no exclamations, no recruiter jargon).
+  editorsNoteQuietDay: {
+    en: 'All quiet today. Nothing on the table that needs you.',
+    es: 'Día tranquilo. Nada en la mesa que te necesite.',
+  },
   // Pipeline-summary "YOUR PIPELINE" label and tracker CTA.
   pipelineLabel: { en: 'YOUR PIPELINE', es: 'TU PIPELINE' },
   pipelineOpenTracker: {

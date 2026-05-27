@@ -60,7 +60,39 @@ export function SignalStack({ visible, collapsed, locale }: Props) {
     }
   }
 
-  if (remaining.length === 0 && collapsed === 0) return null;
+  // Empty state — render an explicit "all quiet" block instead of vanishing
+  // the section. Without this the Brief reads like a half-rendered page
+  // (masthead → editor's note → empty space → pipeline summary).
+  if (remaining.length === 0 && collapsed === 0) {
+    return (
+      <section style={{ marginBottom: '36px', display: 'flex', flexDirection: 'column' }}>
+        <div
+          className="font-mono uppercase text-ink-3"
+          style={{
+            fontSize: '10.5px',
+            letterSpacing: '1.3px',
+            marginBottom: '4px',
+            paddingBottom: '10px',
+            borderBottom: '1px solid var(--lm-line)',
+          }}
+        >
+          {pick(BRIEF_STRINGS.signalsHeadQuiet, locale)}
+        </div>
+        <p
+          style={{
+            margin: '20px 0 0',
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            lineHeight: 1.55,
+            color: 'var(--lm-ink-2)',
+            maxWidth: '52ch',
+          }}
+        >
+          {pick(BRIEF_STRINGS.signalsQuietBody, locale)}
+        </p>
+      </section>
+    );
+  }
 
   const total = remaining.length + collapsed;
 
