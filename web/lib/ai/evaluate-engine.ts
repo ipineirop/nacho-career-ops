@@ -6,6 +6,8 @@ import { resolveCompany } from '@/lib/matching/resolve';
 import { matchPastEmployer, type UserEmployer, type PastEmployerMatch } from '@/lib/matching/past-employer';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { lintBriefBilingual, type BriefLintFinding } from './brief-linter';
+import { buildFallbackEditorsNote } from './brief-fallback';
 
 interface EvaluationInput {
   jd: string;
@@ -668,3 +670,365 @@ async function computePastEmployerMatch(
     return null;
   }
 }
+
+// ============================================================
+// BRIEF GENERATION — Labra Brief editorial path
+// ============================================================
+// Companion to evaluateRole(): one Anthropic call per user per user-local day
+// producing bilingual {en, es} for the editor's note, optional pick editorial
+// summary, and every triggered signal body. Lint → regenerate-once-then-
+// fallback per the handoff §5. The signals themselves are computed
+// upstream by lib/brief/signals/* and supplied here as "seeds" so the LLM
+// only writes prose, never invents facts.
+
+/**
+ * A signal occurrence handed to the LLM for body prose generation. The
+ * orchestrator (lib/brief/signals/index.ts) has already verified the
+ * grounding rule (each seed names at least one entity or count) and that
+ * the user has not snoozed/dismissed this occurrence.
+ */
+export interface BriefSignalSeed {
+  /** Stable per-render identifier. The API echoes this as `signal.id`. */
+  id: string;
+  type: 'freshness' | 'drift' | 'bar' | 'pipeline.cold' | 'pipeline.next';
+  /** Entities/counts the body MUST reference (grounding tokens for the
+   *  linter and for the prompt's voice instruction). Examples:
+   *  ['Mercado Libre', '7d'], ['comp floor', '6mo']. */
+  groundingTokens: string[];
+  /** Structured context the LLM uses to draft the body. Kept open-ended;
+   *  each signal module provides what its prose needs (cadence days,
+   *  contact name, mismatch summary, etc.). */
+  context: Record<string, unknown>;
+}
+
+export interface BriefPickSeed {
+  /** Name, role, location — facts the LLM must reference verbatim. */
+  groundingTokens: string[];
+  /** Structured Pick context (company, role, segment, salary band). */
+  context: Record<string, unknown>;
+}
+
+export interface BriefGenerateParams {
+  userId: string;
+  /** ISO date the Brief is keyed to (user-local). Used for logging only. */
+  today: string;
+  /** Issue number (days since users.createdAt). Powers the fallback. */
+  issueNumber: number;
+  /** Caller's normalized locale: 'en' or 'es'. Drives the locale instruction
+   *  at the top of the prompt. The output still contains BOTH languages. */
+  primaryLocale: 'en' | 'es';
+  /** Compact prose summary of the user's pipeline + identity the LLM uses
+   *  to write the editor's note. Built by the assembler. */
+  userContext: string;
+  signals: BriefSignalSeed[];
+  pick: BriefPickSeed | null;
+}
+
+export interface BriefGenerated {
+  editorsNote: { en: string; es: string };
+  generationMethod: 'llm' | 'fallback';
+  pickEditorialSummary: { en: string; es: string } | null;
+  signals: Array<{ id: string; body: { en: string; es: string } }>;
+  /** Anthropic usage for cost tracking (handoff §9.5). The assembler writes
+   *  a user_events row of type 'brief.generation_cost' from this. */
+  cost: {
+    model: string;
+    inputTokens: number;
+    outputTokens: number;
+  };
+  /** Linter findings on the final accepted output (may be empty when the
+   *  first attempt passes). Useful for offline quality monitoring. */
+  lintFindings: {
+    editorsNote: { en: BriefLintFinding[]; es: BriefLintFinding[] };
+    signals: Array<{ id: string; en: BriefLintFinding[]; es: BriefLintFinding[] }>;
+  };
+}
+
+const BRIEF_MODEL = 'claude-sonnet-4-6';
+
+function buildBriefPrompt(
+  params: BriefGenerateParams,
+  strictRetry: boolean,
+): string {
+  const { primaryLocale, userContext, signals, pick, issueNumber } = params;
+
+  const voiceRules = `
+Voice (Labra Design System v2 §16):
+- Candid, dry, informed. Peer-to-peer voice — not top-down, not salesy.
+- First-person "I" / "yo" is allowed (this is the editor speaking).
+- "We" / "nosotros" as the product is BANNED. Never write "we found", "we offer", "te traemos", "te encontramos".
+- 1–3 sentences per editorial paragraph. Max 1 italicized phrase (markdown *like-this*) per language version.
+- BOLD proper nouns (companies, people) with double-star markdown: \`**Kavak**\`, \`**Mercado Libre**\`, \`**Susana M.**\`. Bold is for entity identity, italic is for editorial emphasis. Bold spans are unlimited; use bold whenever a proper noun appears so the reader's eye can find the named entities at a glance.
+- Every body MUST reference at least one specific entity by name or a specific count from the supplied data. Generic copy is rejected.
+
+English-specific:
+- Em-dashes "—" are allowed.
+
+Spanish-specific (§17.1):
+- Em-dashes "—" are BANNED. Use semicolons, colons, or commas.
+- Use the "tú" form. Never "vos".
+
+Both languages — banned phrases (do not use, exact-or-substring match):
+- Gamification: amazing, incredible, spectacular, extraordinary / increíble, asombroso, espectacular, fantástico, extraordinario
+- Urgency: don't miss out, last chance, exclusive, limited time / no te lo pierdas, imperdible, última oportunidad, exclusivo
+- Sales CTAs: next level, take the next step, apply now, act now / lleva tu carrera al siguiente nivel, da el siguiente paso, transforma tu carrera, actúa ahora, aplica ya, no esperes más
+- Product "we": we found, we bring you, we offer / te encontramos, encontramos para ti, te traemos, te ofrecemos
+- Recruiter jargon: the standalone token "JD" — use "job description" / "descripción del puesto" instead.
+- Universal: no emoji, no exclamation marks ("!" or "¡").
+`.trim();
+
+  const localeInstruction = `
+The user's primary locale is "${primaryLocale}", but you MUST produce both English ("en") and Spanish ("es") versions of every text field regardless of the language of any source material you are given. This is non-negotiable: output language follows the user's preference, not the input.
+`.trim();
+
+  const strictPreamble = strictRetry
+    ? `
+You produced text on the previous attempt that violated the rules above. Re-read every voice rule and banned phrase. Then write tighter, more grounded prose. If you cannot ground a signal body in a named entity or count from its provided context, omit nothing — the linter will already have stopped it from reaching you.
+`.trim()
+    : '';
+
+  const signalsJson = JSON.stringify(
+    signals.map((s) => ({
+      id: s.id,
+      type: s.type,
+      grounding_tokens: s.groundingTokens,
+      context: s.context,
+    })),
+    null,
+    2,
+  );
+
+  const pickJson = pick
+    ? JSON.stringify(
+        { grounding_tokens: pick.groundingTokens, context: pick.context },
+        null,
+        2,
+      )
+    : 'null';
+
+  return `${strictPreamble ? strictPreamble + '\n\n' : ''}${localeInstruction}
+
+${voiceRules}
+
+You are writing today's Labra Brief — a daily editorial surface for a single user. The brief has its own masthead (issue number, date, city) rendered separately above this text. The editor's note is pure editorial; it is NEVER a status report.
+
+HARD BANS on the editor's note text:
+- Do NOT mention or repeat the issue number anywhere in the body (no "Issue №14", no "Number 10", no "№10").
+- Do NOT mention the date anywhere in the body (no "today's date is…", no "Thursday May 14").
+- Do NOT mention the city anywhere in the body (no "Mexico City", no "CDMX").
+- Do NOT render pipeline counts as a literal sentence (no "1 pursue, 18 replies, nothing on watch" prose). Counts can inform what you choose to highlight, but the prose itself should be editorial.
+- Do NOT open with metadata. Open with an editorial observation, an entity, or an "I" sentence.
+
+The editor's note voice — STRUCTURE example only (locked DS v2). The entity names in this example are PLACEHOLDERS; you must NEVER use "Kavak", "Mercado Libre", "Clip", or any other name from this example unless it also appears in the SIGNALS or PICK data below:
+
+  "Tight slate today. **<EntityA>** just opened a <role> seat that matches your scope at <PriorEmployer> almost *line-for-line*; I quieted 18 listings — mostly senior IC and one recruiter pitching comp 40% under market. The **<EntityB>** thread has gone quiet on day nine, and nine is the tipping window."
+
+Observe the STRUCTURE: editorial opener, two named-and-bolded entities pulled from the user's actual data, one italic phrase, first-person "I quieted", specific numbers used as detail (18 listings, 40% under market, day nine) — never as raw count prose. Three sentences total. Entity names come from the SIGNALS / PICK / USER CONTEXT blocks below, NEVER invented.
+
+The editor's note MUST name at least one specific entity from today's signals — a company name, person, or role title — and bold it with \`**Name**\`. The bolded entity MUST appear in the FIRST sentence. If no signals are firing today, anchor on a Pick entity, or on a single specific fact (a number with editorial framing). Abstract pipeline-vibe-checks ("the queue is calm", "nothing urgent today") without a named entity are rejected.
+
+USER CONTEXT (data for your reasoning — do NOT echo verbatim):
+${userContext}
+
+SIGNALS TO WRITE BODIES FOR (each must reference its grounding_tokens):
+${signalsJson}
+
+PICK (write a pickEditorialSummary if non-null; otherwise return null):
+${pickJson}
+
+Return ONLY valid JSON matching this exact shape, no prose, no markdown fences:
+{
+  "editorsNote": { "en": "...", "es": "..." },
+  "pickEditorialSummary": { "en": "...", "es": "..." } | null,
+  "signals": [
+    { "id": "<echo from input>", "body": { "en": "...", "es": "..." } }
+  ]
+}
+
+Each signal body must reference at least one of its grounding_tokens, and should bold every proper noun it mentions. Stay within 1–3 sentences per text field. Use at most one \`*italicized*\` phrase per language version.`;
+}
+
+interface RawBriefOutput {
+  editorsNote: { en: string; es: string };
+  pickEditorialSummary: { en: string; es: string } | null;
+  signals: Array<{ id: string; body: { en: string; es: string } }>;
+}
+
+function parseBriefResponse(text: string): RawBriefOutput {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON found in brief response');
+  return JSON.parse(match[0]);
+}
+
+/**
+ * Single Anthropic call producing the bilingual Brief payload, with one
+ * stricter retry on linter rejection and a deterministic fallback for the
+ * editor's note on second rejection. Signal bodies that can't pass on retry
+ * are dropped from the returned `signals` array (callers should treat them
+ * as omitted occurrences).
+ */
+export async function generateBrief(
+  params: BriefGenerateParams,
+): Promise<BriefGenerated> {
+  // Grounding for the editor's note.
+  //   - When signals are firing today, the only acceptable grounding is
+  //     the name (or grounding token) of one of those signals. This stops
+  //     the LLM from borrowing entity names from the prompt's STRUCTURE
+  //     example (e.g. "Mercado Libre", "Kavak"); it must reference a
+  //     real entity from the user's day.
+  //   - When no signals fire, fall back to verdict-word / count tokens so
+  //     a Brief without signals can still anchor on counts.
+  //   - The issue number is NEVER a grounding token (prompt bans it).
+  const signalTokens = params.signals.flatMap((s) => s.groundingTokens);
+  const groundingForEditorsNote: string[] =
+    signalTokens.length > 0
+      ? signalTokens
+      : [
+          'pursue', 'pursues', 'pursuit',
+          'reply', 'replies',
+          'watch', 'watches',
+          'avanza', 'avance', 'búsqueda', 'búsquedas',
+          'responde', 'respuesta', 'respuestas',
+          'observa', 'observación', 'observaciones',
+          'candidatura', 'candidaturas',
+        ];
+
+  async function callOnce(strict: boolean): Promise<{
+    raw: RawBriefOutput;
+    usage: { input_tokens: number; output_tokens: number };
+  }> {
+    const prompt = buildBriefPrompt(params, strict);
+    const response = await anthropic.messages.create({
+      model: BRIEF_MODEL,
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const text = (response.content[0] as { type: string; text: string }).text;
+    return {
+      raw: parseBriefResponse(text),
+      usage: {
+        input_tokens: response.usage?.input_tokens ?? 0,
+        output_tokens: response.usage?.output_tokens ?? 0,
+      },
+    };
+  }
+
+  let attempt: { raw: RawBriefOutput; usage: { input_tokens: number; output_tokens: number } };
+  let totalIn = 0;
+  let totalOut = 0;
+
+  try {
+    attempt = await callOnce(false);
+    totalIn += attempt.usage.input_tokens;
+    totalOut += attempt.usage.output_tokens;
+  } catch (err) {
+    console.error('generateBrief: first call failed', (err as Error).message);
+    return {
+      editorsNote: buildFallbackEditorsNote({
+        issueNumber: params.issueNumber,
+        signalCount: params.signals.length,
+      }),
+      generationMethod: 'fallback',
+      pickEditorialSummary: null,
+      signals: [],
+      cost: { model: BRIEF_MODEL, inputTokens: 0, outputTokens: 0 },
+      lintFindings: {
+        editorsNote: { en: [], es: [] },
+        signals: [],
+      },
+    };
+  }
+
+  // Lint pass 1
+  const noteLint1 = lintBriefBilingual(attempt.raw.editorsNote, groundingForEditorsNote);
+  const signalLints1 = attempt.raw.signals.map((s) => {
+    const seed = params.signals.find((x) => x.id === s.id);
+    const tokens = seed ? seed.groundingTokens : [];
+    return { id: s.id, body: s.body, lint: lintBriefBilingual(s.body, tokens) };
+  });
+
+  const anyFailure =
+    !noteLint1.ok ||
+    signalLints1.some((s) => !s.lint.ok);
+
+  let finalNote = attempt.raw.editorsNote;
+  let finalNoteFindings = noteLint1.ok
+    ? { en: [], es: [] }
+    : { en: noteLint1.en, es: noteLint1.es };
+  let finalSignals = signalLints1
+    .filter((s) => s.lint.ok)
+    .map((s) => ({ id: s.id, body: s.body }));
+  let finalSignalFindings = signalLints1.map((s) => ({
+    id: s.id,
+    en: s.lint.ok ? [] : s.lint.en,
+    es: s.lint.ok ? [] : s.lint.es,
+  }));
+  let pick = attempt.raw.pickEditorialSummary;
+  let method: 'llm' | 'fallback' = 'llm';
+
+  if (anyFailure) {
+    // Retry once with the strict preamble.
+    try {
+      const retry = await callOnce(true);
+      totalIn += retry.usage.input_tokens;
+      totalOut += retry.usage.output_tokens;
+
+      const noteLint2 = lintBriefBilingual(retry.raw.editorsNote, groundingForEditorsNote);
+      const signalLints2 = retry.raw.signals.map((s) => {
+        const seed = params.signals.find((x) => x.id === s.id);
+        const tokens = seed ? seed.groundingTokens : [];
+        return { id: s.id, body: s.body, lint: lintBriefBilingual(s.body, tokens) };
+      });
+
+      // Editor's note: take retry if it passed; otherwise fall back.
+      if (noteLint2.ok) {
+        finalNote = retry.raw.editorsNote;
+        finalNoteFindings = { en: [], es: [] };
+      } else {
+        finalNote = buildFallbackEditorsNote({
+          issueNumber: params.issueNumber,
+          signalCount: params.signals.length,
+        });
+        finalNoteFindings = { en: noteLint2.en, es: noteLint2.es };
+        method = 'fallback';
+      }
+
+      // Signals: keep only those that pass on the retry. (Signals from the
+      // first attempt are discarded on retry to keep prose consistent within
+      // a single Brief.)
+      finalSignals = signalLints2
+        .filter((s) => s.lint.ok)
+        .map((s) => ({ id: s.id, body: s.body }));
+      finalSignalFindings = signalLints2.map((s) => ({
+        id: s.id,
+        en: s.lint.ok ? [] : s.lint.en,
+        es: s.lint.ok ? [] : s.lint.es,
+      }));
+
+      pick = retry.raw.pickEditorialSummary;
+    } catch (err) {
+      console.error('generateBrief: retry failed', (err as Error).message);
+      // Keep first-attempt-passing parts; fall back the note if it failed.
+      if (!noteLint1.ok) {
+        finalNote = buildFallbackEditorsNote({
+          issueNumber: params.issueNumber,
+          signalCount: params.signals.length,
+        });
+        method = 'fallback';
+      }
+    }
+  }
+
+  return {
+    editorsNote: finalNote,
+    generationMethod: method,
+    pickEditorialSummary: pick,
+    signals: finalSignals,
+    cost: { model: BRIEF_MODEL, inputTokens: totalIn, outputTokens: totalOut },
+    lintFindings: {
+      editorsNote: finalNoteFindings,
+      signals: finalSignalFindings,
+    },
+  };
+}
+

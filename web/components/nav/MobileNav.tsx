@@ -1,33 +1,45 @@
 'use client';
 
+/**
+ * Mobile bottom tab bar — matches `Labra Brief.html` lines 802-816 (`.tab-m`).
+ *
+ *   .tab-m         → flex, border-top 1px line, padding 8px 0 14px
+ *   .tab-m a       → flex 1, centered, Albert 11px / 500, ink-3 inactive
+ *   .tab-m a.on    → ink color
+ *   .tab-m a .ti   → 6x6 round dot ABOVE the label,
+ *                    ink-3 inactive, accent on active. The dot is what
+ *                    surfaces the active tab — there's no underline or
+ *                    background pill, just the dot's color flip.
+ *
+ * Evaluate is FAB-only (root layout mount); never a tab.
+ */
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// Evaluate is reached via the persistent FAB (per the v1 Evaluate spec), not a
-// nav item — there is no dedicated /evaluate input page anymore.
 const NAV_ITEMS = [
+  { href: '/brief',    label: 'Brief' },
   { href: '/tracker',  label: 'Tracker' },
   { href: '/settings', label: 'Settings' },
 ] as const;
 
 export function MobileNav() {
   const pathname = usePathname();
-
-  // Onboarding and auth screens have their own navigation — skip the global tab bar.
   if (pathname?.startsWith('/onboarding') || pathname?.startsWith('/auth')) return null;
 
-  const isActive = (href: string) => {
-    return href === '/' ? pathname === '/' : pathname.startsWith(href);
-  };
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname?.startsWith(href) ?? false;
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex border-t"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-40 flex"
       style={{
-        background: 'var(--lm-surface)',
-        borderColor: 'var(--lm-line)',
-        height: '56px',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        background: 'var(--lm-bg)',
+        borderTop: '1px solid var(--lm-line)',
+        padding: '8px 0 14px',
+        paddingBottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
+        alignItems: 'center',
+        gap: 0,
       }}
     >
       {NAV_ITEMS.map(({ href, label }) => {
@@ -36,14 +48,29 @@ export function MobileNav() {
           <Link
             key={href}
             href={href}
-            className="flex flex-1 items-center justify-center text-[13px]"
             style={{
-              fontFamily: 'var(--font-albert-sans)',
-              fontWeight: active ? 500 : 400,
+              flex: 1,
+              textAlign: 'center',
+              fontFamily: 'var(--font-body)',
+              fontSize: '11px',
+              fontWeight: 500,
               color: active ? 'var(--lm-ink)' : 'var(--lm-ink-3)',
               textDecoration: 'none',
+              padding: '6px 0',
+              display: 'block',
             }}
           >
+            <span
+              aria-hidden="true"
+              style={{
+                display: 'block',
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: active ? 'var(--lm-accent)' : 'var(--lm-ink-3)',
+                margin: '0 auto 4px',
+              }}
+            />
             {label}
           </Link>
         );

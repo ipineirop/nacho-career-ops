@@ -511,3 +511,7 @@
 }
 .verdict-view .v-actions .ghost:hover { color: var(--ink-2); }
 .verdict-view .v-actions .spacer { flex: 1; }
+
+/* Brief — ghost actions reveal on row hover, per Labra Brief.html §sig */
+.brief-sig:hover .brief-ghost-actions,
+.brief-sig:focus-within .brief-ghost-actions { opacity: 1 !important; }

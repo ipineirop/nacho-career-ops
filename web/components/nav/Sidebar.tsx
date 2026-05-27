@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
+import { LocaleToggle } from '@/components/locale/LocaleToggle';
 
 // Evaluate is reached via the persistent FAB (per the v1 Evaluate spec), not a
 // sidebar item — there is no dedicated /evaluate input page anymore.
 const NAV_ITEMS = [
+  { href: '/brief',    label: 'Brief' },
   { href: '/tracker',  label: 'Tracker' },
   { href: '/settings', label: 'Settings' },
 ] as const;
@@ -79,6 +81,12 @@ export function Sidebar() {
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
+
+      {/* Language toggle — sits above the user section as global chrome.
+          Re-renders any client surface that consumes useLocale(). */}
+      <div style={{ padding: '0 4px 16px' }}>
+        <LocaleToggle />
+      </div>
 
       {/* User section */}
       {session && (
