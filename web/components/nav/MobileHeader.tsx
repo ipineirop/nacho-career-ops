@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { LocaleToggle } from '@/components/locale/LocaleToggle';
 
 function getInitials(name?: string | null) {
   if (!name) return '?';
@@ -37,22 +38,25 @@ export function MobileHeader() {
           labra<span style={{ color: 'var(--lm-accent)', fontStyle: 'italic' }}>.</span>
         </span>
 
-        <button
-          onClick={() => setShowUserSheet(!showUserSheet)}
-          className="flex items-center justify-center rounded-full text-[12px] font-medium"
-          style={{
-            width: '32px',
-            height: '32px',
-            background: 'var(--lm-canvas)',
-            color: 'var(--lm-ink-2)',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-albert-sans)',
-          }}
-          title="Account menu"
-        >
-          {getInitials(session.user?.name)}
-        </button>
+        <div className="flex items-center gap-s3">
+          <LocaleToggle />
+          <button
+            onClick={() => setShowUserSheet(!showUserSheet)}
+            className="flex items-center justify-center rounded-full text-[12px] font-medium"
+            style={{
+              width: '32px',
+              height: '32px',
+              background: 'var(--lm-canvas)',
+              color: 'var(--lm-ink-2)',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-albert-sans)',
+            }}
+            title="Account menu"
+          >
+            {getInitials(session.user?.name)}
+          </button>
+        </div>
       </header>
 
       {/* Scrim */}

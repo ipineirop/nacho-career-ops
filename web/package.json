@@ -8,7 +8,9 @@
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:migrate": "npx tsx lib/db/migrate.ts"
+    "db:migrate": "npx tsx lib/db/migrate.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",
@@ -45,6 +47,7 @@
     "@types/react-dom": "^19",
     "postgres": "^3.4.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

@@ -503,6 +503,51 @@ export const settings = pgTable('settings', {
 });
 
 // ============================================================
+// BRIEF — daily editorial surface (Labra Brief)
+// ============================================================
+
+// brief_cache — resolved §3 Brief payload per user per user-local day.
+// Editor's note and LLM-generated signal bodies never regenerate within a
+// user-local day (handoff §3.4); cache TTL'd to user-local midnight.
+// Signals are filtered on each read against signal_states, but bodies are
+// reused from the cache.
+export const briefCache = pgTable('brief_cache', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  isoDate: date('iso_date').notNull(), // user-local calendar date the Brief is keyed to
+  payload: jsonb('payload').notNull(), // resolved §3 shape (masthead, editorsNote, pick, signals, pipelineSummary)
+  generatedAt: timestamp('generated_at').defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(), // user-local midnight
+}, (t) => ({
+  userDateUniq: unique('brief_cache_user_date_uniq').on(t.userId, t.isoDate),
+  userIdx: index('brief_cache_user_idx').on(t.userId, t.isoDate),
+}));
+
+// signal_states — snooze + dismiss persistence per signal occurrence
+// (handoff §6.2). entityRef is the natural occurrence key, e.g.
+// `company:Mercado Libre` for pipeline.cold or `field:comp_floor` for
+// freshness. Per-type defaults are uniform 30d in v1 (user decision).
+export const signalStates = pgTable('signal_states', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  signalType: text('signal_type').notNull(), // freshness|drift|bar|pipeline.cold|pipeline.next
+  entityRef: text('entity_ref').notNull(),
+  snoozedUntil: timestamp('snoozed_until'),
+  dismissedAt: timestamp('dismissed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (t) => ({
+  userTypeRefUniq: unique('signal_states_user_type_ref_uniq').on(t.userId, t.signalType, t.entityRef),
+  userIdx: index('signal_states_user_idx').on(t.userId),
+}));
+
+// Observation logs for handoff §6.5 reuse userEvents with event types:
+//   brief.signal_rendered  → { signalId, signalType, entitiesReferenced }
+//   brief.signal_action    → { signalId, signalType, action }
+//   brief.generation_cost  → { inputTokens, outputTokens, model, costUsd }
+// No new table.
+
+// ============================================================
 // TYPE EXPORTS
 // ============================================================
 
@@ -577,3 +622,9 @@ export type NewOauthToken = typeof oauthTokens.$inferInsert;
 
 export type SigninCode = typeof signinCodes.$inferSelect;
 export type NewSigninCode = typeof signinCodes.$inferInsert;
+
+export type BriefCache = typeof briefCache.$inferSelect;
+export type NewBriefCache = typeof briefCache.$inferInsert;
+
+export type SignalState = typeof signalStates.$inferSelect;
+export type NewSignalState = typeof signalStates.$inferInsert;

@@ -9,6 +9,8 @@ import { MobileNav } from '@/components/nav/MobileNav';
 import { EvaluatePanelProvider } from '@/components/evaluate/EvaluatePanelProvider';
 import { EvaluateFab } from '@/components/evaluate/EvaluateFab';
 import { EvaluatePanel } from '@/components/evaluate/EvaluatePanel';
+import { LocaleProvider } from '@/components/locale/LocaleProvider';
+import { normalizeLocale } from '@/components/locale/locale-utils';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
@@ -43,6 +45,24 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const isDev = process.env.NODE_ENV === 'development';
   const session = isDev ? { user: { name: 'Demo User', email: 'demo@labra.local' } } : await getServerSession(authOptions);
+
+  // Seed locale from users.locale so the first paint already matches the
+  // user's preference (no client-side flip). Falls back to 'es' (app
+  // default) when no row exists yet (e.g. brand-new signin).
+  let initialLocale: 'en' | 'es' = 'es';
+  if (session?.user?.email) {
+    try {
+      const db = getDb();
+      const [u] = await db
+        .select({ locale: users.locale })
+        .from(users)
+        .where(eq(users.email, session.user.email))
+        .limit(1);
+      initialLocale = normalizeLocale(u?.locale ?? null);
+    } catch (err) {
+      console.error('layout: locale lookup failed', (err as Error)?.message);
+    }
+  }
 
   // Gate: a freshly signed-in user with no completed onboarding goes straight
   // to /onboarding and sees nothing else (no tracker, no home, no evaluate).
@@ -91,21 +111,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${geistMono.variable} ${albertSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="h-full">
         <Providers session={session}>
+          <LocaleProvider initialLocale={initialLocale}>
           <EvaluatePanelProvider>
             {session || isDev ? (
               <div className="flex h-full flex-col lg:flex-row">
-                {/* Desktop sidebar */}
+                {/* Desktop left rail — labra. brand, primary nav, locale toggle, user. */}
                 <Sidebar />
-                {/* Mobile top bar */}
+                {/* Mobile top bar — brand + locale toggle + avatar; the link
+                    cluster lives in the bottom MobileNav below. */}
                 <MobileHeader />
-                {/* Main content — on mobile add bottom padding for the nav bar (56px) */}
+                {/* Main content — bottom-padded for the mobile bottom nav (56px). */}
                 <main
                   className="flex-1 overflow-auto pb-[56px] lg:pb-0"
                   style={{ background: 'var(--lm-bg)' }}
                 >
                   {children}
                 </main>
-                {/* Mobile bottom nav */}
+                {/* Mobile bottom nav. */}
                 <MobileNav />
                 {/* Evaluate FAB + panel — root overlay; the FAB hides itself on /onboarding/* and when the panel is open. */}
                 <EvaluateFab />
@@ -115,6 +137,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               children
             )}
           </EvaluatePanelProvider>
+          </LocaleProvider>
         </Providers>
       </body>
     </html>
